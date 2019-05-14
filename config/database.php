@@ -17,4 +17,12 @@ return [
         'collation' => 'utf8_unicode_ci',
         'prefix'    => 'xq_',
     ] ,
+
+    'redis' => [
+        'host'        => '127.0.0.1' ,
+        'port'      => 6379 ,
+        'password'  => '364793' ,
+        'prefix'    => 'rtc_' ,
+        'timeout'   => 0 ,
+    ] ,
 ];

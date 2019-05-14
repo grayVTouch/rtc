@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket 配套demo</title>
+</head>
+<body>
+<div>
+    <button id="send" type="button">发送</button>
+    <script>
+        var link = 'ws://192.168.61.102:9300';
+        var ws = new WebSocket(link);
+        ws.onopen = function () {
+            console.log('websocket 已经打开');
+        };
+
+        ws.onmessage = function (e) {
+          console.log('接收到来自服务器的消息：' , e.data);
+        };
+
+        ws.onclose = function (e) {
+          console.log('ws 已经关闭' , e.code , e.reason);
+        };
+
+        var button = document.getElementById('send');
+        button.onclick = function () {
+            var data = {
+                platform: 'pc' ,
+                token: 'abc' ,
+                callback: '' ,
+                data: 'fuck'
+            };
+            // ws.send('hello');
+            ws.send(JSON.stringify(data));
+        };
+
+    </script>
+</div>
+</body>
+</html>
