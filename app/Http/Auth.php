@@ -16,7 +16,10 @@ class Auth extends Base
     // 前置操作
     public function before() :bool
     {
-        $authorization = $this->request->header['authorization'];
+        if (!parent::before()) {
+            return false;
+        }
+        $authorization = $this->request->header['authorization'] ?? '';
         if (empty($authorization)) {
             $this->error('用户认证失败' , 401);
             return false;
@@ -27,5 +30,7 @@ class Auth extends Base
             return false;
         }
         return true;
+
+
     }
 }

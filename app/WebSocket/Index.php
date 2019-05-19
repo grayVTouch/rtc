@@ -13,6 +13,6 @@ class Index extends Base
 {
     public function index()
     {
-        $this->success('欢迎访问 websocket !!');
+        $this->success('欢迎访问 grayVTouch 开发的 WebSocket 引擎');
     }
 }

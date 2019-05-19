@@ -7,6 +7,7 @@
  */
 
 use Core\Lib\Container;
+use function core\ssl_random;
 use function extra\config as config_function;
 
 function config($key , array $args = []){
@@ -52,4 +53,14 @@ function json($code , $data , $request = '' , $type = 'response')
 function json_for_http($code , $data)
 {
     return json_encode(compact('code' , 'data'));
+}
+
+function identifier()
+{
+    return ssl_random(32);
+}
+
+function token()
+{
+    return ssl_random(255);
 }

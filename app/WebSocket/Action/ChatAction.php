@@ -12,13 +12,13 @@ namespace App\WebSocket\Action;
 class ChatAction extends Action
 {
     // 私聊
-    public static function send()
+    public static function _private($msg_id)
     {
 
     }
 
     // 群聊
-    public static function groupSend()
+    public static function group($msg_id)
     {
 
     }

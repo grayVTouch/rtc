@@ -8,6 +8,7 @@
 
 namespace App\Model;
 
+use Illuminate\Support\Facades\DB;
 
 class GroupMember extends Model
 {
@@ -15,7 +16,7 @@ class GroupMember extends Model
     public $timestamps = false;
 
     // 获取用户id
-    public static function getUserIdByGroupId($group_id)
+    public static function getUserIdByGroupId(int $group_id = 0)
     {
         $res = self::where('group_id' , $group_id)->get();
         $id_list = [];
@@ -26,7 +27,7 @@ class GroupMember extends Model
         return $id_list;
     }
 
-    public static function findByUserIdAndGroupId($user_id , $group_id)
+    public static function findByUserIdAndGroupId(int $user_id = 0 , int $group_id = 0)
     {
         $res = self::where([
                 ['user_id' , '=' , $user_id] ,
@@ -36,4 +37,66 @@ class GroupMember extends Model
         self::single($res);
         return $res;
     }
+
+    // 删除掉排除了给定成员之后的群成员
+    public static function delOther($group_id , array $exclude = [])
+    {
+        return self::where('group_id' , $group_id)
+            ->whereNotIn('user_id' , $exclude)
+            ->delete();
+    }
+
+    // 获取排除了给定成员之外的群成员列表
+    public static function getOtherByGroupId($group_id , array $exclude = [])
+    {
+        $res = self::where('group_id' , $group_id)
+            ->whereNotIn('user_id' , $exclude)
+            ->get();
+        self::multiple($res);
+        return $res;
+    }
+
+    // 获取非平台用户
+    public static function getWaiterIdByGroupId(int $group_id = 0)
+    {
+        $res = DB::table('group_member as gm')
+            ->leftJoin('user as u' , 'gm.user_id' , '=' , 'u.id')
+            ->where([
+                ['gm.group_id' , '=' , $group_id] ,
+                ['u.role' , '=' , 'admin'] ,
+            ])
+            ->select('gm.*')
+            ->get();
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->user_id;
+        }
+        return $id_list;
+    }
+
+    // 获取用户加入过的群组
+    public static function getGroupIdByUserId(int $user_id = 0)
+    {
+        $res = self::where('user_id' , $user_id)->get();
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->group_id;
+        }
+        return $id_list;
+    }
+
+    public static function delByUserId(int $user_id)
+    {
+        return self::where('user_id' , $user_id)->delete();
+    }
+
+    public static function delByGroupId(int $group_id)
+    {
+        return self::where('group_id' , $group_id)->delete();
+    }
+
+
+
 }

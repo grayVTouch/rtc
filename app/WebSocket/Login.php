@@ -15,10 +15,10 @@ class Login extends Base
     public function login(array $param)
     {
         $param['unique_code'] = $param['unique_code'] ?? '';
-        $res = LoginAction::login($param);
+        $res = LoginAction::login($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
-        return $this->success($param['data']);
+        return $this->success($res['data']);
     }
 }

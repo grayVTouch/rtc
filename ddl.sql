@@ -39,6 +39,7 @@ create table if not exists `xq_group` (
   name char(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
   is_temp enum('y' , 'n') default 'n' comment '是否是临时群: y-是 n-否' ,
+  is_service enum('y' , 'n') default 'n' comment '是否是服务通道' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群';
@@ -107,3 +108,46 @@ create table if not exists `xq_group_message` (
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';
+
+drop table if exists `xq_group_message_read_status`;
+create table if not exists `xq_group_message_read_status` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'xq_user.id' ,
+  group_message_id int unsigned default 0 comment 'xq_group_message.id' ,
+  is_read enum('y' , 'n') default 'n' comment '是否读取: y-已读 n-未读' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息-读取状态';
+
+drop table if exists `xq_message_read_status`;
+create table if not exists `xq_message_read_status` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'xq_user.id' ,
+  message_id int unsigned default 0 comment 'xq_message.id' ,
+  is_read enum('y' , 'n') default 'n' comment '是否读取: y-已读 n-未读' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '私聊消息-读取状态';
+
+drop table if exists `xq_push`;
+create table if not exists `xq_push` (
+  id int unsigned not null auto_increment ,
+  identifier char(255) default '' comment 'xq_project.identifier' ,
+  push_type enum('single' , 'multiple') default 'single' comment '推送类型：single-推单人；multiple-推多人' ,
+  user_id int unsigned default 0 comment 'xq_user.id，仅在 type = single 的时候有效' ,
+  role enum('admin' , 'user' , 'all') default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，仅在 type = multiple 的时候有效' ,
+  `type` char(255) default '' comment '推送类型' ,
+  `data` text comment '推送的数据' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送表';
+
+drop table if exists `xq_push_read_status`;
+create table if not exists `xq_push_read_status` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'xq_user.id' ,
+  push_id int unsigned default 0 comment 'xq_push.id' ,
+  is_read enum('y' , 'n') default 'n' comment '是否读取: y-已读 n-未读' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送消息-读取状态';

@@ -23,4 +23,7 @@ return [
     'enable_guest' => true ,
     // 单个客服最多接听的访客数量
     'number_of_receptions' => 10 ,
+    // 客服最长等待时间
+    'wait_duration' => 2 * 60 ,
+
 ];

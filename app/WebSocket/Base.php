@@ -8,22 +8,24 @@
 
 namespace App\WebSocket;
 
+use App\Model\Project;
+use App\Redis\MiscRedis;
 use App\Util\Push;
 use Swoole\WebSocket\Server as WebSocket;
 
 class Base implements BaseInterface
 {
-    protected $conn = null;
+    public $conn = null;
 
-    protected $fd = null;
+    public $fd = null;
 
-    protected $identifier = null;
+    public $identifier = null;
 
-    protected $platform = null;
+    public $platform = null;
 
-    protected $token = null;
+    public $token = null;
 
-    protected $request = null;
+    public $request = null;
 
     public function __construct(WebSocket $conn , $fd , string $identifier = '' , string $platform = '' , string $token = '' , string $request = '')
     {
@@ -38,6 +40,12 @@ class Base implements BaseInterface
     // 前置操作
     public function before() :bool
     {
+        // 检查 identifier 是否正确！！
+        if (empty(Project::findByIdentifier($this->identifier))) {
+            $this->error('identifier 不正确！！请先创建项目！' , 400);
+            return false;
+        }
+        MiscRedis::fdMappingIdentifier($this->fd , $this->identifier);
         return true;
     }
 
@@ -56,7 +64,7 @@ class Base implements BaseInterface
     // 响应：失败时
     public function error($data = '' , $code = 400)
     {
-        return self::response($$data , $code);
+        return self::response($data , $code);
     }
 
     // 响应：自定义
@@ -66,25 +74,25 @@ class Base implements BaseInterface
     }
 
     // 结合当前业务的发送接口：发送单条数据
-    public function send(int $user_id , string $type = '' , array $data = [])
+    public function send(int $user_id , string $type = '' , $data = [])
     {
         return $this->push($user_id , $type , $data , [$this->fd]);
     }
 
     // 结合当前业务的发送接口：发送多条数据
-    public function sendAll(array $user_ids , string $type = '' , array $data = [])
+    public function sendAll(array $user_ids , string $type = '' , $data = [])
     {
         return $this->pushAll($user_ids , $type , $data , [$this->fd]);
     }
 
     // 单条推送：推送其他数据
-    public function push($user_id , string $type = '' , array $data = [] , array $exclude = [])
+    public function push($user_id , string $type = '' , $data = [] , array $exclude = [])
     {
         return Push::single($this->identifier , $user_id , $type , $data , $exclude);
     }
 
     // 单条推送：推送其他数据
-    public function pushAll($user_ids , string $type = '' , array $data = [] , array $exclude = [])
+    public function pushAll($user_ids , string $type = '' , $data = [] , array $exclude = [])
     {
         return Push::multiple($this->identifier , $user_ids , $type , $data , $exclude);
     }

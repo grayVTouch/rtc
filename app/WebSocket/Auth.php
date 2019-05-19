@@ -10,15 +10,19 @@ namespace App\WebSocket;
 
 use App\Model\UserToken;
 use App\Model\User;
-use App\Redis\UserRedis;
 use App\Util\Data;
 use App\WebSocket\Action\LoginAction;
 use Exception;
 
 class Auth extends Base
 {
+    protected $user;
+
     public function before() :bool
     {
+        if (!parent::before()) {
+            return false;
+        }
         return $this->auth();
     }
 
@@ -43,7 +47,7 @@ class Auth extends Base
                 return false;
             }
             // 自动登录
-            $res = LoginAction::login([
+            $res = LoginAction::login($this , [
                 'unique_code' => $user->unique_code
             ]);
             if ($res['code'] != 200) {
@@ -52,13 +56,8 @@ class Auth extends Base
             }
             $this->token = $res['data'];
             // 通知客户端更新登录信息
-            $this->push($this->fd , 'token' , Data::token($this->token));
-            // 绑定 user_id <=> fd
-            $res = UserRedis::bindFdByUserId($this->fd , $user->identifier , $user->user_id);
-            if ($res == false) {
-                $this->conn->disconnect($this->fd , 500 , 'Redis 服务器挂了');
-                return false;
-            }
+            $this->push($this->fd , 'refresh_token' , Data::token($this->token));
+            $this->user = $user;
             return true;
         }
         $user = User::findById($token->user_id);
@@ -66,11 +65,7 @@ class Auth extends Base
             $this->conn->disconnect($this->fd , 404 , '用户不存在');
             return false;
         }
-        $res = UserRedis::bindFdByUserId($this->fd , $user->identifier , $user->user_id);
-        if ($res == false) {
-            $this->conn->disconnect($this->fd , 500 , 'Redis 服务器挂了');
-            return false;
-        }
+        $this->user = $user;
         return true;
     }
 

@@ -25,31 +25,21 @@ class Push
         $default = [
             // 群聊消息
             'type'  => 'group_message' ,
-            'data'  => [
-                // 群
-                'group' => [] ,
-                // 发送者
-                'sender' => [] ,
-                // 发送的消息
-                'message' => [] ,
-            ]
+            // 参考 xq_group_message 表
+            'data'  => []
         ];
         // 私聊格式要求
         $default = [
             // 私聊消息
             'type'  => 'message' ,
-            'data'  => [
-                // 发送者
-                'user' => [] ,
-                // 发送的消息
-                'message' => [] ,
-            ]
+            // 参考 xq_message 表
+            'data'  => []
         ];
         // 检查是否在线
         if (!UserRedis::isOnline($identifier , $user_id)) {
             return false;
         }
-        $conns = UserRedis::findFdByUserId($identifier , $user_id);
+        $conns = UserRedis::fdByUserId($identifier , $user_id);
         $websocket = Container::make('websocket');
         $res = [
             'success'   => 0 ,
@@ -66,10 +56,10 @@ class Push
                 $res['fail']++;
                 continue ;
             }
-            $send = $websocket->push($v , [
+            $send = $websocket->push($v , json_encode([
                 'type' => $type ,
                 'data' => $data ,
-            ]);
+            ]));
             if (!$send) {
                 // 发送失败
                 $res['fail']++;

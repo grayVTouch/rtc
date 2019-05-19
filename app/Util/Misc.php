@@ -15,6 +15,6 @@ class Misc
 {
     public static function uniqueCode()
     {
-        return random(256 , 'mixed' , true);
+        return random(255 , 'mixed' , true);
     }
 }

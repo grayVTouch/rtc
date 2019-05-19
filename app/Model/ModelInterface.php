@@ -8,10 +8,8 @@
 
 namespace App\Model;
 
-use Traversable;
-
 interface ModelInterface
 {
     static function single($m = null);
-    static function multiple(Traversable $list);
+    static function multiple($list);
 }

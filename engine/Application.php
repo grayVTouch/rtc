@@ -8,16 +8,21 @@
 
 namespace Engine;
 
-use Core\Lib\Redis;
 use Exception;
+
+use ArrayAccess;
+use Core\Lib\Redis;
+use Core\Lib\Container;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-use Core\Lib\Container;
 use Engine\WebSocket\Connection;
 
-class Application
+class Application implements ArrayAccess
 {
     protected $connection = null;
+
+    protected $db = null;
 
     public function __construct()
     {
@@ -41,6 +46,11 @@ class Application
         $database->addConnection($config);
         $database->bootEloquent();
         Container::bind('database' , $database);
+        $this->db = $database;
+        // 设置允许静态使用
+        Facade::setFacadeApplication([
+            'db' =>$database->getDatabaseManager() ,
+        ]);
     }
 
     // 初始化 Redis
@@ -51,8 +61,39 @@ class Application
         Container::bind('redis' , $redis);
     }
 
+    public function emptyRedis()
+    {
+        // 清空 redis
+        redis()->flushAll();
+
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->$offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->$offset;
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->$offset = $value;
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->$offset);
+    }
+
     public function run()
     {
+        $this->initDatabase();
+        $this->initRedis();
+        $this->emptyRedis();
         $this->initWebSocket();
+        $this->connection->run();
     }
 }

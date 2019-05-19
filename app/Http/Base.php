@@ -8,20 +8,22 @@
 
 namespace App\Http;
 
+use App\Redis\MiscRedis;
 use App\Util\Push;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
+use App\Model\Project;
 
 class Base implements BaseInterface
 {
-    protected $conn = null;
+    public $conn = null;
 
-    protected $identifier = null;
+    public $identifier = null;
 
-    protected $platform = null;
+    public $request = null;
 
-    protected $request = null;
+    public $response = null;
 
     public function __construct(WebSocket $conn , Request $request , Response $response , string $identifier = '')
     {
@@ -34,6 +36,11 @@ class Base implements BaseInterface
     // 前置操作
     public function before() :bool
     {
+        // 检查 identifier 是否正确！！
+        if (empty(Project::findByIdentifier($this->identifier))) {
+            $this->error('identifier 不正确！！请先创建项目！' , 400);
+            return false;
+        }
         return true;
     }
 

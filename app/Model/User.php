@@ -11,11 +11,22 @@ namespace App\Model;
 
 use App\Util\Misc;
 use function core\random;
+use Exception;
 
 class User extends Model
 {
     protected $table = 'user';
     public $timestamps = false;
+
+    public static function single($m = null)
+    {
+        if (empty($m)) {
+            return ;
+        }
+        if (!is_object($m)) {
+            throw new Exception('参数 1 类型错误');
+        }
+    }
 
     public static function findByUniqueCode(string $unique_code = '')
     {
@@ -48,5 +59,30 @@ class User extends Model
                 ->get();
         self::multiple($res);
         return $res;
+    }
+
+    public static function getTempByTimestamp(string $timestamp)
+    {
+        $res = self::where([
+            ['create_time' , '<=' , $timestamp] ,
+            ['is_temp' , '<=' , 'y'] ,
+        ])->get();
+        self::multiple($res);
+        return $res;
+    }
+
+    public static function getIdByRole(string $role = '')
+    {
+        if (empty($role)) {
+            $res = self::all();
+        } else {
+            $res = self::where('role' , $role)->get();
+        }
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->id;
+        }
+        return $id_list;
     }
 }

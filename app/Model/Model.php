@@ -14,7 +14,7 @@ use Traversable;
 
 class Model extends BaseModel implements ModelInterface
 {
-    public static function multiple(Traversable $list)
+    public static function multiple($list)
     {
         foreach ($list as $v)
         {
@@ -33,7 +33,7 @@ class Model extends BaseModel implements ModelInterface
     }
 
     // 更新
-    public static function updateById($id , array $param = [])
+    public static function updateById(int $id , array $param = [])
     {
         return static::where('id' , $id)
             ->update($param);
@@ -54,7 +54,7 @@ class Model extends BaseModel implements ModelInterface
         return $res;
     }
 
-    public static function findById($id)
+    public static function findById(int $id)
     {
         $res = static::find($id);
         if (empty($res)) {
@@ -70,4 +70,5 @@ class Model extends BaseModel implements ModelInterface
         static::multiple($res);
         return $res;
     }
+
 }
