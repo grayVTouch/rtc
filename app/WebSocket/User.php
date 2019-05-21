@@ -10,8 +10,10 @@ namespace App\WebSocket;
 
 class User extends Auth
 {
-    public function send()
+    // 获取平台咨询通道信息
+    public function get()
     {
 
     }
+
 }

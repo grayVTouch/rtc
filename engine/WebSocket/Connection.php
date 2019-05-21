@@ -101,7 +101,28 @@ class Connection
             return ;
         }
         $user_id = UserRedis::fdMappingUserId($identifier , $fd);
-        $this->app->clearRedis($user_id , $fd);
+        // 清除 Redis
+        $this->clearRedis($user_id , $fd);
+        $user = User::findById($user_id);
+        if ($user->role == 'admin') {
+            if (!UserRedis::isOnline($identifier , $user_id)) {
+                // 如果是客服，用户加入的群组
+                $group = GroupMember::getGroupByUserId($user_id);
+                foreach ($group as $v)
+                {
+                    $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->id);
+                    if ($group_bind_waiter != $user_id) {
+                        // 绑定的并非当前客服
+                        continue ;
+                    }
+                    $user_ids = GroupMember::getUserIdByGroupId($v->id);
+                    Push::multiple($identifier , $user_ids , 'waiter_leave' , [
+                        'group'     => $group ,
+                        'message'   => '客服已经离开' ,
+                    ]);
+                }
+            }
+        }
     }
 
     public function message(WebSocket $server , $frame)
@@ -109,6 +130,7 @@ class Connection
         try {
             try {
                 $data = json_decode($frame->data , true);
+                echo 'hello boys and girls';
                 if (!is_array($data)) {
                     $server->disconnect($frame->fd , 400 , '数据格式不规范，请按照要求提供必要数据');
                     return ;
@@ -264,7 +286,7 @@ class Connection
                     continue ;
                 }
                 // 检查最近一条消息是否发送超时
-                $last_message = GroupMessage::lastUserMessage($v->id);
+                $last_message = GroupMessage::recentMessage($v->id);
 //                print_r($last_message);
                 if (!empty($last_message)) {
                     $create_time = strtotime($last_message->create_time);

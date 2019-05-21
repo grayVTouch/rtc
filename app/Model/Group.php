@@ -52,4 +52,15 @@ class Group extends Model
         self::multiple($res);
         return $res;
     }
+
+    public static function advoiseGroupByUserId(int $user_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['is_service' , '=' , 'y'] ,
+            ])
+            ->first();
+        self::single($res);
+        return $res;
+    }
 }

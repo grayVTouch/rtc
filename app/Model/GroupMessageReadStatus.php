@@ -33,4 +33,16 @@ class GroupMessageReadStatus extends Model
             ->where('gm.group_id' , $group_id)
             ->delete();
     }
+
+    public static function unreadCountByUserIdAndGroupId(int $user_id , int $group_id)
+    {
+        return DB::table('group_message as gm')
+            ->leftJoin('group_message_read_status as gmrs' , 'gm.id' , '=' , 'gmrs.group_message_id')
+            ->where([
+                ['gm.group_id' , '=' , $group_id] ,
+                ['gmrs.user_id' , '=' , $user_id] ,
+                ['gmrs.is_read' , '=' , 'n'] ,
+            ])
+            ->count();
+    }
 }

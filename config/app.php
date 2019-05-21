@@ -25,5 +25,7 @@ return [
     'number_of_receptions' => 10 ,
     // 客服最长等待时间
     'wait_duration' => 2 * 60 ,
+    // 记录数限制
+    'limit' => 20 ,
 
 ];

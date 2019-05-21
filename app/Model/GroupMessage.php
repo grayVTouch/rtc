@@ -48,7 +48,7 @@ class GroupMessage extends Model
     }
 
     // 用户发送的最近一条信息：最近一条消息
-    public static function lastUserMessage(int $group_id)
+    public static function recentMessage(int $group_id)
     {
         $res = DB::table('group_message as gm')
             ->leftJoin('user as u' , 'gm.user_id' , '=' , 'u.id')
@@ -65,6 +65,26 @@ class GroupMessage extends Model
         $res->group = Group::findById($res->group_id);
         $res->user = User::findById($res->user_id);
         self::single($res);
+        return $res;
+    }
+
+    public static function history($group_id , int $group_message_id = 0 , int $limit = 20)
+    {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+        ];
+        if (!empty($group_message_id)) {
+            $where[] = ['id' , '<' , $group_message_id];
+        }
+        $res = self::with(['group' , 'user'])->where($where)
+            ->orderBy('id' , 'desc')
+            ->limit($limit)
+            ->get();
+        foreach ($res as $v)
+        {
+            $v->group = Group::single($v->group);
+            $v->user = User::single($v->user);
+        }
         return $res;
     }
 

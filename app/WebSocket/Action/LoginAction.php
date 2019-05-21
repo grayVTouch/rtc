@@ -65,7 +65,7 @@ class LoginAction extends Action
             return ;
         }
         if ($user->role != 'admin') {
-            // 不是工作人员
+            // 不是工作人员，分配在线客服
             return ;
         }
         try {

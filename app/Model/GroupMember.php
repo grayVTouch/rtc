@@ -98,5 +98,30 @@ class GroupMember extends Model
     }
 
 
+    public static function getGroupByUserId(int $user_id)
+    {
+        $res = self::with(['group' , 'user'])
+            ->where('user_id' , $user_id)
+            ->get();
+        foreach ($res as $v)
+        {
+            self::single($v);
+            Group::single($v->group);
+            User::single($v->user);
+        }
+        return $res;
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class , 'group_id' , 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class , 'user_id' , 'id');
+    }
+
+
 
 }

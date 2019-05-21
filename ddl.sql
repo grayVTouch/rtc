@@ -36,6 +36,7 @@ drop table if exists `xq_group`;
 create table if not exists `xq_group` (
   id int unsigned not null auto_increment ,
   identifier char(255) default '' comment 'xq_project.identifier' ,
+  user_id int unsigned default '' comment '群主：xq_user.id' ,
   name char(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
   is_temp enum('y' , 'n') default 'n' comment '是否是临时群: y-是 n-否' ,

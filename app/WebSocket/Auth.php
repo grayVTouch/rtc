@@ -16,7 +16,7 @@ use Exception;
 
 class Auth extends Base
 {
-    protected $user;
+    public $user;
 
     public function before() :bool
     {

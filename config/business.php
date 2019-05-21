@@ -22,6 +22,7 @@ return [
         'refresh_group_for_advoise' => '通知客户端，平台咨询时请更新携带的群信息' ,
         'error'                 => 'Swoole 服务器发生异常' ,
         'waiter_leave'          => '客服已经离开' ,
+        'unread_count'          => '未读消息数量' ,
     ] ,
 
     // 群推类型
