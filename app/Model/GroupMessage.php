@@ -10,6 +10,7 @@ namespace App\Model;
 
 
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class GroupMessage extends Model
 {
@@ -24,6 +25,17 @@ class GroupMessage extends Model
     public function user()
     {
         return $this->belongsTo(User::class , 'user_id' , 'id');
+    }
+
+    public static function single($m = null)
+    {
+        if (empty($m)) {
+            return ;
+        }
+        if (!is_object($m)) {
+            throw new Exception('参数 1 错误');
+        }
+        $m->message_type = 'group';
     }
 
     public static function findById(int $id = 0)
@@ -48,14 +60,18 @@ class GroupMessage extends Model
     }
 
     // 用户发送的最近一条信息：最近一条消息
-    public static function recentMessage(int $group_id)
+    public static function recentMessage(int $group_id , string $role = 'none')
     {
+        $where = [
+            ['gm.group_id' , '=' , $group_id] ,
+        ];
+        $role = in_array($role , ['none' , 'user' , 'admin']) ? $role : 'none';
+        if ($role != 'none') {
+            $where[] = ['u.role' , '=' , $role];
+        }
         $res = DB::table('group_message as gm')
             ->leftJoin('user as u' , 'gm.user_id' , '=' , 'u.id')
-            ->where([
-                ['gm.group_id' , '=' , $group_id] ,
-                ['u.role' , '=' , 'user'] ,
-            ])
+            ->where($where)
             ->orderBy('gm.id' , 'desc')
             ->select('gm.*')
             ->first();
@@ -82,8 +98,9 @@ class GroupMessage extends Model
             ->get();
         foreach ($res as $v)
         {
-            $v->group = Group::single($v->group);
-            $v->user = User::single($v->user);
+            self::single($v);
+            Group::single($v->group);
+            User::single($v->user);
         }
         return $res;
     }

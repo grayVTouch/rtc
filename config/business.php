@@ -23,6 +23,7 @@ return [
         'error'                 => 'Swoole 服务器发生异常' ,
         'waiter_leave'          => '客服已经离开' ,
         'unread_count'          => '未读消息数量' ,
+        'allocated'             => '加入客服成功，通知信息' ,
     ] ,
 
     // 群推类型

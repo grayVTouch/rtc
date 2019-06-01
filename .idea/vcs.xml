@@ -4,6 +4,7 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/app/extra" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/extra" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/front/plugin" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/plugin/database/vendor/doctrine/inflector" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/plugin/database/vendor/illuminate/container" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/plugin/database/vendor/illuminate/contracts" vcs="Git" />

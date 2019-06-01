@@ -40,4 +40,17 @@ class Push extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 设置消息的读取状态
+    public function readStatus()
+    {
+        $param = $this->request->post;
+        $param['push_id'] = $param['push_id'] ?? '';
+        $param['is_read'] = $param['is_read'] ?? '';
+        $res = PushAction::readStatus($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

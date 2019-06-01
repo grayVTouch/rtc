@@ -50,6 +50,22 @@ class User extends Model
         return self::findById($id);
     }
 
+    // 创建临时后台用户
+    public static function tempAdmin(string $identifier)
+    {
+        $data = [
+            'identifier' => $identifier ,
+            'username'   => '客服_' . random(6 , 'mixed' , true) ,
+            'nickname'   => '客服_' . random(6 , 'mixed' , true) ,
+            'avatar'     => '' ,
+            'unique_code' => Misc::uniqueCode() ,
+            'is_temp'    => 'y' ,
+            'role'      => 'admin' ,
+        ];
+        $id = self::insertGetId($data);
+        return self::findById($id);
+    }
+
     public static function getByIdentifierAndRole(string $identifer = '' , string $role = '')
     {
         $res = self::where([

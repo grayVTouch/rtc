@@ -9,11 +9,16 @@
 namespace App\WebSocket\Action;
 
 
+use App\Model\Group;
 use App\Model\GroupMember;
+use App\Model\GroupMessage;
+use App\Model\GroupMessageReadStatus;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Redis\MessageRedis;
 use App\Redis\UserRedis;
+use App\Util\Misc;
+use App\Util\Push;
 use function core\array_unit;
 use Core\Lib\Validator;
 use function core\ssl_random;
@@ -56,9 +61,13 @@ class LoginAction extends Action
         UserRedis::fdMappingUserId($app->identifier , $app->fd , $user->id);
         // 登录成功后消费未读游客消息（平台咨询）队列
         self::util_allocate($app , $user);
+        // 初始化咨询通道
+        UserAction::util_initAdvoiseGroup($user->id);
+        // 推送一条未读消息数量
         return self::success($param['token']);
     }
 
+    // 自动分配客服
     public static function util_allocate(Base $app , User $user)
     {
         if (empty($user)) {
@@ -71,6 +80,7 @@ class LoginAction extends Action
         try {
             DB::beginTransaction();
             $group_msg = MessageRedis::consumeUnhandleMsg($app->identifier);
+            $push = [];
             foreach ($group_msg as $v)
             {
                 if (empty(GroupMember::findByUserIdAndGroupId($user->id , $v['group_id']))) {
@@ -81,11 +91,44 @@ class LoginAction extends Action
                     $user_ids = GroupMember::getUserIdByGroupId($v['group_id']);
                     $app->pushAll($user_ids , 'refresh_session');
                 }
+                $user_ids = GroupMember::getUserIdByGroupId($v['group_id']);
+                $group_message_id = GroupMessage::insertGetId([
+                    'user_id' => $user->id ,
+                    'group_id' => $v['group_id'] ,
+                    'type' => 'text' ,
+                    'message' => sprintf('系统通知：您好，客服 【%s】 很高兴为您服务' , $user->username) ,
+                ]);
+                foreach ($user_ids as $v1)
+                {
+                    $is_read = $v1 == $user->id ? 'y' : 'n';
+                    GroupMessageReadStatus::insert([
+                        'user_id' => $user->id ,
+                        'group_message_id' => $group_message_id ,
+                        'is_read' => $is_read
+                    ]);
+                }
+                $group = Group::findById($v['group_id']);
+                $msg = GroupMessage::findById($group_message_id);
+                $msg->session_id = Misc::sessionId('group' , $v['group_id']);
+                if ($group->is_service == 'y' && $msg->user->role == 'admin') {
+                    $msg->user->username = '客服 ' . $msg->user->username;
+                    $msg->user->nickname = '客服 ' . $msg->user->nickname;
+                }
+                $push[] = [
+                    'identifier' => $user->identifier ,
+                    'user_ids' => $user_ids ,
+                    'type' => 'group_message' ,
+                    'data' => $msg
+                ];
                 // 绑定活跃群组
                 UserRedis::groupBindWaiter($app->identifier , $v['group_id'] , $user->id);
                 UserRedis::delNoWaiterForGroup($app->identifier , $v['group_id']);
             }
             DB::commit();
+            foreach ($push as $v)
+            {
+                Push::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
+            }
         } catch (Exception $e) {
             DB::rollBack();
             $app->push($user->id , 'error' , $e);

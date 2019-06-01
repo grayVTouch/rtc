@@ -45,4 +45,16 @@ class GroupMessageReadStatus extends Model
             ])
             ->count();
     }
+
+    public static function updateStatus(int $user_id , int $group_id , string $is_read = 'y')
+    {
+        return DB::table('group_message_read_status as gmrs')
+            ->leftJoin('group_message as gm' , 'gmrs.group_message_id' , '=' , 'gm.id')
+            ->where([
+                ['gmrs.user_id' , '=' , $user_id] ,
+                ['gm.group_id' , '=' , $group_id] ,
+            ])->update([
+                'gmrs.is_read' => $is_read
+            ]);
+    }
 }

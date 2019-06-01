@@ -20,7 +20,7 @@ class MiscRedis extends Redis
         return redis()->string($name , $identifier);
     }
 
-    public static function delfdMappingIdentifier($fd , $identifier)
+    public static function delfdMappingIdentifier($fd)
     {
         $name = sprintf(self::$fdMappingIdentifier , $fd);
         return redis()->del($name);

@@ -98,7 +98,7 @@ class GroupMember extends Model
     }
 
 
-    public static function getGroupByUserId(int $user_id)
+    public static function getByUserId(int $user_id)
     {
         $res = self::with(['group' , 'user'])
             ->where('user_id' , $user_id)

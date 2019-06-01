@@ -11,7 +11,9 @@ namespace App\Http\Action;
 
 use App\Http\Base;
 use App\Model\Push as PushModel;
+use App\Model\PushReadStatus;
 use App\Model\User;
+use App\WebSocket\Auth;
 use function core\array_unit;
 use Core\Lib\Validator;
 use App\Util\Push;
@@ -79,5 +81,33 @@ class PushAction extends Action
             'push_id' => $id ,
             'result' => $res
         ]);
+    }
+
+    // 读取状态
+    public static function readStatus(Auth $app , array $param)
+    {
+        $validator = Validator::make($param , [
+            'push_id'      => 'required' ,
+            'is_read'      => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->error());
+        }
+        // 检查是否已经存在
+        $param['user_id'] = $app->user->id;
+        $res = PushReadStatus::findByUserIdAndPushId($app->user->id , $param['push_id']);
+        if (empty($res)) {
+            $id = PushReadStatus::insertGetId(array($param , [
+                'user_id' ,
+                'push_id' ,
+                'is_read' ,
+            ]));
+        } else {
+            PushReadStatus::updateById($res->push_id , array_unit($param , [
+                'is_read'
+            ]));
+            $id = $res->id;
+        }
+        return self::success($id);
     }
 }

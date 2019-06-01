@@ -42,7 +42,8 @@ function success($request , $data = '' , $code = 200)
 
 function response($code , $data , $request = '' , $type = 'response')
 {
-    return compact('type' , 'request' , 'code' , 'data');
+    $data = compact('code' , 'data');
+    return compact('type' , 'request' , 'data');
 }
 
 function json($code , $data , $request = '' , $type = 'response')

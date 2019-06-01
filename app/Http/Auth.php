@@ -10,9 +10,12 @@ namespace App\Http;
 
 
 use App\Model\UserToken;
+use App\Model\User;
 
 class Auth extends Base
 {
+    public $user = null;
+
     // 前置操作
     public function before() :bool
     {
@@ -29,6 +32,11 @@ class Auth extends Base
             $this->error('Token 错误' , 401);
             return false;
         }
+        $user = User::findById($token->user_id);
+        if (empty($user)) {
+            return false;
+        }
+        $this->user = $user;
         return true;
 
 

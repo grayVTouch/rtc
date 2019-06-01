@@ -13,8 +13,15 @@ use function core\random;
 
 class Misc
 {
+    // 唯一码
     public static function uniqueCode()
     {
         return random(255 , 'mixed' , true);
+    }
+
+    // 会话ID（群聊|私聊）
+    public static function sessionId(string $type = '' , int $id = 0)
+    {
+        return md5(sprintf('%s_%d' , $type , $id));
     }
 }
