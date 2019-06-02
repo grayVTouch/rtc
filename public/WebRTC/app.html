@@ -3,24 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>即时通讯-前端插件</title>
-    <link rel="stylesheet" href="./plugin/Run/base.css">
-    <link rel="stylesheet" href="./css/Socket.css">
+    <link rel="stylesheet" href="./extra/plugin/Run/base.css">
+    <link rel="stylesheet" href="./core/css/Socket.css">
 </head>
 <body>
 
+<style>
+    body {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+</style>
 
 <div class="demo">
     <input type="text" placeholder="identifier" id="identifier" value="abcdefg"><br>
-    <input type="text" placeholder="unique_code" id="unique_code" value="UIb6809E3505D77b06Rm3dl79yVyCaPYH3W895oU26v2qqC07I2pi36503RfE76Ttgr0ZTNXAv19l1I4r1L3PR386Ooi5429Aq4At6d1ICgV8yjsH31v82f6N53Ok65A35nvdAiO29Ru5c30443yhfrZ0iaW69IUuk088i0r04x8ufh7a572T3661sL5P0uv24wlF56Ed778SH9217qJ42G0Q98835Z6VJaAGx7Z28I83168qi8y97T45yC19qv"><br>
+    <input type="text" placeholder="unique_code" id="unique_code" value="UIb6809E3505D77b06Rm3dl79yVyCaPYH3W895oU26v2qqC07I2pi36503RfE76Ttgr0ZTNXAv19l1I4r1L3PR386Ooi5429Aq4At6d1ICgV8yjsH31v82f6N53Ok65A35nvdAiO29Ru5c30443yhfrZ0iaW69IUuk088i0r04x8ufh7a572T3661sL5P0uv24wlF56Ed778SH9217qJ42G0Q98835Z6VJaAGx7Z28I83168qi8y97T45yC19cv"><br>
     <input type="text" placeholder="platform" value="pc" id="platform"><br>
-    <input type="text" placeholder="websocket" id="websocket" value="ws://192.168.1.67:9300"><br>
+    <input type="text" placeholder="websocket" id="websocket" value="ws://192.168.61.104:9300"><br>
     <button type="button" id="initialize">开始聊天</button><br>
 </div>
 
-<!-- 即时通讯 -->
-<div class="real-time-communication" :class="user.role == 'user' ? 'real-time-communication-for-user' : ''">
-    <!-- 会话列表 -->
+<!-- 即时通讯：最小化 -->
+<div class="real-time-communication-minimum">
     <div class="left">
+        <div class="image-container"><img :src="parent.option.url + '/static/image/female.png'" class="image"></div>
+    </div>
+    <div class="right">我的IM</div>
+</div>
+<!-- 即时通讯：最大化 -->
+<div class="real-time-communication hide" :class="user.role == 'user' ? 'real-time-communication-for-user' : ''">
+    <div class="close" ref="close">X</div>
+    <!-- 会话列表 -->
+    <div class="left" ref="session">
         <div class="top">
             <div class="left">
                 <div class="avatar">
@@ -31,7 +46,7 @@
             <div class="right"></div>
         </div>
         <div class="mid">
-            <div class="item"><img src="./image/message.png" class="image"></div>
+            <div class="item cur"><img :src="parent.option.url + '/static/image/message.png'" class="image"></div>
             <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
             <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
         </div>
@@ -40,7 +55,7 @@
             <div class="item" v-for="v in session" :key="v.session_id" :class="v.session_id == current.session_id ? 'cur' : ''" @click="switchSession(v.session_id)">
                 <div class="left">
                     <div class="image-container">
-                        <img :src="v.user ? v.user.avatar_explain : ''" class="image">
+                        <img v-if="v.type == 'group'" :src="v.group ? v.group.image_explain : ''" class="image">
                     </div>
                 </div>
                 <div class="right">
@@ -97,32 +112,37 @@
                                     <div class="image-container"><img :src="v.user ? v.user.avatar_explain : ''" class="image"></div>
                                 </div>
                                 <div class="right">
-                                    <div class="top">{{ v.user ? (v.user.nickname ? v.user.nickname : v.user.username) : '' }} {{ v.create_time }}</div>
+                                    <div class="top">
+                                        <div class="in">{{ v.user ? (v.user.nickname ? v.user.nickname : v.user.username) : '' }} {{ v.create_time }}</div>
+                                    </div>
                                     <div class="mid">
                                         <div class="in">
                                             <div class="text">{{ v.message }}</div>
                                             <div class="loading" :class="v.loading ? '' : 'hide'">加载中</div>
                                         </div>
                                     </div>
-                                    <div class="btm red" :class="v.error ? '' : 'hide'">发送失败：{{ v.error }}</div>
+                                    <div class="btm">
+                                        <div class="in red" :class="v.error ? '' : 'hide'">发送失败：{{ v.error }}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="tip-message error hide" v-if="v.type == 'no_waiter'">
-                            <div class="in">{{ v.message }}</div>
-                        </div>
-                        <div class="tip-message success" v-if="v.type == 'allocated'">
-                            <div class="in">{{ v.message }}</div>
-                        </div>
+
+                        <!--<div class="tip-message error hide" v-if="v.type == 'no_waiter'">-->
+                            <!--<div class="in">{{ v.message }}</div>-->
+                        <!--</div>-->
+                        <!--<div class="tip-message success" v-if="v.type == 'allocated'">-->
+                            <!--<div class="in">{{ v.message }}</div>-->
+                        <!--</div>-->
                     </template>
                 </div>
             </div>
             <div class="btm">
                 <div class="top hide"></div>
-                <div class="mid">
-                    <textarea ref="input" @keyup="contentKeyUpEvent" v-model="message" class="input" autofocus="autofocus" placeholder="请输入..."></textarea>
+                <div class="mid" ref="input">
+                    <textarea ref="textarea" @keyup="contentKeyUpEvent" v-model="message" class="input" autofocus="autofocus" placeholder="请输入..."></textarea>
                 </div>
-                <div class="btm"><button type="button" class="send" ref="send" @click="sendEvent" title="CTRL + ENTER">发送（CTRL+ENTER）</button></div>
+                <div class="btm"><button type="button" class="send" ref="send" @click="sendEvent" title="ENTER">发送（ENTER）</button></div>
             </div>
         </div>
         <div class="empty" :class="once ? '' : 'hide'">
@@ -130,19 +150,21 @@
         </div>
 
     </div>
+
 </div>
-<script src="./plugin/Third/jquery/jquery-3.3.1.min.js"></script>
-<script src="./plugin/Third/layer/layer.js"></script>
-<script src="./plugin/Vue/Vue.dev.js"></script>
-<script src="./plugin/SmallJs/SmallJs.js"></script>
-<script src="./lib/Socket.js"></script>
-<script src="./js/Communication.js"></script>
+<script src="./extra/plugin/Third/jquery/jquery-3.3.1.min.js"></script>
+<script src="./extra/plugin/Third/layer/layer.js"></script>
+<script src="./extra/plugin/Vue/Vue.dev.js"></script>
+<script src="./extra/plugin/SmallJs/SmallJs.js"></script>
+<script src="./core/js/Socket.js"></script>
+<script src="./core/js/Communication.js"></script>
 <script>
     var identifier = document.querySelector('#identifier');
     var unique_code = document.querySelector('#unique_code');
     var platform = document.querySelector('#platform');
     var websocket = document.querySelector('#websocket');
     var initialize = document.querySelector('#initialize');
+
 
     initialize.addEventListener('click' , function(){
         var c = new Communication(document.body , {
@@ -154,6 +176,7 @@
             platform: platform.value ,
             // websocket 地址
             websocket: websocket.value ,
+            url: 'http://192.168.61.104:9301' ,
         });
     } , false)
 </script>

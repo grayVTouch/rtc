@@ -6,6 +6,7 @@
  * Time: 17:15
  */
 
+use function core\format_path;
 use Core\Lib\Container;
 use function core\ssl_random;
 use function extra\config as config_function;
@@ -15,19 +16,9 @@ function config($key , array $args = []){
     return config_function($dir , $key , $args);
 }
 
-function app()
-{
-    return Container::make('app');
-}
-
 function redis()
 {
     return Container::make('redis');
-}
-
-function database()
-{
-    return Container::make('database');
 }
 
 function error($request , $data = '' , $code = 400)
@@ -64,4 +55,15 @@ function identifier()
 function token()
 {
     return ssl_random(255);
+}
+
+// 生成资源访问地址
+function res_url($path = '')
+{
+    if (empty($path)) {
+        return '';
+    }
+    $url = config('app.url');
+    $url = format_path($url);
+    return sprintf('%s%s' , $url , $path);
 }

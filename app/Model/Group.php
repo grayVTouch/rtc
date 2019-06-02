@@ -16,11 +16,23 @@ class Group extends Model
     protected $table = 'group';
     public $timestamps = false;
 
-    public static function temp(string $identifier)
+    public static function single($m = null)
+    {
+        if (empty($m)) {
+            return ;
+        }
+        if (!is_object($m)) {
+            throw new Exception('参数 1 类型错误');
+        }
+        $m->image_explain = empty($m->image) ? config('app.group_image') : res_url($m->image);
+    }
+
+    public static function temp(string $identifier , int $user_id)
     {
         $data = [
             'identifier' => $identifier ,
-            'name'     => 'group(test)_' . random(6 , 'mixed' , true) ,
+            'user_id'   => $user_id ,
+            'name'     => '【游客】advoise_' . random(6 , 'mixed' , true) ,
             'is_temp'    => 'y' ,
             'is_service'    => 'y' ,
         ];

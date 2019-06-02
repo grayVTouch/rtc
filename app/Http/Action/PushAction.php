@@ -72,7 +72,7 @@ class PushAction extends Action
             'data' ,
         ]));
         $role_range = array_keys(config('business.role'));
-        $user_ids = in_array($param['role'] , $role_range) ? User::getIdByRole($param['role']) : User::getIdByRole();
+        $user_ids = in_array($param['role'] , $role_range) ? User::getIdByIdentifierAndRole($param['role']) : User::getIdByRole();
         $res = Push::multiple($app->identifier , $user_ids , $param['type'] , [
             'push_id'   => $id ,
             'push_data' => $param['data']

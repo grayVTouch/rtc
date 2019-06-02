@@ -16,7 +16,7 @@ class Push extends Auth
     // 未读消息数量
     public function unread(array $param)
     {
-        $res = PushAction::unread($this);
+        $res = PushAction::unread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

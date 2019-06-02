@@ -57,4 +57,24 @@ class GroupMessageReadStatus extends Model
                 'gmrs.is_read' => $is_read
             ]);
     }
+
+    public static function u_insertGetId(int $user_id , int $group_message_id , string $is_read = 'n')
+    {
+        return self::insertGetId([
+            'user_id' => $user_id ,
+            'group_message_id' => $group_message_id ,
+            'is_read' => $is_read ,
+        ]);
+    }
+
+    public static function initByGroupMessageId(int $group_message_id , int $group_id , int $user_id)
+    {
+        $user_ids = GroupMember::getUserIdByGroupId($group_id);
+        foreach ($user_ids as $v)
+        {
+            $is_read = $v == $user_id ? 'y' : 'n';
+            GroupMessageReadStatus::u_insertGetId($v , $group_message_id , $is_read);
+        }
+        return $user_ids;
+    }
 }

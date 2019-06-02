@@ -11,6 +11,7 @@ namespace App\WebSocket;
 use App\Model\Project;
 use App\Redis\MiscRedis;
 use App\Util\Push;
+use Core\Lib\Facade;
 use Swoole\WebSocket\Server as WebSocket;
 
 class Base implements BaseInterface
@@ -71,6 +72,12 @@ class Base implements BaseInterface
     public function response($data = '' , int $code = 200)
     {
         return $this->conn->push($this->fd , json($code , $data , $this->request , 'response'));
+    }
+
+    // 针对当前连接进行推送
+    public function clientPush($type , $data = '')
+    {
+        return $this->conn->push($this->fd , json_encode(compact('type' , 'data')));
     }
 
     // 结合当前业务的发送接口：发送单条数据

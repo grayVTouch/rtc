@@ -6,10 +6,10 @@
  * Time: 17:22
  */
 
-namespace Engine\WebSocket;
+namespace Engine;
 
 
-use App\Util\Misc;
+use App\WebSocket\Util\MessageUtil;
 use Core\Lib\Throwable;
 use DateInterval;
 use DateTime;
@@ -27,18 +27,17 @@ use Illuminate\Support\Facades\DB;
 
 use Core\Lib\Container;
 
-use Engine\Application;
 use Exception;
 
 use Swoole\Server;
 use Swoole\Timer;
-use Swoole\WebSocket\Server as WebSocket;
+use Swoole\WebSocket\Server as BaseWebSocket;
 use Swoole\Http\Request as Http;
 use Swoole\Http\Response;
 
 
 
-class Connection
+class WebSocket
 {
     protected $config = [];
 
@@ -61,9 +60,12 @@ class Connection
 
     protected function initialize()
     {
-        $this->websocket = new Websocket($this->config['ip'] , $this->config['port']);
+        $this->websocket = new BaseWebSocket($this->config['ip'] , $this->config['port']);
+//        var_dump(config('app.web_dir'));
         // 设置进程数量
         $this->websocket->set([
+//            'document_root' => config('app.web_dir') , // v4.4.0以下版本, 此处必须为绝对路径
+//            'enable_static_handler' => true,
             'task_worker_num'   => $this->config['task_worker'] ,
             'worker_num'        => $this->config['worker'] ,
             'enable_reuse_port' => $this->config['reuse_port'] ,
@@ -78,7 +80,7 @@ class Connection
         Container::bind('websocket' , $this->websocket);
     }
 
-    public function workerStart(WebSocket $websocket , int $worker_id)
+    public function workerStart(BaseWebSocket $websocket , int $worker_id)
     {
         $this->app->initDatabase();
         $this->app->initRedis();
@@ -88,7 +90,7 @@ class Connection
         }
     }
 
-    public function open(WebSocket $websocket , Http $http)
+    public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
     }
@@ -96,64 +98,40 @@ class Connection
     public function close(Server $server , int $fd , int $reacter_id)
     {
         $this->isOpen = false;
-        // 销毁
         $identifier = MiscRedis::fdMappingIdentifier($fd);
-//        var_dump("离线标识符：{$identifier}");
         if (empty($identifier)) {
             return ;
         }
         $user_id = UserRedis::fdMappingUserId($identifier , $fd);
         // 清除 Redis（删除的太快了）
         $user = User::findById($user_id);
-//        var_dump("用户ID：{$user_id}");
-//        var_dump("用户是否存在：" . empty($user) . "；用户角色：" . ($user->role ?? '未知的角色'));
         if (!empty($user) && $user->role == 'admin') {
             try {
                 DB::beginTransaction();
                 $push = [];
                 $conn = UserRedis::fdByUserId($identifier , $user->id);
                 $conn = array_diff($conn , [$fd]);
-//                var_dump("离线用户是否仍然存在在线客户端连接：{$user->id}:，isOnline: " . (empty($conn) ? 'yes' : 'no'));
                 if (empty($conn)) {
                     // 如果是客服，用户加入的群组
-                    $joined_group = GroupMember::getByUserId($user->id);
-                    foreach ($joined_group as $v)
+                    $group = GroupMember::getByUserId($user->id);
+                    foreach ($group as $v)
                     {
                         $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
-//                        var_dump("Redis 绑定的数据：" . $group_bind_waiter);
                         $group_bind_waiter = (int) $group_bind_waiter;
                         if ($group_bind_waiter != $user_id) {
-//                            var_dump("群：{$v->group_id} 绑定的客服：{$group_bind_waiter} 并非当前退出用户 {$user->id}");
-                            // 绑定的并非当前客服
+                            // 绑定的并非当前离线客服
                             continue ;
                         }
                         $user_ids = GroupMember::getUserIdByGroupId($v->group_id);
-                        $group_message_id = GroupMessage::insertGetId([
-                            'user_id' => $user->id ,
-                            'group_id' => $v->group_id ,
-                            'type' => 'text' ,
-                            'message' => sprintf('系统通知：客服 【%s】已经离线' , $user->username) ,
-                        ]);
-                        foreach ($user_ids as $v1)
-                        {
-                            $is_read = $v1 == $user->id ? 'y' : 'n';
-                            GroupMessageReadStatus::insert([
-                                'user_id' => $v1 ,
-                                'group_message_id' => $group_message_id ,
-                                'is_read' => $is_read
-                            ]);
-                        }
+                        $group_message_id = GroupMessage::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
+                        GroupMessageReadStatus::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
                         $msg = GroupMessage::findById($group_message_id);
-                        $msg->session_id = Misc::sessionId('group' , $v->group_id);
-                        if ($v->group->is_service == 'y' && $msg->user->role == 'admin') {
-                            $msg->user->username = '客服 ' . $msg->user->username;
-                            $msg->user->nickname = '客服 ' . $msg->user->nickname;
-                        }
+                        MessageUtil::handleGroupMessage($msg);
                         $push[] = [
-                            'identifier' => $v->group->identifier ,
-                            'user_ids'    => $user_ids ,
-                            'type'       => 'group_message' ,
-                            'data'       => $msg
+                            'identifier'    => $v->group->identifier ,
+                            'user_ids'      => $user_ids ,
+                            'type'          => 'group_message' ,
+                            'data'          => $msg
                         ];
                     }
                 }
@@ -172,7 +150,7 @@ class Connection
         $this->clearRedis($user_id , $fd);
     }
 
-    public function message(WebSocket $server , $frame)
+    public function message(BaseWebSocket $server , $frame)
     {
         try {
             try {
@@ -313,7 +291,7 @@ class Connection
         ]));
     }
 
-    public function task(WebSocket $server , $data)
+    public function task(BaseWebSocket $server , $data)
     {
 
     }
@@ -321,12 +299,11 @@ class Connection
     protected function initTimer()
     {
         Timer::tick(30 * 1000 , function(){
-//        Timer::tick(2 * 1000 , function(){
-//            var_dump('30s 定时器一直在跑');
             // 清理超过一定时间没有回复的咨询通道
             try {
                 DB::beginTransaction();
                 $group = Group::serviceGroup();
+                $max_duration = 4 * 60;
                 $wait_duration = config('app.wait_duration');
                 $push = [];
                 foreach ($group as $v)
@@ -342,34 +319,17 @@ class Connection
                     if (!empty($last_message)) {
                         $create_time = strtotime($last_message->create_time);
                         $duration = time() - $create_time;
-                        if ($duration <= $wait_duration) {
+                        if ($duration >= $max_duration || $duration <= $wait_duration) {
                             continue ;
                         }
                     }
                     UserRedis::delGroupBindWaiter($v->identifier , $v->id);
                     // 群通知：客服已经断开连接！
                     $user_ids = GroupMember::getUserIdByGroupId($v->id);
-                    $group_message_id = GroupMessage::insertGetId([
-                        'user_id' => $waiter->id ,
-                        'group_id' => $v->id ,
-                        'type' => 'text' ,
-                        'message' => sprintf('系统通知：由于您长时间未回复，客服 【%s】已经离开' , $waiter->username) ,
-                    ]);
-                    foreach ($user_ids as $v1)
-                    {
-                        $is_read = $v1 == $waiter->id ? 'y' : 'n';
-                        GroupMessageReadStatus::insert([
-                            'user_id' => $v1 ,
-                            'group_message_id' => $group_message_id ,
-                            'is_read' => $is_read
-                        ]);
-                    }
+                    $group_message_id = GroupMessage::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
+                    GroupMessageReadStatus::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
                     $msg = GroupMessage::findById($group_message_id);
-                    $msg->session_id = Misc::sessionId('group' , $v->id);
-                    if ($v->is_service == 'y' && $msg->user->role == 'admin') {
-                        $msg->user->username = '客服 ' . $msg->user->username;
-                        $msg->user->nickname = '客服 ' . $msg->user->nickname;
-                    }
+                    MessageUtil::handleGroupMessage($msg);
                     $push[] = [
                         'identifier' => $v->identifier ,
                         'user_ids'    => $user_ids ,
@@ -459,7 +419,6 @@ class Connection
     {
         $user = User::findById($user_id);
         if (empty($user)) {
-//            var_dump("用户表中未找到用户id = {$user_id} 的用户");
             return ;
         }
         UserRedis::delNumberOfReceptionsForWaiter($user->identifier , $user->id);
@@ -468,14 +427,12 @@ class Connection
         } else {
             $fds = [$fd];
         }
-//        var_dump("用户产生的客户端连接ID：" . json_encode($fds));
         foreach ($fds as $v)
         {
             UserRedis::delFdByUserId($user->identifier , $user_id , $v);
             UserRedis::delFdMappingUserId($user->identifier , $v);
             MiscRedis::delfdMappingIdentifier($v);
         }
-        // todo 删除用户加入过的活跃群组
         if (!UserRedis::isOnline($user->identifier , $user->id)) {
             // 确定当前已经处于完全离线状态，那么删除掉该用户绑定的相关信息
             $group_ids = GroupMember::getGroupIdByUserId($user->id);

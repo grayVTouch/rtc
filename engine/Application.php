@@ -16,13 +16,22 @@ use Core\Lib\Container;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-use Engine\WebSocket\Connection;
-
 class Application implements ArrayAccess
 {
-    protected $connection = null;
+    /**
+     * @see \Engine\WebSocket
+     */
+    protected $websocket;
 
-    protected $db = null;
+    /*
+     * @see Illuminate\Database\Capsule\Manager
+     */
+    protected $db;
+
+    /**
+     * @see \Engine\WebSocket
+     */
+    protected $http;
 
     public function __construct()
     {
@@ -31,8 +40,7 @@ class Application implements ArrayAccess
 
     private function initWebSocket()
     {
-        $this->connection = new Connection($this);
-        Container::bind('connection' , $this->connection);
+        $this->websocket = new WebSocket($this);
     }
 
     // 在 worker 进程启动后执行（必须！！
@@ -45,7 +53,6 @@ class Application implements ArrayAccess
         $config     = config('database.mysql');
         $database->addConnection($config);
         $database->bootEloquent();
-        Container::bind('database' , $database);
         $this->db = $database;
         // 设置允许静态使用
         Facade::setFacadeApplication([
@@ -88,12 +95,23 @@ class Application implements ArrayAccess
         unset($this->$offset);
     }
 
+    public function initHttp()
+    {
+        $pid = pcntl_fork();
+        if ($pid > 0) {
+            return ;
+        }
+        $this->http = new Http();
+        exit;
+    }
+
     public function run()
     {
         $this->initDatabase();
         $this->initRedis();
         $this->emptyRedis();
+        $this->initHttp();
         $this->initWebSocket();
-        $this->connection->run();
+        $this->websocket->run();
     }
 }

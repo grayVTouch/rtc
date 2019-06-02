@@ -15,16 +15,16 @@ use App\Model\GroupMessageReadStatus;
 use App\Model\User;
 use App\Util\Misc;
 use App\WebSocket\Auth;
-use App\WebSocket\Base;
+use App\WebSocket\Util\MessageUtil;
+use App\WebSocket\Util\UserUtil;
 use function core\convert_obj;
 use Core\Lib\Validator;
 use function core\obj_to_array;
-use function core\random;
 
 class MessageAction extends Action
 {
 
-    public static function groupHistory(Auth $app , array $param)
+    public static function groupHistory(Auth $auth , array $param)
     {
         // 获取群聊数据
         $validator = Validator::make($param , [
@@ -42,11 +42,7 @@ class MessageAction extends Action
         $res = convert_obj($res);
         foreach ($res as $v)
         {
-            $v->session_id = Misc::sessionId('group' , $v->group_id);
-            if ($v->user->role == 'admin' && $v->group->is_service == 'y') {
-                $v->user->username = '客服 ' . $v->user->username;
-                $v->user->nickname = '客服 ' . $v->user->nickname;
-            }
+            MessageUtil::handleGroupMessage($v);
         }
         $res = obj_to_array($res);
         usort($res , function($a , $b){
@@ -58,7 +54,7 @@ class MessageAction extends Action
         return self::success($res);
     }
 
-    public static function groupRecent(Auth $app , array $param)
+    public static function groupRecent(Auth $auth , array $param)
     {
         // 获取群聊数据
         $validator = Validator::make($param , [
@@ -76,11 +72,7 @@ class MessageAction extends Action
         $res = convert_obj($res);
         foreach ($res as $v)
         {
-            $v->session_id = Misc::sessionId('group' , $v->group_id);
-            if ($v->user->role == 'admin' && $v->group->is_service == 'y') {
-                $v->user->username = '客服 ' . $v->user->username;
-                $v->user->nickname = '客服 ' . $v->user->nickname;
-            }
+            MessageUtil::handleGroupMessage($v);
         }
         $res = obj_to_array($res);
         usort($res , function($a , $b){
@@ -95,10 +87,9 @@ class MessageAction extends Action
     public static function session(User $user)
     {
         // 群聊
-        $joined_group = GroupMember::getByUserId($user->id);
-        foreach ($joined_group as $v)
+        $group = GroupMember::getByUserId($user->id);
+        foreach ($group as $v)
         {
-//            var_dump("user_id: {$user->id}; group_id: {$v->id}; role: none");
             $recent_message = GroupMessage::recentMessage($v->group_id , 'none');
             $v->recent_message = empty($recent_message) ? [] : $recent_message;
             if ($user->role == 'user' && $v->group->is_service == 'y') {
@@ -109,11 +100,14 @@ class MessageAction extends Action
             $v->type = 'group';
             $v->session_id = Misc::sessionId('group' , $v->group_id);
         }
-        $joined_group = obj_to_array($joined_group);
+        $group = obj_to_array($group);
 
         // todo 私聊
-        $session = array_merge($joined_group);
+        $session = array_merge($group);
         usort($session , function($a , $b){
+            if (empty($a['recent_message'])) {
+                return 0;
+            }
             if ($a['recent_message']['create_time'] == $b['recent_message']['create_time']) {
                 return 0;
             }
@@ -122,14 +116,14 @@ class MessageAction extends Action
         return self::success($session);
     }
 
-    public static function unreadCount(Auth $app)
+    public static function unreadCount(Auth $auth , array $param)
     {
-        $res = UserAction::util_unreadCount($app->user->id);
+        $res = UserUtil::unreadCount($auth->user->id);
         return self::success($res);
     }
 
     // 设置未读消息数量
-    public static function resetGroupUnread(Auth $app , array $param)
+    public static function resetGroupUnread(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
@@ -137,9 +131,9 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = GroupMessageReadStatus::updateStatus($app->user->id , $param['group_id'] , 'y');
+        $res = GroupMessageReadStatus::updateStatus($auth->user->id , $param['group_id'] , 'y');
         // 通知用户刷新会话列表
-        $app->push($app->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_session');
         return self::success($res);
     }
 }

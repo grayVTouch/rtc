@@ -15,7 +15,7 @@ class User extends Auth
     // 获取平台咨询通道信息
     public function groupForAdvoise(array $param)
     {
-        $res = UserAction::groupForAdvoise($this);
+        $res = UserAction::groupForAdvoise($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }

@@ -50,7 +50,7 @@ class Message extends Auth
     // 获取未读消息总数
     public function unreadCount(array $param)
     {
-        $res = MessageAction::unreadCount($this);
+        $res = MessageAction::unreadCount($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

@@ -114,14 +114,14 @@ class UserRedis extends Redis
     public static function allocateWaiter($identifier)
     {
         // 分配在线客服
-        $waiter = User::getByIdentifierAndRole($identifier , 'admin');
+        $waiter_ids = User::getIdByIdentifierAndRole($identifier , 'admin');
         $online = [];
-        foreach ($waiter as $v)
+        foreach ($waiter_ids as $v)
         {
-            if (UserRedis::isOnline($identifier , $v->id)) {
+            if (UserRedis::isOnline($identifier , $v)) {
                 $online[] = [
-                    'user_id' => $v->id ,
-                    'loader'  => UserRedis::numberOfReceptionsForWaiter($identifier , $v->id) ,
+                    'user_id' => $v ,
+                    'loader'  => UserRedis::numberOfReceptionsForWaiter($identifier , $v) ,
                 ];
             }
         }

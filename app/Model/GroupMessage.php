@@ -42,7 +42,7 @@ class GroupMessage extends Model
     {
         $res = self::with([
                 'group' ,
-                'user' ,
+                'user',
             ])
             ->find($id);
         if (empty($res)) {
@@ -65,7 +65,7 @@ class GroupMessage extends Model
         $where = [
             ['gm.group_id' , '=' , $group_id] ,
         ];
-        $role = in_array($role , ['none' , 'user' , 'admin']) ? $role : 'none';
+        $role = in_array($role , ['none' , 'user', 'admin']) ? $role : 'none';
         if ($role != 'none') {
             $where[] = ['u.role' , '=' , $role];
         }
@@ -103,6 +103,17 @@ class GroupMessage extends Model
             User::single($v->user);
         }
         return $res;
+    }
+
+    public static function u_insertGetId(int $user_id , int $group_id , string $type , string $message = '' , string $extra = '')
+    {
+        return self::insertGetId([
+            'user_id' => $user_id ,
+            'group_id' => $group_id ,
+            'type' => $type ,
+            'message' => $message ,
+            'extra' => $extra ,
+        ]);
     }
 
 }

@@ -20,4 +20,14 @@ class UserToken extends Model
         self::single($res);
         return $res;
     }
+
+    public static function u_insertGetId(string $identifier , int $user_id , string $token , string $expire)
+    {
+        return self::insertGetId([
+            'identifier' => $identifier ,
+            'user_id' => $user_id ,
+            'token' => $token ,
+            'expire' => $expire
+        ]);
+    }
 }

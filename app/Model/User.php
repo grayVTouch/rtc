@@ -26,9 +26,10 @@ class User extends Model
         if (!is_object($m)) {
             throw new Exception('参数 1 类型错误');
         }
+        $m->avatar_explain = empty($m->avatar) ? config('app.avatar') : res_url($m->avatar);
     }
 
-    public static function findByUniqueCode(string $unique_code = '')
+    public static function findByUniqueCode(string $unique_code = ''): ?User
     {
         $res = self::where('unique_code' , $unique_code)
             ->first();
@@ -55,8 +56,8 @@ class User extends Model
     {
         $data = [
             'identifier' => $identifier ,
-            'username'   => '客服_' . random(6 , 'mixed' , true) ,
-            'nickname'   => '客服_' . random(6 , 'mixed' , true) ,
+            'username'   => 'waiter_' . random(6 , 'mixed' , true) ,
+            'nickname'   => 'waiter_' . random(6 , 'mixed' , true) ,
             'avatar'     => '' ,
             'unique_code' => Misc::uniqueCode() ,
             'is_temp'    => 'y' ,
@@ -87,13 +88,16 @@ class User extends Model
         return $res;
     }
 
-    public static function getIdByRole(string $role = '')
+    public static function getIdByIdentifierAndRole(string $identifier , string $role = '')
     {
-        if (empty($role)) {
-            $res = self::all();
-        } else {
-            $res = self::where('role' , $role)->get();
+        $where = [
+            ['identifier' , '=' , $identifier] ,
+        ];
+        if (!empty($role)) {
+            $where[] = ['role' , '=' , $role];
         }
+        $res = self::where($where)
+            ->get();
         $id_list = [];
         foreach ($res as $v)
         {

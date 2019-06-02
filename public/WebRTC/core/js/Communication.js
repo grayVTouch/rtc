@@ -22,6 +22,7 @@
         this.option.unique_code = G.isString(option.unique_code) ? option.unique_code : this.option.unique_code;
         this.option.platform = G.isString(option.platform) ? option.platform : this.option.platform;
         this.option.identifier = G.isString(option.identifier) ? option.identifier : this.option.identifier;
+        this.option.url = G.isString(option.url) ? option.url : this.option.url;
         this.run();
     }
 
@@ -36,14 +37,21 @@
             platform: 'unknow' ,
             // websocket 地址
             websocket: 'ws://0.0.0.0:9000' ,
+            // todo 上线前请求修改
+            url: 'unknow host' ,
         } ,
 
         vue: null ,
 
-        dom: {} ,
+        minimum: null ,
+
+        dom: {
+
+        } ,
 
         initStatic: function(){
             this.dom.realTimeCommunication = G('.real-time-communication' , this.dom.container.get(0));
+            this.dom.realTimeCommunicationMinimum = G('.real-time-communication-minimum' , this.dom.container.get(0));
         } ,
 
         initDynamic: function(){
@@ -51,6 +59,45 @@
         } ,
 
         initVue: function(){
+            var self = this;
+            this.minimum = new Vue({
+                el: this.dom.realTimeCommunicationMinimum.get(0) ,
+                data: {
+                    parent: this ,
+                    dom: {} ,
+                } ,
+                mounted: function () {
+                    this.initDom();
+                    this.initialize();
+                    this.defineEvent();
+                } ,
+                methods: {
+                    initDom: function(){
+                        this.dom.container  = G(this.$el);
+                    } ,
+
+                    initialize: function(){
+
+                    } ,
+
+                    show: function(){
+                        this.dom.container.removeClass('hide');
+                    } ,
+
+                    hide: function(){
+                        this.dom.container.addClass('hide');
+                    } ,
+
+                    containerClickEvent: function(){
+                        this.hide();
+                        self.vue.show();
+                    } ,
+
+                    defineEvent: function () {
+                        this.dom.container.on('click' , this.containerClickEvent.bind(this) , true , false);
+                    }
+                }
+            });
 
             this.vue = new Vue({
                 el: this.dom.realTimeCommunication.get(0) ,
@@ -79,27 +126,84 @@
                 } ,
                 mounted: function(){
                     this.initDom();
+                    this.initialize();
                     this.initSocket();
                     this.defineEvent();
                 } ,
-                computed: {
-
-                } ,
                 methods: {
                     initDom: function(){
+                        this.dom.container  = G(this.$el);
+                        this.dom.close    = G(this.$refs.close);
+                        this.dom.session    = G(this.$refs.session);
                         this.dom.history    = G(this.$refs.history);
                         this.dom.input      = G(this.$refs.input);
+                        this.dom.textarea      = G(this.$refs.textarea);
                         this.dom.message    = G(this.$refs.message);
                         this.dom.send       = G(this.$refs.send);
                     } ,
 
+                    initialize: function(){
+                        this.dom.container.removeClass('hide');
+                        this.dom.container.move(document.body , true);
+                        this.value.containerTopVal  = this.dom.container.getCoordVal('top');
+                        this.value.containerLeftVal = this.dom.container.getCoordVal('left');
+                        this.value.containerW       = this.dom.container.width('content-box');
+                        this.value.containerH       = this.dom.container.height('content-box');
+                        this.value.maxLeft = document.documentElement.clientWidth;
+                        this.value.maxTop = document.documentElement.clientHeight;
+                        this.value.minW = 0;
+                        this.value.minH = 0;
+
+                        this.dom.container.css({
+                            left: this.value.maxLeft + 'px' ,
+                            top: this.value.maxTop + 'px' ,
+                            width: this.value.minW + 'px' ,
+                            height: this.value.minH + 'px' ,
+                            right: 'auto' ,
+                            opacity: 0 ,
+                        });
+
+                        this.value.time = 400;
+                        this.dom.container.addClass('hide');
+                    } ,
+
+                    show: function(){
+                        this.dom.container.removeClass('hide');
+                        this.dom.container.animate({
+                            opacity: 1 ,
+                            left: this.value.containerLeftVal + 'px' ,
+                            top: this.value.containerTopVal + 'px' ,
+                            width: this.value.containerW + 'px' ,
+                            height: this.value.containerH + 'px' ,
+                        } , null , this.value.time);
+                    } ,
+
+                    hide: function(){
+                        var self = this;
+                        this.dom.container.animate({
+                            opacity: 0 ,
+                            left: document.body.clientWidth + 'px' ,
+                            top: document.body.clientHeight + 'px' ,
+                            width: '0px' ,
+                            height: '0px' ,
+                        } , function(){
+                            self.dom.container.addClass('hide');
+                        } , this.value.time);
+                    } ,
+
                     initSocket: function(){
                         var vue = this;
+                        var unique_code = this.parent.option.unique_code;
+                        unique_code = G.isValid(unique_code) ?
+                            unique_code :
+                            (G.s.exists('unique_code') ?
+                                G.s.get('unique_code') :
+                                '');
                         // websocket 连接
                         this.conn = new Socket({
                             // 基本数据
                             identifier: this.parent.option.identifier ,
-                            unique_code: this.parent.option.unique_code ,
+                            unique_code: unique_code ,
                             platform: this.parent.option.platform ,
                             websocket: this.parent.option.websocket ,
                             // WebSocket 回调函数
@@ -114,7 +218,7 @@
                                     vue.conn.getSession(vue.response.bind(null , function(res){
                                         vue.session = res;
                                         if (vue.user.role == 'user') {
-                                            // 前端用户
+                                            // 前用户
                                             vue.switchSession(vue.sessionIdForAdvoise());
                                         }
                                     } , null));
@@ -122,28 +226,41 @@
                             } ,
                         });
 
-                        // 接收到推送消息的时候
+                        // 群消息
                         this.conn.on('group_message' , function(res){
-                            // 接收到群消息推送
-                            // console.log('接收到消息推送' , res);
-                            // console.log('接收到消息推送');
                             vue.refreshSession();
                             if (vue.current.session_id != res.session_id) {
+                                vue.play();
                                 return ;
                             }
                             vue.handleForMessage(res , false , '');
                             vue.conn.resetGroupUnread(vue.current.group_id);
+                            var scrollTop = vue.dom.history.scrollTop();
                             var history = vue.getHistory(res.session_id);
-                                history.history.push(res);
-                                vue.$nextTick(function () {
-                                    vue.scrollBottom();
-                                })
+                            history.history.push(res);
+                            vue.$nextTick(function () {
+                                this.dom.history.scrollTop(scrollTop);
+                                this.scrollBottom();
+                            });
                         });
 
+                        // 刷新会话
                         this.conn.on('refresh_session' , function () {
                             // 刷新会话
                             vue.refreshSession();
                         });
+
+                        // 临时用户
+                        this.conn.on('unique_code' , function(res){
+                            // 保存临时的 unique_code
+                            G.s.set('unique_code' , res);
+                        });
+                    } ,
+
+                    play: function(){
+                        var audio = new Audio();
+                        audio.src = this.parent.option.url + '/static/media/new_msg.wav';
+                        audio.play();
                     } ,
 
                     // 找到平台咨询通道
@@ -168,7 +285,7 @@
                             if (res.code == 400) {
                                 this.formError(res.data);
                             } else {
-                                this.error(res.data);
+                                this.msg(res.data);
                             }
                             if (G.isFunction(error)) {
                                 error(res.data);
@@ -186,7 +303,7 @@
                         var self = this;
                         // 保存当前输入框内容
                         if (!this.once) {
-                            this.setSessionTempValue(session_id , this.message);
+                            this.setSessionTempValue(this.current.session_id , this.message);
                         }
                         // 切换会话
                         var current = this.current = this.sessionBySessionId(session_id);
@@ -213,6 +330,9 @@
                             this.message = this.getSessionTempValue(session_id);
                             // 更新该群的未读消息数量
                             this.conn.resetGroupUnread(current.group_id);
+                            this.$nextTick(function(){
+                                this.dom.textarea.trigger('focus');
+                            });
                         } else {
                             // todo 其他
                         }
@@ -258,7 +378,7 @@
                     advoiseWithText: function(session_id){
                         if (this.message.length == 0) {
                             // layer.
-                            layer.tips('请输入内容', this.dom.input.get(0) , {
+                            layer.tips('请输入内容', this.dom.textarea.get(0) , {
                                 tips: [1, '#78BA32']
                             });
                             return ;
@@ -280,7 +400,9 @@
                             history.history.splice(index , 1 , message);
                             // 刷新会话列表
                             self.refreshSession();
+                            var scrollTop = self.dom.history.scrollTop();
                             self.$nextTick(function(){
+                                this.dom.history.scrollTop(scrollTop);
                                 this.scrollBottom();
                             });
                             // 更新该群的未读消息数量
@@ -288,6 +410,11 @@
                         } , function(error){
                             var message = self.messageByTempId(session_id , tempId);
                             self.handleForMessage(message , false , error);
+                            var scrollTop = self.dom.history.scrollTop();
+                            self.$nextTick(function(){
+                                this.dom.history.scrollTop(scrollTop);
+                                this.scrollBottom();
+                            })
                         }));
                         data.message_type = 'group';
                         data.user       = this.user;
@@ -297,9 +424,11 @@
                         var history = this.getHistory(session_id);
                             history.history.push(data);
                         this.message = '';
-                        this.dom.input.html(this.message);
+                        this.dom.textarea.html(this.message);
                         this.setSessionTempValue(session_id , this.message);
+                        var scrollTop = this.dom.history.scrollTop();
                         this.$nextTick(function(){
+                            this.dom.history.scrollTop(scrollTop);
                             // 滚动到底部
                             this.scrollBottom();
                         });
@@ -316,7 +445,6 @@
                     // 刷新会话列表
                     refreshSession: function(){
                         if (!this.isLogin) {
-                            console.log('尚未登录！');
                             return ;
                         }
                         var self = this;
@@ -331,9 +459,10 @@
                      * *********************************
                      */
                     contentKeyUpEvent: function(e){
-                        if (e.ctrlKey && e.keyCode == 13) {
+                        // if (e.ctrlKey && e.keyCode == 13) {
+                        if (e.keyCode == 13) {
                             this.message = this.message.replace(/(\\n|\\r)*$/ , '');
-                            this.dom.input.html(this.message);
+                            this.dom.textarea.html(this.message);
                             this.send('text');
                         }
                     } ,
@@ -432,7 +561,7 @@
                         var key = G.firstKey(obj);
                         var value = obj[key];
                         var msg = key + ' ' + value;
-                        this.error(msg);
+                        this.msg(msg);
                     } ,
 
                     // 成功
@@ -557,8 +686,19 @@
                      * **************************
                      */
 
+                    containerClickEvent: function(e){
+                        G.stop(e);
+                        this.hide();
+                        self.minimum.show();
+                    } ,
+
+
                     defineEvent: function(){
                         this.dom.history.on('scroll' , this.scrollEvent.bind(this) , true , false);
+                        this.dom.session.on(G.mousedown , G.stop , true , false);
+                        this.dom.input.on(G.mousedown , G.stop , true , false);
+                        this.dom.history.on(G.mousedown , G.stop , true , false);
+                        this.dom.close.on('click' , this.containerClickEvent.bind(this) , true , false);
                     } ,
                 } ,
 

@@ -17,6 +17,10 @@ return [
         // worker 进程的数量
         'worker' => 8 ,
     ] ,
+    'http' => [
+        'ip' => '0.0.0.0' ,
+        'port' => 9301 ,
+    ] ,
     // redis 默认过期时间（1个月）
     'timeout' => 1 * 30 * 24 * 3600 ,
     // 是否启用访客模式
@@ -27,5 +31,12 @@ return [
     'wait_duration' => 2 * 60 ,
     // 记录数限制
     'limit' => 20 ,
+    'web_dir' => realpath(__DIR__ . '/../public') ,
+    'log_dir' => realpath(__DIR__ . '/../log') ,
+    // host
+    'url' => 'http://192.168.61.104:9301' ,
+    // 默认头像
+    'avatar' => 'http://192.168.61.104:9301/static/image/male.png' ,
+    'group_image' => 'http://192.168.61.104:9301/static/image/group.png' ,
 
 ];

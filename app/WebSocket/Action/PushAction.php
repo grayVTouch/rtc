@@ -14,9 +14,9 @@ use App\WebSocket\Auth;
 
 class PushAction extends Action
 {
-    public static function unread(Auth $app)
+    public static function unread(Auth $auth , array $param)
     {
-        $res = Push::unread($app->user->id , config('app.limit'));
+        $res = Push::unread($auth->user->id , config('app.limit'));
         return self::success($res);
     }
 }
