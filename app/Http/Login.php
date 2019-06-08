@@ -19,7 +19,7 @@ class Login extends Base
         $param['identifier'] = $param['identifier'] ?? '';
         $param['username'] = $param['username'] ?? '';
         $param['nickname'] = $param['nickname'] ?? '';
-        $param['avatar'] = $param['nickname'] ?? '';
+        $param['avatar'] = $param['avatar'] ?? '';
         $param['role'] = $param['role'] ?? '';
         $res = LoginAction::register($param);
         if ($res['code'] != 200) {

@@ -46,6 +46,11 @@ class LoginAction extends Action
                 'identifier' => '项目标识符错误' ,
             ]);
         }
+        // 检查用户名是否重复
+        $user = User::findByUsername($param['username']);
+        if (!empty($user)) {
+            return self::error('用户名已经被使用');
+        }
         $unique_code = Misc::uniqueCode();
         $param['unique_code'] = $unique_code;
         User::insert(array_unit($param , [
@@ -54,7 +59,7 @@ class LoginAction extends Action
             'nickname' ,
             'avatar' ,
             'role' ,
-            'unique'
+            'unique_code'
         ]));
         return self::success($unique_code);
     }
@@ -78,7 +83,7 @@ class LoginAction extends Action
         }
         // 登录成功
         $param['identifier'] = $user->identifier;
-        $param['user_id'] = $user->user_id;
+        $param['user_id'] = $user->id;
         $param['token']  = token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         UserToken::insert(array_unit($param , [

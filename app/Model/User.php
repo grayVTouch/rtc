@@ -26,12 +26,20 @@ class User extends Model
         if (!is_object($m)) {
             throw new Exception('参数 1 类型错误');
         }
-        $m->avatar_explain = empty($m->avatar) ? config('app.avatar') : res_url($m->avatar);
+        $m->avatar = empty($m->avatar) ? config('app.avatar') : $m->avatar;
     }
 
     public static function findByUniqueCode(string $unique_code = ''): ?User
     {
         $res = self::where('unique_code' , $unique_code)
+            ->first();
+        self::single($res);
+        return $res;
+    }
+
+    public static function findByUsername(string $username = ''): ?User
+    {
+        $res = self::where('username' , $username)
             ->first();
         self::single($res);
         return $res;

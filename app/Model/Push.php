@@ -17,7 +17,7 @@ class Push extends Model
     public $timestamps = false;
 
     // 未读的推送
-    public static function unread(int $user_id , int $limit = 20)
+    public static function unreadByUserId(int $user_id , int $limit = 20)
     {
         $res = DB::table('push as p')
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
@@ -30,5 +30,18 @@ class Push extends Model
             ->get();
         self::multiple($res);
         return $res;
+    }
+
+    // 新增数据
+    public static function u_insertGetId(string $identifier , string $push_type , string $type , string $data = '' , string $role = 'all' , int $user_id = 0)
+    {
+        return self::insertGetId([
+            'identifier' => $identifier ,
+            'push_type' => $push_type ,
+            'user_id' => $user_id ,
+            'role' => $role ,
+            'type' => $type ,
+            'data' => $data ,
+        ]);
     }
 }

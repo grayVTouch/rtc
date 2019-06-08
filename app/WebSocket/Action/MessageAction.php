@@ -116,6 +116,21 @@ class MessageAction extends Action
         return self::success($session);
     }
 
+    // 未读通信数量（私聊 + 群聊）
+    public static function unreadCountForCommunication(Auth $auth , array $param)
+    {
+        $res = UserUtil::unreadCountForCommunication($auth->user->id);
+        return self::success($res);
+    }
+
+    // 未读推送数量
+    public static function unreadCountForPush(Auth $auth , array $param)
+    {
+        $res = UserUtil::unreadCountForPush($auth->user->id);
+        return self::success($res);
+    }
+
+    // 总：未读消息数量
     public static function unreadCount(Auth $auth , array $param)
     {
         $res = UserUtil::unreadCount($auth->user->id);

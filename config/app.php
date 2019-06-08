@@ -6,6 +6,10 @@
  * Time: 16:46
  */
 
+// web 服务器地址
+$host = "http://192.168.61.104:9301";
+//$host = "http://192.168.1.67:9301";
+
 return [
     'websocket' => [
         'ip' => '0.0.0.0' ,
@@ -27,16 +31,16 @@ return [
     'enable_guest' => true ,
     // 单个客服最多接听的访客数量
     'number_of_receptions' => 10 ,
-    // 客服最长等待时间
+    // 客服最长等待时间 2min
     'wait_duration' => 2 * 60 ,
     // 记录数限制
     'limit' => 20 ,
     'web_dir' => realpath(__DIR__ . '/../public') ,
     'log_dir' => realpath(__DIR__ . '/../log') ,
     // host
-    'url' => 'http://192.168.61.104:9301' ,
+    'host' => $host ,
     // 默认头像
-    'avatar' => 'http://192.168.61.104:9301/static/image/male.png' ,
-    'group_image' => 'http://192.168.61.104:9301/static/image/group.png' ,
+    'avatar'        => "{$host}/static/image/avatar.png" ,
+    'group_image'   => "{$host}/static/image/group.png" ,
 
 ];

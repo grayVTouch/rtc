@@ -14,21 +14,7 @@
         if (!container.isDom()) {
             throw new Error('参数 1 错误');
         }
-        if (!G.isObject(option)) {
-            option = this.option;
-        }
-        this.dom.container = container;
-        this.option.websocket = G.isString(option.websocket) ? option.websocket : this.option.websocket;
-        this.option.unique_code = G.isString(option.unique_code) ? option.unique_code : this.option.unique_code;
-        this.option.platform = G.isString(option.platform) ? option.platform : this.option.platform;
-        this.option.identifier = G.isString(option.identifier) ? option.identifier : this.option.identifier;
-        this.option.url = G.isString(option.url) ? option.url : this.option.url;
-        this.run();
-    }
-
-    Communication.prototype = {
-        author: 'grayVTouch' ,
-        option: {
+        this.option = {
             // 项目标识符
             identifier: '' ,
             // 唯一码
@@ -38,20 +24,31 @@
             // websocket 地址
             websocket: 'ws://0.0.0.0:9000' ,
             // todo 上线前请求修改
-            url: 'unknow host' ,
-        } ,
+            host: 'unknow host' ,
+        };
+        if (!G.isObject(option)) {
+            option = this.option;
+        }
+        this.dom = {};
+        this.dom.container = container;
+        this.option.websocket = G.isString(option.websocket) ? option.websocket : this.option.websocket;
+        this.option.unique_code = G.isString(option.unique_code) ? option.unique_code : this.option.unique_code;
+        this.option.platform = G.isString(option.platform) ? option.platform : this.option.platform;
+        this.option.identifier = G.isString(option.identifier) ? option.identifier : this.option.identifier;
+        this.option.host = G.isString(option.host) ? option.host : this.option.host;
+        this.option.unread = option.unread;
+        this.run();
+    }
 
-        vue: null ,
-
-        minimum: null ,
-
-        dom: {
-
-        } ,
-
+    Communication.prototype = {
+        author: 'grayVTouch' ,
+        time: '2019/06/08' ,
         initStatic: function(){
-            this.dom.realTimeCommunication = G('.real-time-communication' , this.dom.container.get(0));
-            this.dom.realTimeCommunicationMinimum = G('.real-time-communication-minimum' , this.dom.container.get(0));
+            this.vue = null;
+            this.dom.realTimeCommunication = this.dom.container.children({
+                className: 'real-time-communication' ,
+                tagName: 'div' ,
+            } , false , true).first();
         } ,
 
         initDynamic: function(){
@@ -59,46 +56,6 @@
         } ,
 
         initVue: function(){
-            var self = this;
-            this.minimum = new Vue({
-                el: this.dom.realTimeCommunicationMinimum.get(0) ,
-                data: {
-                    parent: this ,
-                    dom: {} ,
-                } ,
-                mounted: function () {
-                    this.initDom();
-                    this.initialize();
-                    this.defineEvent();
-                } ,
-                methods: {
-                    initDom: function(){
-                        this.dom.container  = G(this.$el);
-                    } ,
-
-                    initialize: function(){
-
-                    } ,
-
-                    show: function(){
-                        this.dom.container.removeClass('hide');
-                    } ,
-
-                    hide: function(){
-                        this.dom.container.addClass('hide');
-                    } ,
-
-                    containerClickEvent: function(){
-                        this.hide();
-                        self.vue.show();
-                    } ,
-
-                    defineEvent: function () {
-                        this.dom.container.on('click' , this.containerClickEvent.bind(this) , true , false);
-                    }
-                }
-            });
-
             this.vue = new Vue({
                 el: this.dom.realTimeCommunication.get(0) ,
                 data: {
@@ -123,10 +80,14 @@
                     loading: {} ,
                     duration: 200 ,
                     isLogin: false ,
+                    unread: 0 ,
                 } ,
+
+
                 mounted: function(){
                     this.initDom();
-                    this.initialize();
+                    this.initStatic();
+                    this.initDynamic();
                     this.initSocket();
                     this.defineEvent();
                 } ,
@@ -134,61 +95,118 @@
                     initDom: function(){
                         this.dom.container  = G(this.$el);
                         this.dom.close    = G(this.$refs.close);
-                        this.dom.session    = G(this.$refs.session);
+                        this.dom.leftTop    = G(this.$refs['left-top']);
+                        this.dom.leftMid    = G(this.$refs['left-mid']);
+                        this.dom.leftBtm    = G(this.$refs['left-btm']);
                         this.dom.history    = G(this.$refs.history);
                         this.dom.input      = G(this.$refs.input);
                         this.dom.textarea      = G(this.$refs.textarea);
                         this.dom.message    = G(this.$refs.message);
                         this.dom.send       = G(this.$refs.send);
+                        this.dom.user       = G(this.$refs.user);
+                        this.dom.userOuter       = G(this.$refs['user-outer']);
+                        this.dom.userIn       = G(this.$refs['user-in']);
+                        this.dom.mask       = G(this.$refs.mask);
+                        this.dom.avatar       = G(this.$refs.avatar);
+                        this.dom.realTimeCommunicationMinimum       = G(this.$refs['real-time-communication-minimum']);
+                        this.dom.realTimeCommunicationMaximum       = G(this.$refs['real-time-communication-maximum']);
                     } ,
 
-                    initialize: function(){
-                        this.dom.container.removeClass('hide');
-                        this.dom.container.move(document.body , true);
-                        this.value.containerTopVal  = this.dom.container.getCoordVal('top');
-                        this.value.containerLeftVal = this.dom.container.getCoordVal('left');
-                        this.value.containerW       = this.dom.container.width('content-box');
-                        this.value.containerH       = this.dom.container.height('content-box');
-                        this.value.maxLeft = document.documentElement.clientWidth;
-                        this.value.maxTop = document.documentElement.clientHeight;
+                    initStatic: function(){
+                        this.dom.realTimeCommunicationMaximum.removeClass('hide');
+                        this.dom.user.removeClass('hide');
+                        this.value.realTimeCommunicationMaximumW       = this.dom.realTimeCommunicationMaximum.width('content-box');
+                        this.value.realTimeCommunicationMaximumH       = this.dom.realTimeCommunicationMaximum.height('content-box');
                         this.value.minW = 0;
                         this.value.minH = 0;
 
-                        this.dom.container.css({
+                        this.value.userW = this.dom.user.width('content-box');
+                        this.value.userH = this.dom.user.height('content-box');
+                        this.value.endUserW = this.value.userW * 0.6;
+                        this.value.endUserH = this.value.userH * 0.6;
+                        this.value.endLeft = (this.value.userW - this.value.endUserW) / 2;
+                        this.value.endTop = (this.value.userH - this.value.endUserH) / 2;
+                        this.value.endOpacity = 0.6;
+
+                        this.value.time = 300;
+                        this.value.short = 150;
+                        this.value.extra = 20;
+                        this.dom.realTimeCommunicationMaximum.addClass('hide');
+                        this.dom.user.addClass('hide');
+
+                    } ,
+
+                    initDynamic: function(){
+                        this.value.maxLeft = document.documentElement.clientWidth;
+                        this.value.maxTop = document.documentElement.clientHeight;
+
+                        this.value.leftVal = this.value.maxLeft - this.value.realTimeCommunicationMaximumW - this.value.extra;
+                        this.value.leftVal = Math.max(0 , this.value.leftVal);
+                        this.value.topVal  = this.value.maxTop - this.value.realTimeCommunicationMaximumH - this.value.extra;
+                        this.value.topVal = Math.max(0 , this.value.topVal);
+
+                        if (this.isOnceInit) {
+                            this.isOnceInit = false;
+                            this.dom.realTimeCommunicationMaximum.css({
+                                left: this.value.maxLeft + 'px' ,
+                                top: this.value.maxTop + 'px' ,
+                                width: this.value.minW + 'px' ,
+                                height: this.value.minH + 'px' ,
+                                right: 'auto' ,
+                                opacity: 0 ,
+                            });
+
+                            this.dom.userOuter.css({
+                                opacity: this.value.endOpacity ,
+                                width: this.value.endUserW + 'px' ,
+                                height: this.value.endUserH + 'px' ,
+                                left: this.value.endLeft + 'px' ,
+                                top: this.value.endTop + 'px' ,
+                            });
+                            this.dom.userIn.css({
+                                left: -this.value.endLeft + 'px' ,
+                                top:  -this.value.endTop + 'px' ,
+                            });
+
+                            this.dom.realTimeCommunicationMaximum.move(document.body , true);
+                            this.dom.realTimeCommunicationMinimum.move(document.body , true);
+                        }
+                    } ,
+
+                    showMaximum: function(){
+                        var self = this;
+                        this.dom.realTimeCommunicationMaximum.removeClass('hide');
+                        this.dom.realTimeCommunicationMaximum.animate({
+                            opacity: 1 ,
+                            left: this.value.leftVal + 'px' ,
+                            top: this.value.topVal + 'px' ,
+                            width: this.value.realTimeCommunicationMaximumW + 'px' ,
+                            height: this.value.realTimeCommunicationMaximumH + 'px' ,
+                        } , function(){
+                            // 滚动到底部
+                            self.scrollBottom();
+                        } , this.value.time);
+                    } ,
+
+                    hideMaximum: function(){
+                        var self = this;
+                        this.dom.realTimeCommunicationMaximum.animate({
+                            opacity: 0 ,
                             left: this.value.maxLeft + 'px' ,
                             top: this.value.maxTop + 'px' ,
-                            width: this.value.minW + 'px' ,
-                            height: this.value.minH + 'px' ,
-                            right: 'auto' ,
-                            opacity: 0 ,
-                        });
-
-                        this.value.time = 400;
-                        this.dom.container.addClass('hide');
-                    } ,
-
-                    show: function(){
-                        this.dom.container.removeClass('hide');
-                        this.dom.container.animate({
-                            opacity: 1 ,
-                            left: this.value.containerLeftVal + 'px' ,
-                            top: this.value.containerTopVal + 'px' ,
-                            width: this.value.containerW + 'px' ,
-                            height: this.value.containerH + 'px' ,
-                        } , null , this.value.time);
-                    } ,
-
-                    hide: function(){
-                        var self = this;
-                        this.dom.container.animate({
-                            opacity: 0 ,
-                            left: document.body.clientWidth + 'px' ,
-                            top: document.body.clientHeight + 'px' ,
                             width: '0px' ,
                             height: '0px' ,
                         } , function(){
-                            self.dom.container.addClass('hide');
+                            self.dom.realTimeCommunicationMaximum.addClass('hide');
                         } , this.value.time);
+                    } ,
+
+                    showMinimum: function(){
+                        this.dom.realTimeCommunicationMinimum.removeClass('hide');
+                    } ,
+
+                    hideMinimum: function(){
+                        this.dom.realTimeCommunicationMinimum.addClass('hide');
                     } ,
 
                     initSocket: function(){
@@ -211,23 +229,33 @@
                                 // 登录成功
                                 vue.isLogin = true;
                                 // 获取用户信息
-                                vue.conn.getUser(vue.response.bind(null , function (res) {
+                                this.getUser(vue.response.bind(vue , function (res) {
                                     // 活动
                                     vue.user = res;
                                     // 获取会话列表
-                                    vue.conn.getSession(vue.response.bind(null , function(res){
+                                    vue.conn.getSession(vue.response.bind(vue , function(res){
                                         vue.session = res;
                                         if (vue.user.role == 'user') {
+                                            // todo 特殊！！！待优化
+                                            vue.value.realTimeCommunicationMaximumW = 500;
+                                            if (!G.isValid(this.value.repeatInit)) {
+                                                vue.value.realTimeCommunicationMaximumLeftVal += 301;
+                                                vue.value.repeatInit = true;
+                                            }
                                             // 前用户
                                             vue.switchSession(vue.sessionIdForAdvoise());
                                         }
                                     } , null));
                                 } , null));
+
+                                // 获取未读消息数量
+                                vue.refreshUnreadMessage();
                             } ,
                         });
 
                         // 群消息
                         this.conn.on('group_message' , function(res){
+                            // console.log(res);
                             vue.refreshSession();
                             if (vue.current.session_id != res.session_id) {
                                 vue.play();
@@ -235,6 +263,7 @@
                             }
                             vue.handleForMessage(res , false , '');
                             vue.conn.resetGroupUnread(vue.current.group_id);
+                            vue.refreshUnreadMessage();
                             var scrollTop = vue.dom.history.scrollTop();
                             var history = vue.getHistory(res.session_id);
                             history.history.push(res);
@@ -255,11 +284,29 @@
                             // 保存临时的 unique_code
                             G.s.set('unique_code' , res);
                         });
+
+                        // 刷新未读消息总数
+                        this.conn.on('refresh_unread_message' , function(){
+                            vue.refreshUnreadMessage();
+                        });
+
+                        //
+                    } ,
+
+                    // 刷新未读消息数量
+                    refreshUnreadMessage: function(){
+                        var self = this;
+                        this.conn.unreadCount(this.response.bind(this , function(res){
+                            this.unread = res;
+                            if (G.isFunction(self.parent.option.unread)) {
+                                self.parent.option.unread(res);
+                            }
+                        } , null));
                     } ,
 
                     play: function(){
                         var audio = new Audio();
-                        audio.src = this.parent.option.url + '/static/media/new_msg.wav';
+                        audio.src = this.parent.option.host + '/static/media/new_msg.wav';
                         audio.play();
                     } ,
 
@@ -288,13 +335,13 @@
                                 this.msg(res.data);
                             }
                             if (G.isFunction(error)) {
-                                error(res.data);
+                                error.call(this , res.data);
                             }
                             return ;
                         }
                         res = res.data;
                         if (G.isFunction(success)) {
-                            success(res);
+                            success.call(this , res);
                         }
                     } ,
 
@@ -310,7 +357,7 @@
                         this.once = false;
                         // 获取历史聊天记录
                         if (current.type == 'group') {
-                            this.conn.groupRecent(current.group_id , this.response.bind(null , function(res){
+                            this.conn.groupRecent(current.group_id , this.response.bind(this , function(res){
                                 res.forEach(function(v){
                                     // 数据处理
                                     self.handleForMessage(v , false , '');
@@ -330,6 +377,7 @@
                             this.message = this.getSessionTempValue(session_id);
                             // 更新该群的未读消息数量
                             this.conn.resetGroupUnread(current.group_id);
+                            this.refreshUnreadMessage();
                             this.$nextTick(function(){
                                 this.dom.textarea.trigger('focus');
                             });
@@ -393,7 +441,7 @@
                         };
                         var tempId = this.unique();
                         // 发送数据
-                        this.conn.advoise(data.group_id , data.type , data.message , data.extra , this.response.bind(null , function(message){
+                        this.conn.advoise(data.group_id , data.type , data.message , data.extra , this.response.bind(this , function(message){
                             self.handleForMessage(message , false , '');
                             var history = self.getHistory(session_id);
                             var index   = self.messageIndexByTempId(session_id, tempId);
@@ -409,6 +457,10 @@
                             self.conn.resetGroupUnread(session.group_id);
                         } , function(error){
                             var message = self.messageByTempId(session_id , tempId);
+                            if (message == false) {
+                                // 未找到临时记录
+                                return ;
+                            }
                             self.handleForMessage(message , false , error);
                             var scrollTop = self.dom.history.scrollTop();
                             self.$nextTick(function(){
@@ -448,7 +500,7 @@
                             return ;
                         }
                         var self = this;
-                        this.conn.getSession(this.response.bind(null , function(res){
+                        this.conn.getSession(this.response.bind(this , function(res){
                             self.session = res;
                         } , null));
                     } ,
@@ -461,7 +513,7 @@
                     contentKeyUpEvent: function(e){
                         // if (e.ctrlKey && e.keyCode == 13) {
                         if (e.keyCode == 13) {
-                            this.message = this.message.replace(/(\\n|\\r)*$/ , '');
+                            this.message = this.message.replace(/\n|\r/g , '');
                             this.dom.textarea.html(this.message);
                             this.send('text');
                         }
@@ -491,7 +543,8 @@
                                 return cur;
                             }
                         }
-                        throw new Error('未找到 temp_id = ' + tempId + '对应记录');
+                        return false;
+                        // throw new Error('未找到 temp_id = ' + tempId + '对应记录');
                     } ,
 
                     // 消息 index
@@ -649,7 +702,7 @@
                         history.loading = true;
                         if (this.current.type == 'group') {
                             var earliest = history.history[0];
-                            this.conn.groupHistory(session.group_id , earliest.id , this.response.bind(null , function(res){
+                            this.conn.groupHistory(session.group_id , earliest.id , this.response.bind(this , function(res){
                                 res.forEach(function(v){
                                     self.handleForMessage(v , false , '');
                                 });
@@ -686,19 +739,88 @@
                      * **************************
                      */
 
-                    containerClickEvent: function(e){
+                    closeClickEvent: function(e){
                         G.stop(e);
-                        this.hide();
-                        self.minimum.show();
+                        this.hideMaximum();
+                        this.showMinimum();
                     } ,
 
+                    // 用户点击事件
+                    userClickEvent: function(e){
+                        G.stop(e);
+                    } ,
+
+                    // 展示用户
+                    showUser: function(){
+                        this.dom.user.removeClass('hide');
+                        this.dom.userOuter.animate({
+                            opacity: 1 ,
+                            width: this.value.userW + 'px' ,
+                            height: this.value.userH + 'px' ,
+                            left: '0px' ,
+                            top: '0px' ,
+                        } , null , this.value.short);
+                        this.dom.userIn.animate({
+                            left: '0px' ,
+                            top: '0px'
+                        } , null , this.value.short);
+                    } ,
+
+                    // 隐藏用户
+                    hideUser: function(){
+                        var self = this;
+                        this.dom.userOuter.animate({
+                            opacity: this.value.endOpacity ,
+                            width: this.value.endUserW + 'px' ,
+                            height: this.value.endUserH + 'px' ,
+                            left: this.value.endLeft + 'px' ,
+                            top: this.value.endTop + 'px' ,
+                        } , function(){
+                            self.dom.user.addClass('hide');
+                        } , this.value.short);
+                        this.dom.userIn.animate({
+                            left: -this.value.endLeft + 'px' ,
+                            top:  -this.value.endTop + 'px' ,
+                        } , null , this.value.short);
+                    } ,
+
+                    avatarClickEvent: function(e){
+                        var x = e.clientX;
+                        var y = e.clientY;
+                        var extra = 15;
+                        this.dom.user.css({
+                            left: (x + extra) + 'px' ,
+                            top: (y + extra) + 'px'
+                        });
+                        this.showUser();
+                    } ,
+
+                    realTimeCommunicationMinimumClickEvent: function(){
+                        this.showMaximum();
+                        this.hideMinimum();
+                    } ,
 
                     defineEvent: function(){
+                        var win = G(window);
+
                         this.dom.history.on('scroll' , this.scrollEvent.bind(this) , true , false);
-                        this.dom.session.on(G.mousedown , G.stop , true , false);
+                        this.dom.close.on('click' , this.closeClickEvent.bind(this) , true , false);
+                        this.dom.user.on('click' , this.userClickEvent.bind(this) , true , false);
+                        this.dom.avatar.on('click' , this.avatarClickEvent.bind(this) , true , false);
+                        this.dom.mask.on('click' , this.hideUser.bind(this) , true , false);
+                        this.dom.realTimeCommunicationMinimum.on('click' , this.realTimeCommunicationMinimumClickEvent.bind(this) , true , false);
+
+                        // 阻止默认事件
+                        this.dom.avatar.on(G.mousedown , G.stop , true , false);
+                        this.dom.user.on(G.mousedown , G.stop , true , false);
+                        this.dom.leftMid.on(G.mousedown , G.stop , true , false);
+                        this.dom.leftBtm.on(G.mousedown , G.stop , true , false);
                         this.dom.input.on(G.mousedown , G.stop , true , false);
                         this.dom.history.on(G.mousedown , G.stop , true , false);
-                        this.dom.close.on('click' , this.containerClickEvent.bind(this) , true , false);
+
+                        win.on('resize' , () => {
+                            this.initDynamic();
+                        } , true , false);
                     } ,
                 } ,
 

@@ -37,6 +37,7 @@ class Push
         ];
         // 检查是否在线
         if (!UserRedis::isOnline($identifier , $user_id)) {
+            var_dump('用户不再线 identifier: ' . $identifier . ' ; user_id: ' . $user_id);
             return false;
         }
         $conns = UserRedis::fdByUserId($identifier , $user_id);

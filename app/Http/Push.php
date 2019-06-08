@@ -34,12 +34,15 @@ class Push extends Auth
         $param['role'] = $param['role'] ?? '';
         $param['type'] = $param['type'] ?? '';
         $param['data'] = $param['data'] ?? '';
+        $param['user_id'] = $param['user_id'] ?? '';
         $res = PushAction::multiple($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
     }
+
+
 
     // 设置消息的读取状态
     public function readStatus()
@@ -53,4 +56,20 @@ class Push extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 推送：系统消息
+    public function system()
+    {
+        $param = $this->request->post;
+        $param['role'] = $param['role'] ?? '';
+        $param['user_id'] = $param['user_id'] ?? '';
+        $param['type'] = 'system';
+        $param['data'] = $param['data'] ?? '';
+        $res = PushAction::multiple($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 }

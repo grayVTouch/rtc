@@ -43,7 +43,7 @@ class ChatAction extends Action
                     $allocate = UserUtil::allocateWaiter($user->id);
                     if ($allocate['code'] != 200) {
                         // todo 调试
-                        var_dump($allocate['data']);
+//                        var_dump($allocate['data']);
                         // 没有分配到客服，保存到未读消息队列
                         MessageRedis::saveUnhandleMsg($user->identifier , $user->id , $param);
                         // 通知客户端没有客服
@@ -63,6 +63,7 @@ class ChatAction extends Action
                     // 没有客服
                     $auth->pushAll($user_ids , 'group_message' , $msg_with_no_waiter);
                 }
+                $auth->pushAll($user_ids , 'refresh_unread_message');
                 return self::success($msg);
             } catch(Exception $e) {
                 DB::rollBack();
@@ -86,6 +87,7 @@ class ChatAction extends Action
             $user_ids = GroupMember::getUserIdByGroupId($param['group_id']);
             DB::commit();
             $auth->sendAll($user_ids , 'group_message' , $msg);
+            $auth->pushAll($user_ids , 'refresh_unread_message');
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();

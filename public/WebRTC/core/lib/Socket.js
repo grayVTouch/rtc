@@ -9,6 +9,22 @@
 
 })(typeof window === 'undefined' ? this : window , function(window , noGlobal){
     function Socket(option){
+        this.option = {
+            // 项目标识符
+            identifier: '项目标识符' ,
+            // 标识符
+            unique_code: '' ,
+            // pc | andorid | ios | unknow
+            platform: 'unknow' ,
+            // websocket 地址
+            websocket: 'ws://0.0.0.0:9000' ,
+            open: null ,
+            message: null ,
+            close: null ,
+            error: null ,
+            login: null ,
+        };
+
         if (!G.isObject(option)) {
             option = this.option;
         }
@@ -31,39 +47,31 @@
     Socket.prototype = {
         author: 'grayVTouch' ,
         time: '2019-05-21' ,
-        option: {
-            // 项目标识符
-            identifier: '项目标识符' ,
-            // 标识符
-            unique_code: '' ,
-            // pc | andorid | ios | unknow
-            platform: 'unknow' ,
-            // websocket 地址
-            websocket: 'ws://0.0.0.0:9000' ,
-            open: null ,
-            message: null ,
-            close: null ,
-            error: null ,
-            login: null ,
-        } ,
-
-        // 存放回调
-        callback: {} ,
-
-        // 主动推送
-        listen: {} ,
-
-        // ws 连接实例
-        conn: null ,
-
-        // 连接是否打开
-        isOpen: false ,
-
-        // 注册后获取
-        token: '' ,
 
         initStatic: function(){
 
+            // 存放回调
+            this.callback = {};
+
+            // 主动推送（支持的类型）
+            // group_message，群消息
+            // refresh_session，刷新会话
+            // refresh_unread_message，刷新未读消息数量
+            // unique_code，唯一码
+            // system，系统消息
+            this.listen = {};
+
+            // ws 连接实例
+            this.conn = null;
+
+            // 连接是否打开
+            this.isOpen = false;
+
+            // 注册后获取
+            this.token = '';
+
+            // 当前发送的 data 数据
+            this.sendData = [];
         } ,
 
         initDynamic: function(){
@@ -85,16 +93,23 @@
          */
         open: function(){
             var self = this;
-            this.isOpen = true;
+            // this.isOpen = true;
             this.login(this.option.unique_code , function(res){
                 if (res.code != 200) {
                     console.log('error: ' + res.data);
                     return ;
                 }
                 res = res.data;
-                self.setToken(res);
-                if (G.isFunction(self.option.login)) {
-                    self.option.login();
+                this.setToken(res);
+                if (this.sendData.length > 0) {
+                    var sendData = G.copyObj(this.sendData);
+                    sendData.forEach(function(v){
+                        self.websocketSend(v);
+                    });
+                    console.log('WebSocket 重连成功！');
+                }
+                if (G.isFunction(this.option.login)) {
+                    this.option.login.call(this);
                 }
             });
             if (G.isFunction(this.option['open'])) {
@@ -109,22 +124,30 @@
             {
                 case 'response':
                     // 响应
+                    var index;
+                    if ((index = this.sendDataIndexByRequest(res.request)) != -1) {
+                        // 删除掉已经接收到响应的数据
+                        this.sendData.splice(index , 1);
+                    }
                     if (G.isFunction(this.callback[res.request])) {
-                        this.callback[res.request](res.data);
+                        this.callback[res.request].call(this , res.data);
                     }
                     break;
                 default:
                     // 推送
                     if (G.isFunction(this.listen[res.type])) {
-                        this.listen[res.type](res.data);
+                        this.listen[res.type].call(this , res.data);
                     }
             }
             if (G.isFunction(this.option['message'])) {
-                this.option['message'].call(this);
+                this.option['message'].call(this , res.data);
             }
         } ,
 
         close: function(){
+            // this.isOpen = false;
+            console.log('已经断开链接，重连中...');
+            this.reconnect();
             if (G.isFunction(this.option['close'])) {
                 this.option['close'].call(this);
             }
@@ -141,6 +164,20 @@
          * WebSocket 原生功能 end
          * ************************
          */
+
+        sendDataIndexByRequest: function(request){
+            var i   = 0;
+            var cur = null;
+            for (; i < this.sendData.length; ++i)
+            {
+                cur = this.sendData[i];
+                if (cur.request == request) {
+                    return i;
+                }
+            }
+            return -1;
+        } ,
+
 
 
         /**
@@ -175,8 +212,9 @@
 
         // websocket 数据发送
         websocketSend: function(data){
-            if (!this.isOpen) {
-                console.log('websocket 连接已经关闭！开始自动重连...');
+            this.sendData.push(data);
+            if (this.conn.readyState != WebSocket.OPEN) {
+                console.log('数据测试');
                 return ;
             }
             return this.conn.send(G.jsonEncode(data));
@@ -256,12 +294,39 @@
             } , callback);
         } ,
 
+        // 通迅信息：私聊/群聊
+        unreadCountForCommunication: function(callback){
+            return this.send('Message/unreadCountForCommunication' , null , callback);
+        } ,
+
+        // 推送消息未读消息
+        unreadCountForPush: function(callback){
+            return this.send('Message/unreadCountForPush' , null , callback);
+        } ,
+
+        // 总：私聊 + 群聊 + 推送
+        unreadCount: function(callback){
+            return this.send('Message/unreadCount' , null , callback);
+        } ,
+
+        // 设置推送读取状态
+        readStatusForPush: function(push_id , is_read , callback){
+            return this.send('Push/readStatus' , {
+                push_id: push_id ,
+                is_read: is_read
+            } , callback);
+        } ,
+
+        // 获取未读推送消息
+        unreadForPush: function(callback){
+            return this.send('Push/unread' , null , callback);
+        } ,
+
         /**
          * ******************************
          * 业务功能 end
          * ******************************
          */
-
         run: function () {
             this.initStatic();
             this.initDynamic();

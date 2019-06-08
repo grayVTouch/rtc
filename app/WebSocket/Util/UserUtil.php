@@ -114,8 +114,8 @@ class UserUtil extends Util
         ]);
     }
 
-    // 总：未读消息
-    public static function unreadCount($user_id)
+    // 通信未读数量：私聊/群聊
+    public static function unreadCountForCommunication($user_id)
     {
         // 总：未读消息
         // 总：未读聊天消息（私聊/群聊） + 未读推送消息
@@ -125,10 +125,28 @@ class UserUtil extends Util
         {
             $group_unread_count += GroupMessageReadStatus::unreadCountByUserIdAndGroupId($user_id , $v);
         }
-        $push_unread_count = PushReadStatus::unreadCountByUserId($user_id);
-        $res = $group_unread_count + $push_unread_count;
-        return self::success($res);
+        // todo 私聊-未读消息数量
+        $res = $group_unread_count;
+        return $res;
     }
+
+    // 推送未读数量
+    public static function unreadCountForPush($user_id)
+    {
+        $count = PushReadStatus::unreadCountByUserId($user_id);
+        return $count;
+    }
+
+    // 总：私聊/群聊/推送
+    public static function unreadCount($user_id)
+    {
+        $group_unread_count = self::unreadCountForCommunication($user_id);
+        // todo 未读群聊消息
+        $unread_push_count = self::unreadCountForPush($user_id);
+        $res = $group_unread_count + $unread_push_count;
+        return $res;
+    }
+
 
     // 创建临时用户
     public static function createTempUser(string $identifier)

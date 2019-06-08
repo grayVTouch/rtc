@@ -28,7 +28,7 @@ return [
     ] ,
 
     // 群推类型
-    'push_role' => ['admin' , 'user', 'all'] ,
+    'push_role' => ['admin' , 'user', 'all' , 'designation'] ,
 
     // 消息
     'message' => [

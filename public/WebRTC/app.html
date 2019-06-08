@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>即时通讯-前端插件</title>
     <link rel="stylesheet" href="./extra/plugin/Run/base.css">
-    <link rel="stylesheet" href="./core/css/Socket.css">
+    <link rel="stylesheet" href="./extra/plugin/Run/color.css">
+    <link rel="stylesheet" href="./core/css/Communication.css">
 </head>
 <body>
 
@@ -17,146 +18,176 @@
 </style>
 
 <div class="demo">
-    <input type="text" placeholder="identifier" id="identifier" value="abcdefg"><br>
+    <input type="text" placeholder="identifier" id="identifier" value="0hGFPPyf7Bnu3gnF"><br>
     <input type="text" placeholder="unique_code" id="unique_code" value="UIb6809E3505D77b06Rm3dl79yVyCaPYH3W895oU26v2qqC07I2pi36503RfE76Ttgr0ZTNXAv19l1I4r1L3PR386Ooi5429Aq4At6d1ICgV8yjsH31v82f6N53Ok65A35nvdAiO29Ru5c30443yhfrZ0iaW69IUuk088i0r04x8ufh7a572T3661sL5P0uv24wlF56Ed778SH9217qJ42G0Q98835Z6VJaAGx7Z28I83168qi8y97T45yC19cv"><br>
     <input type="text" placeholder="platform" value="pc" id="platform"><br>
     <input type="text" placeholder="websocket" id="websocket" value="ws://192.168.61.104:9300"><br>
     <button type="button" id="initialize">开始聊天</button><br>
 </div>
 
-<!-- 即时通讯：最小化 -->
-<div class="real-time-communication-minimum">
-    <div class="left">
-        <div class="image-container"><img :src="parent.option.url + '/static/image/female.png'" class="image"></div>
-    </div>
-    <div class="right">我的IM</div>
-</div>
-<!-- 即时通讯：最大化 -->
-<div class="real-time-communication hide" :class="user.role == 'user' ? 'real-time-communication-for-user' : ''">
-    <div class="close" ref="close">X</div>
-    <!-- 会话列表 -->
-    <div class="left" ref="session">
-        <div class="top">
-            <div class="left">
-                <div class="avatar">
-                    <div class="image-container"><img :src="user.avatar_explain" class="image"></div>
-                </div>
-                <div class="username">{{ user.nickname ? user.nickname : user.username }}</div>
+<div class="real-time-communication">
+    <!-- 即时通讯：最小化 -->
+    <div class="real-time-communication-minimum" ref="real-time-communication-minimum">
+        <div class="left">
+            <div class="avatar">
+                <div class="image-container"><img :src="parent.option.host + '/static/image/female.png'" class="image"></div>
             </div>
-            <div class="right"></div>
+            <div>{{ user.nickname }}</div>
         </div>
-        <div class="mid">
-            <div class="item cur"><img :src="parent.option.url + '/static/image/message.png'" class="image"></div>
-            <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
-            <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
+        <div class="right">
+            <div class="unread">{{ unread }}</div>
         </div>
-        <div class="btm session">
-
-            <div class="item" v-for="v in session" :key="v.session_id" :class="v.session_id == current.session_id ? 'cur' : ''" @click="switchSession(v.session_id)">
-                <div class="left">
-                    <div class="image-container">
-                        <img v-if="v.type == 'group'" :src="v.group ? v.group.image_explain : ''" class="image">
+    </div>
+    <!-- 即时通讯：最大化 -->
+    <div class="real-time-communication-maximum hide" :class="user.role == 'user' ? 'real-time-communication-maximum-for-user' : ''" ref="real-time-communication-maximum">
+        <!-- 关闭按钮 -->
+        <div class="close" ref="close">
+            <img :src="parent.option.host + '/static/image/minimum.png'" class="image">
+        </div>
+        <!-- 用户信息 -->
+        <div class="user hide" ref="user">
+            <div class="outer" ref="user-outer">
+                <div class="in" ref="user-in">
+                    <div class="top avatar">
+                        <div class="image-container"><img :src="user.avatar_explain" class="image"></div>
+                    </div>
+                    <div class="btm">
+                        <div class="username">{{ user.nickname }}</div>
                     </div>
                 </div>
-                <div class="right">
-                    <div class="in">
+            </div>
+            <div class="mask" ref="mask"></div>
+        </div>
+        <!-- 内容 -->
+        <div class="content">
+            <!-- 会话列表 -->
+            <div class="left">
+                <div class="top" ref="left-top">
+                    <div class="left">
+                        <div class="avatar" ref="avatar">
+                            <div class="image-container"><img :src="user.avatar_explain" class="image"></div>
+                        </div>
+                        <div class="username">{{ user.nickname }}</div>
+                    </div>
+                    <div class="right"></div>
+                </div>
+                <div class="mid" ref="left-mid">
+                    <div class="item cur"><img :src="parent.option.host + '/static/image/message.png'" class="image"></div>
+                    <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
+                    <!--<div class="item"><img src="./image/message.png" class="image"></div>-->
+                </div>
+                <div class="btm session" ref="left-btm">
+
+                    <div class="item" v-for="v in session" :key="v.session_id" :class="v.session_id == current.session_id ? 'cur' : ''" @click="switchSession(v.session_id)">
                         <div class="left">
-                            <div class="top">
-                                <!-- 群 -->
-                                <template v-if="v.type == 'group'">{{ v.group ? v.group.name : '' }}</template>
-                                <!-- todo 私聊 -->
-                            </div>
-                            <div class="btm">
-                                <template v-if="v.recent_message">
-                                    <!-- 文本消息 -->
-                                    <template v-if="v.recent_message.type == 'text'">{{ v.recent_message.message }}</template>
-                                    <!-- todo 其他类型消息 -->
-                                </template>
+                            <div class="image-container">
+                                <img v-if="v.type == 'group'" :src="v.group ? v.group.image_explain : ''" class="image">
                             </div>
                         </div>
                         <div class="right">
-                            <div class="top">{{ v.recent_message ? v.recent_message.create_time : '' }}</div>
-                            <div class="btm"><span class="unread">{{ v.unread }}</span></div>
+                            <div class="in">
+                                <div class="left">
+                                    <div class="top">
+                                        <!-- 群 -->
+                                        <template v-if="v.type == 'group'">{{ v.group ? v.group.name : '' }}</template>
+                                        <!-- todo 私聊 -->
+                                    </div>
+                                    <div class="btm">
+                                        <template v-if="v.recent_message">
+                                            <!-- 文本消息 -->
+                                            <template v-if="v.recent_message.type == 'text'">{{ v.recent_message.message }}</template>
+                                            <!-- todo 其他类型消息 -->
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="right">
+                                    <div class="top">{{ v.recent_message ? v.recent_message.create_time : '' }}</div>
+                                    <div class="btm"><span class="unread">{{ v.unread }}</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-        </div>
-    </div>
-    <!-- 对话窗口 -->
-    <div class="right">
-        <div class="window">
-            <div class="top">
-                <div class="left">
-                    <!-- 群信息 -->
-                    <template v-if="current.type == 'group'">{{ current.group ? current.group.name : '' }}</template>
-                </div>
-                <div class="right"></div>
-            </div>
-            <div class="mid" ref="history">
-                <!-- 加载层 -->
-                <div class="loading">
-                    <span v-if="!history.all && history.loading">加载中...</span>
-                    <span v-else class="gray">已经到底了</span>
-                </div>
-
-                <!-- 聊天记录 -->
-                <div class="history" ref="message">
-
-                    <!-- 发送者 -->
-                    <template v-for="v in history.history">
-                        <div class="message" :class="v.myself ? 'myself' : 'other'" :data-id="v.id">
-                            <div class="in">
-                                <div class="left">
-                                    <div class="image-container"><img :src="v.user ? v.user.avatar_explain : ''" class="image"></div>
-                                </div>
-                                <div class="right">
-                                    <div class="top">
-                                        <div class="in">{{ v.user ? (v.user.nickname ? v.user.nickname : v.user.username) : '' }} {{ v.create_time }}</div>
-                                    </div>
-                                    <div class="mid">
-                                        <div class="in">
-                                            <div class="text">{{ v.message }}</div>
-                                            <div class="loading" :class="v.loading ? '' : 'hide'">加载中</div>
-                                        </div>
-                                    </div>
-                                    <div class="btm">
-                                        <div class="in red" :class="v.error ? '' : 'hide'">发送失败：{{ v.error }}</div>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- 对话窗口 -->
+            <div class="right">
+                <div class="window">
+                    <div class="top">
+                        <div class="left">
+                            <!-- 群信息 -->
+                            <template v-if="current.type == 'group'">{{ current.group ? current.group.name : '' }}</template>
+                        </div>
+                        <div class="right"></div>
+                    </div>
+                    <div class="mid" ref="history">
+                        <!-- 加载层 -->
+                        <div class="loading">
+                            <span v-if="!history.all && history.loading">加载中...</span>
+                            <span v-else class="gray">已经到底了</span>
                         </div>
 
-                        <!--<div class="tip-message error hide" v-if="v.type == 'no_waiter'">-->
-                            <!--<div class="in">{{ v.message }}</div>-->
-                        <!--</div>-->
-                        <!--<div class="tip-message success" v-if="v.type == 'allocated'">-->
-                            <!--<div class="in">{{ v.message }}</div>-->
-                        <!--</div>-->
-                    </template>
+                        <!-- 聊天记录 -->
+                        <div class="history" ref="message">
+
+                            <!-- 发送者 -->
+                            <template v-for="v in history.history">
+                                <div class="message" :class="v.myself ? 'myself' : 'other'" :data-id="v.id">
+                                    <div class="in">
+                                        <div class="left">
+                                            <div class="image-container"><img :src="v.user ? v.user.avatar_explain : ''" class="image"></div>
+                                        </div>
+                                        <div class="right">
+                                            <div class="top">
+                                                <div class="in">{{ v.user ? (v.user.nickname ? v.user.nickname : v.user.username) : '' }} {{ v.create_time }}</div>
+                                            </div>
+                                            <div class="mid">
+                                                <div class="in">
+                                                    <div class="text">{{ v.message }}</div>
+                                                    <div class="loading">
+                                                        <img :src="parent.option.host + '/static/image/loading.png'" class="image image-for-loading" :class="v.loading ? '' : 'hide'">
+                                                        <img :src="parent.option.host + '/static/image/fail.png'" class="image " :class="v.error ? '' : 'hide'">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="btm">
+                                                <div class="in red" :class="v.error ? '' : 'hide'">发送失败：{{ v.error }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--<div class="tip-message error hide" v-if="v.type == 'no_waiter'">-->
+                                <!--<div class="in">{{ v.message }}</div>-->
+                                <!--</div>-->
+                                <!--<div class="tip-message success" v-if="v.type == 'allocated'">-->
+                                <!--<div class="in">{{ v.message }}</div>-->
+                                <!--</div>-->
+                            </template>
+                        </div>
+                    </div>
+                    <div class="btm">
+                        <div class="top hide"></div>
+                        <div class="mid" ref="input">
+                            <textarea ref="textarea" @keyup="contentKeyUpEvent" v-model="message" class="input" autofocus="autofocus" placeholder="请输入..."></textarea>
+                        </div>
+                        <div class="btm"><button type="button" class="send" ref="send" @click="sendEvent" title="ENTER">发送（ENTER）</button></div>
+                    </div>
                 </div>
-            </div>
-            <div class="btm">
-                <div class="top hide"></div>
-                <div class="mid" ref="input">
-                    <textarea ref="textarea" @keyup="contentKeyUpEvent" v-model="message" class="input" autofocus="autofocus" placeholder="请输入..."></textarea>
+                <div class="empty" :class="once ? '' : 'hide'">
+                    <div class="in">请选择会话</div>
                 </div>
-                <div class="btm"><button type="button" class="send" ref="send" @click="sendEvent" title="ENTER">发送（ENTER）</button></div>
+
             </div>
-        </div>
-        <div class="empty" :class="once ? '' : 'hide'">
-            <div class="in">请选择会话</div>
         </div>
 
     </div>
-
 </div>
+
 <script src="./extra/plugin/Third/jquery/jquery-3.3.1.min.js"></script>
 <script src="./extra/plugin/Third/layer/layer.js"></script>
 <script src="./extra/plugin/Vue/Vue.dev.js"></script>
 <script src="./extra/plugin/SmallJs/SmallJs.js"></script>
-<script src="./core/js/Socket.js"></script>
+<script src="./core/lib/Socket.js"></script>
 <script src="./core/js/Communication.js"></script>
 <script>
     var identifier = document.querySelector('#identifier');
@@ -164,7 +195,6 @@
     var platform = document.querySelector('#platform');
     var websocket = document.querySelector('#websocket');
     var initialize = document.querySelector('#initialize');
-
 
     initialize.addEventListener('click' , function(){
         var c = new Communication(document.body , {
@@ -176,9 +206,26 @@
             platform: platform.value ,
             // websocket 地址
             websocket: websocket.value ,
-            url: 'http://192.168.61.104:9301' ,
+
+            // web 服务器域名
+            // host: 'http://192.168.61.104:9301' ,
+            host: 'http://192.168.61.104:9301' ,
         });
-    } , false)
+    } , false);
+
+    // (function(){
+    //     var c = new Communication(document.body , {
+    //         // 项目标识符
+    //         identifier: identifier.value ,
+    //         // 唯一码
+    //         unique_code: unique_code.value ,
+    //         // pc | andorid | ios | unknow
+    //         platform: platform.value ,
+    //         // websocket 地址
+    //         websocket: websocket.value ,
+    //         url: 'http://192.168.1.67:9301' ,
+    //     });
+    // })();
 </script>
 </body>
 </html>

@@ -14,9 +14,16 @@ use App\Model\User;
 
 class Auth extends Base
 {
+    /**
+     * @var User
+     */
     public $user = null;
 
-    // 前置操作
+    /**
+     * 前置操作
+     *
+     * @return bool
+     */
     public function before() :bool
     {
         if (!parent::before()) {
@@ -34,6 +41,7 @@ class Auth extends Base
         }
         $user = User::findById($token->user_id);
         if (empty($user)) {
+            $this->error("未找到 {$token->user_id} 对应用户");
             return false;
         }
         $this->user = $user;

@@ -47,7 +47,27 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
-    // 获取未读消息总数
+    // 未读消息（私聊 + 群聊）
+    public function unreadCountForCommunication(array $param)
+    {
+        $res = MessageAction::unreadCountForCommunication($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 推送消息
+    public function unreadCountForPush(array $param)
+    {
+        $res = MessageAction::unreadCountForPush($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 总：通迅消息 + 推送消息
     public function unreadCount(array $param)
     {
         $res = MessageAction::unreadCount($this , $param);
@@ -56,6 +76,7 @@ class Message extends Auth
         }
         return $this->success($res['data']);
     }
+
 
     // 更新未读消息数量
     public function resetGroupUnread(array $param)

@@ -63,7 +63,7 @@ function res_url($path = '')
     if (empty($path)) {
         return '';
     }
-    $url = config('app.url');
+    $url = config('app.host');
     $url = format_path($url);
     return sprintf('%s%s' , $url , $path);
 }

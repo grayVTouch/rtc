@@ -58,7 +58,7 @@ class Model extends BaseModel implements ModelInterface
     {
         $res = static::find($id);
         if (empty($res)) {
-            return ;
+            return null;
         }
         static::single($res);
         return $res;
