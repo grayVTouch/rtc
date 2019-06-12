@@ -97,6 +97,14 @@ class GroupMember extends Model
         return self::where('group_id' , $group_id)->delete();
     }
 
+    public static function delByUserIdAndGroupId(int $user_id , int $group_id)
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['group_id' , '=' , $group_id] ,
+        ])->delete();
+    }
+
 
     public static function getByUserId(int $user_id)
     {
@@ -130,6 +138,16 @@ class GroupMember extends Model
         ]);
     }
 
-
+    /**
+     * 检查是否存在
+     *
+     * @param int $user_id
+     * @param int $group_id
+     * @return bool
+     */
+    public static function exist(int $user_id , int $group_id)
+    {
+        return !empty(self::findByUserIdAndGroupId($user_id , $group_id));
+    }
 
 }

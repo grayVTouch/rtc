@@ -39,19 +39,19 @@ class Redis
 
 
     // 调用原生方法
-    public function native($method , ...$args)
+    public function native(string $method , ...$args)
     {
         return call_user_func_array([$this->conn , $method] , $args);
     }
 
     // 生成带有前缀的 key
-    public function key($name)
+    public function key(string $name)
     {
         return sprintf('%s%s' , $this->prefix , $name);
     }
 
     // 获取/设置字符串
-    public function string($name , $value = '' , $timeout = 0)
+    public function string(string $name , string $value = '' , int $timeout = 0)
     {
         $key = $this->key($name);
         if (empty($value)) {
@@ -64,7 +64,7 @@ class Redis
     }
 
     // 获取/设置字符串
-    public function hash($name , $key = '' , $value = '' , $timeout = 0)
+    public function hash(string $name , string $key , string $value = '' , int $timeout = 0)
     {
         $name = $this->key($name);
         if (empty($value)) {
@@ -77,7 +77,7 @@ class Redis
     }
 
     // 获取/设置字符串
-    public function hashAll($name , array $data = [] , $timeout = 0)
+    public function hashAll(string $name , array $data = [] , int $timeout = 0)
     {
         $name = $this->key($name);
         if (empty($data)) {
@@ -89,31 +89,31 @@ class Redis
         }
     }
 
-    public function lPush($name , $value)
+    public function lPush(string $name , string $value)
     {
         $key = $this->key($name);
         return $this->native('lPush' , $key , $value);
     }
 
-    public function rPush($name , $value)
+    public function rPush(string $name , string $value)
     {
         $key = $this->key($name);
         return $this->native('rPush' , $key , $value);
     }
 
-    public function lRange($name , int $start = 0 , int $end = -1)
+    public function lRange(string $name , int $start = 0 , int $end = -1)
     {
         $key = $this->key($name);
         return $this->native('lRange' , $key , $start , $end);
     }
 
     // 删除 key
-    public function del($name)
+    public function del(string $name)
     {
         return $this->native('del' , $this->key($name));
     }
 
-    public function parse($str = '')
+    public function parse(string $str = '')
     {
         return json_decode($str , true);
     }

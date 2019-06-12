@@ -25,6 +25,7 @@ return [
         'unread_count'          => '未读消息数量' ,
         'allocated'             => '加入客服成功，通知信息' ,
         'unique_code'           => '用户标识符' ,
+        'refresh_unread_count'  => '刷新未读消息数量' ,
     ] ,
 
     // 群推类型
@@ -37,4 +38,21 @@ return [
         'waiter_close' => '系统通知：客服 【%s】已经离线' ,
         'no_waiter' => '' ,
     ] ,
+
+    // 消息类型
+    'message_type' => [
+        'text'  => '文本' ,
+        'image' => '图片' ,
+    ] ,
+
+    /**
+     * 申请状态
+     *
+     * approve 通过
+     * refuse  拒绝
+     * wait    等待
+     */
+    'application_status' => ['approve' , 'refuse' , 'wait'] ,
+    // 用户可选的申请状态
+    'application_status_for_user' => ['approve' , 'refuse'] ,
 ];

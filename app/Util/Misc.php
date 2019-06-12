@@ -3,6 +3,7 @@
 namespace App\Util;
 
 use function core\random;
+use function core\ssl_random;
 
 /**
  * Created by PhpStorm.
@@ -24,4 +25,17 @@ class Misc
     {
         return md5(sprintf('%s_%d' , $type , $id));
     }
+
+    // 生成标识符
+    public static function identifier()
+    {
+        return ssl_random(32);
+    }
+
+    // 生成 token
+    public static function token()
+    {
+        return ssl_random(255);
+    }
+
 }

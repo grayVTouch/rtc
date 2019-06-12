@@ -17,7 +17,7 @@ class Hash
      *
      * @return string 加密后的字符串
      */
-    public static function make($str , $cost = 10){
+    public static function make(string $str , int $cost = 10){
         return password_hash($str , PASSWORD_BCRYPT , [
             'cost' => $cost
         ]);
@@ -30,7 +30,7 @@ class Hash
      * @param $compare 加密后的字符串
      * @return boolean
      */
-    public static function check($str , $compare){
-        return password_verify($str , $compare);
+    public static function check(string $str , string $hash){
+        return password_verify($str , $hash);
     }
 }

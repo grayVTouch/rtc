@@ -36,11 +36,12 @@ drop table if exists `xq_group`;
 create table if not exists `xq_group` (
   id int unsigned not null auto_increment ,
   identifier char(255) default '' comment 'xq_project.identifier' ,
-  user_id int unsigned default '' comment '群主：xq_user.id' ,
+  user_id int unsigned default 0 comment '群主：xq_user.id' ,
   name char(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
   is_temp enum('y' , 'n') default 'n' comment '是否是临时群: y-是 n-否' ,
   is_service enum('y' , 'n') default 'n' comment '是否是服务通道' ,
+  enable_auth enum('y' , 'n') default 'n' comment '开启进群认证：y-是 n-否' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群';
@@ -79,12 +80,14 @@ create table if not exists `xq_application` (
   id int unsigned not null auto_increment ,
   type char(255) default '' comment '类型：private-私聊；group-群聊' ,
   op_type char(255) default '' comment '操作类型：add-申请成为好友/申请进群；invite-邀请好友加群；...其他待扩充' ,
-  user_id int unsigned default 0 comment '我的id: xq_user.id' ,
-  friend_id int unsigned default 0 comment '好友id：xq_user.id' ,
+  user_id int unsigned default 0 comment '受理方: xq_user.id' ,
+  group_id int unsigned default 0 comment '如果 type = group，那么这个字段将会有用' ,
+  relation_user_id char(255) default '' comment '关联用户，xq_user.id 的集合，用,分割；如果是单人，那么就是 xq_user.id' ,
   status enum('approve' , 'refuse' , 'wait') default 'wait' comment '申请状态：approve-同意；refuse-拒绝；wait-等待处理' ,
+  remark varchar(500) default '' comment '备注信息' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
-) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '相关申请';
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '申请记录';
 
 drop table if exists `xq_message`;
 create table if not exists `xq_message` (
@@ -152,3 +155,4 @@ create table if not exists `xq_push_read_status` (
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送消息-读取状态';
+

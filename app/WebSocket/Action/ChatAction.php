@@ -8,28 +8,45 @@
 
 namespace App\WebSocket\Action;
 
-use App\Model\User;
+use App\Model\Friend;
+use App\Model\Message;
+use App\Model\MessageReadStatus;
 use App\Model\Group;
 use App\Model\GroupMember;
 use App\Model\GroupMessage;
 use App\Model\GroupMessageReadStatus;
 use App\Redis\MessageRedis;
 use App\Redis\UserRedis;
-use App\Util\Misc;
+use App\Util\Chat;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\Util\UserUtil;
-use function core\array_unit;
 use Core\Lib\Throwable;
+use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
-
 use App\WebSocket\Auth;
 
 class ChatAction extends Action
 {
-    public static function advoise(Auth $auth , array $param)
+    /**
+     * 消息发送-平台咨询-文本
+     *
+     * @param Auth $auth
+     * @param array $param
+     * @return array
+     */
+    public static function group_text_advoise(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'groupid' => 'required' ,
+            'message' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $user = $auth->user;
+        $param['user_id']   = $user->id;
+        $param['type']      = 'text';
         // 检查当前登录类型
         if ($user->role == 'user') {
             try {
@@ -67,7 +84,7 @@ class ChatAction extends Action
                 return self::success($msg);
             } catch(Exception $e) {
                 DB::rollBack();
-                $auth->push($user->id , 'error' , (new Throwable())->exceptionJsonHandlerInDev($e , true));
+                return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
             }
         }
         try {
@@ -91,7 +108,76 @@ class ChatAction extends Action
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
-            $auth->push($user->id , 'error' , (new Throwable())->exceptionJsonHandlerInDev($e , true));
+            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+        }
+    }
+
+    /**
+     * 消息发送：私聊-文本
+     *
+     * @throws \Exception
+     */
+    public static function private_text_send(Auth $auth , array $param = [])
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+            'message'   => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $param['user_id'] = $auth->user->id;
+        $param['type'] = 'text';
+        // 检查是否时好友
+        if (!Friend::isFriend($param['user_id'] , $param['friend_id'])) {
+            return self::error('你们不是好友，禁止操作' , 403);
+        }
+        $param['chat_id'] = Chat::chatId($param['user_id'] , $param['friend_id']);
+        try {
+            DB::beginTransaction();
+            $id = Message::u_insertGetId($param['user_id'] , $param['chat_id'] , $param['type'] , $param['message']);
+            $msg = Message::findById($id);
+            MessageReadStatus::initByMessageId($id , $param['user_id'] , $param['friend_id']);
+            DB::commit();
+            $auth->sendAll([$param['user_id'] , $param['friend_id']] , $param['type'] , $msg);
+            return self::success($msg);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+        }
+    }
+
+    /**
+     * 消息发送：群聊-文本
+     *
+     * @throws \Exception
+     */
+    public static function group_text_send(Auth $auth , array $param = [])
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'message'   => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $param['user_id'] = $auth->user->id;
+        $param['type'] = 'text';
+        if (!GroupMember::exist($param['user_id'] , $param['group_id'])) {
+            // 检查是否在群里面
+            return self::error('你不再这个群里面，禁止操作' , 403);
+        }
+        try {
+            DB::beginTransaction();
+            $id     = GroupMessage::u_insertGetId($param['user_id'] , $param['group_id'] , $param['type'] , $param['message']);
+            $msg    = GroupMessage::findById($id);
+            GroupMessageReadStatus::initByGroupMessageId($id , $param['group_id'] , $param['user_id']);
+            DB::commit();
+            $auth->sendAll([$param['user_id'] , $param['friend_id']] , $param['type'] , $msg);
+            return self::success($msg);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
         }
     }
 }

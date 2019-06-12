@@ -12,19 +12,52 @@ use App\WebSocket\Action\ChatAction;
 
 class Chat extends Auth
 {
-    // 平台咨询
-    public function advoise(array $param)
+    /**
+     * 平台咨询-文本
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function group_text_advoise(array $param)
     {
-        $param['user_id'] = $this->user->id;
-        $param['group_id'] = $param['group_id'] ?? '';
-        $param['type'] = $param['type'] ?? '';
-        $param['message'] = $param['message'] ?? '';
-        $param['extra'] = $param['extra'] ?? '';
-        $res = ChatAction::advoise($this , $param);
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $res = ChatAction::group_text_advoise($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
+    }
+
+    /**
+     * 群消息-文本
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function group_text_send(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $res = ChatAction::group_text_advoise($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 消息发送：私聊-文本
+    public function private_text_send(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $res = ChatAction::private_text_send($this , $param);
+    }
+
+    // 消息发送：私聊-图片
+    public function private_image_send()
+    {
 
     }
+
 }

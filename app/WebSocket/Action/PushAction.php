@@ -20,7 +20,7 @@ class PushAction extends Action
     // 未读消息数量
     public static function unread(Auth $auth , array $param)
     {
-        $res = PushReadStatus::unreadByUserId($auth->user->id , config('app.limit'));
+        $res = Push::unreadByUserId($auth->user->id , config('app.limit'));
         return self::success($res);
     }
 
@@ -40,7 +40,7 @@ class PushAction extends Action
         if (empty($res)) {
             $id = PushReadStatus::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
         } else {
-            PushReadStatus::updateById($res->push_id , array_unit($param , [
+            PushReadStatus::updateById($res->id , array_unit($param , [
                 'is_read'
             ]));
             $id = $res->id;

@@ -8,6 +8,7 @@
 
 namespace App\Redis;
 
+use Engine\Facade\Redis as RedisFacade;
 
 class MiscRedis extends Redis
 {
@@ -15,14 +16,14 @@ class MiscRedis extends Redis
     {
         $name = sprintf(self::$fdMappingIdentifier , $fd);
         if (empty($identifier)) {
-            return redis()->string($name);
+            return RedisFacade::string($name);
         }
-        return redis()->string($name , $identifier);
+        return RedisFacade::string($name , $identifier);
     }
 
     public static function delfdMappingIdentifier($fd)
     {
         $name = sprintf(self::$fdMappingIdentifier , $fd);
-        return redis()->del($name);
+        return RedisFacade::del($name);
     }
 }

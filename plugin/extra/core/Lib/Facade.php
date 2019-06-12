@@ -5,7 +5,7 @@
  * Date: 2019/6/1
  * Time: 10:35
  *
- *
+ * 前缀 u_
  */
 
 namespace Core\Lib;
@@ -17,20 +17,20 @@ class Facade implements FacadeInterface
     // 实例集合
     private static $instance = [];
 
-    // 设置
-    public static function set(string $key , $value)
+    // 注册
+    public static function register(string $key , $value)
     {
         self::$instance[$key] = $value;
     }
 
     // 检查 key 是否存在
-    public static function exist(string $key)
+    public static function u_exist(string $key)
     {
         return isset(self::$instance[$key]);
     }
 
     // 获取实例
-    public static function get(string $key)
+    public static function u_make(string $key)
     {
         return self::$instance[$key] ?? null;
     }
@@ -43,6 +43,11 @@ class Facade implements FacadeInterface
     // 调用实例方法
     public static function __callStatic($name , array $args)
     {
-        return call_user_func_array(self::$instance[self::getFacadeAccessor()] , $args);
+        $key = static::getFacadeAccessor();
+        if (!self::u_exist($key)) {
+            throw new Exception("注册表中未找到 {$key} 对应的实例");
+        }
+        $ins = self::u_make($key);
+        return call_user_func_array([$ins , $name] , $args);
     }
 }

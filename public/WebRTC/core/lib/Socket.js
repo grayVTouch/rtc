@@ -278,8 +278,8 @@
         } ,
 
         // 平台咨询
-        advoise: function(group_id , type , message , extra , callback){
-            return this.send('Chat/advoise' , {
+        group_text_advoise: function(group_id , type , message , extra , callback){
+            return this.send('Chat/group_text_advoise' , {
                 group_id: group_id ,
                 type: type ,
                 message: message ,

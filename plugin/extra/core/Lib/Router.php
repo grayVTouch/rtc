@@ -24,7 +24,7 @@ class Router {
             'MobileAdmin' => 'MobileAdmin'
         ] ,
         // 面向普通用户
-        'user' => [
+        'User' => [
             'Pc' => 'Home' ,
             'Mobile' => 'Mobile'
         ]
@@ -52,7 +52,7 @@ class Router {
     // 获取可选的模块范围
     public static function modules($user_type){
         if (!in_array($user_type , self::$_userTypeRange)) {
-             $user_type = 'user';
+             $user_type = 'User';
         }
 
         return self::$_moduleRange[$user_type];

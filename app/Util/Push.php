@@ -10,24 +10,12 @@ namespace App\Util;
 
 
 use App\Redis\UserRedis;
-use Core\Lib\Container;
+use Engine\Facade\WebSocket;
 
 class Push
 {
     public static function single(string $identifier , int $user_id , string $type = '' , $data = [] , array $exclude = [])
     {
-        // 其他格式要求
-        $default = [
-            'type' => 'type' ,
-            'data' => '' ,
-        ];
-        // 群聊格式要求
-        $default = [
-            // 群聊消息
-            'type'  => 'group_message' ,
-            // 参考 xq_group_message 表
-            'data'  => []
-        ];
         // 私聊格式要求
         $default = [
             // 私聊消息
@@ -37,11 +25,9 @@ class Push
         ];
         // 检查是否在线
         if (!UserRedis::isOnline($identifier , $user_id)) {
-            var_dump('用户不再线 identifier: ' . $identifier . ' ; user_id: ' . $user_id);
             return false;
         }
         $conns = UserRedis::fdByUserId($identifier , $user_id);
-        $websocket = Container::make('websocket');
         $res = [
             'success'   => 0 ,
             'fail'      => 0 ,
@@ -52,12 +38,12 @@ class Push
                 // 跳过排除的客户端连接
                 continue ;
             }
-            if (!$websocket->exists($v)) {
+            if (!WebSocket::exist($v)) {
                 // 连接已经无效，跳过
                 $res['fail']++;
                 continue ;
             }
-            $send = $websocket->push($v , json_encode([
+            $send = WebSocket::push($v , json_encode([
                 'type' => $type ,
                 'data' => $data ,
             ]));

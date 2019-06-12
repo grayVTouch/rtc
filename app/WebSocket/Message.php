@@ -78,7 +78,7 @@ class Message extends Auth
     }
 
 
-    // 更新未读消息数量
+    // 重置群未读消息数量
     public function resetGroupUnread(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';

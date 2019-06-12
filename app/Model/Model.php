@@ -71,4 +71,10 @@ class Model extends BaseModel implements ModelInterface
         return $res;
     }
 
+    // 检查是否全部存在
+    public static function allExist(array $id_list = [])
+    {
+        $count = static::whereIn('id' , $id_list)->count();
+        return count($id_list) == $count;
+    }
 }

@@ -84,7 +84,7 @@ class LoginAction extends Action
         // 登录成功
         $param['identifier'] = $user->identifier;
         $param['user_id'] = $user->id;
-        $param['token']  = token();
+        $param['token']  = Misc::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         UserToken::insert(array_unit($param , [
             'token' ,

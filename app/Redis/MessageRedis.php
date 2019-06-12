@@ -8,6 +8,7 @@
 
 namespace App\Redis;
 
+use Engine\Facade\Redis as RedisFacade;
 
 class MessageRedis extends Redis
 {
@@ -16,14 +17,14 @@ class MessageRedis extends Redis
     {
         $name = sprintf(self::$unhandleMsg , $identifier);
         $data = json_encode($data);
-        return redis()->hash($name , $user_id , $data , config('app.timeout'));
+        return RedisFacade::hash($name , $user_id , $data , config('app.timeout'));
     }
 
     // 消费未读消息数量
     public static function consumeUnhandleMsg($identifier , int $limit = 0)
     {
         $name = sprintf(self::$unhandleMsg , $identifier);
-        $res = redis()->hashAll($name);
+        $res = RedisFacade::hashAll($name);
         if (empty($res)) {
             return [];
         }
@@ -44,8 +45,8 @@ class MessageRedis extends Redis
             $remaining[$k] = $v;
         }
         // 删除掉旧 key
-        redis()->del($name);
-        redis()->hashAll($name , $remaining , config('app.timeout'));
+        RedisFacade::del($name);
+        RedisFacade::hashAll($name , $remaining , config('app.timeout'));
         return $result;
     }
 }

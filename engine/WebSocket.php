@@ -10,6 +10,7 @@ namespace Engine;
 
 
 use App\WebSocket\Util\MessageUtil;
+use Core\Lib\Facade;
 use Core\Lib\Throwable;
 use DateInterval;
 use DateTime;
@@ -53,19 +54,12 @@ class WebSocket
 
     public function __construct(Application $app)
     {
+        // 注册门面
         $this->app = $app;
-        $this->config       = config('app.websocket');
-        $this->initialize();
-    }
-
-    protected function initialize()
-    {
+        $this->config = config('app.websocket');
         $this->websocket = new BaseWebSocket($this->config['ip'] , $this->config['port']);
-//        var_dump(config('app.web_dir'));
         // 设置进程数量
         $this->websocket->set([
-//            'document_root' => config('app.web_dir') , // v4.4.0以下版本, 此处必须为绝对路径
-//            'enable_static_handler' => true,
             'task_worker_num'   => $this->config['task_worker'] ,
             'worker_num'        => $this->config['worker'] ,
             'enable_reuse_port' => $this->config['reuse_port'] ,
@@ -77,11 +71,13 @@ class WebSocket
         $this->websocket->on('task' , [$this , 'task']);
         $this->websocket->on('message' , [$this , 'message']);
         $this->websocket->on('request' , [$this , 'request']);
-        Container::bind('websocket' , $this->websocket);
+        // 开始运行程序
+        $this->websocket->start();
     }
 
     public function workerStart(BaseWebSocket $websocket , int $worker_id)
     {
+        Facade::register('websocket' , $this);
         $this->app->initDatabase();
         $this->app->initRedis();
         if ($worker_id == 0) {
@@ -90,6 +86,10 @@ class WebSocket
         }
     }
 
+    /**
+     * @param \Swoole\WebSocket\Server $websocket
+     * @param \Swoole\Http\Request $http
+     */
     public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
@@ -143,7 +143,7 @@ class WebSocket
             } catch(Exception $e) {
                 DB::rollBack();
                 $exception = (new Throwable())->exceptionJsonHandlerInDev($e , true);
-                echo json_encode($exception) . PHP_EOL;
+                echo "onclose has exception: " . json_encode($exception) . PHP_EOL;
             }
         }
         // 删除 Redis
@@ -232,7 +232,7 @@ class WebSocket
                 'type' => 'error' ,
                 'data' => (new Throwable)->exceptionJsonHandlerInDev($e , true)
             ]));
-            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
+//            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
         }
     }
 
@@ -458,6 +458,18 @@ class WebSocket
             'class'     => $res[0] ,
             'method'    => $res[1] ,
         ];
+    }
+
+    // 发送数据
+    public function push(int $fd , string $data = '')
+    {
+        $this->websocket->push($fd , $data);
+    }
+
+    // 是否存在
+    public function exist(int $fd)
+    {
+        return $this->websocket->exist($fd);
     }
 
     public function run()

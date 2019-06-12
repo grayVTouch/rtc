@@ -7,12 +7,13 @@
  */
 
 // web 服务器地址
-$host = "http://192.168.61.104:9301";
+$host = "http://192.168.61.102:9301";
 //$host = "http://192.168.1.67:9301";
-
+// 监听的 ip
+$ip = '0.0.0.0';
 return [
     'websocket' => [
-        'ip' => '0.0.0.0' ,
+        'ip' => $ip ,
         'port' => 9300 ,
         // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
         'reuse_port' => true ,
@@ -22,7 +23,7 @@ return [
         'worker' => 8 ,
     ] ,
     'http' => [
-        'ip' => '0.0.0.0' ,
+        'ip' => $ip ,
         'port' => 9301 ,
     ] ,
     // redis 默认过期时间（1个月）
@@ -35,12 +36,15 @@ return [
     'wait_duration' => 2 * 60 ,
     // 记录数限制
     'limit' => 20 ,
+    // 网站路径
     'web_dir' => realpath(__DIR__ . '/../public') ,
+    // 日志目录
     'log_dir' => realpath(__DIR__ . '/../log') ,
     // host
     'host' => $host ,
     // 默认头像
     'avatar'        => "{$host}/static/image/avatar.png" ,
+    // 默认群头像
     'group_image'   => "{$host}/static/image/group.png" ,
 
 ];

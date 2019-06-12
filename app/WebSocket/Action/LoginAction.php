@@ -12,6 +12,7 @@ use App\Model\Group;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Redis\UserRedis;
+use App\Util\Misc;
 use App\WebSocket\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Validator;
@@ -53,10 +54,11 @@ class LoginAction extends Action
         // 登录成功
         $param['identifier'] = $user->identifier;
         $param['user_id'] = $user->id;
-        $param['token']  = token();
+        $param['token']  = Misc::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
         // 绑定 user_id <=> fd
+        var_dump('当前登录的客户端链接 fd：' . $base->fd);
         UserRedis::fdByUserId($base->identifier , $user->id , $base->fd);
         UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
         if ($user->role == 'admin') {

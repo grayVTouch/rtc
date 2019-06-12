@@ -21,4 +21,12 @@ class Project extends Model
         self::single($res);
         return $res;
     }
+
+    public static function u_insertGetId(string $name , string $identifier)
+    {
+        return self::insertGetId([
+            'name' => $name ,
+            'identifier' => $identifier
+        ]);
+    }
 }

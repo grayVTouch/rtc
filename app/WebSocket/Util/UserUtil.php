@@ -38,29 +38,43 @@ class UserUtil extends Util
             // 已经存在客服
             return self::error("客服分配失败【{$user_id}】：已经分配客服，不允许重复分配" , 403);
         }
-        // 没有分配在线客服
+        // 分配在线客服
         $waiter_ids = User::getIdByIdentifierAndRole($user->identifier , 'admin');
-        if (!UserRedis::hasOnline($user->identifier , $waiter_ids)) {
+        $online = [];
+        foreach ($waiter_ids as $v)
+        {
+            if (UserRedis::isOnline($user->identifier , $v)) {
+                $online[] = [
+                    'user_id' => $v ,
+                    'loader'  => UserRedis::numberOfReceptionsForWaiter($user->identifier , $v) ,
+                ];
+            }
+        }
+        if (empty($online)) {
             // 没有在线客服
             return self::error("客服分配失败【{$user_id}】：没有客服在线" , 404);
         }
-        $waiter_id = UserRedis::allocateWaiter($user->identifier);
-        if ($waiter_id === false) {
-            // 客服繁忙
+        usort($online , function($a , $b){
+            if ($a['loader'] == $b['loader']) {
+                return 0;
+            }
+            return $a['loader'] > $b['loader'] ? 1 : -1;
+        });
+        $waiter = $online[0];
+        if ($waiter['loader'] > config('app.number_of_receptions')) {
+            // 超过客服当前接通的最大数量
             return self::error("客服分配失败【{$user_id}】：客服繁忙"  , 429);
         }
+        $waiter_id = $waiter['user_id'];
         try {
             DB::beginTransaction();
             $waiter = User::findById($waiter_id);
             // 存在客服
             UserRedis::groupBindWaiter($user->identifier , $group->id , $waiter->id);
             UserRedis::delNoWaiterForGroup($user->identifier , $group->id);
-            // 加入到聊天室
             if (empty(GroupMember::findByUserIdAndGroupId($waiter->id , $group->id))) {
-                GroupMember::insert([
-                    'user_id' => $waiter->id ,
-                    'group_id' => $group->id
-                ]);
+                // 不在群内，加入到聊天室
+                GroupMember::u_insertGetId($waiter->id , $group->id);
             }
             $user_ids = GroupMember::getUserIdByGroupId($group->id);
             $group_message_id = GroupMessage::u_insertGetId($waiter->id , $group->id , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
@@ -76,7 +90,7 @@ class UserUtil extends Util
         } catch(Exception $e) {
             DB::rollBack();
             Push::single($user->identifier , $user->id , 'error' , (new Throwable())->exceptionJsonHandlerInDev($e , true));
-            return self::error('发生异常' , 500);
+            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
         }
     }
 

@@ -9,6 +9,7 @@
 namespace App\Redis;
 
 use App\Model\User;
+use Engine\Facade\Redis as RedisFacade;
 
 class UserRedis extends Redis
 {
@@ -17,10 +18,10 @@ class UserRedis extends Redis
     {
         $name = sprintf(self::$fdKey , $identifier , $user_id);
         if (is_null($fd)) {
-            $res = redis()->string($name);
+            $res = RedisFacade::string($name);
             return json_decode($res , true);
         }
-        $value = redis()->string($name);
+        $value = RedisFacade::string($name);
         $value = json_decode($value , true);
         if (empty($value)) {
             $value = [$fd];
@@ -38,7 +39,7 @@ class UserRedis extends Redis
         }
         $value = json_encode($value);
         // 注意我们这个允许多端登录！！
-        return redis()->string($name , $value , config('app.timeout'));
+        return RedisFacade::string($name , $value , config('app.timeout'));
     }
 
     public static function delFdByUserId($identifier , $user_id , int $fd)
@@ -57,9 +58,9 @@ class UserRedis extends Redis
             $result[] = $v;
         }
         if (empty($result)) {
-            return redis()->del($name);
+            return RedisFacade::del($name);
         }
-        return redis()->string($name , json_encode($result) , config('app.timeout'));
+        return RedisFacade::string($name , json_encode($result) , config('app.timeout'));
     }
 
     // 检查用户是否在线
@@ -95,9 +96,9 @@ class UserRedis extends Redis
     {
         $name = sprintf(self::$numberOfReceptionsForWaiter , $identifier , $user_id);
         if (!empty($count)) {
-            return redis()->string($name , $count);
+            return RedisFacade::string($name , $count);
         }
-        $count = redis()->string($name);
+        $count = RedisFacade::string($name);
         if ($count == false) {
             return 0;
         }
@@ -107,7 +108,7 @@ class UserRedis extends Redis
     public static function delNumberOfReceptionsForWaiter($identifier , $user_id)
     {
         $name = sprintf(self::$numberOfReceptionsForWaiter , $identifier , $user_id);
-        return redis()->del($name);
+        return RedisFacade::del($name);
     }
 
     // 自动分配客服
@@ -148,44 +149,44 @@ class UserRedis extends Redis
     {
         $name = sprintf(self::$groupActiveWaiter , $identifier , $group_id);
         if (empty($waiter)) {
-            return (int) redis()->string($name);
+            return (int) RedisFacade::string($name);
         }
-        return redis()->string($name , $waiter);
+        return RedisFacade::string($name , $waiter);
     }
 
     public static function delGroupBindWaiter(string $identifier , int $group_id)
     {
         $name = sprintf(self::$groupActiveWaiter , $identifier , $group_id);
-        return redis()->del($name);
+        return RedisFacade::del($name);
     }
 
     public static function fdMappingUserId($identifier , $fd , int $user_id = 0)
     {
         $name = sprintf(self::$fdMappingUserIdKey , $identifier , $fd);
         if (empty($user_id)) {
-            return redis()->string($name);
+            return RedisFacade::string($name);
         }
-        return redis()->string($name , $user_id , config('app.timeout'));
+        return RedisFacade::string($name , $user_id , config('app.timeout'));
     }
 
     public static function delFdMappingUserId($identifier , $fd)
     {
         $name = sprintf(self::$fdMappingUserIdKey , $identifier , $fd);
-        return redis()->del($name);
+        return RedisFacade::del($name);
     }
 
     public static function noWaiterForGroup(string $identifier , int $group_id , bool $get = true)
     {
         $name = sprintf(self::$noWaiterForGroup , $identifier , $group_id);
         if ($get) {
-            return redis()->string($name);
+            return RedisFacade::string($name);
         }
-        return redis()->string($name , '消息并不重要！重要的是这个 key 的存在！表示某个群组已经通知过了！' , config('app.timeout'));
+        return RedisFacade::string($name , '消息并不重要！重要的是这个 key 的存在！表示某个群组已经通知过了！' , config('app.timeout'));
     }
 
     public static function delNoWaiterForGroup(string $identifier , int $group_id)
     {
         $name = sprintf(self::$noWaiterForGroup , $identifier , $group_id);
-        return redis()->del($name);
+        return RedisFacade::del($name);
     }
 }

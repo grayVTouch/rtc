@@ -115,6 +115,12 @@ function has_cn($str = '')
     return (bool) preg_match($reg , $str);
 }
 
+function has_en($str = '')
+{
+    $reg = '/[A-z]+/';
+    return (bool) preg_match($reg , $str);
+}
+
 // 是否全部中文
 function all_cn($str = '')
 {

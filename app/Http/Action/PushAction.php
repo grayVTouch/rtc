@@ -43,7 +43,6 @@ class PushAction extends Action
             $push = PushModel::findById($id);
             Push::single($auth->identifier , $param['user_id'] , $param['type'] , $push);
             // 让他更新未读消息数量
-            PushUtil::refreshUnreadCountForPush($auth->identifier , $param['user_id']);
             DB::commit();
             return self::success($push);
         } catch(Exception $e) {
@@ -84,7 +83,6 @@ class PushAction extends Action
             foreach ($user_ids as $v)
             {
                 Push::single($auth->identifier , $v , $param['type'] , $push);
-                PushUtil::refreshUnreadCountForPush($auth->identifier , $v);
             }
             DB::commit();
             return self::success($push);
@@ -110,7 +108,7 @@ class PushAction extends Action
         if (empty($res)) {
             $id = PushReadStatus::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
         } else {
-            PushReadStatus::updateById($res->push_id , array_unit($param , [
+            PushReadStatus::updateById($res->id , array_unit($param , [
                 'is_read'
             ]));
             $id = $res->id;

@@ -81,6 +81,7 @@
                     duration: 200 ,
                     isLogin: false ,
                     unread: 0 ,
+                    isOnceInit: true ,
                 } ,
 
 
@@ -441,7 +442,7 @@
                         };
                         var tempId = this.unique();
                         // 发送数据
-                        this.conn.advoise(data.group_id , data.type , data.message , data.extra , this.response.bind(this , function(message){
+                        this.conn.group_text_advoise(data.group_id , data.type , data.message , data.extra , this.response.bind(this , function(message){
                             self.handleForMessage(message , false , '');
                             var history = self.getHistory(session_id);
                             var index   = self.messageIndexByTempId(session_id, tempId);

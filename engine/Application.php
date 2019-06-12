@@ -10,13 +10,13 @@ namespace Engine;
 
 use Exception;
 
-use ArrayAccess;
 use Core\Lib\Redis;
-use Core\Lib\Container;
+use Engine\Facade\Redis as RedisFacade;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Core\Lib\Facade as FacadeLib;
 
-class Application implements ArrayAccess
+class Application
 {
     /**
      * @see \Engine\WebSocket
@@ -33,11 +33,15 @@ class Application implements ArrayAccess
      */
     protected $http;
 
+
     public function __construct()
     {
-        Container::bind('app' , $this);
+
     }
 
+    /**
+     * 初始化 websocket
+     */
     private function initWebSocket()
     {
         $this->websocket = new WebSocket($this);
@@ -54,7 +58,10 @@ class Application implements ArrayAccess
         $database->addConnection($config);
         $database->bootEloquent();
         $this->db = $database;
-        // 设置允许静态使用
+        // 使其支持门面的调用方式
+        // 必须使用 Laravel 的门面
+        // 因为 DB::class 门面类继承的使
+        // Laravel 的 Facade
         Facade::setFacadeApplication([
             'db' =>$database->getDatabaseManager() ,
         ]);
@@ -65,53 +72,51 @@ class Application implements ArrayAccess
     {
         $config = config('database.redis');
         $redis = new Redis($config);
-        Container::bind('redis' , $redis);
+        // todo 不采用容器的方式
+//        Container::bind('redis' , $redis);
+        // todo 采用门面的方式
+        FacadeLib::register('redis' , $redis);
     }
 
-    public function emptyRedis()
+    public function clearRedis()
     {
         // 清空 redis
-        redis()->flushAll();
-
+        RedisFacade::flushAll();
     }
 
-    public function offsetExists($offset)
-    {
-        return isset($this->$offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->$offset;
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->$offset = $value;
-    }
-
-    public function offsetUnset($offset)
-    {
-        unset($this->$offset);
-    }
-
+    /**
+     * 初始化 http 服务器
+     *
+     * @throws Exception
+     */
     public function initHttp()
     {
         $pid = pcntl_fork();
+        if ($pid < 0) {
+            throw new Exception("创建子进程失败");
+        }
         if ($pid > 0) {
             return ;
         }
         $this->http = new Http();
+        // 子进程退出
         exit;
     }
 
+    /**
+     * 开始运行程序
+     *
+     * @throws Exception
+     */
     public function run()
     {
         $this->initDatabase();
         $this->initRedis();
-        $this->emptyRedis();
+        $this->clearRedis();
         $this->initHttp();
+        // 这个务必在最后执行！！
+        // 因为 WebSocket 实例一旦创建成功
+        // 那么实际上
         $this->initWebSocket();
-        $this->websocket->run();
     }
 }
