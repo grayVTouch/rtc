@@ -5,6 +5,7 @@
     <title>即时通讯-前端插件</title>
     <link rel="stylesheet" href="./extra/plugin/Run/base.css">
     <link rel="stylesheet" href="./extra/plugin/Run/color.css">
+    <link rel="stylesheet" href="./extra/plugin/Run/button.css">
     <link rel="stylesheet" href="./core/css/Communication.css">
 </head>
 <body>
@@ -15,14 +16,50 @@
         width: 100%;
         height: 100%;
     }
+
+    table {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    input {
+        min-width: 300px;
+    }
 </style>
 
 <div class="demo">
-    <input type="text" placeholder="identifier" id="identifier" value="0hGFPPyf7Bnu3gnF"><br>
-    <input type="text" placeholder="unique_code" id="unique_code" value="UIb6809E3505D77b06Rm3dl79yVyCaPYH3W895oU26v2qqC07I2pi36503RfE76Ttgr0ZTNXAv19l1I4r1L3PR386Ooi5429Aq4At6d1ICgV8yjsH31v82f6N53Ok65A35nvdAiO29Ru5c30443yhfrZ0iaW69IUuk088i0r04x8ufh7a572T3661sL5P0uv24wlF56Ed778SH9217qJ42G0Q98835Z6VJaAGx7Z28I83168qi8y97T45yC19cv"><br>
-    <input type="text" placeholder="platform" value="pc" id="platform"><br>
-    <input type="text" placeholder="websocket" id="websocket" value="ws://47.252.80.36:9300"><br>
-    <button type="button" id="initialize">开始聊天</button><br>
+    <table>
+        <tbody>
+        <tr>
+            <td>identifier</td>
+            <td><input type="text" placeholder="identifier" id="identifier" value="0hGFPPyf7Bnu3gnF"></td>
+        </tr>
+        <tr>
+            <td>unique_code</td>
+            <td><input type="text" placeholder="unique_code" id="unique_code" value="OJ70uZ3977ow71708lU26yc8GKu24w9390Hhy1ux9SY16Ptg4Vl469KJ26xjXz3bS82DFa21SaIy5mD8GE1736BGy78py0YZ7gw7ARsre1bc45I3JT6i8aK739ny394F7W8sW83bH628U0j65F52K51ku1t8Vl2P0slblm1g0f5u5R9We4r3607lsW649Aa0y090W92m4Twh355E4X1avvJd0P6T9741Ih470R08j7lUZzT3cXG4p9Kci9Ah6vX"></td>
+        </tr>
+        <tr>
+            <td>platform</td>
+            <td><input type="text" placeholder="platform" value="pc" id="platform"></td>
+        </tr>
+        <tr>
+            <td>websocket</td>
+            <td><input type="text" placeholder="websocket" id="websocket" value="ws://47.252.80.36:9300"></td>
+        </tr>
+        <tr>
+            <td>websocketUrl</td>
+            <td><input type="text" placeholder="websocket url" id="websocket-url" value="http://47.252.80.36:9301"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="button" id="initialize" class="run-button run-button-blue">开始聊天</button>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    <pre>点击开始聊天后将以 后台用户 yueshu 登录！！然后请新开一个页面打开此文件，并把 unique_code 清空，然后点击登录，将以游客的身份登录。之后，就可以开始对话了。</pre>
+    <pre>由于连接国外服务器，所以速度可能有点慢，请耐心等待</pre>
 </div>
 
 <div class="real-time-communication">
@@ -194,6 +231,7 @@
     var unique_code = document.querySelector('#unique_code');
     var platform = document.querySelector('#platform');
     var websocket = document.querySelector('#websocket');
+    var websocketUrl = document.querySelector('#websocket-url');
     var initialize = document.querySelector('#initialize');
 
     initialize.addEventListener('click' , function(){
@@ -208,8 +246,7 @@
             websocket: websocket.value ,
 
             // web 服务器域名
-            host: 'http://47.252.80.36:9301' ,
-            // host: 'http://172.22.35.179:9301' ,
+            host: websocketUrl.value ,
         });
     } , false);
 
