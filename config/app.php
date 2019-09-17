@@ -6,26 +6,18 @@
  * Time: 16:46
  */
 
-// web 服务器地址
-//$host = "http://192.168.61.102:9301";
-//$host = "http://192.168.1.67:9301";
-$host = "http://47.252.80.36:9301";
-// 监听的 ip
-$ip = '0.0.0.0';
+$host = 'http://192.168.145.129';
+
 return [
     'websocket' => [
-        'ip' => $ip ,
-        'port' => 9300 ,
+        'ip' => '0.0.0.0' ,
+        'port' => 10000 ,
         // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
         'reuse_port' => true ,
         // 任务进程的数量
-        'task_worker' => 8 ,
+        'task_worker' => 0 ,
         // worker 进程的数量
-        'worker' => 8 ,
-    ] ,
-    'http' => [
-        'ip' => $ip ,
-        'port' => 9301 ,
+        'worker' => 1 ,
     ] ,
     // redis 默认过期时间（1个月）
     'timeout' => 1 * 30 * 24 * 3600 ,
@@ -34,7 +26,7 @@ return [
     // 单个客服最多接听的访客数量
     'number_of_receptions' => 10 ,
     // 客服最长等待时间 2min
-    'wait_duration' => 2 * 60 ,
+    'wait_duration' => 5 * 60 ,
     // 记录数限制
     'limit' => 20 ,
     // 网站路径
