@@ -58,8 +58,8 @@ class LoginAction extends Action
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
         // 绑定 user_id <=> fd
-        var_dump('当前登录的客户端链接 fd：' . $base->fd);
-        UserRedis::fdByUserId($base->identifier , $user->id , $base->fd);
+//        var_dump('当前登录的客户端链接 fd：' . $base->fd);
+        UserRedis::fdByUserId($base->identifier , $user->id , $base-fd);
         UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
         if ($user->role == 'admin') {
             // 工作人员
