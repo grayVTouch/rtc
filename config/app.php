@@ -9,16 +9,20 @@
 $host = 'http://192.168.145.129';
 
 return [
-    'websocket' => [
-        'ip' => '0.0.0.0' ,
-        'port' => 10000 ,
-        // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
-        'reuse_port' => true ,
-        // 任务进程的数量
-        'task_worker' => 0 ,
-        // worker 进程的数量
-        'worker' => 1 ,
-    ] ,
+    // 监听的 ip
+    'ip' => '0.0.0.0' ,
+    // 监听的端口
+    'port' => 10000 ,
+    // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
+    'reuse_port' => true ,
+    // 任务进程的数量
+    'task_worker' => 0 ,
+    // worker 进程的数量
+    'worker' => 1 ,
+    // 静态文件根目录
+    'document_root' => '/myself/command/rtc/public' ,
+    // 调试模式
+    'debug' => true ,
     // redis 默认过期时间（1个月）
     'timeout' => 1 * 30 * 24 * 3600 ,
     // 是否启用访客模式

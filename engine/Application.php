@@ -8,6 +8,7 @@
 
 namespace Engine;
 
+use Core\Lib\Log;
 use Exception;
 
 use Core\Lib\Redis;
@@ -104,6 +105,19 @@ class Application
     }
 
     /**
+     * *****************
+     * 初始化日志操作
+     * *****************
+     */
+    public function initLog()
+    {
+        $log = new Log();
+        $log->dir = __DIR__ . '/../';
+        $log->prefix = 'runtime';
+        FacadeLib::register('log' , $log);
+    }
+
+    /**
      * 开始运行程序
      *
      * @throws Exception
@@ -113,7 +127,8 @@ class Application
         $this->initDatabase();
         $this->initRedis();
         $this->clearRedis();
-        $this->initHttp();
+        $this->initLog();
+//        $this->initHttp();
         // 这个务必在最后执行！！
         // 因为 WebSocket 实例一旦创建成功
         // 那么实际上

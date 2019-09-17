@@ -19,7 +19,7 @@ return [
         'no_waiter'             => '没有客服' ,
         'refresh_token'         => '请更新用户的登录信息' ,
         'refresh_session'       => '指令：请刷新会话列表' ,
-        'refresh_group_for_advoise' => '通知客户端，平台咨询时请更新携带的群信息' ,
+        'refresh_group_for_advoise' => '指令：通知客户端，平台咨询时请更新携带的群信息' ,
         'error'                 => 'Swoole 服务器发生异常' ,
         'waiter_leave'          => '客服已经离开' ,
         'unread_count'          => '未读消息数量' ,
@@ -28,7 +28,13 @@ return [
         'refresh_unread_count'  => '刷新未读消息数量' ,
     ] ,
 
-    // 群推类型
+    /**
+     * 群推类型
+     * admin        后台用户
+     * user         前台用户
+     * all          所有用户
+     * designation  指定用户
+     */
     'push_role' => ['admin' , 'user', 'all' , 'designation'] ,
 
     // 消息
@@ -36,13 +42,19 @@ return [
         'waiter_join' => '系统通知：您好，客服 【%s】 很高兴为您服务' ,
         'waiter_leave' => '系统通知：由于您长时间未回复，客服 【%s】已经离开' ,
         'waiter_close' => '系统通知：客服 【%s】已经离线' ,
-        'no_waiter' => '' ,
+        'no_waiter' => '系统通知：暂无客服在线' ,
     ] ,
 
     // 消息类型
     'message_type' => [
         'text'  => '文本' ,
         'image' => '图片' ,
+        'voice' => '语音' ,
+        'file' => '文件' ,
+        'video_call' => '视频通话' ,
+        'voice_call' => '语音通话' ,
+        'random_red_envelope' => '随机红包' ,
+        'password_red_envelope' => '口令红包' ,
     ] ,
 
     /**

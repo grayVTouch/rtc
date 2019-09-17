@@ -7,6 +7,7 @@
  */
 
 use function core\format_path;
+use Engine\Facade\Log;
 use function extra\config as config_function;
 
 /**
@@ -104,4 +105,10 @@ function res_url(string $path = '')
     $url = config('app.host');
     $url = format_path($url);
     return sprintf('%s%s' , $url , $path);
+}
+
+// 记录错误日志
+function log($msg , $flag = 'runtime')
+{
+    return Log::write(sprintf('[%s] %10s %s' , date('Y-m-d H:i:s') , $flag , $msg));
 }

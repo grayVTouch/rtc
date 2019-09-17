@@ -23,11 +23,8 @@ use App\Model\User;
 use App\Redis\MiscRedis;
 use App\Redis\UserRedis;
 use App\Util\Push;
+use Engine\Facade\Log;
 use Illuminate\Support\Facades\DB;
-
-
-use Core\Lib\Container;
-
 use Exception;
 
 use Swoole\Server;
@@ -35,7 +32,6 @@ use Swoole\Timer;
 use Swoole\WebSocket\Server as BaseWebSocket;
 use Swoole\Http\Request as Http;
 use Swoole\Http\Response;
-
 
 
 class WebSocket
@@ -52,20 +48,63 @@ class WebSocket
 
     protected $identifier = null;
 
+    protected $ip = '0.0.0.0';
+
+    protected $port = 10000;
+
+    protected $taskWorkerNum = 0;
+
+    protected $workerNum = 1;
+
+    protected $documentRoot = '';
+
+    protected $enableReusePort = true;
+
+    /**
+     * 解析 WebSocket 配置参数
+     */
+    protected function parseConfig()
+    {
+        $this->ip               = config('app.ip');
+        $this->port             = config('app.port');
+        $this->taskWorkerNum    = config('app.task_worker');
+        $this->workerNum        = config('app.worker');
+        $this->documentRoot     = config('app.document_root');
+        $this->enableReusePort  = config('app.reuse_port');
+    }
+
+    /**
+     * @return array
+     */
+    protected function getConfig()
+    {
+        $option = [];
+        if (!empty($this->taskWorkerNum)) {
+            $option['task_worker_num'] = $this->taskWorkerNum;
+        }
+        if (!empty($this->workerNum)) {
+            $option['worker_num'] = $this->workerNum;
+        }
+        if (!empty($this->enableReusePort)) {
+            $option['enable_reuse_port'] = $this->enableReusePort;
+        }
+        if (!empty($this->documentRoot)) {
+            $option['document_root'] = $this->documentRoot;
+            $option['enable_static_handler'] = true;
+        }
+        return $option;
+    }
+
     public function __construct(Application $app)
     {
-        // 注册门面
+        // 解析配置
+        $this->parseConfig();
         $this->app = $app;
-        $this->config = config('app.websocket');
-        $this->websocket = new BaseWebSocket($this->config['ip'] , $this->config['port']);
-        // 设置进程数量
-        $this->websocket->set([
-            'task_worker_num'   => $this->config['task_worker'] ,
-            'worker_num'        => $this->config['worker'] ,
-            'enable_reuse_port' => $this->config['reuse_port'] ,
-        ]);
+        $this->websocket = new BaseWebSocket($this->ip , $this->port);
+        $this->websocket->set($this->getConfig());
+        // 在 manager 进程中调用
         $this->websocket->on('WorkerStart' , [$this , 'workerStart']);
-        // 子进程内部调用
+        // 在主进程中调用（Reactor 线程组实现高性能 tcp 监听）
         $this->websocket->on('open' , [$this , 'open']);
         $this->websocket->on('close' , [$this , 'close']);
         $this->websocket->on('task' , [$this , 'task']);
@@ -80,10 +119,11 @@ class WebSocket
         Facade::register('websocket' , $this);
         $this->app->initDatabase();
         $this->app->initRedis();
-        if ($worker_id == 0) {
-            // 仅在第一个 worker 进程开启定时器，避免重复
-            $this->initTimer();
+        if ($worker_id != 0) {
+            return ;
         }
+        // 定时器仅需要开启一次！
+        $this->initTimer();
     }
 
     /**
@@ -142,8 +182,13 @@ class WebSocket
                 }
             } catch(Exception $e) {
                 DB::rollBack();
-                $exception = (new Throwable())->exceptionJsonHandlerInDev($e , true);
-                echo "onclose has exception: " . json_encode($exception) . PHP_EOL;
+                $info = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $info = json_encode($info);
+                if (!config('app.debug')) {
+                    echo "onclose has exception: " . $info . PHP_EOL;
+                    exit;
+                }
+                log($info , 'exception');
             }
         }
         // 删除 Redis
@@ -228,11 +273,16 @@ class WebSocket
             // 所以 手动销毁
             unset($instance);
         } catch(Exception $e) {
-            $server->push($frame->fd , json_encode([
-                'type' => 'error' ,
-                'data' => (new Throwable)->exceptionJsonHandlerInDev($e , true)
-            ]));
-//            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
+            $info = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+            if (config('app.debug')) {
+                $server->push($frame->fd , json_encode([
+                    'type' => 'error' ,
+                    'data' => $info
+                ]));
+                return ;
+            }
+            log(json_encode($info) , 'exception');
+            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
         }
     }
 
@@ -277,7 +327,12 @@ class WebSocket
             // 所以 手动销毁
             unset($instance);
         } catch(Exception $e) {
-            $this->httpResponse($response , (new Throwable)->exceptionJsonHandlerInDev($e , true) , 500);
+            $info = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+            if (config('app.debug')) {
+                $this->httpResponse($response , (new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+                return ;
+            }
+            log(json_encode($info) , 'exception');
         }
     }
 
@@ -344,6 +399,13 @@ class WebSocket
                 }
             } catch(Exception $e) {
                 DB::rollBack();
+                $info = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $info = json_encode($info);
+                if (config('app.debug')) {
+                    echo '定时发生执行发生错误：' . $info;
+                    exit;
+                }
+                log($info , 'exception');
             }
         });
 
