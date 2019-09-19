@@ -8,13 +8,13 @@
 
 namespace App\Http\Util;
 
-use App\Util\Push;
+use App\Util\PushUtil as BasePushUtil;
 
 class PushUtil extends Util
 {
     // 更新未读消息
     public static function refreshUnreadCountForPush(string $identifier , int $user_id)
     {
-        return Push::single($identifier , $user_id , 'refresh_unread_count_for_push');
+        return BasePushUtil::single($identifier , $user_id , 'refresh_unread_count_for_push');
     }
 }

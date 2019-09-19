@@ -9,8 +9,9 @@
 namespace App\Model;
 
 
-class Friend extends Model
+class FriendModel extends Model
 {
+    protected $table = 'friend';
     /**
      * 检查是否时好友
      *
@@ -19,7 +20,7 @@ class Friend extends Model
      * @return mixed
      * @throws \Exception
      */
-    public static function findByUserIdAndFriendId(int $user_id , int $friend_id): ?Friend
+    public static function findByUserIdAndFriendId(int $user_id , int $friend_id): ?FriendModel
     {
         $res = self::where([
             ['user_id' , '=' , $user_id] ,

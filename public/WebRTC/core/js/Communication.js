@@ -320,7 +320,7 @@
                         {
                             cur     = this.session[i];
                             group   = cur.group;
-                            if (group.is_service == 'y') {
+                            if (group.is_service == 1) {
                                 return cur.session_id;
                             }
                         }
@@ -391,7 +391,7 @@
                     send: function(type){
                         if (this.current.type == 'group') {
                             // 群消息
-                            if (this.current.group.is_service == 'y') {
+                            if (this.current.group.is_service == 1) {
                                 // 咨询通道
                                 switch (type)
                                 {

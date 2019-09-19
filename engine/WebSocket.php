@@ -19,10 +19,10 @@ use App\Model\Group;
 use App\Model\GroupMember;
 use App\Model\GroupMessage;
 use App\Model\GroupMessageReadStatus;
-use App\Model\User;
+use App\Model\UserModel;
 use App\Redis\MiscRedis;
 use App\Redis\UserRedis;
-use App\Util\Push;
+use App\Util\PushUtil;
 use Engine\Facade\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -144,7 +144,7 @@ class WebSocket
         }
         $user_id = UserRedis::fdMappingUserId($identifier , $fd);
         // 清除 Redis（删除的太快了）
-        $user = User::findById($user_id);
+        $user = UserModel::findById($user_id);
         if (!empty($user) && $user->role == 'admin') {
             try {
                 DB::beginTransaction();
@@ -178,7 +178,7 @@ class WebSocket
                 DB::commit();
                 foreach ($push as $v)
                 {
-                    Push::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
+                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
                 }
             } catch(Exception $e) {
                 DB::rollBack();
@@ -188,7 +188,7 @@ class WebSocket
                     echo "onclose has exception: " . $info . PHP_EOL;
                     exit;
                 }
-                log($info , 'exception');
+                Log::log($info , 'exception');
             }
         }
         // 删除 Redis
@@ -251,23 +251,24 @@ class WebSocket
             // 实例化对象
             $instance = new $class($this->websocket , $frame->fd , $data['identifier'] , $data['platform'] , $data['token'] , $data['request']);
             // 执行前置操作
-            if (!method_exists($instance , 'before')) {
-                throw new Exception("Call to undefined method {$class}::before");
-            }
-            $next = call_user_func([$instance , 'before']);
-            if (!$next) {
-                return ;
+            if (method_exists($instance , 'before')) {
+//                throw new Exception("Call to undefined method {$class}::before");
+                $next = call_user_func([$instance , 'before']);
+                if (!$next) {
+                    return ;
+                }
             }
             // 执行目标操作
             if (!method_exists($instance , $router['method'])) {
                 throw new Exception("Call to undefined method {$class}::{$router['method']}");
             }
+
             call_user_func([$instance , $router['method']] , $data['data']);
             // 执行后置操作
-            if (!method_exists($instance , 'after')) {
-                throw new Exception("Call to undefined method {$class}::after");
+            if (method_exists($instance , 'after')) {
+//                throw new Exception("Call to undefined method {$class}::after");
+                call_user_func([$instance , 'after']);
             }
-            call_user_func([$instance , 'after']);
             // 由于这个是长连接
             // 我怕他不会自动回收
             // 所以 手动销毁
@@ -281,7 +282,7 @@ class WebSocket
                 ]));
                 return ;
             }
-            log(json_encode($info) , 'exception');
+            Log::log(json_encode($info) , 'exception');
             $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
         }
     }
@@ -290,6 +291,11 @@ class WebSocket
     public function request(Http $request , Response $response)
     {
         try {
+            // 支持跨域请求
+            if ($request->server['request_method'] == 'OPTIONS') {
+                $this->httpResponse($response , '' , 200);
+                return ;
+            }
             $router = $this->parseRouter($request->server['request_uri']);
             if (empty($router)) {
                 $this->httpResponse($response , '请求的地址不正确' , 400);
@@ -304,13 +310,14 @@ class WebSocket
             }
             // 实例化对象
             $instance = new $class($this->websocket , $request , $response , $param['identifier']);
-            if (!method_exists($instance , 'before')) {
-                throw new Exception("Call to undefined method {$class}::before");
-            }
-            // 执行前置操作
-            $next = call_user_func([$instance , 'before']);
-            if (!$next) {
-                return ;
+            if (method_exists($instance , 'before')) {
+//                throw new Exception("Call to undefined method {$class}::before");
+                // 执行前置操作
+                $next = call_user_func([$instance , 'before']);
+                if (!$next) {
+                    $this->httpResponse($response , '中间 before ');
+                    return ;
+                }
             }
             // 执行目标操作
             if (!method_exists($instance , $router['method'])) {
@@ -318,10 +325,10 @@ class WebSocket
             }
             call_user_func([$instance , $router['method']]);
             // 执行后置操作
-            if (!method_exists($instance , 'after')) {
-                throw new Exception("Call to undefined method {$class}::after");
+            if (method_exists($instance , 'after')) {
+//                throw new Exception("Call to undefined method {$class}::after");
+                call_user_func([$instance , 'after']);
             }
-            call_user_func([$instance , 'after']);
             // 由于这个是长连接
             // 我怕他不会自动回收
             // 所以 手动销毁
@@ -332,13 +339,18 @@ class WebSocket
                 $this->httpResponse($response , (new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
                 return ;
             }
-            log(json_encode($info) , 'exception');
+            Log::log(json_encode($info) , 'exception');
         }
     }
 
     public function httpResponse(Response $response , $data = '' , $code = 200)
     {
         $response->header('Content-Type' , 'application/json');
+        // 允许跨域
+        $response->header('Access-Control-Allow-Origin' , '*');
+        $response->header('Access-Control-Allow-Methods' , 'GET,POST,PUT,PATCH,DELETE');
+        $response->header('Access-Control-Allow-Credentials' , 'false');
+        $response->header('Access-Control-Allow-Headers' , 'Authorization,Content-Type,X-Request-With,Ajax-Request');
         $response->status(200);
         $response->end(json_encode([
             'code' => $code ,
@@ -353,6 +365,7 @@ class WebSocket
 
     protected function initTimer()
     {
+        // 单位：ms
         Timer::tick(30 * 1000 , function(){
             // 清理超过一定时间没有回复的咨询通道
             try {
@@ -367,7 +380,7 @@ class WebSocket
                     if (empty($waiter_id)) {
                         continue ;
                     }
-                    $waiter = User::findById($waiter_id);
+                    $waiter = UserModel::findById($waiter_id);
                     // 检查最近一条消息是否发送超时
                     $last_message = GroupMessage::recentMessage($v->id , 'user');
 //                print_r($last_message);
@@ -395,7 +408,7 @@ class WebSocket
                 DB::commit();
                 foreach ($push as $v)
                 {
-                    Push::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
+                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
                 }
             } catch(Exception $e) {
                 DB::rollBack();
@@ -405,10 +418,11 @@ class WebSocket
                     echo '定时发生执行发生错误：' . $info;
                     exit;
                 }
-                log($info , 'exception');
+                Log::log($info , 'exception');
             }
         });
 
+        // 60s 一次
         Timer::tick(60 * 1000 , function(){
 //        Timer::tick(2 * 1000 , function(){
             $time = date('H:i:s' , time());
@@ -425,7 +439,7 @@ class WebSocket
                     $date_time->setTimestamp(strtotime(date('Y-m-d' , time())));
                     $date_time->sub(new DateInterval('P2D'));
                     $timestamp = $date_time->format('Y-m-d H:i:s');
-                    $temp_user = User::getTempByTimestamp($timestamp);
+                    $temp_user = UserModel::getTempByTimestamp($timestamp);
                     $clear_group = function($group_id){
                         // 清理临时群
                         Group::destroy($group_id);
@@ -444,7 +458,7 @@ class WebSocket
                          */
                         foreach ($temp_user as $v)
                         {
-                            User::destroy($v->id);
+                            UserModel::destroy($v->id);
                             GroupMember::delByUserId($v->id);
                             $group_ids = GroupMember::getGroupIdByUserId($v->id);
                             foreach ($group_ids as $v1)
@@ -474,12 +488,13 @@ class WebSocket
             }
         });
 
+        // todo ping 检测客户端是否仍然在线
     }
 
     // 清理 Redis
     public function clearRedis($user_id , $fd = null)
     {
-        $user = User::findById($user_id);
+        $user = UserModel::findById($user_id);
         if (empty($user)) {
             return ;
         }

@@ -8,7 +8,7 @@
 
 namespace App\WebSocket\Action;
 
-use App\Model\Friend;
+use App\Model\FriendModel;
 use App\Model\Message;
 use App\Model\MessageReadStatus;
 use App\Model\Group;
@@ -17,7 +17,7 @@ use App\Model\GroupMessage;
 use App\Model\GroupMessageReadStatus;
 use App\Redis\MessageRedis;
 use App\Redis\UserRedis;
-use App\Util\Chat;
+use App\Util\ChatUtil;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\Util\UserUtil;
 use Core\Lib\Throwable;
@@ -38,7 +38,7 @@ class ChatAction extends Action
     public static function group_text_advoise(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
-            'groupid' => 'required' ,
+            'group_id' => 'required' ,
             'message' => 'required' ,
         ]);
         if ($validator->fails()) {
@@ -117,7 +117,7 @@ class ChatAction extends Action
      *
      * @throws \Exception
      */
-    public static function private_text_send(Auth $auth , array $param = [])
+    public static function send(Auth $auth , array $param = [])
     {
         $validator = Validator::make($param , [
             'friend_id' => 'required' ,
@@ -129,10 +129,10 @@ class ChatAction extends Action
         $param['user_id'] = $auth->user->id;
         $param['type'] = 'text';
         // 检查是否时好友
-        if (!Friend::isFriend($param['user_id'] , $param['friend_id'])) {
+        if (!FriendModel::isFriend($param['user_id'] , $param['friend_id'])) {
             return self::error('你们不是好友，禁止操作' , 403);
         }
-        $param['chat_id'] = Chat::chatId($param['user_id'] , $param['friend_id']);
+        $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
         try {
             DB::beginTransaction();
             $id = Message::u_insertGetId($param['user_id'] , $param['chat_id'] , $param['type'] , $param['message']);

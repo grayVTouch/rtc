@@ -8,7 +8,7 @@
 
 namespace App\Redis;
 
-use App\Model\User;
+use App\Model\UserModel;
 use Engine\Facade\Redis as RedisFacade;
 
 class UserRedis extends Redis
@@ -115,7 +115,7 @@ class UserRedis extends Redis
     public static function allocateWaiter($identifier)
     {
         // 分配在线客服
-        $waiter_ids = User::getIdByIdentifierAndRole($identifier , 'admin');
+        $waiter_ids = UserModel::getIdByIdentifierAndRole($identifier , 'admin');
         $online = [];
         foreach ($waiter_ids as $v)
         {

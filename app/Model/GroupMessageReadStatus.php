@@ -41,12 +41,12 @@ class GroupMessageReadStatus extends Model
             ->where([
                 ['gm.group_id' , '=' , $group_id] ,
                 ['gmrs.user_id' , '=' , $user_id] ,
-                ['gmrs.is_read' , '=' , 'n'] ,
+                ['gmrs.is_read' , '=' , 0] ,
             ])
             ->count();
     }
 
-    public static function updateStatus(int $user_id , int $group_id , string $is_read = 'y')
+    public static function updateStatus(int $user_id , int $group_id , int $is_read = 1)
     {
         return DB::table('group_message_read_status as gmrs')
             ->leftJoin('group_message as gm' , 'gmrs.group_message_id' , '=' , 'gm.id')
@@ -58,7 +58,7 @@ class GroupMessageReadStatus extends Model
             ]);
     }
 
-    public static function u_insertGetId(int $user_id , int $group_message_id , string $is_read = 'n')
+    public static function u_insertGetId(int $user_id , int $group_message_id , int $is_read = 0)
     {
         return self::insertGetId([
             'user_id' => $user_id ,
@@ -72,7 +72,7 @@ class GroupMessageReadStatus extends Model
         $user_ids = GroupMember::getUserIdByGroupId($group_id);
         foreach ($user_ids as $v)
         {
-            $is_read = $v == $user_id ? 'y' : 'n';
+            $is_read = $v == $user_id ? 1 : 0;
             GroupMessageReadStatus::u_insertGetId($v , $group_message_id , $is_read);
         }
         return $user_ids;

@@ -8,7 +8,7 @@
 
 namespace App\WebSocket\Util;
 
-use App\Util\Misc;
+use App\Util\MiscUtil;
 
 class MessageUtil extends Util
 {
@@ -17,14 +17,14 @@ class MessageUtil extends Util
         if (empty($group_message)) {
             return ;
         }
-        $group_message->session_id = Misc::sessionId('group' , $group_message->group_id);
+        $group_message->session_id = MiscUtil::sessionId('group' , $group_message->group_id);
         if (!isset($group_message->group)) {
             return ;
         }
         if (!isset($group_message->user)) {
             return ;
         }
-        if ($group_message->group->is_service != 'y' || $group_message->user->role != 'admin') {
+        if ($group_message->group->is_service != 1 || $group_message->user->role != 'admin') {
             return ;
         }
         $group_message->user->nickname = empty($group_message->user->nickname) ? $group_message->user->username : $group_message->user->nickname;

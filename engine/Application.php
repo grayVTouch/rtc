@@ -8,7 +8,6 @@
 
 namespace Engine;
 
-use Core\Lib\Log;
 use Exception;
 
 use Core\Lib\Redis;
@@ -112,7 +111,7 @@ class Application
     public function initLog()
     {
         $log = new Log();
-        $log->dir = __DIR__ . '/../';
+        $log->dir = config('app.log_dir');
         $log->prefix = 'runtime';
         FacadeLib::register('log' , $log);
     }

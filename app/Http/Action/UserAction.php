@@ -10,8 +10,11 @@ namespace App\Http\Action;
 
 
 use App\Http\Auth;
-use App\Model\User;
+use App\Model\UserModel;
+use App\Model\UserInfoModel;
+use Exception;
 use function extra\array_unit;
+use Illuminate\Support\Facades\DB;
 
 class UserAction extends Action
 {
@@ -21,11 +24,20 @@ class UserAction extends Action
         $param['nickname'] = $param['nickname'] ? $param['nickname'] : $auth->user->nickname;
         $param['avatar'] = $param['avatar'] ? $param['avatar'] : $auth->user->avatar;
         $param['role'] = $param['role'] ? $param['role'] : $auth->user->role;
-        $res = User::updateById($auth->user->id , array_unit($param , [
-            'nickname' ,
-            'avatar' ,
-            'role' ,
-        ]));
-        return self::success($res);
+        try {
+            DB::beginTransaction();
+            UserModel::updateById($auth->user->id , array_unit($param , [
+                'role' ,
+            ]));
+            UserInfoModel::updateById($auth->user->id , array_unit($param , [
+                'nickname' ,
+                'avatar'
+            ]));
+            DB::commit();
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

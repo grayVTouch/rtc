@@ -2783,7 +2783,7 @@
                 dom.scrollLeft(endX);
             }
 
-            if (pos === 1) {
+            if (pos === 'y') {
                 dom.scrollTop(endY);
             }
 
@@ -2908,7 +2908,7 @@
             return minL >= minLRange && minL <= maxLRange || maxL >= minLRange && maxL <= maxLRange;
         }
 
-        if (pos === 1) {
+        if (pos === 'y') {
             return minT >= minTRange && minT <= maxTRange || maxT >= minTRange && maxT <= maxTRange;
         }
 
@@ -5964,7 +5964,7 @@
                 g.CAF(self._dom.__smalljs_animate_timer__);
                 var curTime     = new Date().getTime();
                 var ratio       = (curTime - startTime) / self._time;
-                    ratio       = Math.min(ratio , 1);
+                ratio       = Math.min(ratio , 1);
                 var k;
                 var v;
                 var cssEnd = {};

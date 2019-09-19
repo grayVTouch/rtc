@@ -46,16 +46,34 @@ class Chat extends Auth
         return $this->success($res['data']);
     }
 
-    // 消息发送：私聊-文本
+    // 消息发送：文本
     public function private_text_send(array $param)
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
-        $res = ChatAction::private_text_send($this , $param);
+        $res = ChatAction::send($this , 'text' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
     }
 
+    // 消息发送：图片
+    public function private_image_send(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $res = ChatAction::send($this , 'text' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+
+
     // 消息发送：私聊-图片
-    public function private_image_send()
+    public function private_voice_send()
     {
 
     }

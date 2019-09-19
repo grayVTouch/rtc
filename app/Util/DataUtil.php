@@ -9,7 +9,7 @@
 namespace App\Util;
 
 
-class Data
+class DataUtil
 {
     // 没有客服
     public static function noCustomerService($group , string $message = '')

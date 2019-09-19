@@ -115,7 +115,7 @@ class GroupMember extends Model
         {
             self::single($v);
             Group::single($v->group);
-            User::single($v->user);
+            UserModel::single($v->user);
         }
         return $res;
     }
@@ -127,7 +127,7 @@ class GroupMember extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class , 'user_id' , 'id');
+        return $this->belongsTo(UserModel::class , 'user_id' , 'id');
     }
 
     public static function u_insertGetId(int $user_id , int $group_id)

@@ -12,8 +12,8 @@ use App\Model\Group;
 use App\Model\GroupMember;
 use App\Model\GroupMessage;
 use App\Model\GroupMessageReadStatus;
-use App\Model\User;
-use App\Util\Misc;
+use App\Model\UserModel;
+use App\Util\MiscUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\Util\UserUtil;
@@ -84,7 +84,7 @@ class MessageAction extends Action
         return self::success($res);
     }
 
-    public static function session(User $user)
+    public static function session(UserModel $user)
     {
         // 群聊
         $group = GroupMember::getByUserId($user->id);
@@ -92,13 +92,13 @@ class MessageAction extends Action
         {
             $recent_message = GroupMessage::recentMessage($v->group_id , 'none');
             $v->recent_message = empty($recent_message) ? [] : $recent_message;
-            if ($user->role == 'user' && $v->group->is_service == 'y') {
+            if ($user->role == 'user' && $v->group->is_service == 1) {
                 // 用户使用的平台
                 $v->group->name = '平台咨询';
             }
             $v->unread = GroupMessageReadStatus::unreadCountByUserIdAndGroupId($user->id , $v->group_id);
             $v->type = 'group';
-            $v->session_id = Misc::sessionId('group' , $v->group_id);
+            $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
         }
         $group = obj_to_array($group);
 
@@ -146,7 +146,7 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = GroupMessageReadStatus::updateStatus($auth->user->id , $param['group_id'] , 'y');
+        $res = GroupMessageReadStatus::updateStatus($auth->user->id , $param['group_id'] , 1);
         // 通知用户刷新会话列表
         $auth->push($auth->user->id , 'refresh_session');
         return self::success($res);

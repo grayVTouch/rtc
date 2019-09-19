@@ -288,7 +288,7 @@
                                 self._click.call(this , id);
                             }
                         }
-                        if (isEmpty == 'y' && G.isFunction(self._child)) {
+                        if (isEmpty == 1 && G.isFunction(self._child)) {
                             self._child.call(self , id);
                         }
                         if (isEmpty == 'n' && G.isFunction(self._parent)) {
@@ -340,7 +340,7 @@
             // 切换图标
             this.flag(id);
 
-            if (isEmpty === 'y') {
+            if (isEmpty === 1) {
                 return ;
             }
 
@@ -402,7 +402,7 @@
             // 切换图标
             this.flag(id);
 
-            if (isEmpty === 'y') {
+            if (isEmpty === 1) {
                 return ;
             }
 
@@ -452,7 +452,7 @@
             if (this._topFocus) {
                 this.topFocus(id);
             }
-            if (isEmpty == 'y' && G.isFunction(this._child)) {
+            if (isEmpty == 1 && G.isFunction(this._child)) {
                 this._child.call(this , id);
             }
             if (isEmpty == 'n' && G.isFunction(this._parent)) {
@@ -506,7 +506,7 @@
                 if (this._icon === 'number') {
                     _number.highlight('hide' , children.get() , true);
                 } else {
-                    if (isEmpty !== 'y') {
+                    if (isEmpty !== 1) {
                         _switch.highlight('hide' , children.get() , true);
                     } else {
                         // console.log('为空');
@@ -562,7 +562,7 @@
         // 是否不存在子级
         isEmpty: function(id){
             var item = G(this.item(id));
-            return item.data('isEmpty') === 'y';
+            return item.data('isEmpty') === 1;
         } ,
 
         // 展示图标切换

@@ -10,12 +10,12 @@ namespace App\Http;
 
 
 use App\Model\UserToken;
-use App\Model\User;
+use App\Model\UserModel;
 
 class Auth extends Base
 {
     /**
-     * @var User
+     * @var UserModel
      */
     public $user = null;
 
@@ -39,7 +39,7 @@ class Auth extends Base
             $this->error('Token 错误' , 401);
             return false;
         }
-        $user = User::findById($token->user_id);
+        $user = UserModel::findById($token->user_id);
         if (empty($user)) {
             $this->error("未找到 {$token->user_id} 对应用户");
             return false;

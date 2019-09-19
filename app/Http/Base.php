@@ -9,13 +9,13 @@
 namespace App\Http;
 
 use App\Redis\MiscRedis;
-use App\Util\Push;
+use App\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use App\Model\Project;
 
-class Base implements BaseInterface
+class Base
 {
     public $conn = null;
 
@@ -67,6 +67,13 @@ class Base implements BaseInterface
     {
         // 设置响应头
         $this->response->header('Content-Type' , 'application/json');
+
+        // 允许跨域
+        $this->response->header('Access-Control-Allow-Origin' , '*');
+        $this->response->header('Access-Control-Allow-Methods' , 'GET,POST,PUT,PATCH,DELETE');
+        $this->response->header('Access-Control-Allow-Credentials' , 'false');
+        $this->response->header('Access-Control-Allow-Headers' , 'Authorization,Content-Type,X-Request-With,Ajax-Request');
+
         $this->response->status(200);
         return $this->response->end(json_for_http($code , $data));
     }
@@ -86,12 +93,12 @@ class Base implements BaseInterface
     // 单条推送：推送其他数据
     public function push($user_id , string $type = '' , array $data = [] , array $exclude = [])
     {
-        return Push::single($this->identifier , $user_id , $type , $data , $exclude);
+        return PushUtil::single($this->identifier , $user_id , $type , $data , $exclude);
     }
 
     // 单条推送：推送其他数据
     public function pushAll($user_ids , string $type = '' , array $data = [] , array $exclude = [])
     {
-        return Push::multiple($this->identifier , $user_ids , $type , $data , $exclude);
+        return PushUtil::multiple($this->identifier , $user_ids , $type , $data , $exclude);
     }
 }

@@ -9,7 +9,7 @@
 namespace App\Util;
 
 
-class Chat
+class ChatUtil
 {
     /**
      * 生成会话id

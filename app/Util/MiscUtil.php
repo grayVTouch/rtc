@@ -12,7 +12,7 @@ use function core\ssl_random;
  * Time: 9:30
  */
 
-class Misc
+class MiscUtil
 {
     // 唯一码
     public static function uniqueCode()

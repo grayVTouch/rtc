@@ -9,8 +9,8 @@
 namespace App\WebSocket;
 
 use App\Model\UserToken;
-use App\Model\User;
-use App\Util\Data;
+use App\Model\UserModel;
+use App\Util\DataUtil;
 use App\WebSocket\Action\LoginAction;
 use Exception;
 
@@ -34,7 +34,7 @@ class Auth extends Base
             $this->conn->disconnect($this->fd , 401 , '用户认证失败');
             return false;
         }
-        $user = User::findById($token->user_id);
+        $user = UserModel::findById($token->user_id);
         if (empty($user)) {
             $this->conn->disconnect($this->fd , 404 , '用户不存在');
             return false;

@@ -10,7 +10,7 @@ namespace App\Http\Action;
 
 
 use App\Model\Project;
-use App\Util\Misc;
+use App\Util\MiscUtil;
 use Core\Lib\Validator;
 
 class ProjectAction extends Action
@@ -23,7 +23,7 @@ class ProjectAction extends Action
         if ($validator->fails()) {
             return self::error($validator->error());
         }
-        $param['identifier'] = Misc::identifier();
+        $param['identifier'] = MiscUtil::identifier();
         if (!empty(Project::findByIdentifier($param['identifier']))) {
             // 检查 identifier 是否有冲突
             return self::error('系统生成的 identifier 和现有的冲突，请重新调用该请求以重新生成');

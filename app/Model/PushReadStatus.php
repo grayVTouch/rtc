@@ -23,7 +23,7 @@ class PushReadStatus extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where([
                 ['prs.user_id' , '=' , $user_id] ,
-                ['prs.is_read' , '=' , 'n'] ,
+                ['prs.is_read' , '=' , 0] ,
             ])
             ->count();
     }
@@ -38,7 +38,7 @@ class PushReadStatus extends Model
         return $res;
     }
 
-    public static function u_insertGetId(int $user_id , int $push_id , string $is_read = 'n')
+    public static function u_insertGetId(int $user_id , int $push_id , int $is_read = 0)
     {
         return self::insertGetId([
             'user_id' => $user_id ,
@@ -52,7 +52,7 @@ class PushReadStatus extends Model
     {
         foreach ($user_id as $v)
         {
-            self::u_insertGetId($v , $push_id , 'n');
+            self::u_insertGetId($v , $push_id , 0);
         }
     }
 
@@ -66,7 +66,7 @@ class PushReadStatus extends Model
         $res = self::with('u_push')
             ->where([
                 ['user_id' , '=' , $user_id] ,
-                ['is_read' , '=' , 'n'] ,
+                ['is_read' , '=' , 0] ,
             ])
             ->limit($limit)
             ->get();

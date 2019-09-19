@@ -482,7 +482,7 @@ trait Localization
         return static::executeWithLocale($locale, function ($newLocale, TranslatorInterface $translator) {
             return $newLocale &&
                 (
-                    ($y = static::translateWith($translator, 'y')) !== 'y' &&
+                    ($y = static::translateWith($translator, 'y')) !== 1 &&
                     $y !== static::translateWith($translator, 'year')
                 ) || (
                     ($y = static::translateWith($translator, 'd')) !== 'd' &&

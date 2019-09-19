@@ -10,10 +10,11 @@ namespace App\Model;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model as BaseModel;
-use Traversable;
 
-class Model extends BaseModel implements ModelInterface
+class Model extends BaseModel
 {
+    public $timestamps = false;
+
     public static function multiple($list)
     {
         foreach ($list as $v)

@@ -1,0 +1,10 @@
+{
+  "router": "/Friend/delFriend",
+  "identifier": "abcdefg",
+  "token": "rZxUtKEL12oMkxIOmuZSKu6cHFr6B7SClM0pNyfXFQlrfp9YjyNKHazPqoEN8kqtqAQObdUpAUMdBsS3CiovfMVeUb9fqSKvK2sSi5U0zuu83efSeZw8kgNt0gi0Puh2j1HMIdF7eyJhD0XW2Gyfp1AakBFjUjXbIEW4PWWjzqzyhJVsag2TJtRJvDQvjEfrPxQ26OPfFJvHZN3Wfw3LQCtojLiqRfknwoddN6HWaJztqE1ybxSsrCO6fSG0JOw" ,
+  "request": "abcdefghijklmnopqrstuvwxyz",
+  "platform": "pc",
+  "data": {
+    "friend_id": 2
+  }
+}

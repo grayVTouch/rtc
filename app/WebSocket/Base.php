@@ -10,11 +10,11 @@ namespace App\WebSocket;
 
 use App\Model\Project;
 use App\Redis\MiscRedis;
-use App\Util\Push;
+use App\Util\PushUtil;
 use Core\Lib\Facade;
 use Swoole\WebSocket\Server as WebSocket;
 
-class Base implements BaseInterface
+class Base
 {
     public $conn = null;
 
@@ -47,6 +47,10 @@ class Base implements BaseInterface
             return false;
         }
         MiscRedis::fdMappingIdentifier($this->fd , $this->identifier);
+
+        // 自定义的一些代码
+        require_once __DIR__ . '/Common/currency.php';
+
         return true;
     }
 
@@ -95,12 +99,12 @@ class Base implements BaseInterface
     // 单条推送：推送其他数据
     public function push($user_id , string $type = '' , $data = [] , array $exclude = [])
     {
-        return Push::single($this->identifier , $user_id , $type , $data , $exclude);
+        return PushUtil::single($this->identifier , $user_id , $type , $data , $exclude);
     }
 
     // 单条推送：推送其他数据
     public function pushAll($user_ids , string $type = '' , $data = [] , array $exclude = [])
     {
-        return Push::multiple($this->identifier , $user_ids , $type , $data , $exclude);
+        return PushUtil::multiple($this->identifier , $user_ids , $type , $data , $exclude);
     }
 }

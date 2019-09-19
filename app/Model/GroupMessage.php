@@ -24,7 +24,7 @@ class GroupMessage extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class , 'user_id' , 'id');
+        return $this->belongsTo(UserModel::class , 'user_id' , 'id');
     }
 
     public static function single($m = null)
@@ -50,7 +50,7 @@ class GroupMessage extends Model
         }
         self::single($res);
         Group::single($res->group);
-        User::single($res->user);
+        UserModel::single($res->user);
         return $res;
     }
 
@@ -79,7 +79,7 @@ class GroupMessage extends Model
             return ;
         }
         $res->group = Group::findById($res->group_id);
-        $res->user = User::findById($res->user_id);
+        $res->user = UserModel::findById($res->user_id);
         self::single($res);
         return $res;
     }
@@ -100,7 +100,7 @@ class GroupMessage extends Model
         {
             self::single($v);
             Group::single($v->group);
-            User::single($v->user);
+            UserModel::single($v->user);
         }
         return $res;
     }

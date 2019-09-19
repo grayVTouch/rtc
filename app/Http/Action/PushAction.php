@@ -13,11 +13,11 @@ use App\Http\Base;
 use App\Http\Util\PushUtil;
 use App\Model\Push as PushModel;
 use App\Model\PushReadStatus;
-use App\Model\User;
+use App\Model\UserModel;
 use App\Http\Auth;
 use function core\array_unit;
 use Core\Lib\Validator;
-use App\Util\Push;
+use App\Util\PushUtil;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +41,7 @@ class PushAction extends Action
             $id = PushModel::u_insertGetId($param['identifier'] , $param['push_type'] , $param['type'] , $param['data'] , $param['role'] , $param['user_id']);
             PushReadStatus::initByPushId($id , [$param['user_id']]);
             $push = PushModel::findById($id);
-            Push::single($auth->identifier , $param['user_id'] , $param['type'] , $push);
+            PushUtil::single($auth->identifier , $param['user_id'] , $param['type'] , $push);
             // 让他更新未读消息数量
             DB::commit();
             return self::success($push);
@@ -73,8 +73,8 @@ class PushAction extends Action
             } else {
                 // 按照角色
                 $user_ids = in_array($param['role'] , ['admin' , 'user']) ?
-                    User::getIdByIdentifierAndRole($auth->identifier , $param['role']) :
-                    User::getIdByIdentifierAndRole($auth->identifier , null);
+                    UserModel::getIdByIdentifierAndRole($auth->identifier , $param['role']) :
+                    UserModel::getIdByIdentifierAndRole($auth->identifier , null);
             }
             $id = PushModel::u_insertGetId($param['identifier'] , $param['push_type'] , $param['type'] , $param['data'] , $param['role']);
             // 未读消息状态
@@ -82,7 +82,7 @@ class PushAction extends Action
             $push = PushModel::findById($id);
             foreach ($user_ids as $v)
             {
-                Push::single($auth->identifier , $v , $param['type'] , $push);
+                PushUtil::single($auth->identifier , $v , $param['type'] , $push);
             }
             DB::commit();
             return self::success($push);

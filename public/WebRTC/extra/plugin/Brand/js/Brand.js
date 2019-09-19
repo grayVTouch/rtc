@@ -132,7 +132,7 @@
             for (; i < this.dom.brands.length; ++i)
             {
                 cur = this.dom.brands.jump(i , true);
-                if (cur.data('hot') == 'y') {
+                if (cur.data('hot') == 1) {
                     cur.removeClass('hide');
                 } else {
                     cur.addClass('hide');
@@ -196,7 +196,7 @@
             for (; i < this.dom.brands.length; ++i)
             {
                 cur = this.dom.brands.jump(i , true);
-                if (cur.data('checked') == 'y') {
+                if (cur.data('checked') == 1) {
                     res.push(cur.get(0));
                 }
             }
@@ -211,7 +211,7 @@
             for (; i < this.dom.brands.length; ++i)
             {
                 cur = this.dom.brands.jump(i , true);
-                if (cur.data('checked') == 'y') {
+                if (cur.data('checked') == 1) {
                     res.push(cur.data('id'));
                 }
             }

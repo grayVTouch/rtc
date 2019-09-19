@@ -9,8 +9,10 @@
 return [
     // 角色
     'role' => [
-        'admin' => '管理员（工作人员）' ,
-        'user' => '普通用户' ,
+        // '管理员（工作人员）'
+        'admin' ,
+        // '普通用户'
+        'user' ,
     ] ,
 
     // 预定义动作
@@ -25,7 +27,8 @@ return [
         'unread_count'          => '未读消息数量' ,
         'allocated'             => '加入客服成功，通知信息' ,
         'unique_code'           => '用户标识符' ,
-        'refresh_unread_count'  => '刷新未读消息数量' ,
+        'refresh_unread_count'  => '刷新未读消息数量（总数量）' ,
+        'refresh_application'   => '刷新申请列表' ,
     ] ,
 
     /**
@@ -51,8 +54,13 @@ return [
         'image' => '图片' ,
         'voice' => '语音' ,
         'file' => '文件' ,
+        'card' => '名片' ,
         'video_call' => '视频通话' ,
         'voice_call' => '语音通话' ,
+        'message_set' => '消息集合' ,
+        'write_status' => '输入状态' ,
+
+        // 聊天项目仅负责发送红包消息，跟红包相关的业务逻辑统统丢给使用该项目的人
         'random_red_envelope' => '随机红包' ,
         'password_red_envelope' => '口令红包' ,
     ] ,
@@ -63,8 +71,25 @@ return [
      * approve 通过
      * refuse  拒绝
      * wait    等待
+     * auto_approve 自动通过
      */
-    'application_status' => ['approve' , 'refuse' , 'wait'] ,
+    'application_status' => ['approve' , 'refuse' , 'wait' , 'auto_approve'] ,
     // 用户可选的申请状态
     'application_status_for_user' => ['approve' , 'refuse'] ,
+
+    /**
+     * 短信验证码类型
+     */
+    'sms_code_type' => [
+        1 => '注册' ,
+        2 => '登录' ,
+        3 => '修改密码'
+    ] ,
+
+    // 申请类型
+    'app_type' => [
+        'app_friend'        => '申请成为好友' ,
+        'app_group'         => '申请进群' ,
+        'invite_into_group' => '邀请好友进群' ,
+    ] ,
 ];

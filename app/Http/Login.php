@@ -18,6 +18,7 @@ class Login extends Base
         $param = $this->request->post;
         $param['identifier'] = $param['identifier'] ?? '';
         $param['username'] = $param['username'] ?? '';
+        $param['password'] = $param['password'] ?? '';
         $param['nickname'] = $param['nickname'] ?? '';
         $param['avatar'] = $param['avatar'] ?? '';
         $param['role'] = $param['role'] ?? '';
@@ -28,12 +29,25 @@ class Login extends Base
         return $this->success($res['data']);
     }
 
+    // 远程登录
+    public function remoteLogin()
+    {
+        $param = $this->request->post;
+        $param['unique_code'] = $param['unique_code'] ?? '';
+        $res = LoginAction::remoteLogin($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     // 登录
     public function login()
     {
         $param = $this->request->post;
-        $param['unique_code'] = $param['unique_code'] ?? '';
-        $res = LoginAction::login($param);
+        $param['username'] = $param['username'] ?? '';
+        $param['password'] = $param['password'] ?? '';
+        $res = LoginAction::login($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

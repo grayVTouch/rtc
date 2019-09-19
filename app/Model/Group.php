@@ -14,7 +14,6 @@ use function core\random;
 class Group extends Model
 {
     protected $table = 'group';
-    public $timestamps = false;
 
     public static function single($m = null)
     {
@@ -33,8 +32,8 @@ class Group extends Model
             'identifier' => $identifier ,
             'user_id'   => $user_id ,
             'name'     => '【游客】advoise_' . random(6 , 'mixed' , true) ,
-            'is_temp'    => 'y' ,
-            'is_service'    => 'y' ,
+            'is_temp'    => 1 ,
+            'is_service'    => 1 ,
         ];
         $id = self::insertGetId($data);
         return self::findById($id);
@@ -51,7 +50,7 @@ class Group extends Model
     {
         $res = self::where([
             ['create_time' , '<=' , $timestamp] ,
-            ['is_temp' , '<=' , 'y'] ,
+            ['is_temp' , '<=' , 1] ,
         ])->get();
         self::multiple($res);
         return $res;
@@ -59,7 +58,7 @@ class Group extends Model
 
     public static function serviceGroup()
     {
-        $res = self::where('is_service' , 'y')
+        $res = self::where('is_service' , 1)
             ->get();
         self::multiple($res);
         return $res;
@@ -69,7 +68,7 @@ class Group extends Model
     {
         $res = self::where([
                 ['user_id' , '=' , $user_id] ,
-                ['is_service' , '=' , 'y'] ,
+                ['is_service' , '=' , 1] ,
             ])
             ->first();
         self::single($res);

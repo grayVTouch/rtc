@@ -15,7 +15,7 @@ return [
         'password'  => '364793',
         'charset'   => 'utf8',
         'collation' => 'utf8_unicode_ci',
-        'prefix'    => 'xq_',
+        'prefix'    => 'rtc_',
     ] ,
 
     'redis' => [

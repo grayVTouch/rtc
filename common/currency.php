@@ -107,8 +107,13 @@ function res_url(string $path = '')
     return sprintf('%s%s' , $url , $path);
 }
 
-// 记录错误日志
-function log($msg , $flag = 'runtime')
+/**
+ * 响应数据结构
+ */
+function response_data($data = '' , $code = 200)
 {
-    return Log::write(sprintf('[%s] %10s %s' , date('Y-m-d H:i:s') , $flag , $msg));
+    return [
+        'code' => $code ,
+        'data' => $data ,
+    ];
 }

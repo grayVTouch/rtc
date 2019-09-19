@@ -12,7 +12,7 @@ namespace App\Util;
 use App\Redis\UserRedis;
 use Engine\Facade\WebSocket;
 
-class Push
+class PushUtil
 {
     public static function single(string $identifier , int $user_id , string $type = '' , $data = [] , array $exclude = [])
     {
@@ -20,7 +20,7 @@ class Push
         $default = [
             // 私聊消息
             'type'  => 'message' ,
-            // 参考 xq_message 表
+            // 参考 rtc_message 表
             'data'  => []
         ];
         // 检查是否在线

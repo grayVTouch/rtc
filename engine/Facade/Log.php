@@ -14,6 +14,7 @@ use Core\Lib\Facade;
  * @see \Core\Lib\Redis
  *
  * @method static write($data , string $mode = 'a')
+ * @method static log($log , string $flag = 'runtime')
  *
  */
 class Log extends Facade

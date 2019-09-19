@@ -23,7 +23,7 @@ class Push extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where([
                 ['prs.user_id' , '=' , $user_id] ,
-                ['prs.is_read' , '=' , 'n'] ,
+                ['prs.is_read' , '=' , 0] ,
             ])
             ->select('p.*')
             ->limit($limit)

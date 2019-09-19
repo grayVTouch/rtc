@@ -11,7 +11,7 @@ namespace App\WebSocket\Action;
 
 use App\Model\Group;
 use App\Model\GroupMember;
-use App\Model\User;
+use App\Model\UserModel;
 use App\WebSocket\Auth;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
@@ -36,7 +36,7 @@ class GroupAction extends Action
             return self::error('未找到对应群信息' , 404);
         }
         // 检查是否开启进群认证
-        if ($group->enable_auth == 'y') {
+        if ($group->enable_auth == 1) {
             // 开启了进群认证
             $param['type']      = 'group';
             $param['op_type']   = 'add';
@@ -75,13 +75,13 @@ class GroupAction extends Action
             return self::error('未找到对应群信息' , 404);
         }
         $relation_user_id = json_decode($param['relation_user_id'] , true);
-        if (!User::allExist($relation_user_id)) {
+        if (!UserModel::allExist($relation_user_id)) {
             // 检查用户是否存在（批量检测）
             return self::error('用户信息包含不支持的用户' , 403);
         }
         try {
             DB::beginTransaction();
-            if ($group->enable_auth == 'y') {
+            if ($group->enable_auth == 1) {
                 // 开启了进群认证
                 $param['type'] = 'group';
                 $param['op_type'] = 'invite';
