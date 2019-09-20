@@ -9,18 +9,18 @@
 namespace App\WebSocket\Action;
 
 
-use App\Model\Push;
-use App\Model\PushReadStatus;
+use App\Model\PushModel;
+use App\Model\PushReadStatusModel;
 use App\WebSocket\Auth;
 use Core\Lib\Validator;
-use function extra\array_unit;
+use function core\array_unit;
 
 class PushAction extends Action
 {
     // 未读消息数量
     public static function unread(Auth $auth , array $param)
     {
-        $res = Push::unreadByUserId($auth->user->id , config('app.limit'));
+        $res = PushModel::unreadByUserId($auth->user->id , config('app.limit'));
         return self::success($res);
     }
 
@@ -36,11 +36,11 @@ class PushAction extends Action
         }
         // 检查是否已经存在
         $param['user_id'] = $auth->user->id;
-        $res = PushReadStatus::findByUserIdAndPushId($auth->user->id , $param['push_id']);
+        $res = PushReadStatusModel::findByUserIdAndPushId($auth->user->id , $param['push_id']);
         if (empty($res)) {
-            $id = PushReadStatus::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
+            $id = PushReadStatusModel::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
         } else {
-            PushReadStatus::updateById($res->id , array_unit($param , [
+            PushReadStatusModel::updateById($res->id , array_unit($param , [
                 'is_read'
             ]));
             $id = $res->id;

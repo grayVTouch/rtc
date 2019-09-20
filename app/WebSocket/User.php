@@ -26,4 +26,16 @@ class User extends Auth
     {
         return self::success($this->user);
     }
+
+    // 与我相关的申请记录
+    public function app(array $param)
+    {
+        $param['limit'] = $param['limit'] ?? '';
+        $param['order'] = $param['order'] ?? '';
+        $res = UserAction::app($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

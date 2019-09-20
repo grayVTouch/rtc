@@ -11,7 +11,7 @@ namespace App\Model;
 
 use function core\random;
 
-class Group extends Model
+class GroupModel extends Model
 {
     protected $table = 'group';
 

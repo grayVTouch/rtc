@@ -8,18 +8,18 @@
 
 namespace App\WebSocket\Util;
 
-use App\Model\GroupMember;
-use App\Model\GroupMessage;
-use App\Model\GroupMessageReadStatus;
+use App\Model\GroupMemberModel;
+use App\Model\GroupMessageModel;
+use App\Model\GroupMessageReadStatusModel;
 use App\Util\PushUtil;
-use App\Model\PushReadStatus;
+use App\Model\PushReadStatusModel;
 use App\Model\UserModel;
 use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use Core\Lib\Throwable;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use App\Model\Group;
+use App\Model\GroupModel;
 use App\Redis\MessageRedis;
 
 class UserUtil extends Util
@@ -31,7 +31,7 @@ class UserUtil extends Util
         if ($user->role != 'user') {
             return self::error("客服分配失败【{$user_id}】：不是平台用户" , 403);
         }
-        $group = Group::advoiseGroupByUserId($user_id);
+        $group = GroupModel::advoiseGroupByUserId($user_id);
         // 检查有没有活跃的后台客服
         $bind_waiter = UserRedis::groupBindWaiter($user->identifier , $group->id);
         if (!empty($bind_waiter)) {
@@ -72,14 +72,14 @@ class UserUtil extends Util
             // 存在客服
             UserRedis::groupBindWaiter($user->identifier , $group->id , $waiter->id);
             UserRedis::delNoWaiterForGroup($user->identifier , $group->id);
-            if (empty(GroupMember::findByUserIdAndGroupId($waiter->id , $group->id))) {
+            if (empty(GroupMemberModel::findByUserIdAndGroupId($waiter->id , $group->id))) {
                 // 不在群内，加入到聊天室
-                GroupMember::u_insertGetId($waiter->id , $group->id);
+                GroupMemberModel::u_insertGetId($waiter->id , $group->id);
             }
-            $user_ids = GroupMember::getUserIdByGroupId($group->id);
-            $group_message_id = GroupMessage::u_insertGetId($waiter->id , $group->id , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
-            GroupMessageReadStatus::initByGroupMessageId($group_message_id , $group->id , $user->id);
-            $msg = GroupMessage::findById($group_message_id);
+            $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
+            $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $group->id , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
+            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group->id , $user->id);
+            $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
             DB::commit();
             PushUtil::multiple($user->identifier , $user_ids , 'group_message' , $msg);
@@ -101,28 +101,28 @@ class UserUtil extends Util
             // 如果不是平台用户，跳过
             return ;
         }
-        $group = Group::advoiseGroupByUserId($user->id);
+        $group = GroupModel::advoiseGroupByUserId($user->id);
         if (!empty($group)) {
             return ;
         }
         // 为空，说明该用户并没有咨询通道
         if ($user->is_temp == 1) {
             // 临时用户：创建临时组
-            $group = Group::temp($user->identifier , $user->id);
+            $group = GroupModel::temp($user->identifier , $user->id);
         } else {
             // 正式用户：创建组
             $group_name = sprintf('advoise-%s-%s' , $user->identifier , $user->id);
-            $id = Group::insertGetId([
+            $id = GroupModel::insertGetId([
                 'identifier'    => $user->identifier ,
                 'name'          => $group_name ,
                 'user_id'       => $user->id ,
                 'is_temp'       => 0 ,
                 'is_service'    => 1 ,
             ]);
-            $group = Group::findById($id);
+            $group = GroupModel::findById($id);
         }
         // 加入群
-        GroupMember::insert([
+        GroupMemberModel::insert([
             'user_id'   => $user->id ,
             'group_id'  => $group->id ,
         ]);
@@ -134,10 +134,10 @@ class UserUtil extends Util
         // 总：未读消息
         // 总：未读聊天消息（私聊/群聊） + 未读推送消息
         $group_unread_count = 0;
-        $group_ids = GroupMember::getGroupIdByUserId($user_id);
+        $group_ids = GroupMemberModel::getGroupIdByUserId($user_id);
         foreach ($group_ids as $v)
         {
-            $group_unread_count += GroupMessageReadStatus::unreadCountByUserIdAndGroupId($user_id , $v);
+            $group_unread_count += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($user_id , $v);
         }
         // todo 私聊-未读消息数量
         $res = $group_unread_count;
@@ -147,7 +147,7 @@ class UserUtil extends Util
     // 推送未读数量
     public static function unreadCountForPush($user_id)
     {
-        $count = PushReadStatus::unreadCountByUserId($user_id);
+        $count = PushReadStatusModel::unreadCountByUserId($user_id);
         return $count;
     }
 
@@ -184,15 +184,15 @@ class UserUtil extends Util
             $push = [];
             foreach ($group_msg as $v)
             {
-                if (empty(GroupMember::findByUserIdAndGroupId($waiter->id , $v['group_id']))) {
-                    GroupMember::u_insertGetId($waiter->id , $v['group_id']);
-                    $user_ids = GroupMember::getUserIdByGroupId($v['group_id']);
+                if (empty(GroupMemberModel::findByUserIdAndGroupId($waiter->id , $v['group_id']))) {
+                    GroupMemberModel::u_insertGetId($waiter->id , $v['group_id']);
+                    $user_ids = GroupMemberModel::getUserIdByGroupId($v['group_id']);
                     PushUtil::multiple($waiter->identifier , $user_ids , 'refresh_session');
                 }
-                $user_ids = GroupMember::getUserIdByGroupId($v['group_id']);
-                $group_message_id = GroupMessage::u_insertGetId($waiter->id , $v['group_id'] , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
-                GroupMessageReadStatus::initByGroupMessageId($group_message_id , $v['group_id'] , $waiter->id);
-                $msg = GroupMessage::findById($group_message_id);
+                $user_ids = GroupMemberModel::getUserIdByGroupId($v['group_id']);
+                $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v['group_id'] , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
+                GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v['group_id'] , $waiter->id);
+                $msg = GroupMessageModel::findById($group_message_id);
                 MessageUtil::handleGroupMessage($msg);
                 $push[] = [
                     'identifier'    => $waiter->identifier ,
@@ -223,7 +223,7 @@ class UserUtil extends Util
             // 已经提醒过了，退出
             return ;
         }
-        $waiter_ids = GroupMember::getWaiterIdByGroupId($group_id);
+        $waiter_ids = GroupMemberModel::getWaiterIdByGroupId($group_id);
         if (empty($waiter_ids)) {
             // 在该群组里面没有客服，生成一个随机用户
             $admin = UserModel::tempAdmin($identifier);
@@ -231,14 +231,14 @@ class UserUtil extends Util
             $admin = UserModel::findById($waiter_ids[0]);
         }
         // 插入新消息
-        $group_message_id = GroupMessage::u_insertGetId($admin->id , $group_id , 'text' , '系统通知：暂无客服在线，您可以留言，我们将会第一时间回复！');
+        $group_message_id = GroupMessageModel::u_insertGetId($admin->id , $group_id , 'text' , '系统通知：暂无客服在线，您可以留言，我们将会第一时间回复！');
         // 初始化消息已读/未读
-        GroupMessageReadStatus::initByGroupMessageId($group_message_id , $group_id , $user_id);
+        GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group_id , $user_id);
         // 找到该条信息
-        $msg = GroupMessage::findById($group_message_id);
+        $msg = GroupMessageModel::findById($group_message_id);
         // 消息处理
         MessageUtil::handleGroupMessage($msg);
-        $user_ids = GroupMember::getUserIdByGroupId($group_id);
+        $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
         PushUtil::multiple($identifier , $user_ids , 'group_message' , $msg);
         // 是否提示过客服不存在
         UserRedis::noWaiterForGroup($identifier , $group_id , false);

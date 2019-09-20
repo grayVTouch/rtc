@@ -15,10 +15,10 @@ use Core\Lib\Throwable;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
-use App\Model\Group;
-use App\Model\GroupMember;
-use App\Model\GroupMessage;
-use App\Model\GroupMessageReadStatus;
+use App\Model\GroupModel;
+use App\Model\GroupMemberModel;
+use App\Model\GroupMessageModel;
+use App\Model\GroupMessageReadStatusModel;
 use App\Model\UserModel;
 use App\Redis\MiscRedis;
 use App\Redis\UserRedis;
@@ -153,7 +153,7 @@ class WebSocket
                 $conn = array_diff($conn , [$fd]);
                 if (empty($conn)) {
                     // 如果是客服，用户加入的群组
-                    $group = GroupMember::getByUserId($user->id);
+                    $group = GroupMemberModel::getByUserId($user->id);
                     foreach ($group as $v)
                     {
                         $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
@@ -162,10 +162,10 @@ class WebSocket
                             // 绑定的并非当前离线客服
                             continue ;
                         }
-                        $user_ids = GroupMember::getUserIdByGroupId($v->group_id);
-                        $group_message_id = GroupMessage::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
-                        GroupMessageReadStatus::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
-                        $msg = GroupMessage::findById($group_message_id);
+                        $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
+                        $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
+                        GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
+                        $msg = GroupMessageModel::findById($group_message_id);
                         MessageUtil::handleGroupMessage($msg);
                         $push[] = [
                             'identifier'    => $v->group->identifier ,
@@ -212,6 +212,10 @@ class WebSocket
             $default = [
                 // 路由
                 'router'    => 'user/test' ,
+                // 调试模式
+                'debug' => 'running' ,
+                // 用户id
+                'user_id' => 1 ,
                 // 项目标识符
                 'identifier' => 'abcd' ,
                 // 除非 action = test，否则都需要携带 token
@@ -234,6 +238,8 @@ class WebSocket
             ];
             $data['router']     = $data['router'] ?? '';
             $data['identifier']      = $data['identifier'] ?? '';
+            $data['debug']      = $data['debug'] ?? '';
+            $data['user_id']      = $data['user_id'] ?? '';
             $data['token']      = $data['token'] ?? '';
             $data['platform']   = $data['platform'] ?? '';
             $data['request']   = $data['request'] ?? '';
@@ -249,7 +255,7 @@ class WebSocket
                 throw new Exception(" Class {$class} Not Found");
             }
             // 实例化对象
-            $instance = new $class($this->websocket , $frame->fd , $data['identifier'] , $data['platform'] , $data['token'] , $data['request']);
+            $instance = new $class($this->websocket , $frame->fd , $data['identifier'] , $data['platform'] , $data['token'] , $data['request'] , $data['user_id'] , $data['debug']);
             // 执行前置操作
             if (method_exists($instance , 'before')) {
 //                throw new Exception("Call to undefined method {$class}::before");
@@ -370,7 +376,7 @@ class WebSocket
             // 清理超过一定时间没有回复的咨询通道
             try {
                 DB::beginTransaction();
-                $group = Group::serviceGroup();
+                $group = GroupModel::serviceGroup();
                 $max_duration = 4 * 60;
                 $wait_duration = config('app.wait_duration');
                 $push = [];
@@ -382,7 +388,7 @@ class WebSocket
                     }
                     $waiter = UserModel::findById($waiter_id);
                     // 检查最近一条消息是否发送超时
-                    $last_message = GroupMessage::recentMessage($v->id , 'user');
+                    $last_message = GroupMessageModel::recentMessage($v->id , 'user');
 //                print_r($last_message);
                     if (!empty($last_message)) {
                         $create_time = strtotime($last_message->create_time);
@@ -393,10 +399,10 @@ class WebSocket
                     }
                     UserRedis::delGroupBindWaiter($v->identifier , $v->id);
                     // 群通知：客服已经断开连接！
-                    $user_ids = GroupMember::getUserIdByGroupId($v->id);
-                    $group_message_id = GroupMessage::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
-                    GroupMessageReadStatus::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
-                    $msg = GroupMessage::findById($group_message_id);
+                    $user_ids = GroupMemberModel::getUserIdByGroupId($v->id);
+                    $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
+                    GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
+                    $msg = GroupMessageModel::findById($group_message_id);
                     MessageUtil::handleGroupMessage($msg);
                     $push[] = [
                         'identifier' => $v->identifier ,
@@ -442,13 +448,13 @@ class WebSocket
                     $temp_user = UserModel::getTempByTimestamp($timestamp);
                     $clear_group = function($group_id){
                         // 清理临时群
-                        Group::destroy($group_id);
+                        GroupModel::destroy($group_id);
                         // 清理临时群中的成员
-                        GroupMember::delByGroupId($group_id);
+                        GroupMemberModel::delByGroupId($group_id);
                         // 群聊消息
-                        GroupMessage::delByGroupId($group_id);
+                        GroupMessageModel::delByGroupId($group_id);
                         // 清理群聊已读/未读
-                        GroupMessageReadStatus::delByGroupId($group_id);
+                        GroupMessageReadStatusModel::delByGroupId($group_id);
                     };
                     if (!empty($temp_user)) {
                         /**
@@ -459,8 +465,8 @@ class WebSocket
                         foreach ($temp_user as $v)
                         {
                             UserModel::destroy($v->id);
-                            GroupMember::delByUserId($v->id);
-                            $group_ids = GroupMember::getGroupIdByUserId($v->id);
+                            GroupMemberModel::delByUserId($v->id);
+                            $group_ids = GroupMemberModel::getGroupIdByUserId($v->id);
                             foreach ($group_ids as $v1)
                             {
                                 $clear_group($v1);
@@ -474,7 +480,7 @@ class WebSocket
                      * 清理临时群
                      * **************
                      */
-                    $temp_group = Group::getTempByTimestamp($timestamp);
+                    $temp_group = GroupModel::getTempByTimestamp($timestamp);
                     if (!empty($temp_group)) {
                         foreach ($temp_group as $v)
                         {
@@ -512,7 +518,7 @@ class WebSocket
         }
         if (!UserRedis::isOnline($user->identifier , $user->id)) {
             // 确定当前已经处于完全离线状态，那么删除掉该用户绑定的相关信息
-            $group_ids = GroupMember::getGroupIdByUserId($user->id);
+            $group_ids = GroupMemberModel::getGroupIdByUserId($user->id);
             array_walk($group_ids , function($v) use($user){
                 UserRedis::delGroupBindWaiter($user->identifier , $v);
                 UserRedis::delNoWaiterForGroup($user->identifier , $v);

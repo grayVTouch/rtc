@@ -58,4 +58,13 @@ class Friend extends Auth
         return self::success($res['data']);
     }
 
+    // 好友列表
+    public function myFriend(array $param)
+    {
+        $res = FriendAction::myFriend($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

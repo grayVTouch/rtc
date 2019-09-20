@@ -9,7 +9,7 @@
 namespace App\Http\Action;
 
 
-use App\Model\Project;
+use App\Model\ProjectModel;
 use App\Util\MiscUtil;
 use Core\Lib\Validator;
 
@@ -24,11 +24,11 @@ class ProjectAction extends Action
             return self::error($validator->error());
         }
         $param['identifier'] = MiscUtil::identifier();
-        if (!empty(Project::findByIdentifier($param['identifier']))) {
+        if (!empty(ProjectModel::findByIdentifier($param['identifier']))) {
             // 检查 identifier 是否有冲突
             return self::error('系统生成的 identifier 和现有的冲突，请重新调用该请求以重新生成');
         }
-        $id = Project::u_insertGetId($param['name'] , $param['identifier']);
+        $id = ProjectModel::u_insertGetId($param['name'] , $param['identifier']);
         return self::success($id);
     }
 }

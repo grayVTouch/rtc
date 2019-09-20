@@ -9,17 +9,17 @@
 namespace App\WebSocket\Action;
 
 
-use App\Model\Application;
+use App\Model\ApplicationModel;
 use App\Model\FriendModel;
-use App\Model\Message;
+use App\Model\MessageModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\PushUtil;
 use App\WebSocket\Auth;
+use function core\array_unit;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
-use function extra\array_unit;
 use Illuminate\Support\Facades\DB;
 
 class FriendAction extends Action
@@ -53,7 +53,7 @@ class FriendAction extends Action
             } else {
                 $param['status'] = 'wait';
             }
-            Application::insertGetId(array_unit($param , [
+            ApplicationModel::insertGetId(array_unit($param , [
                 'type' ,
                 'op_type' ,
                 'user_id' ,
@@ -61,7 +61,7 @@ class FriendAction extends Action
                 'status' ,
                 'remark' ,
             ]));
-//            DB::commit();
+            DB::commit();
             if ($friend->user_option->friend_auth) {
                 // 推送申请数量更新
                 PushUtil::single($auth->identifier , $param['friend_id'] , 'refresh_application');
@@ -89,16 +89,19 @@ class FriendAction extends Action
         if (!in_array($param['status'] , $range)) {
             return self::error('不支持的 status 值，当前受支持的值有 ' . implode(',' , $range) , 403);
         }
-        $app = Application::findById($param['application_id']);
+        $app = ApplicationModel::findById($param['application_id']);
         if (empty($app)) {
             return self::error('未找到对应的申请记录' , 404);
         }
         if ($app->type != 'private') {
             return self::error('该申请记录类型不是私聊！非法操作' , 403);
         }
+        if ($app->user_id != $auth->user->id) {
+            return self::error('你并非该记录的拥有者！非法操作' , 403);
+        }
         try {
             DB::beginTransaction();
-            Application::updateById($app->id , [
+            ApplicationModel::updateById($app->id , [
                 'status' => $param['status']
             ]);
             if ($param['status'] == 'approve') {
@@ -135,12 +138,19 @@ class FriendAction extends Action
             FriendModel::delByUserIdAndFriendId($auth->user->id , $param['friend_id']);
             FriendModel::delByUserIdAndFriendId($param['friend_id'] , $auth->user->id);
             // 删除聊天记录
-            Message::delByChatId($chat_id);
+            MessageModel::delByChatId($chat_id);
             DB::commit();
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
             return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
         }
+    }
+
+    // 好友列表
+    public static function myFriend(Auth $auth , array $param)
+    {
+        $res = FriendModel::getByUserId($auth->user->id);
+        return self::success($res);
     }
 }

@@ -37,7 +37,7 @@ class Login extends Base
     {
         $param['area_code'] = $param['area_code'] ?? '';
         $param['phone'] = $param['phone'] ?? '';
-        $param['password'] = $param['password'] ?? '';
+        $param['sms_code'] = $param['sms_code'] ?? '';
         $res = LoginAction::loginUsePhone($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

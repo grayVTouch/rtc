@@ -9,6 +9,8 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
+
 class FriendModel extends Model
 {
     protected $table = 'friend';
@@ -65,5 +67,30 @@ class FriendModel extends Model
             ['user_id' , '=' , $user_id] ,
             ['friend_id' , '=' , $friend_id] ,
         ])->delete();
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(UserModel::class , 'user_id' , 'id');
+    }
+
+    public function friend()
+    {
+        return $this->belongsTo(UserModel::class , 'friend_id' , 'id');
+    }
+
+    public static function getByUserId(int $user_id)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->where('user_id' , $user_id)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
     }
 }

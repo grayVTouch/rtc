@@ -10,43 +10,10 @@ namespace App\WebSocket;
 
 
 use App\WebSocket\Action\MessageAction;
-use App\WebSocket\Action\UserAction;
+
 
 class Message extends Auth
 {
-    //  群：历史消息记录
-    public function groupHistory(array $param)
-    {
-        $param['group_id'] = $param['group_id'] ?? '';
-        $param['group_message_id'] = $param['group_message_id'] ?? '';
-        $res = MessageAction::groupHistory($this , $param);
-        if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
-        }
-        return $this->success($res['data']);
-    }
-
-    // 群：最近消息
-    public function groupRecent(array $param)
-    {
-        $param['group_id'] = $param['group_id'] ?? '';
-        $res = MessageAction::groupRecent($this , $param);
-        if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
-        }
-        return $this->success($res['data']);
-    }
-
-    // 会话列表
-    public function session(array $param)
-    {
-        $res = MessageAction::session($this->user);
-        if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
-        }
-        return $this->success($res['data']);
-    }
-
     // 未读消息（私聊 + 群聊）
     public function unreadCountForCommunication(array $param)
     {
@@ -67,7 +34,7 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
-    // 总：通迅消息 + 推送消息
+    // 总：通迅消息 + 推送消息 + 申请消息
     public function unreadCount(array $param)
     {
         $res = MessageAction::unreadCount($this , $param);
@@ -77,15 +44,18 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
-
-    // 重置群未读消息数量
-    public function resetGroupUnread(array $param)
+    // 历史记录
+    public function history(array $param)
     {
-        $param['group_id'] = $param['group_id'] ?? '';
-        $res = MessageAction::resetGroupUnread($this , $param);
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['order'] = $param['order'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $res = MessageAction::history($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
     }
+
+
 }

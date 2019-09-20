@@ -13,7 +13,7 @@ use App\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use App\Model\Project;
+use App\Model\ProjectModel;
 
 class Base
 {
@@ -37,7 +37,7 @@ class Base
     public function before() :bool
     {
         // 检查 identifier 是否正确！！
-        if (empty(Project::findByIdentifier($this->identifier))) {
+        if (empty(ProjectModel::findByIdentifier($this->identifier))) {
             $this->error('identifier 不正确！！请先创建项目！' , 400);
             return false;
         }

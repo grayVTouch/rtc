@@ -8,7 +8,7 @@
 
 namespace App\WebSocket;
 
-use App\Model\Project;
+use App\Model\ProjectModel;
 use App\Redis\MiscRedis;
 use App\Util\PushUtil;
 use Core\Lib\Facade;
@@ -28,7 +28,11 @@ class Base
 
     public $request = null;
 
-    public function __construct(WebSocket $conn , $fd , string $identifier = '' , string $platform = '' , string $token = '' , string $request = '')
+    public $debug = null;
+
+    public $userId = null;
+
+    public function __construct(WebSocket $conn , $fd , string $identifier = '' , string $platform = '' , string $token = '' , string $request = '' , $user_id = '' , $debug = '')
     {
         $this->fd       = $fd;
         $this->identifier = $identifier;
@@ -36,13 +40,15 @@ class Base
         $this->token    = $token;
         $this->request = $request;
         $this->conn     = $conn;
+        $this->userId = $user_id;
+        $this->debug = $debug;
     }
 
     // 前置操作
     public function before() :bool
     {
         // 检查 identifier 是否正确！！
-        if (empty(Project::findByIdentifier($this->identifier))) {
+        if (empty(ProjectModel::findByIdentifier($this->identifier))) {
             $this->error('identifier 不正确！！请先创建项目！' , 400);
             return false;
         }

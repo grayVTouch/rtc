@@ -126,7 +126,6 @@ create table if not exists `rtc_message` (
   chat_id varchar(255) default '' comment '会话id，生成规则：minUserId_maxUserId' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
   message text comment '消息' ,
-  extra text comment '额外数据' ,
   flag varchar(255) default 'normal' comment '消息标志：burn-阅后即焚消息；normal-正常消息' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -139,7 +138,6 @@ create table if not exists `rtc_group_message` (
   group_id int unsigned default 0 comment 'rtc_group.id' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
   message text comment '消息' ,
-  extra text comment '额外数据' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';

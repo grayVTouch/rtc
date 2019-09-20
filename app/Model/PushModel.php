@@ -11,7 +11,7 @@ namespace App\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class Push extends Model
+class PushModel extends Model
 {
     protected $table = 'push';
     public $timestamps = false;

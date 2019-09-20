@@ -11,7 +11,7 @@ namespace App\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class GroupMessageReadStatus extends Model
+class GroupMessageReadStatusModel extends Model
 {
     protected $table = 'group_message_read_status';
     public $timestamps = false;
@@ -69,12 +69,21 @@ class GroupMessageReadStatus extends Model
 
     public static function initByGroupMessageId(int $group_message_id , int $group_id , int $user_id)
     {
-        $user_ids = GroupMember::getUserIdByGroupId($group_id);
+        $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
         foreach ($user_ids as $v)
         {
             $is_read = $v == $user_id ? 1 : 0;
-            GroupMessageReadStatus::u_insertGetId($v , $group_message_id , $is_read);
+            GroupMessageReadStatusModel::u_insertGetId($v , $group_message_id , $is_read);
         }
         return $user_ids;
     }
+
+    public static function countByUserIdAndIsRead(int $user_id , int $is_read)
+    {
+        return (int) (self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['is_read' , '=' , $is_read] ,
+        ])->count());
+    }
+
 }

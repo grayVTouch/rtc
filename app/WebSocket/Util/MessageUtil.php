@@ -8,6 +8,8 @@
 
 namespace App\WebSocket\Util;
 
+use App\Model\MessageModel;
+use App\Model\MessageReadStatusModel;
 use App\Util\MiscUtil;
 
 class MessageUtil extends Util
@@ -29,5 +31,22 @@ class MessageUtil extends Util
         }
         $group_message->user->nickname = empty($group_message->user->nickname) ? $group_message->user->username : $group_message->user->nickname;
         $group_message->user->nickname = '客服 ' . $group_message->user->nickname;
+    }
+
+    /**
+     * 私聊消息
+     *
+     * @param MessageModel|null $msg
+     * @param int $user_id
+     * @param int $friend_id
+     * @return null
+     */
+    public static function handleMessage($msg , int $user_id , int $friend_id)
+    {
+        if (empty($msg)) {
+            return ;
+        }
+        $msg->self_is_read      = MessageReadStatusModel::isRead($user_id , $msg->id);
+        $msg->friend_is_read    = MessageReadStatusModel::isRead($friend_id , $msg->id);
     }
 }

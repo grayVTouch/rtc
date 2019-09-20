@@ -17,18 +17,32 @@ return [
 
     // 预定义动作
     'push' => [
-        'response'              => '服务器响应' ,
-        'no_waiter'             => '没有客服' ,
-        'refresh_token'         => '请更新用户的登录信息' ,
-        'refresh_session'       => '指令：请刷新会话列表' ,
-        'refresh_group_for_advoise' => '指令：通知客户端，平台咨询时请更新携带的群信息' ,
-        'error'                 => 'Swoole 服务器发生异常' ,
-        'waiter_leave'          => '客服已经离开' ,
-        'unread_count'          => '未读消息数量' ,
-        'allocated'             => '加入客服成功，通知信息' ,
-        'unique_code'           => '用户标识符' ,
-        'refresh_unread_count'  => '刷新未读消息数量（总数量）' ,
-        'refresh_application'   => '刷新申请列表' ,
+        // 服务器响应
+        'response' ,
+        // 没有客服
+        'no_waiter' ,
+        // 指令：请更新用户的登录信息
+        'refresh_token' ,
+        // 指令：请刷新会话列表
+        'refresh_session' ,
+        // 指令：通知客户端，平台咨询时请更新携带的群信息
+        'refresh_group_for_advoise' ,
+        // Swoole 服务器发生异常
+        'error' ,
+        // 客服已经离开
+        'waiter_leave' ,
+        // 未读消息数量
+        'unread_count' ,
+        // 加入客服成功，通知信息
+        'allocated' ,
+        // 用户标识符
+        'unique_code' ,
+        // 指令：刷新未读消息数量（总数量）
+        'refresh_unread_count' ,
+        // 指令：刷新申请列表
+        'refresh_application' ,
+        // 私聊信息
+        'private_message' ,
     ] ,
 
     /**
@@ -50,19 +64,27 @@ return [
 
     // 消息类型
     'message_type' => [
-        'text'  => '文本' ,
-        'image' => '图片' ,
-        'voice' => '语音' ,
-        'file' => '文件' ,
-        'card' => '名片' ,
-        'video_call' => '视频通话' ,
-        'voice_call' => '语音通话' ,
-        'message_set' => '消息集合' ,
-        'write_status' => '输入状态' ,
+        // 文本
+        'text' ,
+        // 图片
+        'image' ,
+        // 语音
+        'voice' ,
+        // 文件
+        'file' ,
+        // 名片
+        'card' ,
+        // 视频通话
+        'video_call' ,
+        // 语音通话
+        'voice_call' ,
+        // 消息集合
+        'message_set' ,
 
-        // 聊天项目仅负责发送红包消息，跟红包相关的业务逻辑统统丢给使用该项目的人
-        'random_red_envelope' => '随机红包' ,
-        'password_red_envelope' => '口令红包' ,
+        // 随机红包
+        'random_red_envelope' ,
+        // 口令红包
+        'password_red_envelope' ,
     ] ,
 
     /**
@@ -91,5 +113,6 @@ return [
         'app_friend'        => '申请成为好友' ,
         'app_group'         => '申请进群' ,
         'invite_into_group' => '邀请好友进群' ,
+        'kick_group'        => '群主踢人出群' ,
     ] ,
 ];

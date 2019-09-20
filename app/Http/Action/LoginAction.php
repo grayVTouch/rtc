@@ -9,7 +9,7 @@
 namespace App\Http\Action;
 
 use App\Http\Base;
-use App\Model\Project;
+use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserInfoModel;
 use App\Model\UserToken;
@@ -47,7 +47,7 @@ class LoginAction extends Action
             ]);
         }
         // 检查 identfier 是否存在
-        $project = Project::findByIdentifier($param['identifier']);
+        $project = ProjectModel::findByIdentifier($param['identifier']);
         if (empty($project)) {
             return self::error([
                 'identifier' => '项目标识符错误' ,

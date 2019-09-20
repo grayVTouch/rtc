@@ -10,7 +10,7 @@ namespace App\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class GroupMember extends Model
+class GroupMemberModel extends Model
 {
     protected $table = 'group_member';
     public $timestamps = false;
@@ -114,7 +114,7 @@ class GroupMember extends Model
         foreach ($res as $v)
         {
             self::single($v);
-            Group::single($v->group);
+            GroupModel::single($v->group);
             UserModel::single($v->user);
         }
         return $res;
@@ -122,7 +122,7 @@ class GroupMember extends Model
 
     public function group()
     {
-        return $this->belongsTo(Group::class , 'group_id' , 'id');
+        return $this->belongsTo(GroupModel::class , 'group_id' , 'id');
     }
 
     public function user()

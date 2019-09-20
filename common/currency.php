@@ -117,3 +117,18 @@ function response_data($data = '' , $code = 200)
         'data' => $data ,
     ];
 }
+
+function parse_order(string $str = '' , string $separator = '|')
+{
+    if (empty($str)) {
+        return [];
+    }
+    $res = explode($separator , $str);
+    if (count($res) != 2) {
+        return [];
+    }
+    return [
+        'field' => $res[0] ,
+        'value' => $res[1] ,
+    ];
+}

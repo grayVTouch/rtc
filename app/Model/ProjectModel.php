@@ -9,7 +9,7 @@
 namespace App\Model;
 
 
-class Project extends Model
+class ProjectModel extends Model
 {
     protected $table = 'project';
     public $timestamps = false;

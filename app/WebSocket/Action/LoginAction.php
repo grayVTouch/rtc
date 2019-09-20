@@ -8,7 +8,7 @@
 
 namespace App\WebSocket\Action;
 
-use App\Model\Group;
+use App\Model\GroupModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
 use App\Model\UserModel;
@@ -170,11 +170,11 @@ class LoginAction extends Action
             $validator = Validator::make($param , [
                 'area_code'    => 'required' ,
                 'phone'    => 'required' ,
-                'password'    => 'required' ,
+                'sms_code'    => 'required' ,
             ] , [
                 'area_code.required' => '必须' ,
                 'phone.required' => '必须' ,
-                'password.required' => '必须' ,
+                'sms_code.required' => '必须' ,
             ]);
             if ($validator->fails()) {
                 return self::error($validator->error());
@@ -195,6 +195,23 @@ class LoginAction extends Action
                     return self::error('创建访客账号失败' , 500);
                 }
             }
+        }
+        // 检查短信验证码
+        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
+        if (empty($sms_code)) {
+            return self::error([
+                'sms_code' => '请先发送短信验证码' ,
+            ]);
+        }
+        if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
+            return self::error([
+                'sms_code' => '验证码已经过期' ,
+            ]);
+        }
+        if ($sms_code->code != $param['sms_code']) {
+            return self::error([
+                'sms_code' => '短信验证码不正确' ,
+            ]);
         }
         // 登录成功
         $param['identifier'] = $user->identifier;

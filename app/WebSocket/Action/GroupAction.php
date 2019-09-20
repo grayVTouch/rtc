@@ -9,15 +9,15 @@
 namespace App\WebSocket\Action;
 
 
-use App\Model\Group;
-use App\Model\GroupMember;
+use App\Model\GroupModel;
+use App\Model\GroupMemberModel;
 use App\Model\UserModel;
 use App\WebSocket\Auth;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
-use App\Model\Application;
+use App\Model\ApplicationModel;
 use Exception;
-use function extra\array_unit;
+use function core\array_unit;
 use Illuminate\Support\Facades\DB;
 
 class GroupAction extends Action
@@ -31,7 +31,7 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $group = Group::findById($param['group_id']);
+        $group = GroupModel::findById($param['group_id']);
         if (empty($group)) {
             return self::error('未找到对应群信息' , 404);
         }
@@ -43,7 +43,7 @@ class GroupAction extends Action
             $param['user_id']   = $group->user_id;
             $param['relation_user_id'] = $auth->user->id;
             $param['status']    = 'wait';
-            $id = Application::insertGetId(array_unit($param , [
+            $id = ApplicationModel::insertGetId(array_unit($param , [
                 'type' ,
                 'op_type' ,
                 'user_id' ,
@@ -56,7 +56,7 @@ class GroupAction extends Action
             return self::success($id);
         }
         // 未开启进群认证
-        GroupMember::u_insertGetId($auth->user->id , $group->id);
+        GroupMemberModel::u_insertGetId($auth->user->id , $group->id);
         return self::success();
     }
 
@@ -70,7 +70,7 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $group = Group::findById($param['group_id']);
+        $group = GroupModel::findById($param['group_id']);
         if (empty($group)) {
             return self::error('未找到对应群信息' , 404);
         }
@@ -87,7 +87,7 @@ class GroupAction extends Action
                 $param['op_type'] = 'invite';
                 $param['user_id'] = $group->user_id;
                 $param['status'] = 'wait';
-                $id = Application::insertGetId(array_unit($param , [
+                $id = ApplicationModel::insertGetId(array_unit($param , [
                     'type' ,
                     'op_type' ,
                     'user_id' ,
@@ -101,7 +101,7 @@ class GroupAction extends Action
             // 未开启进群认证
             foreach ($relation_user_id as $v)
             {
-                GroupMember::u_insertGetId($v , $group->id);
+                GroupMemberModel::u_insertGetId($v , $group->id);
             }
             DB::commit();
             return self::success();
@@ -124,7 +124,7 @@ class GroupAction extends Action
         if (!in_array($param['status'] , $range)) {
             return self::error('不支持的 status 值，当前受支持的值有 ' . implode(',' , $range));
         }
-        $app = Application::findById($param['application_id']);
+        $app = ApplicationModel::findById($param['application_id']);
         if (empty($app)) {
             return self::error('未找到对应的申请记录' , 404);
         }
@@ -133,7 +133,7 @@ class GroupAction extends Action
         }
         try {
             DB::beginTransaction();
-            Application::updateById($app->id , [
+            ApplicationModel::updateById($app->id , [
                'status' => $param['status']
             ]);
             if ($param['status'] == 'approve') {
@@ -141,7 +141,7 @@ class GroupAction extends Action
                 $relation_user_id = json_decode($app->relation_user_id , true);
                 foreach ($relation_user_id as $v)
                 {
-                    GroupMember::u_insertGetId($v , $app->group_id);
+                    GroupMemberModel::u_insertGetId($v , $app->group_id);
                 }
             }
             DB::commit();
@@ -165,7 +165,7 @@ class GroupAction extends Action
         if (empty($user_id)) {
             return self::error('请提供待删除的用户');
         }
-        $group = Group::findById($param['group_id']);
+        $group = GroupModel::findById($param['group_id']);
         if (empty($group)) {
             return self::error('未找到群信息' , 404);
         }
@@ -176,7 +176,7 @@ class GroupAction extends Action
             DB::beginTransaction();
             foreach ($user_id as $v)
             {
-                GroupMember::delByUserIdAndGroupId($v , $group->id);
+                GroupMemberModel::delByUserIdAndGroupId($v , $group->id);
             }
             DB::commit();
             return self::success();

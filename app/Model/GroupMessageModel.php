@@ -12,14 +12,14 @@ namespace App\Model;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
-class GroupMessage extends Model
+class GroupMessageModel extends Model
 {
     protected $table = 'group_message';
     public $timestamps = false;
 
     public function group()
     {
-        return $this->belongsTo(Group::class , 'group_id' , 'id');
+        return $this->belongsTo(GroupModel::class , 'group_id' , 'id');
     }
 
     public function user()
@@ -40,16 +40,13 @@ class GroupMessage extends Model
 
     public static function findById(int $id = 0)
     {
-        $res = self::with([
-                'group' ,
-                'user',
-            ])
+        $res = self::with(['group' , 'user'])
             ->find($id);
         if (empty($res)) {
             return ;
         }
         self::single($res);
-        Group::single($res->group);
+        GroupModel::single($res->group);
         UserModel::single($res->user);
         return $res;
     }
@@ -78,7 +75,7 @@ class GroupMessage extends Model
         if (empty($res)) {
             return ;
         }
-        $res->group = Group::findById($res->group_id);
+        $res->group = GroupModel::findById($res->group_id);
         $res->user = UserModel::findById($res->user_id);
         self::single($res);
         return $res;
@@ -99,7 +96,7 @@ class GroupMessage extends Model
         foreach ($res as $v)
         {
             self::single($v);
-            Group::single($v->group);
+            GroupModel::single($v->group);
             UserModel::single($v->user);
         }
         return $res;
@@ -115,5 +112,4 @@ class GroupMessage extends Model
             'extra' => $extra ,
         ]);
     }
-
 }

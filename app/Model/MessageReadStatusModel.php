@@ -10,7 +10,7 @@ namespace App\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class MessageReadStatus extends Model
+class MessageReadStatusModel extends Model
 {
     protected $table = 'message_read_status';
     public $timestamps = false;
@@ -59,4 +59,21 @@ class MessageReadStatus extends Model
         ]);
     }
 
+    public static function isRead(int $user_id , int $message_id)
+    {
+        return (int) (self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['message_id' , '=' , $message_id] ,
+            ])
+            ->value('is_read'));
+    }
+
+    // 已读/未读消息数量
+    public static function countByUserIdAndIsRead(int $user_id , int $is_read)
+    {
+        return (int) (self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['is_read' , '=' , $is_read] ,
+        ])->count());
+    }
 }

@@ -11,8 +11,8 @@ namespace App\Http\Action;
 
 use App\Http\Base;
 use App\Http\Util\PushUtil;
-use App\Model\Push as PushModel;
-use App\Model\PushReadStatus;
+use App\Model\PushModel as PushModel;
+use App\Model\PushReadStatusModel;
 use App\Model\UserModel;
 use App\Http\Auth;
 use function core\array_unit;
@@ -39,7 +39,7 @@ class PushAction extends Action
         try {
             DB::begintransaction();
             $id = PushModel::u_insertGetId($param['identifier'] , $param['push_type'] , $param['type'] , $param['data'] , $param['role'] , $param['user_id']);
-            PushReadStatus::initByPushId($id , [$param['user_id']]);
+            PushReadStatusModel::initByPushId($id , [$param['user_id']]);
             $push = PushModel::findById($id);
             PushUtil::single($auth->identifier , $param['user_id'] , $param['type'] , $push);
             // 让他更新未读消息数量
@@ -78,7 +78,7 @@ class PushAction extends Action
             }
             $id = PushModel::u_insertGetId($param['identifier'] , $param['push_type'] , $param['type'] , $param['data'] , $param['role']);
             // 未读消息状态
-            PushReadStatus::initByPushId($id , $user_ids);
+            PushReadStatusModel::initByPushId($id , $user_ids);
             $push = PushModel::findById($id);
             foreach ($user_ids as $v)
             {
@@ -104,11 +104,11 @@ class PushAction extends Action
         }
         // 检查是否已经存在
         $param['user_id'] = $auth->user->id;
-        $res = PushReadStatus::findByUserIdAndPushId($auth->user->id , $param['push_id']);
+        $res = PushReadStatusModel::findByUserIdAndPushId($auth->user->id , $param['push_id']);
         if (empty($res)) {
-            $id = PushReadStatus::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
+            $id = PushReadStatusModel::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
         } else {
-            PushReadStatus::updateById($res->id , array_unit($param , [
+            PushReadStatusModel::updateById($res->id , array_unit($param , [
                 'is_read'
             ]));
             $id = $res->id;

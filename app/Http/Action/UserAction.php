@@ -13,7 +13,7 @@ use App\Http\Auth;
 use App\Model\UserModel;
 use App\Model\UserInfoModel;
 use Exception;
-use function extra\array_unit;
+use function core\array_unit;
 use Illuminate\Support\Facades\DB;
 
 class UserAction extends Action

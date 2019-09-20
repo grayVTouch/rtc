@@ -11,4 +11,6 @@ return [
     'code_duration' => 30 * 60 ,
     // 短信验证码 发送频率，单位：s
     'sms_code_wait_time' => 60 ,
+    // 每页显示记录数
+    'limit' => 20 ,
 ];

@@ -11,7 +11,7 @@ namespace App\Model;
 
 use Illuminate\Support\Facades\DB;
 
-class PushReadStatus extends Model
+class PushReadStatusModel extends Model
 {
     protected $table = 'push_read_status';
     public $timestamps = false;
@@ -58,7 +58,7 @@ class PushReadStatus extends Model
 
     public function u_push()
     {
-        return $this->belongsTo(Push::class , 'push_id' , 'id');
+        return $this->belongsTo(PushModel::class , 'push_id' , 'id');
     }
 
     public static function unreadByUserId(int $user_id , int $limit = 10)
@@ -73,7 +73,7 @@ class PushReadStatus extends Model
         foreach ($res as $v)
         {
             self::single($v);
-            Push::single($v->u_push);
+            PushModel::single($v->u_push);
         }
         return $res;
     }
