@@ -37,7 +37,7 @@ class Facade implements FacadeInterface
 
     public static function getFacadeAccessor(): string
     {
-        throw new Exception('请重新实现该方法');
+        throw new Exception('您尚未实现该方法！请重新实现该方法');
     }
 
     // 调用实例方法

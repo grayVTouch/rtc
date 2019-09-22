@@ -89,19 +89,6 @@ function check_num_len($num , $len)
     return is_numeric($num) && mb_strlen($num) == $len;
 }
 
-// 获取给定数组中给定键名对应单元
-function array_unit(array $arr = [] , array $keys = [])
-{
-    $res = [];
-    foreach ($keys as $v)
-    {
-        if (!isset($arr[$v])) {
-            continue ;
-        }
-        $res[$v] = $arr[$v];
-    }
-    return $res;
-}
 
 function is_http($str = '')
 {

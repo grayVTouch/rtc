@@ -248,27 +248,47 @@ function ssl_random(int $len = 256){
 }
 
 
-// 精确的随机数分配
-function decimal_random($total , $num , $scale = 2)
+/**
+ * @param $total
+ * @param $num
+ * @param int $scale
+ * @return array|bool
+ */
+function decimal_random(float $total , int $num , int $scale = 2)
 {
     $min = 1;
-    $max = 60;
+    $max = 50;
     $last = $total;
     $res = [];
-    for ($i = 1; $i <= $num; ++$i)
+    $count = 0;
+    while (true)
     {
-        if ($i == $num) {
+        if ($count++ > 10000000) {
+            // 死循环！说明参数有问题
+            return false;
+        }
+        if (count($res) == $num - 1) {
             // 总额 - 已用
             $res[] = $last;
+            break;
         } else {
             // 随机分配
             $cur = mt_rand($min , $max);
             $ratio = bcdiv($cur , 100 , 2);
             $amount = bcmul($last , $ratio , $scale);
+            if ($amount == 0) {
+                $res = [];
+                $last = $total;
+                continue ;
+            }
             $last = bcsub($last , $amount , $scale);
+            if ($last == 0) {
+                $res = [];
+                $last = $total;
+                continue ;
+            }
             $res[] = $amount;
         }
     }
     return $res;
 }
-
