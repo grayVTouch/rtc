@@ -12,6 +12,7 @@ use App\WebSocket\Action\ChatAction;
 
 class Chat extends Auth
 {
+
     /**
      * 平台咨询-文本
      *
