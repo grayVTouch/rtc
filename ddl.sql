@@ -207,3 +207,9 @@ create table if not exists `rtc_sms_code` (
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '短信验证码';
+
+-- 私聊-删除消息
+-- 群聊-删除消息
+-- 黑名单
+-- 消息撤回
+-- 转发

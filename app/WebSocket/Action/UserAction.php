@@ -11,6 +11,7 @@ namespace App\WebSocket\Action;
 
 use App\Model\ApplicationModel;
 use App\Model\GroupModel;
+use App\Model\UserModel;
 use App\WebSocket\Auth;
 use function WebSocket\ws_config;
 
@@ -31,5 +32,22 @@ class UserAction extends Action
         $order = parse_order($param['order']);
         $res = ApplicationModel::list($param , $order , $param['limit']);
         return self::success($res);
+    }
+
+    public static function editUserInfo(Auth $auth , array $param)
+    {
+        $param['avatar'] = empty($param['avatar']) ? $auth->user->avatar : $param['avatar'];
+        $param['sex'] = empty($param['sex']) ? $auth->user->sex : $param['sex'];
+        $param['birthday'] = empty($param['birthday']) ? $auth->user->birthday : $param['birthday'];
+        $param['nickname'] = empty($param['nickname']) ? $auth->user->nickname : $param['nickname'];
+        $param['signature'] = empty($param['signature']) ? $auth->user->signature : $param['signature'];
+        UserModel::updateById($auth->user->id , [
+            'avatar' ,
+            'sex' ,
+            'birthday' ,
+            'nickname' ,
+            'signature' ,
+        ]);
+        return self::success();
     }
 }

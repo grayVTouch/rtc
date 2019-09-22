@@ -39,7 +39,7 @@ class GroupAction extends Action
         if ($group->enable_auth == 1) {
             // 开启了进群认证
             $param['type']      = 'group';
-            $param['op_type']   = 'add';
+            $param['op_type']   = 'app_group';
             $param['user_id']   = $group->user_id;
             $param['relation_user_id'] = $auth->user->id;
             $param['status']    = 'wait';
@@ -64,8 +64,8 @@ class GroupAction extends Action
     public static function inviteJoinGroup(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
-            'group_id' => 'required' ,
-            'relation_user_id' => 'required' ,
+            'group_id'          => 'required' ,
+            'relation_user_id'  => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -77,7 +77,7 @@ class GroupAction extends Action
         $relation_user_id = json_decode($param['relation_user_id'] , true);
         if (!UserModel::allExist($relation_user_id)) {
             // 检查用户是否存在（批量检测）
-            return self::error('用户信息包含不支持的用户' , 403);
+            return self::error('包含现有群成员，请重新选择' , 403);
         }
         try {
             DB::beginTransaction();
@@ -99,11 +99,14 @@ class GroupAction extends Action
                 return self::success($id);
             }
             // 未开启进群认证
+            $msg = "";
             foreach ($relation_user_id as $v)
             {
                 GroupMemberModel::u_insertGetId($v , $group->id);
+
             }
             DB::commit();
+            // 群通知
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();

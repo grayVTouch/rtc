@@ -38,4 +38,19 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 编辑信息
+    public function editUserInfo(array $param)
+    {
+        $param['nickname']  = $param['nickname'] ?? '';
+        $param['avatar']    = $param['avatar'] ?? '';
+        $param['sex']       = $param['sex'] ?? '';
+        $param['birthday']  = $param['birthday'] ?? '';
+        $param['signature'] = $param['signature'] ?? '';
+        $res = UserAction::editUserInfo($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }
