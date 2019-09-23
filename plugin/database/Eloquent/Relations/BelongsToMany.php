@@ -2,12 +2,12 @@
 
 namespace Illuminate\Database\Eloquent\Relations;
 
-use Illuminate\Support\Str;
-use InvalidArgumentException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class BelongsToMany extends Relation
 {
@@ -920,11 +920,11 @@ class BelongsToMany extends Relation
     /**
      * Create an array of new instances of the related models.
      *
-     * @param  array  $records
+     * @param  iterable  $records
      * @param  array  $joinings
      * @return array
      */
-    public function createMany(array $records, array $joinings = [])
+    public function createMany(iterable $records, array $joinings = [])
     {
         $instances = [];
 

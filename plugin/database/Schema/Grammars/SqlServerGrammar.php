@@ -2,8 +2,8 @@
 
 namespace Illuminate\Database\Schema\Grammars;
 
-use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Fluent;
 
 class SqlServerGrammar extends Grammar
 {
@@ -310,6 +310,21 @@ class SqlServerGrammar extends Grammar
     public function compileDisableForeignKeyConstraints()
     {
         return 'EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all";';
+    }
+
+    /**
+     * Compile the command to drop all foreign keys.
+     *
+     * @return string
+     */
+    public function compileDropAllForeignKeys()
+    {
+        return "DECLARE @sql NVARCHAR(MAX) = N'';
+            SELECT @sql += 'ALTER TABLE ' + QUOTENAME(OBJECT_NAME(parent_object_id)) 
+                + ' DROP CONSTRAINT ' + QUOTENAME(name) + ';'
+            FROM sys.foreign_keys;
+            
+            EXEC sp_executesql @sql;";
     }
 
     /**
