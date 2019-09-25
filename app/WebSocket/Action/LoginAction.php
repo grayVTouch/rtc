@@ -392,6 +392,7 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        $param['identifier'] = $base->identifier;
         $param['code'] = random(4 , 'mixed' , true);
         $param['type'] = $type;
         // 检查短信验证码
@@ -406,6 +407,7 @@ class LoginAction extends Action
         } else {
             SmsCodeModel::insertGetId(array_unit($param , [
                 'area_code' ,
+                'identifier' ,
                 'phone' ,
                 'code' ,
                 'type' ,
