@@ -35,6 +35,7 @@ class Login extends Base
 
     public function loginUsePhone(array $param)
     {
+        print_r($param);
         $param['area_code'] = $param['area_code'] ?? '';
         $param['phone'] = $param['phone'] ?? '';
         $param['sms_code'] = $param['sms_code'] ?? '';

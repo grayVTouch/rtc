@@ -171,10 +171,6 @@ class LoginAction extends Action
                 'area_code'    => 'required' ,
                 'phone'    => 'required' ,
                 'sms_code'    => 'required' ,
-            ] , [
-                'area_code.required' => '必须' ,
-                'phone.required' => '必须' ,
-                'sms_code.required' => '必须' ,
             ]);
             if ($validator->fails()) {
                 return self::error($validator->error());
