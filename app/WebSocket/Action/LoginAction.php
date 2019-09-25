@@ -165,30 +165,14 @@ class LoginAction extends Action
 
     public static function loginUsePhone(Base $base , array $param)
     {
-        if (!config('app.enable_guest')) {
-            // 未启用旅客模式
-            $validator = Validator::make($param , [
-                'area_code'    => 'required' ,
-                'phone'    => 'required' ,
-                'sms_code'    => 'required' ,
-            ]);
-            if ($validator->fails()) {
-                return self::error($validator->message());
-            }
-            $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
-            if (empty($user)) {
-                return self::error('手机号未注册');
-            }
-        } else {
-            // 旅客模式
-            $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
-            if (empty($user)) {
-                // 自动分配用户
-                $user = UserUtil::createTempUser($base->identifier);
-                if (empty($user)) {
-                    return self::error('创建访客账号失败' , 500);
-                }
-            }
+        // 未启用旅客模式
+        $validator = Validator::make($param , [
+            'area_code'    => 'required' ,
+            'phone'    => 'required' ,
+            'sms_code'    => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
         }
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
@@ -200,6 +184,10 @@ class LoginAction extends Action
         }
         if ($sms_code->code != $param['sms_code']) {
             return self::error('短信验证码不正确');
+        }
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        if (empty($user)) {
+            return self::error('手机号未注册');
         }
         // 登录成功
         $param['identifier'] = $user->identifier;
