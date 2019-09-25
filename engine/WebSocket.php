@@ -204,11 +204,17 @@ class WebSocket
             try {
                 $data = json_decode($frame->data , true);
                 if (!is_array($data)) {
-                    $server->disconnect($frame->fd , 400 , '数据格式不规范，请按照要求提供必要数据');
+                    $server->push($frame->fd , json_encode([
+                        'code' => 400 ,
+                        'data' => '数据格式不规范，请按照要求提供必要数据'
+                    ]));
                     return ;
                 }
             } catch(Exception $e) {
-                $server->disconnect($frame->fd , 400 , '数据解析异常，请按照要求提供必要数据');
+                $server->push($frame->fd , json_encode([
+                    'code' => 400 ,
+                    'data' => '数据解析异常，请按照要求提供必要数据'
+                ]));
                 return ;
             }
             // data 数据格式要求
@@ -293,7 +299,11 @@ class WebSocket
                 return ;
             }
             Log::log(json_encode($info) , 'exception');
-            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
+//            $server->disconnect($frame->fd , 500 , '服务器发生内部错误，服务器主动切断连接！请反馈错误信息给开发者');
+            $server->push($frame->fd , json_encode([
+                'code' => 500 ,
+                'data' => '服务器发生内部错误，请反馈错误信息给开发者'
+            ]));
         }
     }
 
