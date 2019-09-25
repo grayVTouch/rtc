@@ -43,16 +43,25 @@ return [
         'refresh_application' ,
         // 私聊信息
         'private_message' ,
+        // 群聊消息
+        'group_message' ,
+        // 指令：刷新群成员列表
+        'refresh_group_member' ,
     ] ,
 
     /**
      * 群推类型
-     * admin        后台用户
-     * user         前台用户
-     * all          所有用户
-     * designation  指定用户
      */
-    'push_role' => ['admin' , 'user', 'all' , 'designation'] ,
+    'push_role' => [
+        // 后台用户
+        'admin' ,
+        // 前台用户
+        'user',
+        // 所有用户
+        'all' ,
+        // 指定用户
+        'designation'
+    ] ,
 
     // 消息
     'message' => [
@@ -90,13 +99,17 @@ return [
 
     /**
      * 申请状态
-     *
-     * approve 通过
-     * refuse  拒绝
-     * wait    等待
-     * auto_approve 自动通过
      */
-    'application_status' => ['approve' , 'refuse' , 'wait' , 'auto_approve'] ,
+    'application_status' => [
+        // 通过
+        'approve' ,
+        // 拒绝
+        'refuse' ,
+        // 等待
+        'wait' ,
+        // 自动通过
+        'auto_approve'
+    ] ,
     // 用户可选的申请状态
     'application_status_for_user' => ['approve' , 'refuse'] ,
 
@@ -115,5 +128,13 @@ return [
         'app_group'         => '申请进群' ,
         'invite_into_group' => '邀请好友进群' ,
         'kick_group'        => '群主踢人出群' ,
+    ] ,
+
+    // 群类型
+    'group_type' => [
+        // 1-永久群
+        1 ,
+        // 2-时效群
+        2 ,
     ] ,
 ];

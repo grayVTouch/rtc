@@ -45,15 +45,62 @@ function check_price($price){
 
 // 检查年份
 function check_year($year){
-    $reg = '/^\d{4}$/';
+    return check_datetime($year , 'year');
+}
 
-    return (bool) preg_match($reg , $year);
+function check_month($date)
+{
+    return check_datetime($date , 'month');
+}
+
+function check_date($date)
+{
+    return check_datetime($date , 'date');
+}
+
+function check_hour($date)
+{
+    return check_datetime($date , 'hour');
+}
+
+function check_minute($date)
+{
+    return check_datetime($date , 'minute');
+}
+
+function check_second($date)
+{
+    return check_datetime($date , 'second');
 }
 
 // 检查日期格式
-function check_date($date){
-    $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1])$/';
-
+function check_datetime($date , $type = 'all'){
+    switch ($type)
+    {
+        case 'all':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1]) ([01][0-9]|2[0-3])\-[0-5][0-9]\-[0-5][0-9]$/';
+            break;
+        case 'year':
+            $reg = '/^\d{4}$/';
+            break;
+        case 'month':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])$/';
+            break;
+        case 'date':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1])$/';
+            break;
+        case 'hour':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1]) ([01][0-9]|2[0-3])$/';
+            break;
+        case 'minute':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1]) ([01][0-9]|2[0-3])\-[0-5][0-9]$/';
+            break;
+        case 'second':
+            $reg = '/^\d{4}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1]) ([01][0-9]|2[0-3])\-[0-5][0-9]\-[0-5][0-9]$/';
+            break;
+        default:
+            throw new Exception('不支持的 type');
+    }
     return (bool) preg_match($reg , $date);
 }
 

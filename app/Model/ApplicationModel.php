@@ -59,6 +59,5 @@ class ApplicationModel extends Model
         return (int) (self::where('user_id' , $user_id)
             ->whereIn('status' , ['wait'])
             ->count());
-
     }
 }

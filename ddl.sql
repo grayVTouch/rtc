@@ -60,12 +60,9 @@ create table if not exists `rtc_group` (
   user_id int unsigned default 0 comment '群主：rtc_user.id' ,
   name varchar(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
-  `alias` varchar(500) default '' comment '群别名' ,
-  `top` tinyint default 0 comment '群置顶：0-否 1-是' ,
-  tip tinyint default 1 comment '消息提醒（消息免打扰）？0-否 1-是' ,
   is_temp tinyint default 0 comment '是否是临时群: 0-否 1-是' ,
   is_service tinyint default 0 comment '是否是服务通道' ,
-  auth tinyint default 0 comment '群认证：0-否 1-是' ,
+  auth tinyint default 0 comment '进群认证：0-否 1-是' ,
   announcement varchar(5000) default '' comment '群公告' ,
   introduction varchar(5000) default '' comment '群简介' ,
   `type` tinyint default 1 comment '群类型：1-永久群 2-时效群' ,
@@ -126,6 +123,7 @@ create table if not exists `rtc_message` (
   chat_id varchar(255) default '' comment '会话id，生成规则：minUserId_maxUserId' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
   message text comment '消息' ,
+  extra text comment '额外数据' ,
   flag varchar(255) default 'normal' comment '消息标志：burn-阅后即焚消息；normal-正常消息' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -138,6 +136,7 @@ create table if not exists `rtc_group_message` (
   group_id int unsigned default 0 comment 'rtc_group.id' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
   message text comment '消息' ,
+  extra text comment '额外数据' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';

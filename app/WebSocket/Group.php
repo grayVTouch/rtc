@@ -21,8 +21,8 @@ class Group extends Auth
      */
     public function appJoinGroup(array $param)
     {
-        $param['group_id'] = $param['group_id'] ?? '';
-        $param['remark'] = $param['remark'] ?? '';
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['remark']    = $param['remark'] ?? '';
         $res = GroupAction::appJoinGroup($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
@@ -77,6 +77,26 @@ class Group extends Auth
         $param['user_id'] = $param['user_id'] ?? '';
         $param['group_id'] = $param['group_id'] ?? '';
         $res = GroupAction::kickMember($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    /**
+     * 创建群组
+     *
+     * @param array $param
+     * @return mixed
+     * @throws \Exception
+     */
+    public function create(array $param)
+    {
+        $param['name'] = $param['name'] ?? '';
+        $param['type'] = $param['type'] ?? '';
+        $param['expire'] = $param['expire'] ?? '';
+        $param['user_ids'] = $param['user_ids'] ?? '';
+        $res = GroupAction::create($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }

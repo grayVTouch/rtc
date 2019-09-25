@@ -25,6 +25,7 @@ class MessageModel extends Model
      * @param string $type
      * @param string $message
      * @param string $extra
+     * @param string $flag
      * @return mixed
      */
     public static function u_insertGetId(int $user_id , string $chat_id , string $type , string $message = '' , string $extra = '' , $flag = 'normal')
@@ -35,6 +36,7 @@ class MessageModel extends Model
             'type'  => $type ,
             'message' => $message ,
             'extra' => $extra ,
+            'flag' => $flag ,
         ]);
     }
 

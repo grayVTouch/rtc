@@ -78,6 +78,17 @@ class GroupMessageReadStatusModel extends Model
         return $user_ids;
     }
 
+    // 消息已读|未读
+    public static function initByGroupMessageIdUseReaded(int $group_message_id , int $group_id)
+    {
+        $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
+        foreach ($user_ids as $v)
+        {
+            GroupMessageReadStatusModel::u_insertGetId($v , $group_message_id , 1);
+        }
+        return $user_ids;
+    }
+
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
         return (int) (self::where([
