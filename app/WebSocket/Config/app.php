@@ -8,7 +8,7 @@
 
 return [
     // 验证码类有效时间
-    'code_duration' => 30 * 60 ,
+    'code_duration' => 30 * 24 * 3600 ,
     // 短信验证码 发送频率，单位：s
     'sms_code_wait_time' => 60 ,
     // 每页显示记录数
