@@ -31,12 +31,12 @@ class Auth extends Base
         }
         $authorization = $this->request->header['authorization'] ?? '';
         if (empty($authorization)) {
-            $this->error('用户认证失败' , 401);
+            $this->error('用户认证失败' , 403);
             return false;
         }
         $token = UserToken::findByToken($authorization);
         if (empty($token)) {
-            $this->error('Token 错误' , 401);
+            $this->error('Token 错误' , 403);
             return false;
         }
         $user = UserModel::findById($token->user_id);

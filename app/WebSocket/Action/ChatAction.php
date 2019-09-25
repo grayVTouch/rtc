@@ -120,29 +120,9 @@ class ChatAction extends Action
      */
     public static function send(Auth $auth , $type , array $param = [])
     {
-        $validator = Validator::make($param , [
-            'friend_id' => 'required' ,
-            'message' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $type_range = config('business.message_type');
-        if (!in_array($type , $type_range)) {
-            return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
-        }
-        $param['user_id'] = $auth->user->id;
-        // 检查是否时好友
-        $relation = FriendModel::findByUserIdAndFriendId($param['user_id'] , $param['friend_id']);
-        if (empty($relation)) {
-            // todo 这个地方可能需要返回一个特殊的状态码
-            return self::error('你们还不是好友，禁止操作' , 403);
-        }
-        $param['type'] = $type;
-        // 该条消息是否是阅后即焚的消息
-        $param['flag'] = $relation->burn == 1 ? 'burn' : 'normal';
-        $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
-        return ChatUtil::send($auth , $param['user_id'] , $param['friend_id'] , $type , $param['message'] , $param['extra'] , $param['flag']);
+        $param['user_id']   = $auth->user->id;
+        $param['type']      = $type;
+        return ChatUtil::send($auth , $param);
     }
 
     /**
@@ -152,53 +132,6 @@ class ChatAction extends Action
      */
     public static function groupSend(Auth $auth , $type , array $param = [])
     {
-        $validator = Validator::make($param , [
-            'group_id' => 'required' ,
-            '' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $type_range = config('business.message_type');
-        if (!in_array($type , $type_range)) {
-            return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
-        }
-        $param['user_id'] = $auth->user->id;
-        // 检查是否时好友
-        $relation = FriendModel::findByUserIdAndFriendId($param['user_id'] , $param['friend_id']);
-        if (empty($relation)) {
-            // todo 这个地方可能需要返回一个特殊的状态码
-            return self::error('你们还不是好友，禁止操作' , 403);
-        }
-        $param['type'] = $type;
-        // 该条消息是否是阅后即焚的消息
-        $param['flag'] = $relation->burn ? 'burn' : 'normal';
-        $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
-        try {
-            DB::beginTransaction();
-            $id = MessageModel::insertGetId(array_unit($param , [
-                'user_id' ,
-                'chat_id' ,
-                'message' ,
-                'type' ,
-                'flag' ,
-            ]));
-            MessageReadStatusModel::initByMessageId($id , $param['user_id'] , $param['friend_id']);
-            $msg = MessageModel::findById($id);
-            MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
-            DB::commit();
-            $user_ids = [$param['user_id'] , $param['friend_id']];
-            $auth->sendAll($user_ids , 'private_message' , $msg);
-            $auth->pushAll($user_ids , 'refresh_session');
-            $auth->pushAll($user_ids , 'refresh_unread_count');
-            // todo app 推送
-            if (ws_config('app.enable_app_push')) {
 
-            }
-            return self::success($msg);
-        } catch(Exception $e) {
-            DB::rollBack();
-            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
-        }
     }
 }

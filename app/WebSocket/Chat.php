@@ -35,6 +35,7 @@ class Chat extends Auth
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
         $res = ChatAction::send($this , 'text' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -47,6 +48,7 @@ class Chat extends Auth
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
         $res = ChatAction::send($this , 'image' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -59,6 +61,7 @@ class Chat extends Auth
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
         $res = ChatAction::send($this , 'voice' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

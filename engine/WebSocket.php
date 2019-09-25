@@ -134,10 +134,12 @@ class WebSocket
     {
         $this->isOpen = true;
         echo '存在客户端连接' . PHP_EOL;
+        $websocket->push($http->fd , 'hello world!!');
     }
 
     public function close(Server $server , int $fd , int $reacter_id)
     {
+        var_dump('存在客户端下线');
         $this->isOpen = false;
         $identifier = MiscRedis::fdMappingIdentifier($fd);
         if (empty($identifier)) {
