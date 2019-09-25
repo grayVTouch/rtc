@@ -32,12 +32,13 @@ class Auth extends Base
         $token = UserToken::findByToken($this->token);
         if ($this->debug != 'running') {
             if (empty($token)) {
-                $this->conn->disconnect($this->fd , 401 , '用户认证失败');
+//                $this->conn->disconnect($this->fd , 403 , '用户认证失败');
+//                $this->conn
                 return false;
             }
             $user = UserModel::findById($token->user_id);
             if (empty($user)) {
-                $this->conn->disconnect($this->fd , 404 , '用户不存在');
+//                $this->conn->disconnect($this->fd , 403 , '用户不存在');
                 return false;
             }
             $this->user = $user;

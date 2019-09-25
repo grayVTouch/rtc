@@ -11,11 +11,15 @@ namespace App\Util;
 
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
+use App\Model\GroupMessageModel;
+use App\Model\GroupMessageReadStatusModel;
+use App\Model\GroupModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
 use function core\array_unit;
+use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +118,11 @@ class ChatUtil extends Util
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
         }
+        // 检查群是否还存在
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在！' , 404);
+        }
         // 检查是否时好友
         $exist = GroupMemberModel::exist($param['user_id'] , $param['group_id']);
         if (!$exist) {
@@ -123,28 +132,28 @@ class ChatUtil extends Util
         $param['extra'] = $param['extra'] ?? '';
         try {
             DB::beginTransaction();
-            $id = MessageModel::insertGetId(array_unit($param , [
+            $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
                 'user_id' ,
-                'chat_id' ,
+                'group_id' ,
                 'message' ,
                 'type' ,
-                'flag' ,
+                'extra' ,
             ]));
-            MessageReadStatusModel::initByMessageId($id , $param['user_id'] , $param['friend_id']);
-            $msg = MessageModel::findById($id);
-            MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
+            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $param['user_id']);
+            $msg = GroupMessageModel::findById($group_message_id);
+            MessageUtil::handleGroupMessage($msg);
+            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
             DB::commit();
-            $user_ids = [$param['user_id'] , $param['friend_id']];
-            $auth->sendAll($user_ids , 'private_message' , $msg);
-            $auth->pushAll($user_ids , 'refresh_session');
-            $auth->pushAll($user_ids , 'refresh_unread_count');
+            $base->sendAll($user_ids , 'group_message' , $msg);
+            $base->pushAll($user_ids , 'refresh_session');
+            $base->pushAll($user_ids , 'refresh_unread_count');
             if (ws_config('app.enable_app_push')) {
                 // todo app 推送
             }
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
-            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+            throw $e;
         }
     }
 }

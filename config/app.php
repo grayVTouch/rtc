@@ -27,7 +27,7 @@ return [
     // redis 默认过期时间（1个月）
     'timeout' => 1 * 30 * 24 * 3600 ,
     // 是否启用访客模式
-    'enable_guest' => true ,
+    'enable_guest' => false ,
     // 单个客服最多接听的访客数量
     'number_of_receptions' => 10 ,
     // 客服最长等待时间 2min

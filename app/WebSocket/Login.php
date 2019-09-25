@@ -82,6 +82,7 @@ class Login extends Base
     {
         $param['area_code'] = $param['area_code'] ?? '';
         $param['phone'] = $param['phone'] ?? '';
+        print_r($param);
         $res = LoginAction::smsCode($this , 1 , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

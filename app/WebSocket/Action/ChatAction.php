@@ -132,6 +132,8 @@ class ChatAction extends Action
      */
     public static function groupSend(Auth $auth , $type , array $param = [])
     {
-
+        $param['user_id']   = $auth->user->id;
+        $param['type']      = $type;
+        return ChatUtil::groupSend($auth , $param);
     }
 }

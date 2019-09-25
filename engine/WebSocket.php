@@ -133,8 +133,8 @@ class WebSocket
     public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
-        echo '存在客户端连接' . PHP_EOL;
-        $websocket->push($http->fd , 'hello world!!');
+        var_dump('存在客户端连接');
+        $websocket->push($http->fd , '你已经成功连接客户端');
     }
 
     public function close(Server $server , int $fd , int $reacter_id)
