@@ -393,7 +393,7 @@ class LoginAction extends Action
             return self::error($validator->message());
         }
         $param['identifier'] = $base->identifier;
-        $param['code'] = random(4 , 'mixed' , true);
+        $param['code'] = random(4 , 'number' , true);
         $param['type'] = $type;
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , $type);
