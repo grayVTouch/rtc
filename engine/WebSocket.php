@@ -134,7 +134,7 @@ class WebSocket
     {
         $this->isOpen = true;
         var_dump('存在客户端连接');
-        $websocket->push($http->fd , '你已经成功连接客户端');
+//        $websocket->push($http->fd , '你已经成功连接客户端');
     }
 
     public function close(Server $server , int $fd , int $reacter_id)

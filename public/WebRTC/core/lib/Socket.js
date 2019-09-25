@@ -202,7 +202,9 @@
         // 发送数据
         send: function(router , data , callback){
             data = this.data(router , data);
+
             this.callback[data.request] = callback;
+
             return this.websocketSend(data);
         } ,
 
