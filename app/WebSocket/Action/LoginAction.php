@@ -39,7 +39,7 @@ class LoginAction extends Action
                 'unique_code.required' => '必须' ,
             ]);
             if ($validator->fails()) {
-                return self::error($validator->error());
+                return self::error($validator->message());
             }
             $user = UserModel::findByUniqueCode($param['unique_code']);
             if (empty($user)) {
@@ -106,7 +106,7 @@ class LoginAction extends Action
                 'password.required' => '必须' ,
             ]);
             if ($validator->fails()) {
-                return self::error($validator->error());
+                return self::error($validator->message());
             }
             $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
             if (empty($user)) {
@@ -173,13 +173,11 @@ class LoginAction extends Action
                 'sms_code'    => 'required' ,
             ]);
             if ($validator->fails()) {
-                return self::error($validator->error());
+                return self::error($validator->message());
             }
             $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
             if (empty($user)) {
-                return self::error([
-                    'phone' => '未找到当前提供的 username 对应的用户' ,
-                ]);
+                return self::error('手机号未注册');
             }
         } else {
             // 旅客模式
@@ -195,19 +193,13 @@ class LoginAction extends Action
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
         if (empty($sms_code)) {
-            return self::error([
-                'sms_code' => '请先发送短信验证码' ,
-            ]);
+            return self::error('请先发送短信验证码');
         }
         if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
-            return self::error([
-                'sms_code' => '验证码已经过期' ,
-            ]);
+            return self::error('请先发送短信验证码');
         }
         if ($sms_code->code != $param['sms_code']) {
-            return self::error([
-                'sms_code' => '短信验证码不正确' ,
-            ]);
+            return self::error('短信验证码不正确');
         }
         // 登录成功
         $param['identifier'] = $user->identifier;
@@ -258,7 +250,7 @@ class LoginAction extends Action
             'sms_code'  => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
@@ -343,44 +335,32 @@ class LoginAction extends Action
             'sms_code'  => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
-            return self::error([
-                'role' => '不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range) ,
-            ]);
+            return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range) ,);
         }
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);
         if (empty($sms_code)) {
-            return self::error([
-                'sms_code' => '请先发送短信验证码' ,
-            ]);
+            return self::error('请先发送短信验证码');
         }
         if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
-            return self::error([
-                'sms_code' => '验证码已经过期' ,
-            ]);
+            return self::error('验证码已经过期');
         }
         if ($sms_code->code != $param['sms_code']) {
-            return self::error([
-                'sms_code' => '短信验证码不正确' ,
-            ]);
+            return self::error('短信验证码不正确');
         }
         // 检查手机号码是否被使用过
         $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
         if (!empty($user)) {
-            return self::error([
-                'phone' => '该手机号码已经注册，请直接登录' ,
-            ]);
+            return self::error('该手机号码已经注册，请直接登录');
         }
         if (!empty($param['invite_code'])) {
             $referrer = UserModel::findByIdentifierAndInviteCode($base->identifier , $param['invite_code']);
             if (empty($referrer)) {
-                return self::error([
-                    'invite_code' => '邀请码错误，未找到该邀请码对应的用户' ,
-                ]);
+                return self::error('邀请码错误，未找到该邀请码对应的用户');
             }
             $param['p_id'] = $referrer->id;
         } else {
@@ -422,7 +402,7 @@ class LoginAction extends Action
             'phone'     => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $param['code'] = random(4 , 'mixed' , true);
         $param['type'] = $type;

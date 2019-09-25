@@ -31,7 +31,7 @@ class PushAction extends Action
             'data'      => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $param['push_type'] = 'single';
         $param['role'] = 'user';
@@ -58,7 +58,7 @@ class PushAction extends Action
             'data'      => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $param['push_type'] = 'multiple';
         $param['role'] = in_array($param['role'] , config('business.push_role')) ? $param['role'] : 'all';
@@ -100,7 +100,7 @@ class PushAction extends Action
             'is_read'      => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         // 检查是否已经存在
         $param['user_id'] = $auth->user->id;

@@ -32,7 +32,7 @@ class PushAction extends Action
             'is_read'      => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         // 检查是否已经存在
         $param['user_id'] = $auth->user->id;

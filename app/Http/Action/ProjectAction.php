@@ -21,7 +21,7 @@ class ProjectAction extends Action
             'name' => 'required' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $param['identifier'] = MiscUtil::identifier();
         if (!empty(ProjectModel::findByIdentifier($param['identifier']))) {

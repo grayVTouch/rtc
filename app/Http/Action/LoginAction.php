@@ -38,7 +38,7 @@ class LoginAction extends Action
             'role.required' => '必须' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
@@ -92,7 +92,7 @@ class LoginAction extends Action
             'unique_code.required' => '必须' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $user = UserModel::findByUniqueCode($param['unique_code']);
         if (empty($user)) {
@@ -125,7 +125,7 @@ class LoginAction extends Action
             'password.required' => '必须' ,
         ]);
         if ($validator->fails()) {
-            return self::error($validator->error());
+            return self::error($validator->message());
         }
         $user = UserModel::findByUsername($param['username']);
         if (empty($user)) {
