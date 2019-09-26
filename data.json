@@ -1,18 +1,15 @@
 {
-  "router": "/Chat/sendImageForPrivate",
-  "identifier": "abcdefg",
-  "user_id": 2 ,
+  "router": "/Group/create",
+  "identifier": "test",
+  "user_id": 1 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-      "friend_id": 2 ,
-      "message": [
-        "http://aliyun.com/01.jpg" ,
-        "http://aliyun.com/02.jpg" ,
-        "http://aliyun.com/03.jpg"
-      ]
-
+    "name": 2 ,
+    "type": 1 ,
+    "expire": "",
+    "user_ids": "[1,2]",
   }
 }
