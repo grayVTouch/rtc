@@ -53,4 +53,15 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 搜索好友
+    public function search(array $param)
+    {
+        $param['keyword'] = $param['keyword'] ?? '';
+        $res = UserAction::search($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

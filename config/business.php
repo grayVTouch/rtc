@@ -47,6 +47,8 @@ return [
         'group_message' ,
         // 指令：刷新群成员列表
         'refresh_group_member' ,
+        // 指令：刷新群列表
+        'refresh_group' ,
     ] ,
 
     /**
@@ -110,8 +112,14 @@ return [
         // 自动通过
         'auto_approve'
     ] ,
+
     // 用户可选的申请状态
-    'application_status_for_user' => ['approve' , 'refuse'] ,
+    'application_status_for_client' => [
+        // 通过
+        'approve' ,
+        // 拒绝
+        'refuse'
+    ] ,
 
     /**
      * 短信验证码类型
@@ -128,6 +136,14 @@ return [
         'app_group'         => '申请进群' ,
         'invite_into_group' => '邀请好友进群' ,
         'kick_group'        => '群主踢人出群' ,
+    ] ,
+
+    // 群：申请类型
+    'app_type_for_group' => [
+        // 申请进群
+        'app_group' ,
+        // 邀请进群
+        'invite_into_group' ,
     ] ,
 
     // 群类型

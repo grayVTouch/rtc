@@ -66,6 +66,7 @@ create table if not exists `rtc_group` (
   announcement varchar(5000) default '' comment '群公告' ,
   introduction varchar(5000) default '' comment '群简介' ,
   `type` tinyint default 1 comment '群类型：1-永久群 2-时效群' ,
+  `anonymous` tinyint default 1 comment '匿名聊天：0-否 1-是' ,
   `expire` datetime default null comment '当 type = 2时，该字段有效，表示群的过期时间' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -108,10 +109,11 @@ create table if not exists `rtc_application` (
   type varchar(255) default '' comment '类型：private-私聊；group-群聊' ,
   op_type varchar(255) default '' comment '操作类型：app_friend-申请成为好友；app_group-申请进群；invite_into_group-邀请好友进群；...其他待扩充' ,
   user_id int unsigned default 0 comment '受理方: rtc_user.id' ,
+  invite_user_id int unsigned default 0 comment '邀请用户（群用户）：rtc_user.id' ,
   group_id int unsigned default 0 comment '如果 type = group，那么这个字段将会有用' ,
   relation_user_id varchar(255) default '' comment '如果是邀请用户进群，那么这个字段就会有用，关联用户，rtc_user.id 的集合，用,分割；如果是单人，那么就是 rtc_user.id' ,
   status varchar(500) default 'wait' comment '申请状态：approve-同意；refuse-拒绝；wait-等待处理' ,
-  remark varchar(500) default '' comment '备注信息（申请消息）' ,
+  remark varchar(500) default '' comment '备注信息' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '申请记录';

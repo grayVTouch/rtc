@@ -64,9 +64,9 @@ class FriendAction extends Action
             DB::commit();
             if ($friend->user_option->friend_auth) {
                 // 推送申请数量更新
-                PushUtil::single($auth->identifier , $param['friend_id'] , 'refresh_application');
+                $auth->push($param['friend_id'] , 'refresh_application');
                 // 推送总未读消息数量更新
-                PushUtil::single($auth->identifier , $param['friend_id'] , 'refresh_unread_count');
+                $auth->push($param['friend_id'] , 'refresh_unread_count');
                 // todo app推送
             }
             return self::success('操作成功');
@@ -75,6 +75,8 @@ class FriendAction extends Action
             throw $e;
         }
     }
+
+
 
     public static function decideApp(Auth $auth , array $param)
     {
@@ -85,7 +87,7 @@ class FriendAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $range = config('business.application_status_for_user');
+        $range = config('business.application_status_for_client');
         if (!in_array($param['status'] , $range)) {
             return self::error('不支持的 status 值，当前受支持的值有 ' . implode(',' , $range) , 403);
         }

@@ -13,6 +13,7 @@ use App\Model\ApplicationModel;
 use App\Model\GroupModel;
 use App\Model\UserModel;
 use App\WebSocket\Auth;
+use Core\Lib\Validator;
 use function WebSocket\ws_config;
 
 class UserAction extends Action
@@ -49,5 +50,24 @@ class UserAction extends Action
             'signature' ,
         ]);
         return self::success();
+    }
+
+    // 搜索好友
+    public static function search(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'keyword' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = [];
+        if ($user_use_id = UserModel::findById($param['id'])) {
+            $res[] = $user_use_id;
+        }
+        if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['keyword'])) {
+            $res[] = $user_use_phone;
+        }
+        return self::success($res);
     }
 }

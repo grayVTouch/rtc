@@ -200,4 +200,21 @@ class UserModel extends Model
         UserOptionModel::single($res->user_option);
         return $res;
     }
+
+    public static function findByIdentifierAndPhone(string $identifier , string $phone)
+    {
+        $res = self::with(['userOption'])
+            ->where([
+                ['identifier' , '=' , $identifier] ,
+                ['phone' , '=' , $phone] ,
+            ])
+            ->first();
+        if (empty($res)) {
+            return ;
+        }
+        $res = convert_obj($res);
+        self::single($res);
+        UserOptionModel::single($res->user_option);
+        return $res;
+    }
 }
