@@ -46,3 +46,21 @@ function array_unit(array $arr = [] , array $keys = [])
     }
     return $res;
 }
+
+// 检查某个数组是否包含重复的值（仅适用于一维数组）
+function has_repeat_in_array(array $arr)
+{
+    $res = [];
+    foreach ($arr as $v)
+    {
+        if (isset($res[$v])) {
+            $res[$v]++;
+        } else {
+            $res[$v] = 1;
+        }
+        if ($res[$v] > 1) {
+            return true;
+        }
+    }
+    return false;
+}

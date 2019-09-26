@@ -18,6 +18,7 @@ use App\Util\ChatUtil;
 use App\Util\PushUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
+use function core\has_repeat_in_array;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use App\Model\ApplicationModel;
@@ -343,14 +344,19 @@ class GroupAction extends Action
                 ]);
             }
         }
+        $param['user_id'] = $auth->user->id;
         $param['expire'] = empty($param['expire']) ? null : $param['expire'];
         $user_ids = json_decode($param['user_ids'] , true);
         $user_ids = empty($user_ids) ? [] : $user_ids;
-        $single = empty($user_ids) ? true : false;
+        if (in_array($auth->user->id , $user_ids)) {
+            $user_ids = array_diff($user_ids , [$auth->user->id]);
+        }
+        $single   = empty($user_ids) ? true : false;
         $user_ids[] = $auth->user->id;
         try {
             DB::beginTransaction();
             $group_id = GroupModel::insertGetId(array_unit($param , [
+                'user_id' ,
                 'name' ,
                 'type' ,
                 'expire' ,
@@ -375,7 +381,7 @@ class GroupAction extends Action
                 // 发送邀请通知
                 $member_string = mb_substr($member_string , 0 , mb_strlen($member_string) - 2);
                 $group_message_id = GroupMessageModel::u_insertGetId($auth->user->id , $group_id , 'notification' , sprintf($message , $auth->user->username , $member_string) , json_encode($user_ids));
-                GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $auth->user->id);
+                GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group_id , $auth->user->id);
                 $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
             }
             DB::commit();

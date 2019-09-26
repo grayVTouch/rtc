@@ -22,7 +22,7 @@ class Group extends Auth
     public function appJoinGroup(array $param)
     {
         $param['group_id']  = $param['group_id'] ?? '';
-        $param['remark']    = $param['remark'] ?? '';
+//        $param['remark']    = $param['remark'] ?? '';
         $res = GroupAction::appJoinGroup($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
@@ -40,7 +40,7 @@ class Group extends Auth
     {
         $param['group_id'] = $param['group_id'] ?? '';
         $param['relation_user_id'] = $param['relation_user_id'] ?? '';
-        $param['remark'] = $param['remark'] ?? '';
+//        $param['remark'] = $param['remark'] ?? '';
         $res = GroupAction::inviteJoinGroup($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);

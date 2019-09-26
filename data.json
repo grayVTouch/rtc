@@ -1,5 +1,5 @@
 {
-  "router": "/Group/create",
+  "router": "/Group/appJoinGroup",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,9 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "name": 2 ,
-    "type": 1 ,
-    "expire": "",
-    "user_ids": "[1,2]",
+    "group_id": 2
   }
 }
