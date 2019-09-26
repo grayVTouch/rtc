@@ -62,7 +62,7 @@ class UserAction extends Action
             return self::error($validator->message());
         }
         $res = [];
-        if ($user_use_id = UserModel::findById($param['id'])) {
+        if ($user_use_id = UserModel::findById($param['keyword'])) {
             $res[] = $user_use_id;
         }
         if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['keyword'])) {
