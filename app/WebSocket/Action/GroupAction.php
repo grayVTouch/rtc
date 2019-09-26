@@ -343,6 +343,7 @@ class GroupAction extends Action
                 ]);
             }
         }
+        $param['expire'] = empty($param['expire']) ? null : $param['expire'];
         $user_ids = json_decode($param['user_ids'] , true);
         $user_ids = empty($user_ids) ? [] : $user_ids;
         $single = empty($user_ids) ? true : false;
