@@ -41,8 +41,9 @@ return [
     // host
     'host' => $host ,
     // 默认头像
-    'avatar'        => "{$host}/static/image/avatar.png" ,
+//    'avatar'        => "{$host}/static/image/avatar.png" ,
+    'avatar'        => "" ,
     // 默认群头像
-    'group_image'   => "{$host}/static/image/group.png" ,
+    'group_image'   => "" ,
 
 ];
