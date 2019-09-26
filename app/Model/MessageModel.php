@@ -73,16 +73,20 @@ class MessageModel extends Model
     public static function history(array $filter = [] , array $order = [] , int $limit = 20)
     {
         $filter['limit_id'] = $filter['limit_id'] ?? '';
+        $filter['chat_id'] = $filter['chat_id'] ?? '';
         $order['field'] = $order['field'] ?? 'id';
-        $order['value'] = $order['field'] ?? 'desc';
-        $where = [];
+        $order['value'] = $order['value'] ?? 'desc';
+        $where = [
+            ['chat_id' , '=' , $filter['chat_id']] ,
+        ];
         if ($filter['limit_id'] != '') {
             $where[] = ['id' , '<' , $filter['limit_id']];
         }
         $res = self::with(['user'])
             ->where($where)
             ->orderBy($order['field'] , $order['value'])
-            ->limit($limit);
+            ->limit($limit)
+            ->get();
         $res = convert_obj($res);
         foreach ($res as $v)
         {

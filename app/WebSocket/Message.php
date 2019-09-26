@@ -47,6 +47,7 @@ class Message extends Auth
     // 历史记录
     public function history(array $param)
     {
+        $param['friend_id'] = $param['friend_id'] ?? '';
         $param['limit_id'] = $param['limit_id'] ?? '';
         $param['order'] = $param['order'] ?? '';
         $param['limit'] = $param['limit'] ?? '';

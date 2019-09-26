@@ -10,9 +10,11 @@ namespace App\WebSocket\Action;
 
 
 use App\Model\MessageModel;
+use App\Util\ChatUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\Util\UserUtil;
+use Core\Lib\Validator;
 use function WebSocket\ws_config;
 
 class MessageAction extends Action
@@ -42,13 +44,19 @@ class MessageAction extends Action
     // 历史记录
     public static function history(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $param['limit'] = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
-        $param['user_id'] = $auth->user->id;
+        $param['chat_id'] = ChatUtil::chatId($auth->user->id , $param['friend_id']);
         $order = parse_order($param['order']);
         $res = MessageModel::history($param , $order , $param['limit']);
         foreach ($res as $v)
         {
-            MessageUtil::handleMessage($v , $param['user_id'] , $param['friend_id']);
+            MessageUtil::handleMessage($v , $auth->user->id , $param['friend_id']);
         }
         return self::success($res);
     }

@@ -44,7 +44,7 @@ class GroupAction extends Action
             return self::error('未找到对应群信息' , 404);
         }
         // 检查是否已经在群里面
-        if (GroupMemberModel::exist($auth->user->id , $param['group'])) {
+        if (GroupMemberModel::exist($auth->user->id , $param['group_id'])) {
             return self::success('你已经是群成员' , 403);
         }
         $param['type']      = 'group';
@@ -52,7 +52,7 @@ class GroupAction extends Action
         $param['user_id']   = $group->user_id;
         $param['relation_user_id'] = json_encode([$auth->user->id]);
         $param['remark']    = sprintf('"%s" 申请进群' , $auth->user->nickname);
-        if ($group->enable_auth == 1) {
+        if ($group->auth == 1) {
             // 开启了进群认证
             $param['status']    = 'wait';
             $id = ApplicationModel::insertGetId(array_unit($param , [
@@ -91,7 +91,7 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_application');
             $auth->pushAll($user_ids , 'refresh_group_member');
-            $message = sprintf('"%s" 加入了群聊');
+            $message = sprintf('"%s" 加入了群聊' , $auth->user->nickname);
             // 发送群通知
             ChatUtil::groupSend($auth , [
                 'user_id' => 0 ,
@@ -142,24 +142,27 @@ class GroupAction extends Action
         $param['remark'] = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $remark);
         $param['user_id']   = $group->user_id;
         $param['invite_user_id'] = $auth->user->id;
-        if ($group->enable_auth == 1) {
-            // 开启了进群认证
-            $param['status']    = 'wait';
-            $id = ApplicationModel::insertGetId(array_unit($param , [
-                'type' ,
-                'op_type' ,
-                'user_id' ,
-                'group_id' ,
-                'relation_user_id' ,
-                'status' ,
-                'remark' ,
-            ]));
-            $auth->push($group->user_id , 'refresh_application');
-            $auth->push($group->user_id , 'refresh_unread_count');
-            if (ws_config('app.enable_app_push')) {
-                // todo 发送 app 推送
+        if ($auth->user->id != $group->user_id) {
+            // 非群组
+            if ($group->auth == 1) {
+                // 开启了进群认证
+                $param['status']    = 'wait';
+                $id = ApplicationModel::insertGetId(array_unit($param , [
+                    'type' ,
+                    'op_type' ,
+                    'user_id' ,
+                    'group_id' ,
+                    'relation_user_id' ,
+                    'status' ,
+                    'remark' ,
+                ]));
+                $auth->push($group->user_id , 'refresh_application');
+                $auth->push($group->user_id , 'refresh_unread_count');
+                if (ws_config('app.enable_app_push')) {
+                    // todo 发送 app 推送
+                }
+                return self::success($id);
             }
-            return self::success($id);
         }
         // 没有开启进群认证
         try {
@@ -219,6 +222,9 @@ class GroupAction extends Action
         if (!in_array($app->op_type , $op_type)) {
             return self::error('该申请的记录 op_type 类型错误！禁止操作' , 403);
         }
+        if (!in_array($app->status , ['wait'])) {
+            return self::error('当前申请记录的状态禁止操作');
+        }
         try {
             DB::beginTransaction();
             ApplicationModel::updateById($app->id , [
@@ -275,7 +281,7 @@ class GroupAction extends Action
                     // 如果是邀请进群，那么给邀请用户推送一个结果通知
                 }
             }
-            return self::error();
+            return self::success();
         } catch(Exception $e) {
             DB::rollBack();
             throw $e;

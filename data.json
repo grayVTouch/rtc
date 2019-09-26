@@ -1,5 +1,5 @@
 {
-  "router": "/Group/appJoinGroup",
+  "router": "/Chat/history",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,6 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "group_id": 2
+    "friend_id": 2
   }
 }
