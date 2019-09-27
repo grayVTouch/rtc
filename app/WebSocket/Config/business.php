@@ -93,7 +93,7 @@ return [
         'voice_call' ,
         // 消息集合
         'message_set' ,
-        // 群通知
+        // 通知
         'notification' ,
         // 随机红包
         'random_red_envelope' ,

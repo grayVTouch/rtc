@@ -8,6 +8,7 @@
 
 namespace App\Model;
 
+use function core\convert_obj;
 use Illuminate\Support\Facades\DB;
 
 class GroupMemberModel extends Model
@@ -148,6 +149,21 @@ class GroupMemberModel extends Model
     public static function exist(int $user_id , int $group_id)
     {
         return !empty(self::findByUserIdAndGroupId($user_id , $group_id));
+    }
+
+    public static function getByGroupId(int $group_id)
+    {
+        $res = self::with(['user' , 'group'])
+            ->where('group_id' , $group_id)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            GroupModel::single($v->group);
+        }
+        return $res;
     }
 
 }

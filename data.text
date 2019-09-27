@@ -1,0 +1,5 @@
+$param['nickname']  = $param['nickname'] ?? '';
+$param['avatar']    = $param['avatar'] ?? '';
+$param['sex']       = $param['sex'] ?? '';
+$param['birthday']  = $param['birthday'] ?? '';
+$param['signature'] = $param['signature'] ?? '';

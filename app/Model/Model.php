@@ -78,4 +78,14 @@ class Model extends BaseModel
         $count = static::whereIn('id' , $id_list)->count();
         return count($id_list) == $count;
     }
+
+    public static function delById(int $id)
+    {
+        return static::destroy($id);
+    }
+
+    public static function delByIds(array $id_list)
+    {
+        return static::destroy($id_list);
+    }
 }

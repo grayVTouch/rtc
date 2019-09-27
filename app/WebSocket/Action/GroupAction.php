@@ -297,8 +297,8 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $user_id = json_decode($param['user_id'] , true);
-        if (empty($user_id)) {
+        $kick_user_ids = json_decode($param['user_id'] , true);
+        if (empty($kick_user_ids)) {
             return self::error('请提供待删除的用户');
         }
         $group = GroupModel::findById($param['group_id']);
@@ -308,17 +308,41 @@ class GroupAction extends Action
         if ($group->user_id != $auth->user->id) {
             return self::error('您并非群主，禁止操作' , 403);
         }
+        if (in_array($group->user_id , $kick_user_ids)) {
+            return self::error('群主不能T自己！' , 403);
+        }
         try {
             DB::beginTransaction();
-            foreach ($user_id as $v)
+            $message = '"';
+            foreach ($kick_user_ids as $v)
             {
                 GroupMemberModel::delByUserIdAndGroupId($v , $group->id);
+                $user = UserModel::findById($v);
+                $nickname = empty($user->nickname) ? ws_config('app.nickname') : $user->nickname;
+                $message .= $nickname . ',';
             }
+            $message = mb_substr($message , 0 , mb_strlen($message) - 1);
+            $message .= '" 被移除了群聊';
             DB::commit();
+            $group_member_ids = GroupMemberModel::getUserIdByGroupId($group->id);
+            $auth->pushAll($group_member_ids , 'refresh_group_member');
+            $auth->pushAll($kick_user_ids , 'refresh_group');
+            ChatUtil::groupSend($auth , [
+                'user_id' => $group->user_id ,
+                'group_id' => $group->id ,
+                'type' => 'notification' ,
+                'message' => $message
+            ]);
+            if (ws_config('app.enable_app_push')) {
+                foreach ($kick_user_ids as $v)
+                {
+                    // todo app 推送
+                    // 通知被移除的成员他们已经被移除群聊
+                }
+            }
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
-//            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
             throw $e;
         }
     }
@@ -403,5 +427,70 @@ class GroupAction extends Action
             throw $e;
         }
      }
+
+    // 解散群
+    public static function disbandGroup(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群' , 404);
+        }
+        if ($group->user_id != $auth->user->id) {
+            return self::error('您不是群主，无权限解散群' , 403);
+        }
+        try {
+            DB::beginTransaction();
+            // 获取群成员
+            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
+            // 删除群消息
+            GroupMessageModel::delByGroupId($group->id);
+            // 删除群已读未读消息
+            GroupMessageReadStatusModel::delByGroupId($group->id);
+            // 删除群成员
+            GroupMemberModel::delByGroupId($group->id);
+            // 删除群
+            GroupModel::delById($group->id);
+            DB::commit();
+            $auth->pushAll($user_ids , 'refresh_group');
+            $auth->pushAll($user_ids , 'refresh_group_member');
+            $auth->pushAll($user_ids , 'refresh_session');
+            if (ws_config('app.enable_app_push')) {
+                // todo app 推送（通知所有群成员群已经解散）
+            }
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function myGroup(Auth $auth , array $param)
+    {
+        $my_group = GroupMemberModel::getByUserId($auth->user->id);
+        return self::success($my_group);
+    }
+
+    public static function groupMember(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群' , 404);
+        }
+        $member = GroupMemberModel::getByGroupId($group->id);
+        return self::success($member);
+    }
+
 
 }

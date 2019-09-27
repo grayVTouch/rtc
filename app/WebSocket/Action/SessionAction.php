@@ -67,7 +67,6 @@ class SessionAction extends Action
             $session[] = $v;
         }
         $session = obj_to_array($session);
-        
         usort($session , function($a , $b){
             if (empty($a['recent_message'])) {
                 return 0;

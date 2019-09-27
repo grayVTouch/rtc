@@ -84,6 +84,22 @@ class Group extends Auth
     }
 
     /**
+     * 解散群
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function disbandGroup(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::disbandGroup($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    /**
      * 创建群组
      *
      * @param array $param
@@ -97,6 +113,31 @@ class Group extends Auth
         $param['expire'] = $param['expire'] ?? '';
         $param['user_ids'] = $param['user_ids'] ?? '';
         $res = GroupAction::create($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    /**
+     * 我的群列表
+     */
+    public function myGroup(array $param)
+    {
+        $res = GroupAction::myGroup($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    /**
+     * 群成员
+     */
+    public function groupMember(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::groupMember($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }

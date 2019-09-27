@@ -45,7 +45,6 @@ create table if not exists `rtc_user_option` (
 drop table if exists `rtc_user_token`;
 create table if not exists `rtc_user_token` (
   id int unsigned not null auto_increment ,
-  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.user_id' ,
   token varchar(255) default '' comment 'token' ,
   expire datetime default current_timestamp comment '过期时间' ,
@@ -56,7 +55,6 @@ create table if not exists `rtc_user_token` (
 drop table if exists `rtc_group`;
 create table if not exists `rtc_group` (
   id int unsigned not null auto_increment ,
-  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment '群主：rtc_user.id' ,
   name varchar(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
@@ -147,6 +145,7 @@ drop table if exists `rtc_group_message_read_status`;
 create table if not exists `rtc_group_message_read_status` (
   id int unsigned not null auto_increment ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
+  group_id int unsigned default 0 comment 'rtc_group.id' ,
   group_message_id int unsigned default 0 comment 'rtc_group_message.id' ,
   is_read tinyint default 0 comment '是否读取: y-已读 n-未读' ,
   create_time datetime default current_timestamp comment '创建时间' ,
