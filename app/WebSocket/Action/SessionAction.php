@@ -66,6 +66,7 @@ class SessionAction extends Action
             $v->session_id = MiscUtil::sessionId('private' , $chat_id);
             $session[] = $v;
         }
+        $session = obj_to_array($session);
         usort($session , function($a , $b){
             if (empty($a['recent_message'])) {
                 return 0;
