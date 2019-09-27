@@ -93,7 +93,7 @@ class ChatUtil extends Util
             foreach ($user_ids as $v)
             {
                 $fd = UserRedis::fdByUserId($base->identifier , $v);
-                var_dump('这边推送的用户id对应的 json' . $fd);
+                var_dump('这边推送的用户id对应的 json' . json_encode($fd));
             }
             $base->sendAll($user_ids , 'private_message' , $msg);
             $base->pushAll($user_ids , 'refresh_session');
