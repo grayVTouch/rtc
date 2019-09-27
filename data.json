@@ -1,5 +1,5 @@
 {
-  "router": "/Group/disbandGroup",
+  "router": "/Group/groupMember",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -10,4 +10,5 @@
     "group_id": 1
   }
 }
+
 

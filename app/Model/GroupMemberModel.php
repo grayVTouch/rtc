@@ -151,11 +151,17 @@ class GroupMemberModel extends Model
         return !empty(self::findByUserIdAndGroupId($user_id , $group_id));
     }
 
-    public static function getByGroupId(int $group_id)
+    public static function getByGroupId(int $group_id , int $limit = 0)
     {
         $res = self::with(['user' , 'group'])
-            ->where('group_id' , $group_id)
-            ->get();
+            ->where('group_id' , $group_id);
+        if (empty($limit)) {
+            $res = $res->get();
+        } else {
+            $res = $res
+                ->limit($limit)
+                ->get();
+        }
         $res = convert_obj($res);
         foreach ($res as $v)
         {
@@ -165,5 +171,4 @@ class GroupMemberModel extends Model
         }
         return $res;
     }
-
 }
