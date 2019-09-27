@@ -12,7 +12,9 @@ namespace App\WebSocket\Action;
 use App\Model\ApplicationModel;
 use App\Model\GroupModel;
 use App\Model\UserModel;
+use App\Redis\UserRedis;
 use App\WebSocket\Auth;
+use function core\array_unit;
 use Core\Lib\Validator;
 use function WebSocket\ws_config;
 
@@ -42,13 +44,13 @@ class UserAction extends Action
         $param['birthday'] = empty($param['birthday']) ? $auth->user->birthday : $param['birthday'];
         $param['nickname'] = empty($param['nickname']) ? $auth->user->nickname : $param['nickname'];
         $param['signature'] = empty($param['signature']) ? $auth->user->signature : $param['signature'];
-        UserModel::updateById($auth->user->id , [
+        UserModel::updateById($auth->user->id , array_unit($param , [
             'avatar' ,
             'sex' ,
             'birthday' ,
             'nickname' ,
             'signature' ,
-        ]);
+        ]));
         return self::success();
     }
 
@@ -69,5 +71,29 @@ class UserAction extends Action
             $res[] = $user_use_phone;
         }
         return self::success($res);
+    }
+
+    // 用户信息
+    public static function user(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'user_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户' , 404);
+        }
+        $user->online = UserRedis::isOnline($auth->identifier , $user->id);
+        return self::success($user);
+    }
+
+    public static function mapping(Auth $auth , array $param)
+    {
+        UserRedis::fdByUserId($auth->identifier , $auth->user->id , $auth->fd);
+        UserRedis::fdMappingUserId($auth->identifier , $auth->fd , $auth->user->id);
+        return self::success();
     }
 }

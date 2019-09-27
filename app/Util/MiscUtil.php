@@ -21,9 +21,9 @@ class MiscUtil
     }
 
     // 会话ID（群聊|私聊）
-    public static function sessionId(string $type = '' , int $id = 0)
+    public static function sessionId(string $type = '' , $id = 0)
     {
-        return md5(sprintf('%s_%d' , $type , $id));
+        return md5(sprintf('%s_%s' , $type , $id));
     }
 
     // 生成标识符

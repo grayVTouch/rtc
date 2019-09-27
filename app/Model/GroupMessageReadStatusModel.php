@@ -28,9 +28,11 @@ class GroupMessageReadStatusModel extends Model
 
     public static function delByGroupId(int $group_id)
     {
-        return DB::table('group_message_read_status as gmrs')
-            ->leftJoin('group_message as gm' , 'gmrs.group_message_id' , '=' , 'gm.id')
-            ->where('gm.group_id' , $group_id)
+//        return DB::table('group_message_read_status as gmrs')
+//            ->leftJoin('group_message as gm' , 'gmrs.group_message_id' , '=' , 'gm.id')
+//            ->where('gm.group_id' , $group_id)
+//            ->delete();
+        return self::where('group_id' , $group_id)
             ->delete();
     }
 

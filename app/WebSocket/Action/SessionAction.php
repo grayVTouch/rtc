@@ -28,28 +28,28 @@ class SessionAction extends Action
     {
         $session = [];
         // 群聊
-//        $group = GroupMemberModel::getByUserId($auth->user->id);
-//        foreach ($group as $v)
-//        {
-//            $recent_message = GroupMessageModel::recentMessage($v->group_id , 'none');
-//            if (empty($recent_message)) {
-//                continue ;
-//            }
-//            $v->recent_message = $recent_message;
-//            // 群消息处理
-//            MessageUtil::handleGroupMessage($v->recent_message);
-//            if ($auth->user->role == 'user' && $v->group->is_service == 1) {
-//                // 用户使用的平台
-//                $v->group->name = '平台咨询';
-//            }
-//            $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->group_id);
-//            $v->type = 'group';
-//            // 会话id仅是用于同意管理会话用的
-//            $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
-//            // 九宫格头像
-//            $v->image = [];
-//            $session[] = $v;
-//        }
+        $group = GroupMemberModel::getByUserId($auth->user->id);
+        foreach ($group as $v)
+        {
+            $recent_message = GroupMessageModel::recentMessage($v->group_id , 'none');
+            if (empty($recent_message)) {
+                continue ;
+            }
+            $v->recent_message = $recent_message;
+            // 群消息处理
+            MessageUtil::handleGroupMessage($v->recent_message);
+            if ($auth->user->role == 'user' && $v->group->is_service == 1) {
+                // 用户使用的平台
+                $v->group->name = '平台咨询';
+            }
+            $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->group_id);
+            $v->type = 'group';
+            // 会话id仅是用于同意管理会话用的
+            $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
+            // 九宫格头像
+            $v->member = GroupMemberModel::getByGroupId($v->group_id);
+            $session[] = $v;
+        }
         $friend = FriendModel::getByUserId($auth->user->id);
         foreach ($friend as $v)
         {

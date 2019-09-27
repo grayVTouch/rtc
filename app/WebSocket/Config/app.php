@@ -20,4 +20,6 @@ return [
     // 默认个人
     // 是否开启app推送（使用了极光推送等平台）
     'enable_app_push' => false ,
+    // 默认的昵称
+    'nickname' => '未设置昵称' ,
 ];

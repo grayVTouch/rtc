@@ -26,10 +26,9 @@ class GroupModel extends Model
         $m->image_explain = empty($m->image) ? config('app.group_image') : res_url($m->image);
     }
 
-    public static function temp(string $identifier , int $user_id)
+    public static function temp(int $user_id)
     {
         $data = [
-            'identifier' => $identifier ,
             'user_id'   => $user_id ,
             'name'     => '【游客】advoise_' . random(6 , 'mixed' , true) ,
             'is_temp'    => 1 ,

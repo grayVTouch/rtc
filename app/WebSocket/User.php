@@ -64,4 +64,24 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    public function user(array $param)
+    {
+        $param['user_id'] = $param['user_id'] ?? '';
+        $res = UserAction::user($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 重连后：重新绑定映射关系
+    public function mapping(array $param)
+    {
+        $res = UserAction::mapping($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

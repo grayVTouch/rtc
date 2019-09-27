@@ -108,7 +108,7 @@ class UserUtil extends Util
         // 为空，说明该用户并没有咨询通道
         if ($user->is_temp == 1) {
             // 临时用户：创建临时组
-            $group = GroupModel::temp($user->identifier , $user->id);
+            $group = GroupModel::temp($user->id);
         } else {
             // 正式用户：创建组
             $group_name = sprintf('advoise-%s-%s' , $user->identifier , $user->id);
@@ -242,5 +242,10 @@ class UserUtil extends Util
         PushUtil::multiple($identifier , $user_ids , 'group_message' , $msg);
         // 是否提示过客服不存在
         UserRedis::noWaiterForGroup($identifier , $group_id , false);
+    }
+
+    public static function isOnline()
+    {
+
     }
 }

@@ -21,6 +21,7 @@ use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use function WebSocket\ws_config;
 
 class FriendAction extends Action
 {
@@ -45,8 +46,9 @@ class FriendAction extends Action
         $param['relation_user_id'] = $auth->user->id;
         try {
             DB::beginTransaction();
-            if (!$friend->user_option->friend_auth) {
-                $param['status'] = 'approve';
+            if ($friend->user_option->friend_auth == 0) {
+                // 自动同意
+                $param['status'] = 'auto_approve';
                 // 未开启好友验证
                 FriendModel::u_insertGetId($auth->user->id , $param['friend_id']);
                 FriendModel::u_insertGetId($param['friend_id'] , $auth->user->id);
@@ -62,12 +64,25 @@ class FriendAction extends Action
                 'remark' ,
             ]));
             DB::commit();
-            if ($friend->user_option->friend_auth) {
+            if ($friend->user_option->friend_auth == 1) {
                 // 推送申请数量更新
                 $auth->push($param['friend_id'] , 'refresh_application');
                 // 推送总未读消息数量更新
                 $auth->push($param['friend_id'] , 'refresh_unread_count');
-                // todo app推送
+                if (ws_config('app.enable_app_push')) {
+                    // todo app推送
+                }
+            } else {
+                // 未开启好友认证（直接通过）
+                $user_ids = [$auth->user->id , $param['friend_id']];
+                // 刷新好友列表
+                $auth->pushAll($user_ids , 'refresh_friend');
+                ChatUtil::send($auth , [
+                    'type' => 'notification' ,
+                    'user_id' => $auth->user->id ,
+                    'friend_id' => $param['friend_id'] ,
+                    'message' => '你们已经成为好友，可以开始聊天了！' ,
+                ]);
             }
             return self::success('操作成功');
         } catch(Exception $e) {
@@ -112,8 +127,17 @@ class FriendAction extends Action
                 FriendModel::u_insertGetId($app->relation_user_id , $app->user_id);
             }
             DB::commit();
+            $auth->pushAll($param['friend_id'] , 'refresh_application');
             if ($param['status'] == 'approve') {
-                // todo app推送
+                // 未开启好友认证（直接通过）
+                $user_ids = [$app->user_id , $param['friend_id']];
+                $auth->pushAll($user_ids , 'refresh_friend');
+                ChatUtil::send($auth , [
+                    'type' => 'notification' ,
+                    'user_id' => $auth->user->id ,
+                    'friend_id' => $param['friend_id'] ,
+                    'message' => '你们已经成为好友，可以开始聊天了！' ,
+                ]);
             }
             return self::success();
         } catch(Exception $e) {
@@ -142,10 +166,14 @@ class FriendAction extends Action
             // 删除聊天记录
             MessageModel::delByChatId($chat_id);
             DB::commit();
+            // 刷新好友列表
+            $user_ids = [$auth->user->id , $param['user_id']];
+            $auth->pushAll($user_ids , 'refresh_friend');
+            $auth->pushAll($user_ids , 'refresh_session');
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
-            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+            throw $e;
         }
     }
 

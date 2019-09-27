@@ -49,6 +49,8 @@ return [
         'refresh_group_member' ,
         // 指令：刷新群列表
         'refresh_group' ,
+        // 指令：刷新好友列表
+        'refresh_friend' ,
     ] ,
 
     /**
@@ -91,7 +93,7 @@ return [
         'voice_call' ,
         // 消息集合
         'message_set' ,
-        // 群通知
+        // 通知
         'notification' ,
         // 随机红包
         'random_red_envelope' ,
