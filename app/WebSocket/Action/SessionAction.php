@@ -46,8 +46,8 @@ class SessionAction extends Action
             $v->type = 'group';
             // 会话id仅是用于同意管理会话用的
             $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
-            // 九宫格头像
-            $v->member = GroupMemberModel::getByGroupId($v->group_id);
+            // 群成员：只给最多 9 个
+            $v->member = GroupMemberModel::getByGroupId($v->group_id , 9);
             $session[] = $v;
         }
         $friend = FriendModel::getByUserId($auth->user->id);

@@ -143,4 +143,17 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    /**
+     * 群信息
+     */
+    public function groupInfo(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::groupInfo($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }
