@@ -1,0 +1,217 @@
+/**
+ * 组件：标题设置
+ */
+.run-title {
+    height:40px;
+    line-height:40px;
+    padding:0px 15px;
+    border:1px solid #ccc;
+    position:relative;
+    border-top-left-radius:2px;
+    border-top-right-radius:2px;
+    color:#555;
+    background-color:#f5f5f5;
+    font-size:14px;
+    bottom: -2px;
+}
+
+.run-title:after {
+    display:block;
+    content:'';
+    clear:both;
+}
+
+.run-title .left , .run-title .right {
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    -o-box-sizing:border-box;
+}
+
+.run-title .left {
+    float:left;
+    font-size:14px;
+}
+
+.run-title .right {
+    float:right;
+    font-size:12px;
+}
+
+.run-title .right:after {
+    display:block;
+    content:'';
+    clear:both;
+}
+
+.run-title .right .link {
+    float:left;
+    margin-right:8px;
+}
+
+.run-title .right .link:nth-last-of-type(1) {
+    margin-right:0px;
+}
+
+.run-title .right .link:hover {
+    text-decoration:underline;
+}
+
+
+
+/**
+ *****************************
+ * 通用标题设置 风格 1
+ *****************************
+ */
+.run-title-1 {
+
+}
+
+
+.run-title-1 {
+    height:50px;
+    line-height:50px;
+    position:relative;
+    border-bottom:2px solid #B61D1D;
+    margin-bottom:15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.run-title-1:before {
+    display:block;
+    content:'';
+    position:absolute;
+    left:0px;
+    top:50%;
+    width:5px;
+    height:24px;
+    background-color:#B61D1D;
+    transform:translate3d(0px , -50% , 0px);
+    -webkit-transform:translate3d(0px , -50% , 0px);
+    -moz-transform:translate3d(0px , -50% , 0px);
+    -o-transform:translate3d(0px , -50% , 0px);
+    -ms-transform:translate3d(0px , -50% , 0px);
+}
+
+.run-title-1:after {
+    display:block;
+    content:'';
+    clear:both;
+}
+
+.run-title-1 > * {
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+}
+
+.run-title-1 .left {
+    float:left;
+    font-size:16px;
+    margin-left:15px;
+}
+
+.run-title-1 .right {
+    float:right;
+}
+
+/**
+ *************************
+ * 标题风格-2
+ *************************
+ */
+.run-title-2 {
+    height:32px;
+    line-height:32px;
+}
+
+.run-title-2:after {
+    display:block;
+    content:'';
+    clear:both;
+}
+
+.run-title-2 > * {
+    height:100%;
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    -o-box-sizing:border-box;
+}
+
+.run-title-2 .left {
+    float:left;
+    font-size:24px;
+}
+
+.run-title-2 .right {
+    float:right;
+}
+
+/**
+ *****************************
+ * 通用标题设置 风格 3
+ *****************************
+ */
+.run-title-3 {
+
+}
+
+
+.run-title-3 {
+    height:50px;
+    line-height:50px;
+    position:relative;
+    border-bottom:1px solid #ccc;
+    margin-bottom:15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.run-title-3:before {
+    display:block;
+    content:'';
+    position:absolute;
+    left:0px;
+    top:50%;
+    width:5px;
+    height:24px;
+    background-color:#A9A9A9;
+    transform:translate3d(0px , -50% , 0px);
+    -webkit-transform:translate3d(0px , -50% , 0px);
+    -moz-transform:translate3d(0px , -50% , 0px);
+    -o-transform:translate3d(0px , -50% , 0px);
+    -ms-transform:translate3d(0px , -50% , 0px);
+}
+
+.run-title-3:after {
+    display:block;
+    content:'';
+    clear:both;
+}
+
+.run-title-3 > * {
+    box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+}
+
+.run-title-3 .left {
+    float:left;
+    font-size:16px;
+    margin-left:15px;
+}
+
+.run-title-3 .right {
+    float:right;
+}

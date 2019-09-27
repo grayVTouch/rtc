@@ -1,0 +1,136 @@
+/*
+ * 展示型数据 
+ */
+.h-line-tb {
+	width:100%;
+	font-size:12px;
+}
+
+.h-line-tb thead tr , .h-line-tb tbody tr {
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+}
+
+.h-line-tb thead tr {
+	background-color:#f2f2f2;
+}
+
+.h-line-tb thead tr th , .h-line-tb tbody tr td {
+	height:30px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-align:center;
+	text-overflow: ellipsis;
+	padding: 0px 8px;
+}
+
+.h-line-tb thead tr:hover , .h-line-tb tbody tr:hover {
+	background-color:#f8f8f8;
+}
+
+.h-line-tb tbody .focus-tr {
+    background-color: #f8f8f8;
+}
+
+.h-line-tb thead tr .th-cbox {
+	width:40px;
+}
+
+.h-line-tb thead tr .th-id {
+	width:100px;
+}
+
+.h-line-tb thead tr .th-name {
+	width:160px;
+}
+
+.h-line-tb thead tr .th-time {
+	width:150px;
+}
+
+.h-line-tb thead tr .th-number {
+	width:130px;
+}
+
+.h-line-tb thead tr .th-status {
+	width:130px;
+}
+
+.h-line-tb thead tr .th-explain {
+	width:250px;
+}
+
+.h-line-tb thead tr .th-sex {
+	width:80px;
+}
+
+.h-line-tb thead tr .th-mobile {
+	width:130px;
+}
+
+.h-line-tb thead tr .th-address {
+	width:300px;
+}
+
+.h-line-tb thead tr .th-pic-preview {
+	width:200px;
+}
+
+.h-line-tb thead tr .th-dir {
+	width:250px;
+}
+
+.h-line-tb thead tr .th-group {
+	width:130px;
+}
+
+.h-line-tb thead tr .th-account {
+	width:160px;
+}
+
+.h-line-tb thead tr .th-note {
+	width:250px;
+}
+
+/*
+ * question | answer 型的字段
+ */
+.h-line-tb thead tr .th-qa {
+	width:250px;
+}
+
+.h-line-tb thead tr .th-opr {
+	width:400px;
+}
+
+.h-line-tb tbody tr td .pic {
+	height:30px;
+}
+
+/*
+ * 一列多行
+ */
+.h-line-tb tbody tr .multiple-rows {
+	text-align:left;
+	padding:0px;
+	margin:0px 8px;
+}
+
+.h-line-tb tbody tr .multiple-rows>* {
+	padding:3px 0px;
+	margin:0px 5px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+
+.h-line-tb tbody tr .multiple-rows .status {
+	
+}
+
+.h-line-tb tbody tr .multiple-rows .explain {
+	
+}

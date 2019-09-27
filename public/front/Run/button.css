@@ -1,0 +1,74 @@
+.run-button {
+	display:inline-block;
+	vertical-align:middle;
+	zoom:1;
+	height: 30px;
+	line-height: 30px;
+	border-radius: 2px;
+	border: none;
+	padding: 0 10px;
+	font-size:13px;
+	cursor:pointer;
+	transition:all 0.3s linear;
+	-webkit-transition:all 0.3s linear;
+	-moz-transition:all 0.3s linear;
+	-ms-transition:all 0.3s linear;
+	-o-transition:all 0.3s linear;
+}
+
+.run-button i {
+	padding-right: 5px;
+}
+
+/*
+ * 按钮风格 1，小型按钮
+ */
+.run-button-submit {
+	padding: 0 30px;
+	color: white;
+	background-color: #C21A1A !important;
+}
+
+.run-button-submit:hover {
+	background-color:#E74649;
+}
+
+/** 按钮风格 蓝 **/
+.run-button-blue {
+	color: white;
+	background-color: #2db7f5;
+}
+
+.run-button-blue:hover {
+	background-color: #57c5f7;
+}
+
+/** 按钮风格 绿 **/
+.run-button-green {
+	color: white;
+	background-color: #19be6b;
+}
+
+.run-button-green:hover {
+	background-color: #47cb89;
+}
+
+/** 按钮风格 黄 **/
+.run-button-yellow {
+	color: white;
+	background-color: #f90;
+}
+
+.run-button-yellow:hover {
+	background-color: #ffad33;
+}
+
+/** 按钮风格 橙色 **/
+.run-button-orange {
+	color: white;
+	background-color: #ed4014;
+}
+
+.run-button-orange:hover {
+	background-color: #f16643;
+}

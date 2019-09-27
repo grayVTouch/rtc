@@ -1,0 +1,62 @@
+/*
+ * **************
+ * 功能导航
+ * **************
+ */
+.function-nav {
+    position: relative;
+    height: 50px;
+    line-height: 50px;
+    width: 100%;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.function-nav .functions {
+    margin: 0;
+    height: 100%;
+}
+
+.function-nav .functions .function {
+    float: left;
+    height: 100%;
+    font-size: 14px;
+    color: #555;
+    box-sizing: border-box;
+    padding: 0 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.function-nav .functions .function:before {
+    display: block;
+    content: '';
+    width: 80%;
+    height: 100%;
+    background-color: #d2cfcf;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    opacity: 0;
+    transform: translate3d(-50% , -50% , 0);
+    transition: all 80ms linear;
+}
+
+.function-nav .functions .function:active::before {
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+}
+
+.function-nav .functions .cur {
+    color: #fb66a9;
+}
+
+.function-nav .slider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: #fb66a9;
+}

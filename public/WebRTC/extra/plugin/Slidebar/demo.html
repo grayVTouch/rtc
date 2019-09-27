@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes">
+    <title>侧边栏滑动</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="css/Slidebar.css">
+</head>
+<body>
+<style>
+    .container {
+        width: 400px;
+        height: 600px;
+        border: 1px solid red;
+        margin: 0;
+        margin-left: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="slidebar hide">
+        <div class="mask"></div>
+        <div class="con"></div>
+    </div>
+</div>
+<div class="btns">
+    <button onclick="showSlidebar()">切换</button>
+</div>
+
+<script src="../SmallJs/SmallJs.js"></script>
+<script src="js/Slidebar.js"></script>
+<script>
+    var c = G('.container');
+    var s = new Slidebar(c.get(0) , {
+        status: 'show' ,
+        dir: 'left'
+    });
+
+    function showSlidebar(){
+        if (s.status == 'show') {
+            s.hide();
+        } else {
+            s.show();
+        }
+    }
+</script>
+</body>
+</html>

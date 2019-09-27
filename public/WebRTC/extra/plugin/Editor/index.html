@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/CSS/base.css" />
+    <link rel="stylesheet" href="/CSS/Component/module.css" />
+    <link rel="stylesheet" href="/CSS/Component/input.css" />
+    <link rel="stylesheet" href="css/Editor.css" />
+</head>
+<body>
+
+<style>
+    body {
+        padding:20px;
+    }
+    #container {
+        margin-bottom:20px;
+    }
+
+    #textarea {
+    }
+
+    #html {
+        width:300px;
+        height:200px;
+        border:1px solid red;
+        margin:0px;
+        margin-bottom:20px;
+    }
+</style>
+
+<table class="input-tb">
+    <tbody>
+    <tr>
+        <td>富文本编辑器</td>
+        <td><textarea id="textarea" class="form-textarea"></textarea></td>
+    </tr>
+
+    <tr>
+        <td>可编辑的 html</td>
+        <td><div id="html" contenteditable="true"></div></td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="multiple-rows">
+            <button id="add_text" class="btn-7">追加富文本内容</button>
+            <button id="get_text" class="btn-7">获取文本</button>
+            <button id="add_focus" class="btn-7">添加焦点</button>
+            <button id="test" class="btn-7">空按钮</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div >
+
+<script src="/SmallJs/SmallJs.js"></script>
+<script src="js/Editor.js"></script>
+<script>
+    (function(){
+        "use strict";
+
+        var textarea = G('#textarea');
+        var html = G('#html');
+        var addText = G('#add_text');
+        var getText = G('#get_text');
+        var addFocus = G('#add_focus');
+
+        // 光标上次获取焦点时的选区
+        var selection = {
+            startOffset: 0 ,
+            endOffset: 0
+        };
+
+        var editor = new Editor();
+
+        addText.loginEvent('click' , function(event){
+            var text = textarea.val();
+
+            text = "![face][image](//static.360buyimg.com/im/w_web/img/classic/s38.gif)";
+
+            if (text === '') {
+                alert('不允许插入空值！！');
+                return ;
+            }
+
+            var changeHtml = editor.html(text);
+
+            console.log(changeHtml);
+
+            var _html = html.html();
+
+            var innerHtml = _html + changeHtml;
+
+            // 设置 html
+            html.html(innerHtml);
+
+            // 设置光标位置
+            G.setCursorPoint(html.get() , 'last');
+        } , true , false);
+
+        getText.loginEvent('click' , function(event){
+
+        } , true , false);
+
+        // 保存光标最后位置
+        html.loginEvent('keyup' , function(){
+            selection = G.getSelection(html.get());
+        } , true , false);
+
+        // 保存光标最后位置
+        html.loginEvent('blur' , function(){
+            selection = G.getSelection(html.get());
+        } , true , false);
+
+        addFocus.loginEvent('click' , function(){
+            html.trigger('focus');
+            // console.log(isCollapse(html.get()));
+        } , true , false);
+    })();
+</script>
+</body>
+</html>

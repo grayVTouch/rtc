@@ -1,0 +1,12 @@
+{
+  "router": "/Chat/history",
+  "identifier": "test",
+  "user_id": 1 ,
+  "debug": "running" ,
+  "token": "" ,
+  "request": "abcdefghijklmnopqrstuvwxyz",
+  "platform": "pc",
+  "data": {
+    "friend_id": 2
+  }
+}

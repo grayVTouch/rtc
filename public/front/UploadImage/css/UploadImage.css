@@ -1,0 +1,542 @@
+/**
+ * 上传图片
+ *  author 陈学龙 2017-09-18 14:50:00
+ */
+.upload-image {
+
+}
+
+.upload-image  * {
+	box-sizing:content-box;
+	-webkit-box-sizing:content-box;
+}
+
+.upload-image .select-images {
+	margin-bottom:20px;
+	padding-bottom:10px;
+	border-bottom:1px solid #ccc;
+	height:40px;
+	line-height:40px;
+}
+
+.upload-image .select-images:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.upload-image .select-images .upload-show , .upload-image .select-images .tip {
+	float:left;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}
+
+
+
+.upload-image .select-images .upload-show {
+	position:relative;
+	margin-right:52px;
+}
+
+.upload-image .select-images .upload-show:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.upload-image .select-images .upload-show .image-line , .upload-image .select-images .upload-show .text-line {
+	width:140px;
+	text-align:center;
+	line-height:normal;
+	/*
+	float:left;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+	*/
+}
+
+.upload-image .select-images .upload-show .image-line {
+
+}
+
+.upload-image .select-images .upload-show .image-line .selected-count {
+	font-size:12px;
+	color:red;
+	padding:0px 8px;
+}
+
+.upload-image .select-images .upload-show .text-line {
+	font-size:13px;
+	height:16px;
+	color:#555;
+}
+
+.upload-image .select-images .upload-show .image-line .upload-image-btn {
+	width:24px;
+	height:24px;
+}
+
+.upload-image .select-images .upload-show .clear-selected {
+	position:absolute;
+	z-index:1;
+	right:0px;
+	top:0px;
+	height:100%;
+	width:40px;
+	opacity:0;
+	transition:all 0.12s linear;
+	-webkit-transition:all 0.12s linear;
+	-moz-transition:all 0.12s linear;
+	-ms-transition:all 0.12s linear;
+	-o-transition:all 0.12s linear;
+	transform:translate3d(0px , 0px , 0px);
+	-webkit-transform:translate3d(0px , 0px , 0px);
+	-moz-transform:translate3d(0px , 0px , 0px);
+	-ms-transform:translate3d(0px , 0px , 0px);
+	-o-transform:translate3d(0px , 0px , 0px);
+}
+
+
+.upload-image .select-images .upload-show .clear-selected:hover .image {
+	transform:rotate3d(0 , 0 , 1 , 360deg);
+	-webkit-transform:rotate3d(0 , 0 , 1 , 360deg);
+	-moz-transform:rotate3d(0 , 0 , 1 , 360deg);
+	-ms-transform:rotate3d(0 , 0 , 1 , 360deg);
+	-o-transform:rotate3d(0 , 0 , 1 , 360deg);
+
+}
+
+.upload-image .select-images .upload-show .clear-selected .image {
+	width:24px;
+	height:24px;
+	transition:all 0.4s linear;
+	-webkit-transition:all 0.4s linear;
+	-moz-transition:all 0.4s linear;
+	-ms-transition:all 0.4s linear;
+	-o-transition:all 0.4s linear;
+	transform:rotate3d(0 , 0 , 1 , 0deg);
+	-webkit-transform:rotate3d(0 , 0 , 1 , 0deg);
+	-moz-transform:rotate3d(0 , 0 , 1 , 0deg);
+	-ms-transform:rotate3d(0 , 0 , 1 , 0deg);
+	-o-transform:rotate3d(0 , 0 , 1 , 0deg);
+}
+
+.upload-image .select-images .upload-images-input {
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:100%;
+	height:100%;
+	z-index:2;
+	opacity:0;
+}
+
+.upload-image .select-images .tip {
+	font-size: 13px;
+}
+
+
+.upload-image .preview-images {
+	
+}
+
+
+.upload-image .preview-images:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+/**
+ * 第一种图片上传风格（并行上传，5张以内图片）
+ */
+.upload-image .preview-images .image-item {
+	float:left;
+	margin-right:10px;
+	margin-bottom:10px;
+	max-width:150px;
+	border:1px solid #ccc;
+	padding:1px;
+	position:relative;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}
+
+.upload-image .preview-images .image-item:hover .img .image {
+	transform:scale(1.05 , 1.05);
+}
+
+.upload-image .preview-images .image-item:hover .img::after {
+	background-color:rgba(255,255,255,0.2);
+}
+
+.upload-image .preview-images .image-item .img  {
+	overflow:hidden;	
+}
+
+.upload-image .preview-images .image-item .img:after {
+	display:block;
+	content:'';
+	width:100%;
+	height:100%;
+	position:absolute;
+	left:0px;
+	top:0px;
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+	background-color:transparent;
+}
+
+.upload-image .preview-images .image-item .img .image {
+	height:100px;
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+}
+
+.upload-image .preview-images .image-item .close {
+	position:absolute;
+	right:-10px;
+	top:-10px;
+}
+
+.upload-image .preview-images .image-item .close .image {
+	width:20px;
+	height:20px;
+}
+
+.upload-image .preview-images .image-item .progress {
+	position:absolute;
+	width:100%;
+	height:5px;
+	padding:0px 1px;
+	left:0px;
+	bottom:0px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+}
+
+.upload-image .preview-images .image-item .progress .p-total {
+	background-color:#e2e2e2;
+	height:100%;
+}
+
+.upload-image .preview-images .image-item .progress .p-total .p-cur {
+	width:0%;
+	height:100%;
+	margin-left:0px;
+	background-color:#5FB878;
+	transition:all 0.12s linear;
+	-webkit-transition:all 0.12s linear;
+	-moz-transition:all 0.12s linear;
+	-ms-transition:all 0.12s linear;
+	-o-transition:all 0.12s linear;
+}
+
+/**
+ * 第二种图片上传风格（串行上传，超过 5张）
+ */
+.upload-image .upload-image-list {
+	width:802px;
+	margin:0px;
+}
+
+.upload-image .upload-image-list .upload-title {
+	height:40px;
+	line-height:40px;
+	padding:0px 15px;
+	border:1px solid #ccc;
+	position:relative;
+	bottom:-1px;
+	border-top-left-radius:2px;
+	border-top-right-radius:2px;
+	color:#555;
+	background-color:#f5f5f5;
+	font-size:14px;
+}
+
+.upload-image .upload-image-list .upload-title .cur {
+	color:inherit;
+}
+
+.upload-image .upload-image-list .upload-title .total {
+	color:inherit;
+}
+
+.upload-image .upload-image-list .image-list .list-content {
+	font-size:12px;
+	color:#555;
+	border:1px solid #ccc;
+}
+
+.upload-image .upload-image-list .image-list .list-title:after , .upload-image .upload-image-list .image-list .list-body .line:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.upload-image .upload-image-list .image-list .list-content .item {
+	float:left;
+	white-space:nowrap;
+	overflow:hidden;
+	text-voerflow:ellipsis;
+	text-align:center;
+	border-right:1px solid #ccc;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}
+
+.upload-image .upload-image-list .image-list .list-content .item:nth-last-of-type(1) {
+	border-right:none;
+}
+
+.upload-image .upload-image-list .image-list .list-content {
+
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-preview {
+	width:200px;
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-type {
+	width:120px;
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-size {
+	width:80px;
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-speed {
+	width:120px;
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-status {
+	width:120px;
+}
+
+.upload-image .upload-image-list .image-list .list-content .div-opr {
+	width:160px;
+}
+
+.upload-image .upload-image-list .image-list .list-title {
+	background-color:#f2f2f2;
+	height:40px;
+	line-height:40px;
+	border-bottom:none;
+}
+
+.upload-image .upload-image-list .image-list .list-title:hover {
+	background-color:#f8f8f8;
+}
+
+.upload-image .upload-image-list .image-list .list-title .item:nth-last-of-type(1) {
+	border-right:none;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line {
+	border-bottom:1px solid #ccc;
+	position:relative;
+	margin:0px;
+	overflow:hidden;
+	transition:all 0.12s linear;
+	-webkit-transition:all 0.12s linear;
+	-moz-transition:all 0.12s linear;
+	-ms-transition:all 0.12s linear;
+	-o-transition:all 0.12s linear;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line:hover {
+	background-color:#e0614f26;
+}
+
+.upload-image .upload-image-list .image-list .list-body .focus-line {
+	background-color:#e0614f26;
+}
+
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in {
+	width:800px;
+	height:100%;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+
+.upload-image .upload-image-list .image-list .list-body .line:nth-last-of-type(1) {
+	border-bottom:none;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .item {
+	height:120px;
+	line-height:120px;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .multiple-rows {
+	text-align:left;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .multiple-rows .row {
+	margin-top:8px;
+	padding:0px 8px;
+	line-height:normal;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .multiple-rows .row:nth-last-of-type(1) {
+	margin-bottom:8px;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .multiple-rows .row:nth-of-type(2) .image {
+	height:80px;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .item:nth-last-of-type(1) {
+	border-right:none;
+}
+
+.upload-image .upload-image-list .image-list .list-body .line .line-in .cur-progress {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 0%;
+	background-color: #2147f645;
+	height: 100%;
+	transition:all 0.12s linear;
+	-webkit-transition:all 0.12s linear;
+	-moz-transition:all 0.12s linear;
+	-ms-transition:all 0.12s linear;
+	-o-transition:all 0.12s linear;
+}
+
+/**
+ * 初始化展示图片
+ */
+.upload-image .init-show-image-list {
+
+}
+
+.upload-image .init-show-image-list:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.upload-image .init-show-image-list .init-show-image {
+	float:left;
+	margin-right:10px;
+	margin-bottom:10px;
+	max-width:150px;
+	border:1px solid #ccc;
+	padding:1px;
+	position:relative;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}
+
+.upload-image .preview-images .init-show-image:hover .img .image {
+	transform:scale(1.05 , 1.05);
+}
+
+.upload-image .preview-images .init-show-image:hover .img::after {
+	background-color:rgba(255,255,255,0.2);
+}
+
+.upload-image .preview-images .init-show-image .img  {
+	overflow:hidden;
+}
+
+.upload-image .preview-images .init-show-image .img:after {
+	display:block;
+	content:'';
+	width:100%;
+	height:100%;
+	position:absolute;
+	left:0px;
+	top:0px;
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+	background-color:transparent;
+}
+
+.upload-image .preview-images .init-show-image .img .image {
+	height:100px;
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+}
+
+
+/**
+ * 有图片的时候
+ */
+.upload-image .select-images .upload-show .clear-selected-hover {
+	opacity:1;
+	transform:translate3d(100% , 0px , 0px);
+	-webkit-transform:translate3d(100% , 0px , 0px);
+	-moz-transform:translate3d(100% , 0px , 0px);
+	-ms-transform:translate3d(100% , 0px , 0px);
+	o-transform:translate3d(100% , 0px , 0px);
+}
+
+/**
+ * 状态
+ */
+.upload-image .msg {
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:100%;
+	height:100%;
+	color:white;
+	opacity:0;
+	background-color:rgba(63, 63, 63, 0.6);
+}
+
+.upload-image .msg .msg-in {
+	position:absolute;
+	left:50%;
+	top:50%;
+	transform:translate3d(-50% , -50% , 0px);
+	-webkit-transform:translate3d(-50% , -50% , 0px);
+	-moz-transform:translate3d(-50% , -50% , 0px);
+	-o-transform:translate3d(-50% , -50% , 0px);
+	-ms-transform:translate3d(-50% , -50% , 0px);
+}
+
+/**
+ * 按钮
+ */
+.upload-image .upload-image-list .image-list .list-body .line .item .hide {
+	display:none !important;
+}

@@ -1,0 +1,175 @@
+.infinite-table {
+    font-size: 12px;
+    text-align: left;
+}
+
+.infinite-table > .in {
+    display: inline-block;
+    vertical-align: top;
+}
+
+/**
+ * **********************
+ * 表头
+ * **********************
+ */
+.infinite-table .head {
+    background-color: #f2f2f2;
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+}
+
+.infinite-table .head:hover {
+    background-color: #f8f8f8;
+}
+
+.infinite-table .head:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.infinite-table .head .column {
+    height: 40px;
+    line-height: 40px;
+    font-weight: bold;
+    min-width: 50px;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+}
+
+.infinite-table .head .column:nth-of-type(1) {
+    border-left: 1px solid #ccc;
+}
+
+/**
+ * ******************************
+ * 表格内容
+ * ******************************
+ */
+.infinite-table .list {
+
+}
+
+.infinite-table .list .line {
+
+}
+
+.infinite-table .list .line .record {
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+}
+
+.infinite-table .list .line .record:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.infinite-table .list .line .record:hover {
+    background-color: #f8f8f8;
+}
+
+.infinite-table .list .line .record .column {
+    float: left;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    min-width: 50px;
+    height: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+.infinite-table .list .line .record .column:nth-of-type(1) {
+    border-left: 1px solid #ccc;
+}
+
+.infinite-table .list .line .record .text-left {
+    padding-left: 10px;
+    text-align: left;
+}
+
+.infinite-table .list .line .record .column .prefix {
+    font-size: 12px;
+    position: relative;
+    top: -8px;
+}
+
+.infinite-table .list .line .focus {
+    background-color: #f8f8f8;
+}
+
+/**
+ * ***************************
+ * 可选宽度
+ * ***************************
+ */
+.infinite-table .width-50 {
+    width: 50px;
+}
+
+.infinite-table .width-80 {
+    width: 80px;
+}
+
+.infinite-table .width-100 {
+    width: 100px;
+}
+
+.infinite-table .width-120 {
+    width: 120px;
+}
+
+.infinite-table .width-140 {
+    width: 140px;
+}
+
+.infinite-table .width-160 {
+    width: 160px;
+}
+
+.infinite-table .width-200 {
+    width: 200px;
+}
+
+.infinite-table .width-240 {
+    width: 240px;
+}
+
+.infinite-table .width-280 {
+    width: 280px;
+}
+
+/**
+ * ***************************
+ * 可选高度
+ * ***************************
+ */
+.infinite-table .height-50 {
+    height: 50px;
+    line-height: 50px;
+}

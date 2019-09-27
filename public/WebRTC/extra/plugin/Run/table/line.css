@@ -1,0 +1,340 @@
+/*
+ * 展示型数据 
+ */
+.line-tb {
+	width:100%;
+	font-size:12px;
+}
+
+.line-tb thead tr , .line-tb tbody tr {
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+}
+
+.line-tb thead tr {
+	background-color:#f2f2f2;
+}
+
+.line-tb thead tr th , .line-tb tbody tr td {
+	height:40px;
+	text-align:center;
+	/*white-space: nowrap;*/
+	/*overflow: hidden;*/
+	/*text-overflow: ellipsis;*/
+	word-wrap: break-word;
+	word-break: break-all;
+	padding: 0 8px;
+	border:1px solid #ccc;
+}
+
+.line-tb thead tr:hover , .line-tb tbody tr:hover {
+	background-color:#f8f8f8;
+}
+
+.line-tb tbody .focus {
+    background-color: #f8f8f8;
+}
+
+.line-tb thead tr .th-cbox {
+	width:40px;
+}
+
+.line-tb thead tr .th-id {
+	width:100px;
+}
+
+.line-tb thead tr .th-name {
+	width:160px;
+}
+
+.line-tb thead tr .th-time {
+	width:150px;
+}
+
+.line-tb thead tr .th-number {
+	width:130px;
+}
+
+.line-tb thead tr .th-status {
+	width:130px;
+}
+
+.line-tb thead tr .th-desc {
+	width:250px;
+}
+
+.line-tb thead tr .th-sex {
+	width:80px;
+}
+
+.line-tb thead tr .th-type {
+	width:80px;
+}
+
+.line-tb thead tr .th-mobile {
+	width:130px;
+}
+
+.line-tb thead tr .th-addr {
+	width:300px;
+}
+
+.line-tb thead tr .th-weight {
+	width:50px;
+}
+
+.line-tb thead tr .th-preview {
+	width:200px;
+}
+
+.line-tb thead tr .th-dir {
+	width:250px;
+}
+
+.line-tb thead tr .th-group {
+	width:130px;
+}
+
+.line-tb thead tr .th-account {
+	width:160px;
+}
+
+.line-tb thead tr .th-note {
+	width:250px;
+}
+
+/*
+ * question | answer 型的字段
+ */
+.line-tb thead tr .th-qa {
+	width:250px;
+}
+
+.line-tb thead tr .th-opr {
+	width:130px;
+}
+
+.line-tb tbody tr td .image {
+	max-width: 100%;
+	max-height:80px;
+}
+
+/*
+ * 一列多行
+ */
+.line-tb tbody tr .multiple-rows {
+	text-align:left;
+	padding:0;
+	margin:0 8px;
+}
+
+.line-tb tbody tr .multiple-rows .row {
+	padding:3px 0;
+	margin:0 5px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+	margin-bottom:3px;
+}
+
+.line-tb tbody tr .multiple-rows .row:nth-of-type(1) {
+	margin-top:3px;
+}
+
+.line-tb tbody tr .multiple-rows .status {
+	
+}
+
+.line-tb tbody tr .multiple-rows .explain {
+	
+}
+
+.line-tb .preview {
+	/* ie 10 中需要用到！ */
+	width: auto;
+	max-height:80px;
+}
+
+td.text-left {
+	text-align: left !important;
+}
+
+/**
+ * *************************
+ * 新增规则
+ * *************************
+ */
+.line-tb .w-20 {
+	width: 20px;
+}
+
+.line-tb .w-30 {
+	width: 30px;
+}
+
+.line-tb .w-40 {
+	width: 40px;
+}
+
+.line-tb .w-50 {
+	width: 50px;
+}
+
+.line-tb .w-60 {
+	width: 60px;
+}
+
+.line-tb .w-70 {
+	width: 70px;
+}
+
+.line-tb .w-80 {
+	width: 80px;
+}
+
+.line-tb .w-90 {
+	width: 90px;
+}
+
+.line-tb .w-100 {
+	width: 100px;
+}
+
+.line-tb .w-110 {
+	width: 110px;
+}
+
+.line-tb .w-120 {
+	width: 120px;
+}
+
+.line-tb .w-130 {
+	width: 130px;
+}
+
+.line-tb .w-140 {
+	width: 140px;
+}
+
+.line-tb .w-150 {
+	width: 150px;
+}
+
+.line-tb .w-160 {
+	width: 160px;
+}
+
+.line-tb .w-170 {
+	width: 170px;
+}
+
+.line-tb .w-180 {
+	width: 180px;
+}
+
+.line-tb .w-190 {
+	width: 190px;
+}
+
+.line-tb .w-200 {
+	width: 200px;
+}
+
+.line-tb .w-210 {
+	width: 210px;
+}
+
+.line-tb .w-220 {
+	width: 220px;
+}
+
+.line-tb .w-230 {
+	width: 230px;
+}
+
+.line-tb .w-240 {
+	width: 240px;
+}
+
+.line-tb .w-250 {
+	width: 250px;
+}
+
+.line-tb .w-260 {
+	width: 260px;
+}
+
+.line-tb .w-270 {
+	width: 270px;
+}
+
+.line-tb .w-280 {
+	width: 280px;
+}
+
+.line-tb .w-290 {
+	width: 290px;
+}
+
+.line-tb .w-300
+{
+	width: 300px;
+}
+
+/**
+ * **************************
+ * 字段排序
+ * **************************
+ */
+.line-tb .arrow {
+	display: inline-block;
+	vertical-align: middle;
+	width: 14px;
+	height: 13px;
+	position: relative;
+	cursor: pointer;
+}
+
+.line-tb .arrow i {
+	font-size: 12px;
+	display: block;
+	line-height: 6px;
+	position: absolute;
+	left: 0;
+	font-weight: normal;
+	color: #c5c8ce;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	transition: all 0.3s linear;
+	-webkit-transition: all 0.3s linear;
+	-moz-transition: all 0.3s linear;
+	-ms-transition: all 0.3s linear;
+	-o-transition: all 0.3s linear;
+}
+
+.line-tb .arrow i:hover {
+	color: rgb(81, 90, 110);
+}
+
+.line-tb .arrow .focus {
+	color: #2d8cf0;
+}
+
+.line-tb .arrow .top {
+	top: 0;
+}
+
+.line-tb .arrow .btm {
+	bottom: 0;
+	transform: rotateZ(180deg) translate(0,50%);
+	-webkit-transform: rotateZ(180deg) translate(0,50%);
+	-moz-transform: rotateZ(180deg) translate(0,50%);
+	-ms-transform: rotateZ(180deg) translate(0,50%);
+	-o-transform: rotateZ(180deg) translate(0,50%);
+}

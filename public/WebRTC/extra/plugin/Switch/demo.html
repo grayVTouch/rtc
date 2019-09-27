@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="css/Switch.css" />
+    <title>内容滑动切换</title>
+</head>
+<body>
+
+<style>
+    .container {
+        width: 300px;
+        height: 300px;
+        border: 1px solid red;
+    }
+</style>
+
+<div class="container">
+
+    <!-- 切换容器 -->
+    <div class="switch">
+        <div class="items">
+            <div class="item" data-id="one">内容1</div>
+            <div class="item" data-id="two">内容2</div>
+            <div class="item" data-id="thr">内容3</div>
+            <div class="item" data-id="four">内容4</div>
+        </div>
+    </div>
+
+</div>
+
+<script src="../SmallJs/SmallJs.js"></script>
+<script src="js/Switch.js"></script>
+<script>
+    (function(){
+        "use strict";
+
+        var con = G('.container').first();
+
+        // 强烈声明！不要嵌套！！
+        var s = new Switch(con.get(0) , {
+            id: 'two' ,
+            // 动画过度时间
+            time: 300 ,
+            // 切换事件
+            switch: function(id){
+                console.log('内容切换成功' , id);
+            }
+        });
+    })();
+</script>
+</body>
+</html>

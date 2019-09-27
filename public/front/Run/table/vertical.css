@@ -1,0 +1,34 @@
+/*
+ * 竖排展示表格（两列）
+ */
+.vertical-tb {
+	width:100%;
+	font-size:12px;
+}
+
+.vertical-tb tbody tr td {
+	padding: 12px 0px;
+	padding-left:15px;
+}
+
+.vertical-tb tbody tr td:nth-of-type(1) {
+	width:120px;
+}
+
+.vertical-tb tbody tr td:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.vertical-tb tbody tr td .explain , .vertical-tb tbody tr td .action {
+	float:left;
+	height:24px;
+	margin-right: 8px;
+	line-height:24px;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}

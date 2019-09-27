@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>提示框</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="css/Prompt.css">
+</head>
+<body>
+
+<!-- 弹出层 -->
+<div class="prompt hide">
+    <!-- 背景颜色 -->
+    <div class="bg"></div>
+    <!-- 内容 -->
+    <div class="con">
+        <div class="header">
+            <div class="left title">信息</div>
+            <div class="right btns">
+                <button class="btn close">X</button>
+            </div>
+        </div>
+        <div class="msg">提示内容+++++++</div>
+        <div class="btns">
+            <button class="btn btn-1">确认</button>
+            <button class="btn btn-1">你好</button>
+            <button class="btn btn-1">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="../SmallJs/SmallJs.js"></script>
+<script src="js/Prompt.js"></script>
+<script>
+    "use strict";
+
+    var p = new Prompt('fuck you now !! i love this');
+    // var p1 = new Prompt('gun!!');
+
+    // 或者
+    Prompt.alert('你好');
+</script>
+</body>
+</html>

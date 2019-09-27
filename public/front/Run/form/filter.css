@@ -1,0 +1,56 @@
+/*
+ * 条件筛选
+ */
+.filter-options {
+	border:1px solid #ccc;
+	font-size:12px;
+	padding:5px;
+}
+
+.filter-options:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.filter-options .option {
+	float:left;
+	height:40px;
+	line-height:40px;
+	padding:0px 10px;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-o-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	transition:all 0.15s linear;
+	-webkit-transition:all 0.15s linear;
+	-moz-transition:all 0.15s linear;
+	-ms-transition:all 0.15s linear;
+	-o-transition:all 0.15s linear;
+}
+
+.filter-options .option:hover {
+	background-color:#eee;
+}
+
+.filter-options .option:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.filter-options .option .field , .filter-options .option .value {
+	float:left;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-o-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+}
+
+.filter-options .form-text , .filter-options .form-select {
+	min-width:200px;
+	height:30px;
+	line-height: normal;
+}

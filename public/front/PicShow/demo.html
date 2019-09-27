@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,Chrome=yes">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="renderer" content="webkit">
+	<link rel='stylesheet' href='../css/base.css'>
+	<link rel='stylesheet' href='css/PicShow.css'>
+	<title>图片预览</title>
+</head>
+<body>
+
+<style>
+	.container {
+		min-width:400px;
+		max-width: 800px;
+		height:400px;
+	}
+</style>
+
+<div class='container'>
+
+		<!-- 图片切换容器 -->
+		<div class='pic-show'>
+
+			<!-- 大图预览容器 -->
+			<div class='preview'>
+				<div class="content">
+					<div class="list">
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/01.jpg' class='image'></a>
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/02.jpg' class='image'></a>
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/03.jpg' class='image'></a>
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/04.jpg' class='image'></a>
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/05.jpg' class='image'></a>
+						<a href="https://www.baidu.com/" class="link"><img src='image/Test/06.jpg' class='image'></a>
+					</div>
+				</div>
+				<div class="btn prev"><img src="image/wPrev.png" class="image"></div>
+				<div class="btn next"><img src="image/wNext.png" class="image"></div>
+			</div>
+
+			<!-- 索引容器 -->
+			<div class='index'>
+				<div class='btn prev'><img src='image/prev.png' class='image'></div>
+				<div class='small'>
+					<div class='list'>
+						<!-- 开发时保留！ -->
+						<div class='item cur'><img src='image/Test/01.jpg' class='pic'></div>
+						<div class='item'><img src='image/Test/02.jpg' class='pic'></div>
+					</div>
+				</div>
+				<div class='btn next'><img src='image/next.png' class='image'></div>
+			</div>
+		</div>
+
+</div>
+
+<script src='../SmallJs/SmallJs.js'></script>
+<script src='js/PicShow.js'></script>
+
+<script>
+(function(){
+	"use strcit";
+
+	var c = G('.container');
+	var s = new PicShow(c.get(0) , {
+
+	});
+})();
+</script>
+</body>
+</html>

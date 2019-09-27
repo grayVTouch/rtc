@@ -1,0 +1,177 @@
+/*
+ * 更新时间
+ * 2017-02-15 10:25:00
+ */
+/*** 重置样式 ***/
+
+html {
+	/* 在某些手机浏览器中：元素点击后默认高亮显示 */
+	-webkit-tap-highlight-color:transparent;
+	/* 字体默认最小：12px */
+	-webkit-text-size-adjust:100%;
+}
+
+body {
+	font-family:微软雅黑;
+}
+
+body , form , div , ul , ol , p , h1 , h2 , h3 , h4 , h5 , h6 , nav , section , header , footer , table , frameset ,iframe , figure {
+	margin: 0 auto;
+	padding: 0;
+	outline: none;
+}
+
+h1 , h2 , h3 , h4 , h5 ,h6 {
+	/* 默认字体加粗 */
+	font-weight:normal;
+}
+
+ul , ol {
+	/* 列表默认有标示序号的图片 */
+	list-style-type:none;
+}
+
+b {
+	font-weight: normal;
+}
+
+i {
+	font-style: normal;
+}
+
+table {
+	empty-cells:show;
+	border-collapse:collapse;
+	table-layout:fixed;
+}
+
+/* 设置表格边框（默认无边框） */
+table , table thead tr th , table tbody tr td {
+	border:1px solid #ccc;
+	text-align:left;
+}
+
+input , select , button , textarea {
+	/* 默认是有外边框的 */
+	outline:none;
+	display: inline-block;
+	vertical-align: middle;
+	font-family:inherit;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-o-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+}
+
+input[type=text] , input[type=password] , input[type=search] , input[type=number] ,input[type=range] , input[type=email] , textarea {
+	border:1px solid #ccc;
+	transition:all 0.3s ease-in-out;
+	-webkit-transition:all 0.3s ease-in-out;
+	-moz-transition:all 0.3s ease-in-out;
+	-o-transition:all 0.3s ease-in-out;
+	-ms-transition:all 0.3s ease-in-out;
+}
+
+input[type=text] , input[type=password] , input[type=search] , input[type=number] , input[type=email] {
+	text-indent:12px;
+}
+
+textarea {
+	padding: 5px;
+}
+
+input[type=radio] , input[type=checkbox] {
+	vertical-align:middle;
+	margin: 0;
+	padding: 0;
+}
+
+input[type=submit] , input[type=button] , button {
+	outline:none;
+	border:none;
+	background-color:transparent;
+	font-family:inherit;
+}
+
+textarea {
+	/* 默认编辑框是可伸缩的 */
+	resize:none;
+	outline:none;
+}
+
+img {
+	/* 所有的行内块元素都是 vertical-align:baseline */
+	vertical-align:middle;
+	/* IE 中图片元素是有边框的 */
+	border:none;
+}
+
+video  {
+	vertical-align:middle;
+}
+
+a {
+	/* 连接默认有下划线 */
+	text-decoration:none;
+	color:inherit;
+	cursor:pointer;
+	word-wrap:break-word;
+}
+
+/* 滚动条设置 */
+@media screen and (min-width:751px) {
+	::-webkit-scrollbar {
+		width:12px;
+		height:12px;
+	}
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar-corner , ::-webkit-scrollbar-track {
+	background-color:rgba(140, 140, 140, 0.15);
+}
+
+/* 滚动块 */
+::-webkit-scrollbar-thumb {
+	border-radius:3px;
+	background-color:rgba(58,57,57,0.35);
+	transition:all 0.3s linear;
+	-webkit-transition:all 0.3s linear;
+	-moz-transition:all 0.3s linear;
+	-ms-transition:all 0.3s linear;
+	-o-transition:all 0.3s linear;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color:rgba(58,57,57,0.4);
+}
+
+
+/**
+ * *****************************
+ * 表单填充时，自带的默认样式
+ * ****************************
+ */
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+	/*background-color:transparent !important;*/
+}
+
+/**
+ * ***********
+ * 特殊作用类名
+ * ***********
+ */
+.clear-float:after {
+	display: block;
+	content: '';
+	clear: both;
+}
+
+.hide {
+	display:none;
+}
+
+.simsun {
+	font-family: SimSun;
+}
