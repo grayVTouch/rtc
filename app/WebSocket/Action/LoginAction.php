@@ -224,7 +224,10 @@ class LoginAction extends Action
             */
         }
         // 推送一条未读消息数量
-        return self::success($param['token']);
+        return self::success([
+            'user_id' => $param['user_id'] ,
+            'token' => $param['token']
+        ]);
     }
 
     public static function registerUsePhone(Base $base , array $param)
