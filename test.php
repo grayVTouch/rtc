@@ -58,3 +58,5 @@ A::set('c' , $c);
 
 $b->test();
 $c->test();
+
+echo 'hello boys and girls';
