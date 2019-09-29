@@ -49,9 +49,19 @@ class Message extends Auth
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['limit_id'] = $param['limit_id'] ?? '';
-        $param['order'] = $param['order'] ?? '';
         $param['limit'] = $param['limit'] ?? '';
         $res = MessageAction::history($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 重置未读数量
+    public function resetUnread(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = MessageAction::resetUnread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

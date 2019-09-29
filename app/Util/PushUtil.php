@@ -27,7 +27,7 @@ class PushUtil
         if (!UserRedis::isOnline($identifier , $user_id)) {
             return false;
         }
-        $conns = UserRedis::fdByUserId($identifier , $user_id);
+        $conns = UserRedis::userIdMappingFd($identifier , $user_id);
         $res = [
             'success'   => 0 ,
             'fail'      => 0 ,

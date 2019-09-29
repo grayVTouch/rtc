@@ -21,42 +21,13 @@ use App\WebSocket\Util\MessageUtil;
 
 use function core\convert_obj;
 use function core\obj_to_array;
+use function WebSocket\ws_config;
 
 
 class GroupMessageAction extends Action
 {
 
-    public static function groupHistory(Auth $auth , array $param)
-    {
-        // 获取群聊数据
-        $validator = Validator::make($param , [
-            'group_id' => 'required' ,
-            'group_message_id' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $group = GroupModel::findById($param['group_id']);
-        if (empty($group)) {
-            return self::error('未找到 group_id = ' . $param['group_id'] . ' 对应群信息' , 404);
-        }
-        $res = GroupMessageModel::history($group->id , $param['group_message_id'] , config('app.limit'));
-        $res = convert_obj($res);
-        foreach ($res as $v)
-        {
-            MessageUtil::handleGroupMessage($v);
-        }
-        $res = obj_to_array($res);
-        usort($res , function($a , $b){
-            if ($a['id'] == $b['id']) {
-                return 0;
-            }
-            return $a['id'] > $b['id'] ? 1 : -1;
-        });
-        return self::success($res);
-    }
-
-    public static function groupRecent(Auth $auth , array $param)
+    public static function history(Auth $auth , array $param)
     {
         // 获取群聊数据
         $validator = Validator::make($param , [
@@ -67,27 +38,20 @@ class GroupMessageAction extends Action
         }
         $group = GroupModel::findById($param['group_id']);
         if (empty($group)) {
-            return self::error('未找到 group_id = ' . $param['group_id'] . ' 对应群信息' , 404);
+            return self::error('未找到群对应信息' , 404);
         }
-        $res = GroupMessageModel::history($group->id , 0 , config('app.limit'));
-        // 消息模型关联
-        $res = convert_obj($res);
+        $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
+        $limit = empty($param['limit']) ? 0 : $param['limit'];
+        $res = GroupMessageModel::history($group->id , $limit_id , $limit);
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v);
         }
-        $res = obj_to_array($res);
-        usort($res , function($a , $b){
-            if ($a['id'] == $b['id']) {
-                return 0;
-            }
-            return $a['id'] > $b['id'] ? 1 : -1;
-        });
         return self::success($res);
     }
 
     // 设置未读消息数量
-    public static function resetGroupUnread(Auth $auth , array $param)
+    public static function resetUnread(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
@@ -95,9 +59,10 @@ class GroupMessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = GroupMessageReadStatusModel::updateStatus($auth->user->id , $param['group_id'] , 1);
+        GroupMessageReadStatusModel::updateStatusByUserIdAndGroupId($auth->user->id , $param['group_id'] , 1);
         // 通知用户刷新会话列表
         $auth->push($auth->user->id , 'refresh_session');
-        return self::success($res);
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        return self::success();
     }
 }

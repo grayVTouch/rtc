@@ -92,7 +92,7 @@ class UserAction extends Action
 
     public static function mapping(Auth $auth , array $param)
     {
-        UserRedis::fdByUserId($auth->identifier , $auth->user->id , $auth->fd);
+        UserRedis::userIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
         UserRedis::fdMappingUserId($auth->identifier , $auth->fd , $auth->user->id);
         return self::success();
     }

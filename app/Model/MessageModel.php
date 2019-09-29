@@ -70,21 +70,17 @@ class MessageModel extends Model
         return $res;
     }
 
-    public static function history(array $filter = [] , array $order = [] , int $limit = 20)
+    public static function history(string $chat_id , int $limit_id = 0 , int $limit = 20)
     {
-        $filter['limit_id'] = $filter['limit_id'] ?? '';
-        $filter['chat_id'] = $filter['chat_id'] ?? '';
-        $order['field'] = $order['field'] ?? 'id';
-        $order['value'] = $order['value'] ?? 'desc';
         $where = [
-            ['chat_id' , '=' , $filter['chat_id']] ,
+            ['chat_id' , '=' , $chat_id] ,
         ];
-        if ($filter['limit_id'] != '') {
-            $where[] = ['id' , '<' , $filter['limit_id']];
+        if ($limit_id != '') {
+            $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['user'])
             ->where($where)
-            ->orderBy($order['field'] , $order['value'])
+            ->orderBy('id' , 'desc')
             ->limit($limit)
             ->get();
         $res = convert_obj($res);

@@ -23,6 +23,7 @@ class Chat extends Auth
     {
         $param['group_id']  = $param['group_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
+        $param['extra']   = $param['extra'] ?? '';
         $res = ChatAction::advoise($this , 'text' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -70,7 +71,7 @@ class Chat extends Auth
     }
 
     // 群消息发送：文本
-    public function sendTextForGroup()
+    public function sendTextForGroup(array $param)
     {
         $param['group_id']  = $param['group_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
@@ -83,7 +84,7 @@ class Chat extends Auth
     }
 
     // 群消息发送：图片
-    public function sendImageForGroup()
+    public function sendImageForGroup(array $param)
     {
         $param['group_id']  = $param['group_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
@@ -96,7 +97,7 @@ class Chat extends Auth
     }
 
     // 群消息发送：语音
-    public function sendVoiceForGroup()
+    public function sendVoiceForGroup(array $param)
     {
         $param['group_id']  = $param['group_id'] ?? '';
         $param['message']   = $param['message'] ?? '';

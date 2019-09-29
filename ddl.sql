@@ -64,7 +64,7 @@ create table if not exists `rtc_group` (
   announcement varchar(5000) default '' comment '群公告' ,
   introduction varchar(5000) default '' comment '群简介' ,
   `type` tinyint default 1 comment '群类型：1-永久群 2-时效群' ,
-  `anonymous` tinyint default 1 comment '匿名聊天：0-否 1-是' ,
+  `anonymous` tinyint default 0 comment '匿名聊天：0-否 1-是' ,
   `expire` datetime default null comment '当 type = 2时，该字段有效，表示群的过期时间' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -156,6 +156,7 @@ drop table if exists `rtc_message_read_status`;
 create table if not exists `rtc_message_read_status` (
   id int unsigned not null auto_increment ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
+  chat_id varchar(255) default '' comment '私聊会话id' ,
   message_id int unsigned default 0 comment 'rtc_message.id' ,
   is_read tinyint default 0 comment '是否读取: y-已读 n-未读' ,
   create_time datetime default current_timestamp comment '创建时间' ,

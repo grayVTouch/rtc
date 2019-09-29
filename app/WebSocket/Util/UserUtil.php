@@ -137,7 +137,7 @@ class UserUtil extends Util
         $group_ids = GroupMemberModel::getGroupIdByUserId($user_id);
         foreach ($group_ids as $v)
         {
-            $group_unread_count += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($user_id , $v);
+            $group_unread_count += GroupMessageReadStatusModel::countByUserIdAndGroupId($user_id , $v , 0);
         }
         // todo 私聊-未读消息数量
         $res = $group_unread_count;

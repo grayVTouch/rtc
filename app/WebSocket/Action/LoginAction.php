@@ -65,7 +65,7 @@ class LoginAction extends Action
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
-        UserRedis::fdByUserId($base->identifier , $user->id , $base->fd);
+        UserRedis::userIdMappingFd($base->identifier , $user->id , $base->fd);
         UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
         if ($user->role == 'admin') {
             // 工作人员
@@ -134,7 +134,7 @@ class LoginAction extends Action
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
-        UserRedis::fdByUserId($base->identifier , $user->id , $base->fd);
+        UserRedis::userIdMappingFd($base->identifier , $user->id , $base->fd);
         UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
         if ($user->role == 'admin') {
             // 工作人员
@@ -198,7 +198,7 @@ class LoginAction extends Action
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
-        UserRedis::fdByUserId($base->identifier , $user->id , $base->fd);
+        UserRedis::userIdMappingFd($base->identifier , $user->id , $base->fd);
         UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
         if ($user->role == 'admin') {
             // 工作人员

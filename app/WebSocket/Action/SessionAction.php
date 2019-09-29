@@ -42,7 +42,7 @@ class SessionAction extends Action
                 // 用户使用的平台
                 $v->group->name = '平台咨询';
             }
-            $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->group_id);
+            $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->group_id , 0);
             $v->type = 'group';
             // 会话id仅是用于同意管理会话用的
             $v->session_id = MiscUtil::sessionId('group' , $v->group_id);

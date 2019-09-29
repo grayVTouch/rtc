@@ -14,7 +14,7 @@ use Engine\Facade\Redis as RedisFacade;
 class UserRedis extends Redis
 {
     // 绑定 user_id 和 客户端连接
-    public static function fdByUserId(string $identifier , int $user_id , int $fd = null)
+    public static function userIdMappingFd(string $identifier , int $user_id , int $fd = null)
     {
         $name = sprintf(self::$fdKey , $identifier , $user_id);
         if (is_null($fd)) {
@@ -45,7 +45,7 @@ class UserRedis extends Redis
     public static function delFdByUserId($identifier , $user_id , int $fd)
     {
         $name = sprintf(self::$fdKey , $identifier , $user_id);
-        $res = self::fdByUserId($identifier , $user_id);
+        $res = self::userIdMappingFd($identifier , $user_id);
         if (empty($res)) {
             return true;
         }
@@ -66,7 +66,7 @@ class UserRedis extends Redis
     // 检查用户是否在线
     public static function isOnline(string $identifier = '' , int $user_id = 0)
     {
-        return !empty(self::fdByUserId($identifier , $user_id));
+        return !empty(self::userIdMappingFd($identifier , $user_id));
     }
 
     public static function isAllOnline($identifier , array $user_ids = [])

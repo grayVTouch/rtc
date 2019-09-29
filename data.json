@@ -1,11 +1,11 @@
 {
-  "router": "/Login/loginUsePhone",
-  "identifier": "abcdefg",
+  "router": "/GroupMessage/resetUnread",
+  "identifier": "test",
+  "user_id": 1 ,
+  "debug": "running" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "area_code": "86" ,
-    "phone": "13375086826" ,
-    "sms_code": "364793"
+    "group_id": 6
   }
 }

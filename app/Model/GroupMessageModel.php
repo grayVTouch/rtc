@@ -9,6 +9,7 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -81,18 +82,19 @@ class GroupMessageModel extends Model
         return $res;
     }
 
-    public static function history($group_id , int $group_message_id = 0 , int $limit = 20)
+    public static function history($group_id , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
         ];
-        if (!empty($group_message_id)) {
-            $where[] = ['id' , '<' , $group_message_id];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['group' , 'user'])->where($where)
             ->orderBy('id' , 'desc')
             ->limit($limit)
             ->get();
+        $res = convert_obj($res);
         foreach ($res as $v)
         {
             self::single($v);

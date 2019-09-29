@@ -15,10 +15,10 @@ use App\WebSocket\Action\UserAction;
 class GroupMessage extends Auth
 {
     // 重置群未读消息数量
-    public function resetGroupUnread(array $param)
+    public function resetUnread(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';
-        $res = GroupMessageAction::resetGroupUnread($this , $param);
+        $res = GroupMessageAction::resetUnread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
@@ -26,24 +26,13 @@ class GroupMessage extends Auth
     }
 
     //  群：历史消息记录
-    public function groupHistory(array $param)
+    public function history(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';
-        $param['group_message_id'] = $param['group_message_id'] ?? '';
-        $res = GroupMessageAction::groupHistory($this , $param);
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $res = GroupMessageAction::history($this, $param);
         if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
-        }
-        return $this->success($res['data']);
-    }
-
-    // 群：最近消息
-    public function groupRecent(array $param)
-    {
-        $param['group_id'] = $param['group_id'] ?? '';
-        $res = GroupMessageAction::groupRecent($this , $param);
-        if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
+            return $this->error($res['data'], $res['code']);
         }
         return $this->success($res['data']);
     }

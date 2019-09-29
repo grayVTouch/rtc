@@ -152,7 +152,7 @@ class WebSocket
             try {
                 DB::beginTransaction();
                 $push = [];
-                $conn = UserRedis::fdByUserId($identifier , $user->id);
+                $conn = UserRedis::userIdMappingFd($identifier , $user->id);
                 $conn = array_diff($conn , [$fd]);
                 if (empty($conn)) {
                     // 如果是客服，用户加入的群组
@@ -520,7 +520,7 @@ class WebSocket
         }
         UserRedis::delNumberOfReceptionsForWaiter($user->identifier , $user->id);
         if (empty($fd)) {
-            $fds = $fds = UserRedis::fdByUserId($user->identifier , $user->id);
+            $fds = $fds = UserRedis::userIdMappingFd($user->identifier , $user->id);
         } else {
             $fds = [$fd];
         }
