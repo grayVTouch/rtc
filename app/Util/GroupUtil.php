@@ -20,6 +20,12 @@ class GroupUtil extends Util
      */
     public static function handle($group)
     {
-        $group->limit_member = GroupMemberModel::getByGroupId($group->id , 10);
+        $member = GroupMemberModel::getByGroupId($group->id , 9);
+        $member_avatar = [];
+        foreach ($member as $v)
+        {
+            $member_avatar[] = empty($v->user) ? $v->user->avatar : '';
+        }
+        $group->member_avatar = $member_avatar;
     }
 }
