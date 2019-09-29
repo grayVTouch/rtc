@@ -12,6 +12,7 @@ namespace App\WebSocket\Action;
 use App\Model\ApplicationModel;
 use App\Model\GroupModel;
 use App\Model\UserModel;
+use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
 use App\Util\PageUtil;
 use App\WebSocket\Auth;
@@ -114,5 +115,25 @@ class UserAction extends Action
     public static function info(Auth $auth , array $param)
     {
         return self::success($auth->user);
+    }
+
+    // 修改用户选项信息
+    public static function editUserOption(Auth $auth , array $param)
+    {
+        $user_option = UserOptionModel::findByUserId($auth->user->id);
+        if (empty($user_option)) {
+            return self::error('没有找到用户选项信息，数据不完整！请联系开发人员' , 404);
+        }
+        $param['private_notification']  = empty($param['private_notification']) ? $user_option->private_notification : $param['private_notification'];
+        $param['group_notification']    = empty($param['group_notification']) ? $user_option->group_notification : $param['group_notification'];
+        $param['write_status']          = empty($param['write_status']) ? $user_option->write_status : $param['write_status'];
+        $param['friend_auth']           = empty($param['friend_auth']) ? $user_option->friend_auth : $param['friend_auth'];
+        UserOptionModel::updateById($user_option->id , array_unit($param , [
+            'private_notification' ,
+            'group_notification' ,
+            'write_status' ,
+            'friend_auth' ,
+        ]));
+        return self::success();
     }
 }

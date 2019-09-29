@@ -66,10 +66,12 @@ class ChatUtil extends Util
         $relation = FriendModel::findByUserIdAndFriendId($param['user_id'] , $param['friend_id']);
         if (empty($relation)) {
             // todo 这个地方可能需要返回一个特殊的状态码
-            return self::error('你们还不是好友，禁止操作' , 403);
+            // todo 目前的设计表明即使是陌生人也可以发送消息
+//            return self::error('你们还不是好友，禁止操作' , 403);
         }
         // 该条消息是否是阅后即焚的消息
-        $param['flag'] = $relation->burn == 1 ? 'burn' : 'normal';
+        $param['flag'] = empty($relation) ? 'normal' :
+            ($relation->burn == 1 ? 'burn' : 'normal');
         $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
         $param['extra'] = $param['extra'] ?? '';
         // 这边做基本的认证

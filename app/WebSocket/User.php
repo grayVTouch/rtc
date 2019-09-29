@@ -88,4 +88,18 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 用户选项修改
+    public function editUserOption()
+    {
+        $param['private_notification']  = $param['private_notification'] ?? '';
+        $param['group_notification']    = $param['group_notification'] ?? '';
+        $param['write_status']          = $param['write_status'] ?? '';
+        $param['friend_auth']           = $param['friend_auth'] ?? '';
+        $res = UserAction::editUserOption($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

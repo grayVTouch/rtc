@@ -53,7 +53,7 @@ class GroupAction extends Action
         $param['op_type']   = 'app_group';
         $param['user_id']   = $group->user_id;
         $param['relation_user_id'] = json_encode([$auth->user->id]);
-        $param['remark']    = sprintf('"%s" 申请进群' , $auth->user->nickname);
+        $param['log']    = sprintf('"%s" 申请进群' , $auth->user->nickname);
         if ($group->auth == 1) {
             // 开启了进群认证
             $param['status']    = 'wait';
@@ -65,6 +65,7 @@ class GroupAction extends Action
                 'relation_user_id' ,
                 'status' ,
                 'remark' ,
+                'log' ,
             ]));
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
@@ -85,6 +86,7 @@ class GroupAction extends Action
                 'relation_user_id' ,
                 'status' ,
                 'remark' ,
+                'log' ,
             ]));
             // 未开启进群认证
             GroupMemberModel::u_insertGetId($auth->user->id , $group->id);
@@ -129,19 +131,19 @@ class GroupAction extends Action
             // 检查用户是否存在（批量检测）
             return self::error('包含现有群成员，请重新选择' , 403);
         }
-        $remark = '';
+        $log = '';
         foreach ($relation_user_id as $v)
         {
             $user = UserModel::findById($v);
             if (empty($user)) {
                 return self::error('被邀请人中存在不存在的用户' , 404);
             }
-            $remark .= $user->nickname . ',';
+            $log .= $user->nickname . ',';
         }
-        $remark = mb_substr($remark , 0 , mb_strlen($remark) - 2);
+        $log = mb_substr($log , 0 , mb_strlen($log) - 2);
         $param['type']      = 'group';
         $param['op_type']   = 'invite_into_group';
-        $param['remark'] = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $remark);
+        $param['log'] = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $log);
         $param['user_id']   = $group->user_id;
         $param['invite_user_id'] = $auth->user->id;
         if ($auth->user->id != $group->user_id) {
@@ -157,6 +159,7 @@ class GroupAction extends Action
                     'relation_user_id' ,
                     'status' ,
                     'remark' ,
+                    'log' ,
                 ]));
                 $auth->push($group->user_id , 'refresh_application');
                 $auth->push($group->user_id , 'refresh_unread_count');
@@ -178,6 +181,7 @@ class GroupAction extends Action
                 'relation_user_id' ,
                 'status' ,
                 'remark' ,
+                'log' ,
             ]));
             // 未开启进群认证
             GroupMemberModel::u_insertGetId($auth->user->id , $group->id);
@@ -191,7 +195,7 @@ class GroupAction extends Action
             ChatUtil::groupSend($auth , [
                 'user_id' => 0 ,
                 'type' => 'notification' ,
-                'message' => sprintf($message , $auth->user->nickname , $remark) ,
+                'message' => sprintf($message , $auth->user->nickname , $log) ,
             ]);
             return self::success($id);
         } catch(Exception $e) {

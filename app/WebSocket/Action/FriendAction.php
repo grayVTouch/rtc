@@ -45,6 +45,7 @@ class FriendAction extends Action
         $param['op_type']   = 'app_friend';
         $param['user_id']   = $param['friend_id'];
         $param['relation_user_id'] = $auth->user->id;
+        $param['log'] = sprintf('"%s" 申请添加好友' , $auth->user->nickname);
         try {
             DB::beginTransaction();
             if ($friend->user_option->friend_auth == 0) {

@@ -12,4 +12,12 @@ namespace App\Model;
 class UserOptionModel extends Model
 {
     protected $table = 'user_option';
+
+    public static function findByUserId(int $user_id)
+    {
+        $res = self::where('user_id' , $user_id)
+            ->first();
+        self::single($res);
+        return $res;
+    }
 }
