@@ -492,5 +492,20 @@ class GroupAction extends Action
         return self::success($member);
     }
 
+    public static function groupInfo(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群' , 404);
+        }
+        $group->member = GroupMemberModel::getByGroupId($group->id , 9);
+        return self::success($group);
+    }
 
 }

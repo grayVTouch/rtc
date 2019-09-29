@@ -1,14 +1,11 @@
 {
-  "router": "/Group/groupMember",
-  "identifier": "test",
-  "user_id": 1 ,
-  "debug": "running" ,
-  "token": "" ,
+  "router": "/Login/loginUsePhone",
+  "identifier": "abcdefg",
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "group_id": 1
+    "area_code": "86" ,
+    "phone": "13375086826" ,
+    "sms_code": "364793"
   }
 }
-
-

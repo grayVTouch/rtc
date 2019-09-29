@@ -330,7 +330,7 @@ class LoginAction extends Action
         }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
-            return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range) ,);
+            return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));
         }
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);

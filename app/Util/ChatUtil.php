@@ -16,6 +16,7 @@ use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
+use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
 use function core\array_unit;
@@ -87,6 +88,13 @@ class ChatUtil extends Util
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
             DB::commit();
             $user_ids = [$param['user_id'] , $param['friend_id']];
+            var_dump(json_encode($user_ids));
+            var_dump('当前登录用户的 fd' . $base->fd);
+            foreach ($user_ids as $v)
+            {
+                $fd = UserRedis::fdByUserId($base->identifier , $v);
+                var_dump('这边推送的用户id对应的 json' . json_encode($fd));
+            }
             $base->sendAll($user_ids , 'private_message' , $msg);
             $base->pushAll($user_ids , 'refresh_session');
             $base->pushAll($user_ids , 'refresh_unread_count');
