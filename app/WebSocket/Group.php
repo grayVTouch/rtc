@@ -91,6 +91,7 @@ class Group extends Auth
      */
     public function disbandGroup(array $param)
     {
+
         $param['group_id'] = $param['group_id'] ?? '';
         $res = GroupAction::disbandGroup($this , $param);
         if ($res['code'] != 200) {
