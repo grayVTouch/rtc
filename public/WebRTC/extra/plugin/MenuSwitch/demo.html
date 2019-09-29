@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单切换</title>
+
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="./css/MenuSwitch.css" />
+</head>
+<body>
+
+    <!-- 功能导航菜单 -->
+    <div class="menu-switch-container">
+        <div class='menu-switch menu-switch-for-1'>
+            <div class='item cur' data-id="one">测试 1</div>
+            <div class='item' data-id="two">测试 2</div>
+        </div>
+    </div>
+
+    <script src="../SmallJs/SmallJs.js"></script>
+    <script src="./js/MenuSwitch.js"></script>
+    <script>
+        (function(){
+            'use strict';
+
+            var con = G('.menu-switch-container').first();
+
+            var m = MenuSwitch(con.get() , {
+                // 默认选中的项
+                id: 'one' ,
+                // 项点击后回调
+                click: null ,
+                // 切换后回调
+                switch: null
+            });
+
+            console.log(m);
+        })();
+    </script>
+
+</body>
+</html>

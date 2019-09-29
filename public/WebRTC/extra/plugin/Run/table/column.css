@@ -1,0 +1,63 @@
+/*
+ * 数据列表展示
+ */
+.column-tb {
+	width:100%;
+	border:none;
+	font-size:12px;
+	border:none;
+	color:#999;
+}
+
+.column-tb tbody tr {
+	border-bottom:1px solid #eee;
+}
+
+.column-tb tbody tr:nth-last-of-type(1) {
+	border-bottom:none;
+}
+
+.column-tb tbody tr td {
+	padding:10px 0px;
+	border:none;
+}
+
+.column-tb tbody tr td:nth-of-type(1) {
+	padding-left:80px;
+	width:130px;
+}
+
+.column-tb tbody tr .vertical-top {
+	vertical-align:top;
+}
+
+.column-tb tbody tr td .thumb {
+	max-width:150px;
+}
+
+.column-tb tbody tr td .preview-pic {
+	max-width:720px;
+}
+
+.column-tb tbody tr td .pic {
+	max-width:200px;
+}
+
+.column-tb tbody tr .option-list {
+
+}
+
+.column-tb tbody tr .option-list:after {
+	display:block;
+	content:'';
+	clear:both;
+}
+
+.column-tb tbody tr .option-list .field , .column-tb tbody tr .option-list .value {
+	float:left;
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-ms-box-sizing:border-box;
+	-o-box-sizing:border-box;
+}
