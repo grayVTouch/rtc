@@ -9,13 +9,17 @@
 namespace App\Util;
 
 
+use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
 
 class GroupUtil extends Util
 {
-    // 群信息
-    public static function group(int $group_id)
+    /**
+     * @param \App\Model\GroupModel|\StdClass $group
+     * @return null
+     */
+    public static function handle($group)
     {
-        return GroupModel::findById($group_id);
+        $group->limit_member = GroupMemberModel::getByGroupId($group->id , 10);
     }
 }

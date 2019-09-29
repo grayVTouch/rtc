@@ -22,4 +22,6 @@ return [
     'enable_app_push' => false ,
     // 默认的昵称
     'nickname' => '未设置昵称' ,
+    // 默认页数
+    'page' => 1 ,
 ];

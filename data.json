@@ -1,11 +1,12 @@
 {
-  "router": "/GroupMessage/resetUnread",
+  "router": "/User/app",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "group_id": 6
+    "page": 1 ,
+    "limit": 20
   }
 }

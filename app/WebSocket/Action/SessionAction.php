@@ -16,7 +16,9 @@ use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
+use App\Util\GroupUtil;
 use App\Util\MiscUtil;
+use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
 use function core\obj_to_array;
@@ -35,6 +37,8 @@ class SessionAction extends Action
             if (empty($recent_message)) {
                 continue ;
             }
+            // 群处理
+            GroupUtil::handle($v->group);
             $v->recent_message = $recent_message;
             // 群消息处理
             MessageUtil::handleGroupMessage($v->recent_message);
@@ -46,8 +50,6 @@ class SessionAction extends Action
             $v->type = 'group';
             // 会话id仅是用于同意管理会话用的
             $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
-            // 群成员：只给最多 9 个
-            $v->member = GroupMemberModel::getByGroupId($v->group_id , 9);
             $session[] = $v;
         }
         $friend = FriendModel::getByUserId($auth->user->id);
@@ -58,6 +60,8 @@ class SessionAction extends Action
             if (empty($recent_message)) {
                 continue ;
             }
+            UserUtil::handle($v->user);
+            UserUtil::handle($v->friend);
             // 私聊消息处理
             MessageUtil::handleMessage($recent_message , $v->user_id , $v->friend_id);
             $v->recent_message = $recent_message;

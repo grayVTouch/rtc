@@ -15,7 +15,9 @@ use App\Model\GroupModel;
 use App\Model\GroupMemberModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
+use App\Util\GroupUtil;
 use App\Util\PushUtil;
+use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
 use function core\has_repeat_in_array;
@@ -473,6 +475,11 @@ class GroupAction extends Action
     public static function myGroup(Auth $auth , array $param)
     {
         $my_group = GroupMemberModel::getByUserId($auth->user->id);
+        foreach ($my_group as $v)
+        {
+            UserUtil::handle($v->user);
+            GroupUtil::handle($v->group);
+        }
         return self::success($my_group);
     }
 
@@ -489,6 +496,11 @@ class GroupAction extends Action
             return self::error('未找到群' , 404);
         }
         $member = GroupMemberModel::getByGroupId($group->id);
+        foreach ($member as $v)
+        {
+            UserUtil::handle($v->user);
+            GroupUtil::handle($v->group);
+        }
         return self::success($member);
     }
 
@@ -504,7 +516,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群' , 404);
         }
-        $group->member = GroupMemberModel::getByGroupId($group->id , 9);
+        GroupUtil::handle($group);
         return self::success($group);
     }
 

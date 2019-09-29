@@ -15,6 +15,7 @@ use App\Model\MessageModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\PushUtil;
+use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use function core\array_unit;
 use Core\Lib\Throwable;
@@ -62,6 +63,7 @@ class FriendAction extends Action
                 'relation_user_id' ,
                 'status' ,
                 'remark' ,
+                'log' ,
             ]));
             DB::commit();
             if ($friend->user_option->friend_auth == 1) {
@@ -142,7 +144,7 @@ class FriendAction extends Action
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
-            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+            throw $e;
         }
     }
 
@@ -181,6 +183,11 @@ class FriendAction extends Action
     public static function myFriend(Auth $auth , array $param)
     {
         $res = FriendModel::getByUserId($auth->user->id);
+        foreach ($res as $v)
+        {
+            UserUtil::handle($v->user);
+            UserUtil::handle($v->friend);
+        }
         return self::success($res);
     }
 }

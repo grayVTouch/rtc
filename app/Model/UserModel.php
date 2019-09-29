@@ -217,4 +217,21 @@ class UserModel extends Model
         UserOptionModel::single($res->user_option);
         return $res;
     }
+
+    public static function findByIdentifierAndNickname(string $identifier , string $nickname)
+    {
+        $res = self::with(['userOption'])
+            ->where([
+                ['identifier' , '=' , $identifier] ,
+                ['nickname' , '=' , $nickname] ,
+            ])
+            ->first();
+        if (empty($res)) {
+            return ;
+        }
+        $res = convert_obj($res);
+        self::single($res);
+        UserOptionModel::single($res->user_option);
+        return $res;
+    }
 }

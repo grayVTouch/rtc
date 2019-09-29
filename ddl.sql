@@ -112,6 +112,7 @@ create table if not exists `rtc_application` (
   relation_user_id varchar(255) default '' comment '如果是邀请用户进群，那么这个字段就会有用，关联用户，rtc_user.id 的集合，用,分割；如果是单人，那么就是 rtc_user.id' ,
   status varchar(500) default 'wait' comment '申请状态：approve-同意；refuse-拒绝；wait-等待处理' ,
   remark varchar(500) default '' comment '备注信息' ,
+  log varchar(500) default '' comment '系统日志' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '申请记录';

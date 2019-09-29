@@ -13,7 +13,9 @@ use App\Model\ApplicationModel;
 use App\Model\GroupModel;
 use App\Model\UserModel;
 use App\Redis\UserRedis;
+use App\Util\PageUtil;
 use App\WebSocket\Auth;
+use App\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Validator;
 use function WebSocket\ws_config;
@@ -30,10 +32,16 @@ class UserAction extends Action
     // 申请记录
     public static function app(Auth $auth , array $param)
     {
-        $param['user_id'] = $auth->user->id;
+        $param['page'] = empty($param['page']) ? ws_config('app.page') : $param['page'];
         $param['limit'] = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
-        $order = parse_order($param['order']);
-        $res = ApplicationModel::list($param , $order , $param['limit']);
+        $total = ApplicationModel::countByUserId($auth->user->id);
+        $page = PageUtil::deal($total , $param['page'] , $param['limit']);
+        $res = ApplicationModel::listByUserId($auth->user->id , $page['offset'] , $param['limit']);
+        foreach ($res as $v)
+        {
+            UserUtil::handle($v->user);
+        }
+        $res = PageUtil::data($page , $res);
         return self::success($res);
     }
 
@@ -65,9 +73,15 @@ class UserAction extends Action
         }
         $res = [];
         if ($user_use_id = UserModel::findById($param['keyword'])) {
+            UserUtil::handle($user_use_id);
             $res[] = $user_use_id;
         }
+        if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['keyword'])) {
+            UserUtil::handle($user_use_nickname);
+            $res[] = $user_use_nickname;
+        }
         if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['keyword'])) {
+            UserUtil::handle($user_use_phone);
             $res[] = $user_use_phone;
         }
         return self::success($res);
@@ -86,7 +100,7 @@ class UserAction extends Action
         if (empty($user)) {
             return self::error('未找到用户' , 404);
         }
-        $user->online = UserRedis::isOnline($auth->identifier , $user->id);
+        UserUtil::handle($user);
         return self::success($user);
     }
 
@@ -95,5 +109,10 @@ class UserAction extends Action
         UserRedis::userIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
         UserRedis::fdMappingUserId($auth->identifier , $auth->fd , $auth->user->id);
         return self::success();
+    }
+
+    public static function info(Auth $auth , array $param)
+    {
+        return self::success($auth->user);
     }
 }

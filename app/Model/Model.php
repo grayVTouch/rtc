@@ -88,4 +88,9 @@ class Model extends BaseModel
     {
         return static::destroy($id_list);
     }
+
+    public static function u_count(array $filter = [])
+    {
+        return static::where($filter)->count();
+    }
 }

@@ -9,19 +9,20 @@
 namespace App\Util;
 
 
-use App\Model\UserModel;
+use App\Redis\UserRedis;
 
 class UserUtil extends Util
 {
-    // 是否在线
-    public static function isOnline()
+    /**
+     * 处理用户信息
+     *
+     * @param \App\Model\UserModel|\StdClass $user
+     */
+    public static function handle($user)
     {
-
-    }
-
-    // 获取用户信息
-    public static function user(int $user_id)
-    {
-        return UserModel::findById($user_id);
+        if (empty($user)) {
+            return ;
+        }
+        $user->online = UserRedis::isOnline($user->identifier , $user->id) ? 1 : 0;
     }
 }

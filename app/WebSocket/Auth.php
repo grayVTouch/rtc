@@ -12,6 +12,7 @@ use App\Model\UserToken;
 use App\Model\UserModel;
 use App\Redis\UserRedis;
 use App\Util\DataUtil;
+use App\Util\UserUtil;
 use App\WebSocket\Action\LoginAction;
 use Exception;
 
@@ -47,6 +48,7 @@ class Auth extends Base
             // 调试模式！跳过认证直接获取用户数据
             $this->user = UserModel::findById($this->userId);
         }
+        UserUtil::handle($this->user);
         // 建立映射
         UserRedis::fdMappingUserId($this->identifier , $this->fd , $this->userId);
         UserRedis::userIdMappingFd($this->identifier , $this->userId , $this->fd);

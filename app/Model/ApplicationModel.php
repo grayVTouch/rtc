@@ -16,26 +16,34 @@ class ApplicationModel extends Model
 {
     protected $table = 'application';
 
-    public static function list(array $filter = [] , array $order = [] , int $limit = 20)
+    public function user()
     {
-        $filter['id'] = $filter['id'] ?? '';
-        $order['field'] = $order['field'] ?? 'id';
-        $order['value'] = $order['field'] ?? 'desc';
-        $where = [];
-        if ($filter['id'] != '') {
-            $where[] = ['id' , '=' , $filter['id']];
-        }
+        return $this->belongsTo(UserModel::class , 'user_id' , 'id');
+    }
+
+    public static function listByUserId(int $user_id , int $offset = 0 , int $limit = 20)
+    {
+        $where = [
+            ['user_id' , '=' , $user_id] ,
+        ];
         $res = self::with(['user'])
             ->where($where)
-            ->orderBy($order['field'] , $order['value'])
-            ->paginate($limit);
+            ->orderBy('id' , 'desc')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
         $res = convert_obj($res);
         foreach ($res as $v)
         {
             self::single($v);
-            UserModel::single($v->user);
         }
         return $res;
+    }
+
+    public static function countByUserId(int $user_id)
+    {
+        return self::where('user_id' , $user_id)
+            ->count();
     }
 
     /**
