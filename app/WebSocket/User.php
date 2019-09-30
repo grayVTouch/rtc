@@ -35,7 +35,7 @@ class User extends Auth
     // 查看好友信息
     public function other(array $param)
     {
-        $param['user_id'] = $param['user_id'] ?? '';
+        $param['other_id'] = $param['other_id'] ?? '';
         $res = UserAction::other($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
