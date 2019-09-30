@@ -10,6 +10,7 @@ namespace App\Util;
 
 
 use App\Model\BlacklistModel;
+use App\Model\FriendModel;
 use App\Redis\UserRedis;
 
 class UserUtil extends Util
@@ -27,7 +28,8 @@ class UserUtil extends Util
         $user->online = UserRedis::isOnline($user->identifier , $user->id) ? 1 : 0;
         if (!empty($relation_user_id)) {
             // 黑名单
-            $user->blocked = BlacklistModel::blocked($relation_user_id , $user->id);
+            $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id) ? 1 : 0;
+            $user->is_friend = FriendModel::isFriend($relation_user_id , $user->id) ? 1 : 0;
         }
     }
 }

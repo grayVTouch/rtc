@@ -62,10 +62,10 @@ class BlacklistModel extends Model
 
     public static function blocked(int $user_id , int $block_user_id)
     {
-        return (int) ((self::where([
+        return (self::where([
                 ['user_id' , '=' , $user_id] ,
                 ['block_user_id' , '=' , $block_user_id] ,
             ])
-            ->count()) > 0);
+            ->count()) > 0;
     }
 }
