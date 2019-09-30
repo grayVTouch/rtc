@@ -68,5 +68,16 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
+    // 重置未读数量
+    public function delete(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $res = MessageAction::delete($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 
 }

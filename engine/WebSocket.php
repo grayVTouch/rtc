@@ -402,7 +402,7 @@ class WebSocket
                     }
                     $waiter = UserModel::findById($waiter_id);
                     // 检查最近一条消息是否发送超时
-                    $last_message = GroupMessageModel::recentMessage($v->id , 'user');
+                    $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
 //                print_r($last_message);
                     if (!empty($last_message)) {
                         $create_time = strtotime($last_message->create_time);

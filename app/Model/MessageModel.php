@@ -70,7 +70,7 @@ class MessageModel extends Model
         return $res;
     }
 
-    public static function history(string $chat_id , int $limit_id = 0 , int $limit = 20)
+    public static function history(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['chat_id' , '=' , $chat_id] ,
@@ -79,6 +79,16 @@ class MessageModel extends Model
             $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['user'])
+            ->from('message as m')
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_m.id = rtc_dm.message_id')
+                    ->where([
+                        ['dm.type' , '=' , 'private'] ,
+                        ['dm.user_id' , '=' , $user_id] ,
+                    ]);
+            })
             ->where($where)
             ->orderBy('id' , 'desc')
             ->limit($limit)
@@ -93,9 +103,19 @@ class MessageModel extends Model
     }
 
     // 最新一条数据
-    public static function recentMessage(string $chat_id)
+    public static function recentMessage(int $user_id , string $chat_id)
     {
         $res = self::with(['user'])
+            ->from('message as m')
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_dm.message_id = rtc_m.id')
+                    ->where([
+                        ['dm.user_id' , '=' , $user_id] ,
+                        ['dm.type' , '=' , 'private'] ,
+                    ]);
+            })
             ->where('chat_id' , $chat_id)
             ->orderBy('id' , 'desc')
             ->first();

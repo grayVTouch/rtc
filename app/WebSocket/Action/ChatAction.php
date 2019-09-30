@@ -123,7 +123,6 @@ class ChatAction extends Action
         $param['user_id']   = $auth->user->id;
         $param['type']      = $type;
         return ChatUtil::send($auth , $param);
-
     }
 
     /**
@@ -135,7 +134,8 @@ class ChatAction extends Action
     {
         $param['user_id']   = $auth->user->id;
         $param['type']      = $type;
-//        print_r($param);
+        // nihao
         return ChatUtil::groupSend($auth , $param);
     }
+
 }

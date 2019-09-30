@@ -33,7 +33,7 @@ class SessionAction extends Action
         $group = GroupMemberModel::getByUserId($auth->user->id);
         foreach ($group as $v)
         {
-            $recent_message = GroupMessageModel::recentMessage($v->group_id , 'none');
+            $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->group_id , 'none');
             if (empty($recent_message)) {
                 continue ;
             }
@@ -56,7 +56,7 @@ class SessionAction extends Action
         foreach ($friend as $v)
         {
             $chat_id = ChatUtil::chatId($v->user_id , $v->friend_id);
-            $recent_message = MessageModel::recentMessage($chat_id);
+            $recent_message = MessageModel::recentMessage($auth->user->id , $chat_id);
             if (empty($recent_message)) {
                 continue ;
             }

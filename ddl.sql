@@ -197,6 +197,17 @@ create table if not exists `rtc_blacklist` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '黑名单列表';
 
+drop table if exists `rtc_delete_message`;
+create table if not exists `rtc_delete_message` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  type varchar(255) default '' comment 'private-私聊 group-群聊' ,
+  message_id int unsigned default 0 comment 'rtc_message.id or rtc_group_message.id' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户删除的聊天记录';
+
+
 drop table if exists `rtc_sms_code`;
 create table if not exists `rtc_sms_code` (
   id int unsigned not null auto_increment ,

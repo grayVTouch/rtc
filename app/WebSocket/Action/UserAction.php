@@ -10,6 +10,7 @@ namespace App\WebSocket\Action;
 
 
 use App\Model\ApplicationModel;
+use App\Model\BlacklistModel;
 use App\Model\GroupModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
@@ -134,6 +135,25 @@ class UserAction extends Action
             'write_status' ,
             'friend_auth' ,
         ]));
+        return self::success();
+    }
+
+    public static function blockUser(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'user_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $block_user = UserModel::findById($param['user_id']);
+        if (empty($block_user)) {
+            return self::error('未找到用户信息' , 404);
+        }
+        if ($auth->user->id == $block_user->id) {
+            return self::error('不能添加自身到黑名单');
+        }
+        BlacklistModel::u_insertGetId($auth->user->id , $block_user->id);
         return self::success();
     }
 }

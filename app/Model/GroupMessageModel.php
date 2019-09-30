@@ -58,7 +58,7 @@ class GroupMessageModel extends Model
     }
 
     // 用户发送的最近一条信息：最近一条消息
-    public static function recentMessage(int $group_id , string $role = 'none')
+    public static function recentMessage(int $user_id , int $group_id , string $role = 'none')
     {
         $where = [
             ['gm.group_id' , '=' , $group_id] ,
@@ -67,22 +67,32 @@ class GroupMessageModel extends Model
         if ($role != 'none') {
             $where[] = ['u.role' , '=' , $role];
         }
-        $res = DB::table('group_message as gm')
+        $res = self::with(['group' , 'user'])
+            ->from('group_message as gm')
             ->leftJoin('user as u' , 'gm.user_id' , '=' , 'u.id')
             ->where($where)
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_dm.message_id = rtc_gm.id')
+                    ->where([
+                        ['dm.user_id' , '=' , $user_id] ,
+                        ['dm.type' , '=' , 'group'] ,
+                    ]);
+            })
             ->orderBy('gm.id' , 'desc')
             ->select('gm.*')
             ->first();
         if (empty($res)) {
             return ;
         }
-        $res->group = GroupModel::findById($res->group_id);
-        $res->user = UserModel::findById($res->user_id);
         self::single($res);
+        UserModel::single($res->user);
+        GroupModel::single($res->group);
         return $res;
     }
 
-    public static function history($group_id , int $limit_id = 0 , int $limit = 20)
+    public static function history(int $user_id , $group_id , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
@@ -90,7 +100,18 @@ class GroupMessageModel extends Model
         if (!empty($limit_id)) {
             $where[] = ['id' , '<' , $limit_id];
         }
-        $res = self::with(['group' , 'user'])->where($where)
+        $res = self::with(['group' , 'user'])
+            ->from('group_message as gm')
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_gm.id = rtc_dm.message_id')
+                    ->where([
+                        ['dm.type' , '=' , 'group'] ,
+                        ['dm.user_id' , '=' , $user_id] ,
+                    ]);
+            })
+            ->where($where)
             ->orderBy('id' , 'desc')
             ->limit($limit)
             ->get();
