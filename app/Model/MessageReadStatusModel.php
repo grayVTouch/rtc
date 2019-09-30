@@ -133,7 +133,6 @@ class MessageReadStatusModel extends Model
      */
     public static function updateReadStatusByUserIdAndChatIdExcludeBurn(int $user_id , string $chat_id , int $is_read)
     {
-        DB::enableQueryLog();
         self::from('message_read_status as mrs')
             ->leftJoin('message as m' , 'mrs.message_id' , '=' , 'm.id')
             ->where([
@@ -145,8 +144,7 @@ class MessageReadStatusModel extends Model
             ->update([
                 'mrs.is_read' => $is_read
             ]);
-        $res = DB::getQueryLog();
-        var_dump($res);
+//        $res = DB::getQueryLog();
         return 0;
     }
 
