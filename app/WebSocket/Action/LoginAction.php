@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Action;
 
+use App\Lib\SMS\Zz253;
 use App\Model\GroupModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
@@ -404,10 +405,18 @@ class LoginAction extends Action
             if (strtotime($sms_code->update_time) + ws_config('app.sms_code_wait_time') > time()) {
                 return self::error('发送的频率过高，请等待1分钟后再发送短信验证码' , 401);
             }
+            $res = Zz253::send($param['area_code'] , $param['phone'] , $param['code']);
+            if ($res['code'] != 200) {
+                return self::error(sprintf('Line: %s; 短信平台远程接口错误：%s' , __LINE__ , $res['data']));
+            }
             SmsCodeModel::updateById($sms_code->id , [
                 'code' => $param['code']
             ]);
         } else {
+            $res = Zz253::send($param['area_code'] , $param['phone'] , $param['code']);
+            if ($res['code'] != 200) {
+                return self::error(sprintf('Line: %s; 短信平台远程接口错误：%s' , __LINE__ , $res['data']));
+            }
             SmsCodeModel::insertGetId(array_unit($param , [
                 'area_code' ,
                 'identifier' ,
