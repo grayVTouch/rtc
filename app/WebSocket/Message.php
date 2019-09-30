@@ -60,7 +60,7 @@ class Message extends Auth
     // 重置未读数量
     public function resetUnread(array $param)
     {
-        $param['group_id'] = $param['group_id'] ?? '';
+        $param['friend_id'] = $param['friend_id'] ?? '';
         $res = MessageAction::resetUnread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
