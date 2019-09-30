@@ -1,5 +1,5 @@
 {
-  "router": "/User/blockUser",
+  "router": "/User/other",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,

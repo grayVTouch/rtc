@@ -9,6 +9,7 @@
 namespace App\Util;
 
 
+use App\Model\BlacklistModel;
 use App\Redis\UserRedis;
 
 class UserUtil extends Util
@@ -18,11 +19,15 @@ class UserUtil extends Util
      *
      * @param \App\Model\UserModel|\StdClass $user
      */
-    public static function handle($user)
+    public static function handle($user , int $relation_user_id = 0)
     {
         if (empty($user)) {
             return ;
         }
         $user->online = UserRedis::isOnline($user->identifier , $user->id) ? 1 : 0;
+        if (!empty($relation_user_id)) {
+            // 黑名单
+            $user->blocked = BlacklistModel::blocked($relation_user_id , $user->id);
+        }
     }
 }

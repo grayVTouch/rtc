@@ -89,23 +89,6 @@ class UserAction extends Action
         return self::success($res);
     }
 
-    // 用户信息
-    public static function user(Auth $auth , array $param)
-    {
-        $validator = Validator::make($param , [
-            'user_id' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $user = UserModel::findById($param['user_id']);
-        if (empty($user)) {
-            return self::error('未找到用户' , 404);
-        }
-        UserUtil::handle($user);
-        return self::success($user);
-    }
-
     public static function mapping(Auth $auth , array $param)
     {
         UserRedis::userIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
@@ -113,9 +96,26 @@ class UserAction extends Action
         return self::success();
     }
 
-    public static function info(Auth $auth , array $param)
+    public static function self(Auth $auth , array $param)
     {
         return self::success($auth->user);
+    }
+
+    // 他人信息
+    public static function other(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'other_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $other = UserModel::findById($param['other_id']);
+        if (empty($other)) {
+            return self::error('未找到用户' , 404);
+        }
+        UserUtil::handle($other , $auth->user->id);
+        return self::success($other);
     }
 
     // 修改用户选项信息
@@ -155,5 +155,41 @@ class UserAction extends Action
         }
         BlacklistModel::u_insertGetId($auth->user->id , $block_user->id);
         return self::success();
+    }
+
+    public static function unblockUser(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'user_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $unblock_user = UserModel::findById($param['user_id']);
+        if (empty($unblock_user)) {
+            return self::error('未找到用户信息' , 404);
+        }
+        if ($auth->user->id == $unblock_user->id) {
+            return self::error('不能从黑名单中删除自身');
+        }
+        $res = BlacklistModel::unblockUser($auth->user->id , $unblock_user->id);
+        if ($res == 0) {
+            return self::error('您并没有将对方加入黑名单');
+        }
+        return self::success('操作成功');
+    }
+
+    public static function blacklist(Auth $auth , array $param)
+    {
+        $total = BlacklistModel::countByUserId($auth->user->id);
+        $limit = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
+        $page = PageUtil::deal($total , $param['page'] , $limit);
+        $res = BlacklistModel::listByUserId($auth->user->id , $page['offset'] , $page['limit']);
+        foreach ($res as $v)
+        {
+            UserUtil::handle($v->block_user , $auth->user->id);
+        }
+        $res = PageUtil::data($page , $res);
+        return self::success($res);
     }
 }

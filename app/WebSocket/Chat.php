@@ -70,6 +70,21 @@ class Chat extends Auth
         return $this->success($res['data']);
     }
 
+    // 私聊消息发送：名片
+    public function sendCardForPrivate(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $res = ChatAction::send($this , 'card' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+
+
     // 群消息发送：文本
     public function sendTextForGroup(array $param)
     {
@@ -103,6 +118,19 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $res = ChatAction::groupSend($this , 'voice' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 群消息发送：名片
+    public function sendCardForGroup(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $res = ChatAction::groupSend($this , 'card' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

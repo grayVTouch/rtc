@@ -22,9 +22,21 @@ class User extends Auth
         return self::success($res['data']);
     }
 
-    public function info(array $param)
+    // 查看自身用户信息
+    public function self(array $param)
     {
-        $res = UserAction::info($this , $param);
+        $res = UserAction::self($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 查看好友信息
+    public function other(array $param)
+    {
+        $param['user_id'] = $param['user_id'] ?? '';
+        $res = UserAction::other($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }
@@ -69,16 +81,6 @@ class User extends Auth
         return self::success($res['data']);
     }
 
-    public function user(array $param)
-    {
-        $param['user_id'] = $param['user_id'] ?? '';
-        $res = UserAction::user($this , $param);
-        if ($res['code'] != 200) {
-            return self::error($res['data'] , $res['code']);
-        }
-        return self::success($res['data']);
-    }
-
     // 重连后：重新绑定映射关系
     public function mapping(array $param)
     {
@@ -90,7 +92,7 @@ class User extends Auth
     }
 
     // 用户选项修改
-    public function editUserOption()
+    public function editUserOption(array $param)
     {
         $param['private_notification']  = $param['private_notification'] ?? '';
         $param['group_notification']    = $param['group_notification'] ?? '';
@@ -104,7 +106,7 @@ class User extends Auth
     }
 
     // 添加到黑名单
-    public function blockUser()
+    public function blockUser(array $param)
     {
         $param['user_id']  = $param['user_id'] ?? '';
         $res = UserAction::blockUser($this , $param);
@@ -113,4 +115,28 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 取消黑名单
+    public function unblockUser(array $param)
+    {
+        $param['user_id']  = $param['user_id'] ?? '';
+        $res = UserAction::unblockUser($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 黑名单列表
+    public function blacklist(array $param)
+    {
+        $param['limit'] = $param['limit'] ?? '';
+        $param['page'] = $param['page'] ?? '';
+        $res = UserAction::blacklist($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
 }

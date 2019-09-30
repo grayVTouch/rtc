@@ -26,7 +26,7 @@ class PageUtil
     private static $minPage = 1;
 
     // 处理
-    public static function deal(int $total = 0 , int $page = 1 , int $limit = 20): array
+    public static function deal(int $total = 0 , $page = 1 , $limit = 20): array
     {
         $total  = empty($total) ? self::$total : $total;
         $limit  = empty($limit) ? self::$limit : $limit;
