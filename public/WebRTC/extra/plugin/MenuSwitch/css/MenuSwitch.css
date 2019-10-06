@@ -83,7 +83,7 @@
     height:2px;
     background-color:#2d81d9;
     position:absolute;
-    bottom:0px;
+    bottom:0;
 }
 
 .menu-switch-for-2:after {
@@ -225,7 +225,7 @@
     content:'';
     position:absolute;
     bottom:-1px;
-    left:0px;
+    left:0;
     height:2px;
     width:100%;
     transition:all 0.3s linear;

@@ -62,6 +62,7 @@ class WebSocket
 
     /**
      * 解析 WebSocket 配置参数
+     * @throws \Exception
      */
     protected function parseConfig()
     {
@@ -95,6 +96,12 @@ class WebSocket
         return $option;
     }
 
+    /**
+     * WebSocket constructor.
+     *
+     * @param \Engine\Application $app
+     * @throws \Exception
+     */
     public function __construct(Application $app)
     {
         // 解析配置

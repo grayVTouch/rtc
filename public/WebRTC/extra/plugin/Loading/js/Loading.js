@@ -52,11 +52,6 @@
         cTime: '2016/12/12 17:53:00' ,
         constructor: Loading ,
 
-        // close 回调函数接收的参数
-        args: null ,
-        // close 上下文环境
-        context: null ,
-
         _initStaticHTML: function(){
 
         } ,
@@ -80,6 +75,10 @@
             this._endOpacity    = 1;
 
             this.status = this._status;
+            // close 回调函数接收的参数
+            this.args = null;
+            // close 上下文环境
+            this.context = null;
         } ,
 
         _initStatic: function(){

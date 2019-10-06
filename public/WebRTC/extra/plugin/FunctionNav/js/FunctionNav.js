@@ -20,7 +20,7 @@
             id: 'image' ,
             time: 300 ,
             switch: null ,
-            click: null
+            click: null ,
         };
 
         if (G.isUndefined(option)) {
@@ -53,7 +53,12 @@
         } ,
 
         _initStatic: function(){
-
+            this._functions_.each(function(dom){
+                new TouchFeedback(dom , {
+                    time: 300 ,
+                    backgroundColor: '#ff5f5b' ,
+                });
+            });
         } ,
 
         _initDynamicHTML: function(){

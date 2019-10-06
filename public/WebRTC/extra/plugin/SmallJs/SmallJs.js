@@ -138,9 +138,6 @@
         }
         // 使用时注意
         this._cur = this._get(selector , context);
-
-        this.length = this._cur.length;
-
         this._run();
     }
 
@@ -162,15 +159,10 @@
         // 构造函数
         constructor: SmallJs ,
 
-        length: 0 ,
-
-        // 当前引用的DOM对象
-        _cur: null ,
-
-        // 队列
-        _queue: null ,
-
         _initialize: function(){
+            // 长度
+            this.length = this._cur.length;
+            // 队列
             this.loop(function(dom){
                 if (g.isUndefined(dom.__smalljs_queue__)) {
                     // 为每一个 dom 元素设置一个队列
@@ -476,7 +468,7 @@
             type = g.contain(type , range) ? type : 'inner';
 
             if (g.isNull(html) || g.isUndefined(html)) {
-                return type === 'inner' ? this._cur.innerHTML : this._cur.outerHTML;
+                return type === 'inner' ? this.get(0).innerHTML : this.get(0).outerHTML;
             }
 
             this.loop(function (dom) {
@@ -2621,18 +2613,17 @@
     // 获取可编辑元素的光标位置
     g.getCursorPointForContentEditableElement = function(dom){
         var selection = window.getSelection();
-
         if (selection.rangeCount === 0) {
             return false;
         }
-
         var range = selection.getRangeAt(0);
         var cRange = range.cloneRange();
-
         cRange.selectNodeContents(dom);
         cRange.setEnd(range.endContainer , range.endOffset);
-
-        return cRange.toString().length;
+        return {
+            node: cRange.endContainer ,
+            position: cRange.endOffset
+        };
     };
 
     // 获取 textarea/input 等带有输入域的文本框的光标位置
@@ -2640,40 +2631,43 @@
         return dom.selectionEnd;
     };
 
-    // 获取光标当前位置
-    g.getCursorPoint = function(dom){
-        if (dom.contentEditable !== 'true') {
-            return this.getCursorPointForInput(dom);
-        }
-
-        return this.getCursorPointForContentEditableElement(dom);
-    };
-
     // 可编辑 html: 设置光标位置
-    g.setCursorPointForContentEditableElement = function(dom , pos){
-        dom.focus();
-
-        // 快捷方式
+    g.setCursorPointForContentEditableElement = function(node , pos){
         var posRange = ['first' , 'last'];
-
-        if (this.contain(pos , posRange)) {
-            if (pos === 'first') {
-                pos = 0;
+        var range = document.createRange();
+        if (node.nodeType == 1) {
+            // 元素节点
+            node.focus();
+            if (this.contain(pos , posRange)) {
+                if (pos === 'first') {
+                    pos = 0;
+                } else {
+                    pos = node.childNodes.length;
+                }
+                range.selectNodeContents(node);
+                range.setStart(node , pos);
             } else {
-                pos = dom.childNodes.length;
+                range.selectNodeContents(node);
+                range.setStart(node , pos);
+            }
+        } else {
+            // 文本节点等
+            node.parentNode.focus();
+            if (this.contain(pos , posRange)) {
+                if (pos === 'first') {
+                    pos = 0;
+                } else {
+                    pos = node.parentNode.childNodes.length;
+                }
+                range.selectNodeContents(node.parentNode);
+                range.setStart(node.parentNode , pos);
+            } else {
+                range.selectNodeContents(node);
+                range.setStart(node , pos);
             }
         }
-
-        var range = document.createRange();
-
-        range.selectNodeContents(dom);
-
-        range.setStart(dom , pos);
-
         range.collapse(true);
-
         var selection = window.getSelection();
-
         selection.removeAllRanges();
         selection.addRange(range);
     };
@@ -2681,18 +2675,7 @@
     // 文本域：设置光标位置
     g.setCursorPointForInput = function(dom , pos){
         dom.focus();
-
         dom.setSelectionRange(pos , pos , 'none');
-    };
-
-    // 设置光标位置
-    g.setCursorPoint = function(dom , pos){
-        if (dom.contentEditable !== 'true') {
-            this.setCursorPointForInput(dom , pos);
-            return ;
-        }
-
-        this.setCursorPointForContentEditableElement(dom , pos);
     };
 
     // 获取某个元素距离给定父元素的位置
@@ -2783,7 +2766,7 @@
                 dom.scrollLeft(endX);
             }
 
-            if (pos === 1) {
+            if (pos === 'y') {
                 dom.scrollTop(endY);
             }
 
@@ -2908,7 +2891,7 @@
             return minL >= minLRange && minL <= maxLRange || maxL >= minLRange && maxL <= maxLRange;
         }
 
-        if (pos === 1) {
+        if (pos === 'y') {
             return minT >= minTRange && minT <= maxTRange || maxT >= minTRange && maxT <= maxTRange;
         }
 
@@ -3695,8 +3678,8 @@
      * @return Mixed
      */
     g.random = function(min , max , isInt , fixedNum){
-        var isInt	 = g.type(isInt)    !== 'Boolean' ? true : isInt;
-        var fixedNum = g.type(fixedNum) !== 'Number'  ? 3    : fixedNum;
+        isInt	 = g.type(isInt)    !== 'Boolean' ? true : isInt;
+        fixedNum = g.type(fixedNum) !== 'Number'  ? 3    : fixedNum;
         var range	 = max - min;
         var rel		 = Math.max(min , Math.min(max , range * Math.random()));
 
@@ -4724,7 +4707,7 @@
     };
 
     // 弧度转换为角度
-    g.getDeg = function(rad){
+    g.getAng = function(rad){
         return rad * 180 / Math.PI;
     };
 
@@ -4758,21 +4741,22 @@
     /*
      * 随机获取颜色
      */
-    g.generateRandomColor = function(option){
+    g.randomColor = function(option){
+        var _default = {
+            minR: 0 ,
+            maxR: 255 ,
+            minG: 0 ,
+            maxG: 255 ,
+            minB: 0 ,
+            maxB: 255 ,
+            minA: 0 ,
+            maxA: 1000 ,
+            endA: undefined ,
+            alpha: undefined ,
+            len: 1000
+        };
         if (g.type(option) === 'Undefined') {
-            var option = {
-                minR: 0 ,
-                maxR: 255 ,
-                minG: 0 ,
-                maxG: 255 ,
-                minB: 0 ,
-                maxB: 255 ,
-                minA: 0 ,
-                maxA: 1000 ,
-                endA: undefined ,
-                alpha: undefined ,
-                len: 1000
-            };
+            option = _default;
         }
 
         var R = null;
@@ -4817,15 +4801,15 @@
 
         for (var i = 0; i < option['len']; ++i)
         {
-            R = random(option['minR'] , option['maxR']);
-            G = random(option['minG'] , option['maxG']);
-            B = random(option['minB'] , option['maxB']);
-            A = g.type(option['alpha']) === 'Undefined' ? random(option['minA'] , option['maxA']) / alphaRatio : option['alpha'];
+            R = this.random(option['minR'] , option['maxR'] , true);
+            G = this.random(option['minG'] , option['maxG'] , true);
+            B = this.random(option['minB'] , option['maxB'] , true);
+            A = g.type(option['alpha']) === 'Undefined' ? this.random(option['minA'] , option['maxA'] , true) / alphaRatio : option['alpha'];
 
             colorList.push('RGBA(' + R + ' , ' + G + ' , ' + B + ' , ' + A + ')');
         }
 
-        return colorList;
+        return colorList.join('');
     };
 
 
@@ -5030,6 +5014,7 @@
 
         // 当前项
         current: function(id , data , field){
+            data = g.copyObj(data , true);
             field = this.field(field);
             var i = 0;
             var v = null;
@@ -5045,6 +5030,7 @@
 
         // 单个：直系父级
         parent: function(id , data , field){
+            data = g.copyObj(data , true);
             field = this.field(field);
             var cur    = this.current(id , data , field);
             var i = 0;
@@ -5061,6 +5047,7 @@
 
         // 全部：父级
         parents: function(id , data , field , self , struct){
+            data = g.copyObj(data , true);
             field   = this.field(field);
             self    = g.isBoolean(self) ? self : true;
             struct  = g.isBoolean(struct) ? struct : true;
@@ -5099,6 +5086,7 @@
 
         // 直系全部：子级
         children: function(id , data , field){
+            data = g.copyObj(data , true);
             field  = this.field(field);
             var res    = [];
             var i = 0;
@@ -5113,15 +5101,15 @@
             return res;
         } ,
 
-        // 所有子级
         childrens: function(id , data , field , self , struct){
+            data = g.copyObj(data , true);
             field   = this.field(field);
             self    = g.isBoolean(self) ? self : true;
             struct  = g.isBoolean(struct) ? struct : true;
             var cur = this.current(id , data , field);
             var _self_ = this;
 
-            var get = function(id){
+            var get = function(id , floor){
                 var res    = _self_.children(id , data , field);
                 var v           = null;
                 var i           = 0;
@@ -5130,38 +5118,97 @@
                 for (; i < len; ++i)
                 {
                     v = res[i];
-                    other = get(v[field['id']]);
+                    v.floor = floor;
+                    other = get(v[field['id']] , floor + 1);
                     other.unshift(0);
                     other.unshift(res.length);
                     res.splice.apply(res , other);
                 }
                 return res;
             };
-            var res = get(id);
-            if (self && cur !== false) {
+            var saveSelf = self && cur !== false;
+            var res = get(id , saveSelf ? 2 : 1);
+            if (saveSelf) {
                 // 保存自身
+                cur.floor = 1;
                 res.unshift(cur);
             }
             if (struct) {
                 // 保存结构
-                var get_struct = function(id){
+                var get_struct = function(id , floor){
                     var children = _self_.children(id , res , field);
                     var i = 0;
                     var v = null;
                     for (; i < children.length; ++i)
                     {
                         v = children[i];
-                        v.children = get_struct(v[field['id']]);
+                        v.floor = floor;
+                        v.children = get_struct(v[field['id']] , floor + 1);
                     }
                     return children;
                 };
-                res = get_struct(id);
-                if (self && cur !== false) {
+                res = get_struct(id , saveSelf ? 2 : 1);
+                if (saveSelf) {
+                    cur.floor = 1;
                     cur.children = res;
                     res = cur;
                 }
             }
             return res;
+        } ,
+
+        floor: function(id , data , field , self){
+            data    = g.copyObj(data , true);
+            field   = this.field(field);
+            self    = g.isBoolean(self) ? self : true;
+            var cur = this.current(id , data , field);
+            var _self_ = this;
+            var saveSelf = self && cur !== false;
+            var initFloor = saveSelf ? 2 : 1;
+            var floorLog = [];
+            var get_struct = function(id , floor){
+                var children = _self_.children(id , data , field);
+                if (children.length < 1) {
+                    return ;
+                }
+                var i = 0;
+                var v = null;
+                for (; i < children.length; ++i)
+                {
+                    v = children[i];
+                    get_struct(v[field['id']] , floor + 1);
+                }
+                floorLog.push(floor);
+            };
+            get_struct(id , initFloor);
+            return floorLog.length > 1 ? Math.max.apply(null , floorLog) : 0;
+        } ,
+
+        floorCount: function(id , data , field , self){
+            data    = g.copyObj(data , true);
+            field   = this.field(field);
+            self    = g.isBoolean(self) ? self : true;
+            var cur = this.current(id , data , field);
+            var _self_ = this;
+            var saveSelf = self && cur !== false;
+            var initFloor = saveSelf ? 2 : 1;
+            var count = {};
+            if (saveSelf) {
+                count[1] = 1;
+            }
+            var get_struct = function(id , floor){
+                var children = _self_.children(id , data , field);
+                var i = 0;
+                var v = null;
+                for (; i < children.length; ++i)
+                {
+                    v = children[i];
+                    count[floor] = g.isUndefined(count[floor]) ? 1 : ++count[floor];
+                    get_struct(v[field['id']] , floor + 1);
+                }
+            };
+            get_struct(id , initFloor);
+            return count;
         } ,
     };
 
@@ -7289,41 +7336,6 @@
         author: '陈学龙' ,
         constructor: Ajax ,
 
-        // 当前创建的 XMLHttpRequest
-        xhr: null ,
-        // 请求头
-        url: null ,
-        method: null ,
-        async: null ,
-        header: null ,
-        additionalTimestamp: null ,
-        data: null ,
-        responseType: null ,
-        wait: null ,
-        withCredentials: null ,
-        before: null ,
-        success: null ,
-        netError: null ,
-        error: null ,
-        progress: null ,
-        loadstart: null ,
-        load: null ,
-        loadend: null ,
-        timeout: null ,
-        abort: null ,
-        uError: null ,
-        uProgress: null ,
-        uLoadstart: null ,
-        uLoad: null ,
-        uLoadend: null ,
-        uTimeout: null ,
-        uAbort: null ,
-        isReturnXHR: null ,
-        username: null ,
-        password: null ,
-        isAllowAjaxHeader: null ,
-        direct: null ,
-
         // 调用原生方法
         native: function(event){
             var args = arguments;
@@ -7695,6 +7707,7 @@
         }
 
         this._queue = [];
+        this.isConsuming = false;
         this.length = this._queue.length;
     }
 
@@ -7706,11 +7719,6 @@
         author: '陈学龙' ,
 
         cTime: '2016/10/27 00:46:00' ,
-
-        length: 0 ,
-
-        // 是否正在消费队列
-        isConsuming: false ,
 
         get: function(index){
             return !g.isInt(index) ? this._queue : this._queue[index];

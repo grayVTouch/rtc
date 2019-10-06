@@ -93,6 +93,9 @@
 
             // 当前显示的标签页类名
             this._focus = 'cur';
+
+            // 容器的最大宽度
+            this._scrollBarW    = 10;
         } ,
 
         _initStatic: function(){
@@ -104,9 +107,9 @@
         } ,
 
         _initDynamicArgs: function(){
-            // 容器的最大宽度
+
             this._multipleTabW  = this._multipleTab.width('content-box');
-            this._tabsW         = this._multipleTabW;
+            this._tabsW         = this._multipleTabW - this._scrollBarW;
             this._tabs_         = G('.tab' , this._tabs.get(0));
 
             // 标签数量
@@ -142,9 +145,6 @@
                 text.css({
                     width: textW + 'px'
                 });
-
-                // 注册事件
-                self._loginEvent(dom.get(0));
             });
         } ,
 
@@ -292,7 +292,7 @@
                 div = G(div);
             div.addClass('tab');
             div.data('id' , id);
-            var k = null;
+            var k;
             var p = 'data-';
             var _k = null;
             // 设置数据集属性
@@ -317,6 +317,7 @@
             this._initDynamicHTML();
             this._initDynamicArgs();
             this._initDynamic();
+
             // 初始化样式
             div.css({
                 width: 0 ,
@@ -333,7 +334,12 @@
                 opacity: endOpacity
             } , function(){
                 self._loginEvent(div.get(0));
-
+                // 必须要重新执行一次初始化！
+                // 因为可能会出现新的标签页出现，但旧标签页动画尚未结束的情况
+                // 如果出现上述情况的时候，新标签页创建时的重新初始化的值针对
+                // 还在动画中的标签页无效，所以必须在动画完成之后再次进行
+                // 标签页重新初始化
+                self._initDynamic();
                 if (G.isFunction(self._created)) {
                     self._created.call(self , id);
                 }
@@ -691,8 +697,7 @@
         // 获取 tab 上新增的额外属性
         attr: function(id , key){
             var tab = G(this.tab(id));
-            var value = tab.data(key);
-            return value;
+            return tab.data(key);
         } ,
 
         _run: function(){

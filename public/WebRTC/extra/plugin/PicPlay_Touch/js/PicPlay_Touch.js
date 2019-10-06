@@ -96,8 +96,6 @@
 
         constructor: PicPlay_Touch ,
 
-        timerGroup: 'PicPlay_Touch' ,
-
         _initStaticHTML: function(){
             // 图片一开始选中索引
             this.index = this._index;
@@ -162,6 +160,8 @@
             this._con.timer = null;
             // 是否已经停止动画（动画过度是否完成）
             this._con.isCarStop = false;
+
+            this.timerGroup = 'PicPlay_Touch';
         } ,
 
         _initStatic: function(){

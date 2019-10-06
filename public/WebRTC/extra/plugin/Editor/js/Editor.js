@@ -110,7 +110,7 @@
     };
 
     // Socket
-    if (G.getValType(Editor) !== 'Undefined') {
+    if (G.type(Editor) !== 'Undefined') {
         window.__editor__ = window.Editor;
     }
 
