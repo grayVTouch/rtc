@@ -60,7 +60,7 @@ class BlacklistModel extends Model
             ->delete();
     }
 
-    public static function blocked(int $user_id , int $block_user_id)
+    public static function blocked(int $user_id , int $block_user_id): bool
     {
         return (self::where([
                 ['user_id' , '=' , $user_id] ,

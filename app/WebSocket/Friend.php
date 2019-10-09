@@ -67,4 +67,28 @@ class Friend extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 设置阅后即焚
+    public function burn(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['burn'] = $param['burn'] ?? '';
+        $res = FriendAction::burn($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 设置好友备注
+    public function alias(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['alias']     = $param['alias'] ?? '';
+        $res = FriendAction::alias($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

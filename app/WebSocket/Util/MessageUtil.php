@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Util;
 
+use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
@@ -46,17 +47,24 @@ class MessageUtil extends Util
      * @param int $friend_id
      * @return null
      */
-    public static function handleMessage($msg , int $user_id , int $friend_id)
+    public static function handleMessage($msg , int $user_id = 0 , int $friend_id = 0)
     {
         if (empty($msg)) {
             return ;
         }
-        $msg->session_id        = MiscUtil::sessionId('private' , $msg->chat_id);
-        $msg->self_is_read      = MessageReadStatusModel::isRead($user_id , $msg->id);
-        $msg->friend_is_read    = MessageReadStatusModel::isRead($friend_id , $msg->id);
-
+        $msg->session_id = MiscUtil::sessionId('private' , $msg->chat_id);
+        $msg->self_is_read = MessageReadStatusModel::isRead($user_id , $msg->id);
+        $msg->friend_is_read = MessageReadStatusModel::isRead($friend_id , $msg->id);
         if (isset($msg->user)) {
             TopUserUtil::handle($msg->user);
         }
     }
+
+    // 删除消息
+    public static function delMessageByIds($id_list)
+    {
+        MessageModel::delByIds($id_list);
+        MessageReadStatusModel::delByMessageIds($id_list);
+    }
+
 }

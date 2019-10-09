@@ -524,4 +524,45 @@ class GroupAction extends Action
         return self::success($group);
     }
 
+    public static function groupAuth(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'auth' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group_auth = ws_config('business.group_auth');
+        if (!in_array($param['auth'] , $group_auth)) {
+            return self::error('auth 字段值不在支持的范围');
+        }
+        GroupModel::updateById($param['group_id'] , array_unit($param , [
+            'auth'
+        ]));
+        return self::success('操作成功');
+    }
+
+    // 群二维码
+    public static function QRCodeData(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群信息' , 404);
+        }
+        $download = ws_config('app.download');
+        $data = [
+            'type'  => 'group' ,
+            'id'    => $param['group_id'] ,
+        ];
+        $base64 = base64_encode(json_encode($data));
+        $link = sprintf('%s?data=%s' , $download , $base64);
+        return self::success($link);
+    }
 }

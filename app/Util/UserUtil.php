@@ -30,6 +30,9 @@ class UserUtil extends Util
             // 黑名单
             $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id) ? 1 : 0;
             $user->is_friend = FriendModel::isFriend($relation_user_id , $user->id) ? 1 : 0;
+            // 好友名称
+            $alias = FriendModel::alias($relation_user_id , $user->id);
+            $user->nickname = empty($alias) ? $user->nickname : $alias;
         }
     }
 }

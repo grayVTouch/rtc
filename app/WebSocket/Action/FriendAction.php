@@ -191,4 +191,46 @@ class FriendAction extends Action
         }
         return self::success($res);
     }
+
+    // 阅后即焚
+    public static function burn(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+            'burn'      => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
+            return self::error('你们并非好友，无权限操作' , 403);
+        }
+        $burn_for_friend = ws_config('business.burn_for_friend');
+        if (!in_array($param['burn'] , $burn_for_friend)) {
+            return self::error('不支持的 flag 类型');
+        }
+        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
+            'burn' ,
+        ]));
+        return self::success();
+    }
+
+    // 好友备注
+    public static function alias(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+            'alias'      => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
+            return self::error('你们并非好友，无权限操作' , 403);
+        }
+        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
+            'alias' ,
+        ]));
+        return self::success();
+    }
 }

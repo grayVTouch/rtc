@@ -140,4 +140,41 @@ class MessageModel extends Model
             ->count());
     }
 
+    // 删除调已经被读取的阅后即焚消息
+    public static function delFriendReadedByChatId(string $chat_id)
+    {
+        // 特别注意，这个地方表明不能用别名
+        // 因为如果用别名 + exists 语句的话
+        // 需要再 delete 后面跟上要删除的表明
+        // 很显然，laravel 的查询构造器不支持
+        // 所以，请使用完整的别名即可
+        return self::from('message')
+            ->where('m.chat_id' , $chat_id)
+            ->whereExists(function($query){
+                // 对方已读
+                $query->select('message_read_status.id')
+                    ->from('message_read_status')
+                    ->whereRaw('rtc_message_read_status.message_id = rtc_message.id')
+                    ->whereRaw('rtc_message_read_status.user_id != rtc_message.user_id')
+                    ->where('message_read_status.is_read' , 1);
+            })
+            ->delete();
+    }
+
+    // 获取所有阅后即焚消息（好友已读）
+    public static function getIdsWithFriendReadedByChatId(string $chat_id)
+    {
+        return self::from('message as m')
+            ->where('m.chat_id' , $chat_id)
+            ->whereExists(function($query){
+                // 对方已读
+                $query->select('mrs.id')
+                    ->from('message_read_status as mrs')
+                    ->whereRaw('rtc_mrs.message_id = rtc_m.id')
+                    ->whereRaw('rtc_mrs.user_id != rtc_m.user_id')
+                    ->where('mrs.is_read' , 1);
+            })
+            ->column('m.id');
+    }
+
 }

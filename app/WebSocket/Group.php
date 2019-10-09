@@ -157,4 +157,31 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    /**
+     * 群验证
+     */
+    public function groupAuth(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['auth'] = $param['auth'] ?? '';
+        $res = GroupAction::groupAuth($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    /**
+     * 群二维码
+     */
+    public function QRCodeData(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::QRCodeData($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

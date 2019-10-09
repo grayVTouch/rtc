@@ -1,11 +1,12 @@
 {
-  "router": "/User/other",
+  "router": "/Group/QRCodeData",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
+  "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "user_id": 2
+    "group_id": 6
   }
 }

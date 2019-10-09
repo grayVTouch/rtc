@@ -49,7 +49,7 @@ class MessageReadStatusModel extends Model
 
     /**
      * 更新消息读取状态
-     *
+     * @param int $is_read 0 | 1
      */
     public static function updateReadStatusByUserIdAndMessageId(int $user_id , int $message_id , int $is_read)
     {
@@ -164,5 +164,12 @@ class MessageReadStatusModel extends Model
             ['user_id' , '=' , $user_id] ,
             ['is_read' , '=' , $is_read] ,
         ])->count());
+    }
+
+    // 删除读取状态
+    public static function delByMessageIds(array $message_ids)
+    {
+        return self::whereIn('message_id' , $message_ids)
+            ->delete();
     }
 }

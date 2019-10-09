@@ -9,6 +9,8 @@
 namespace App\Util;
 
 
+use App\Model\BlacklistModel;
+use App\Model\DeleteMessageModel;
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
@@ -46,7 +48,7 @@ class ChatUtil extends Util
      * 私聊消息发送（这边是去掉了各种用户认证）
      * @throws Exception
      */
-    public static function send(Base $base , array $param)
+    public static function send(Base $base , array $param , bool $push_all = false)
     {
         $validator = Validator::make($param , [
             'user_id' => 'required' ,
@@ -57,7 +59,7 @@ class ChatUtil extends Util
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = config('business.message_type');
+        $type_range = ws_config('business.message_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
         }
@@ -75,6 +77,8 @@ class ChatUtil extends Util
         $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
         $param['extra'] = $param['extra'] ?? '';
         // 这边做基本的认证
+        $blocked = BlacklistModel::blocked($param['user_id'] , $param['user_id']);
+        $param['blocked'] = (int) $blocked;
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [
@@ -84,24 +88,46 @@ class ChatUtil extends Util
                 'type' ,
                 'flag' ,
                 'extra' ,
+                'blocked' ,
             ]));
             MessageReadStatusModel::initByMessageId($id , $param['chat_id'] , $param['user_id'] , $param['friend_id']);
+            if ($blocked) {
+                // 接收方把发送方拉黑了
+                DeleteMessageModel::insertGetId([
+                    'user_id'   => $param['friend_id'] ,
+                    'type'      => 'private' ,
+                    'message_id' => $id
+                ]);
+            }
             $msg = MessageModel::findById($id);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
             DB::commit();
-            $user_ids = [$param['user_id'] , $param['friend_id']];
-            var_dump(json_encode($user_ids));
-            var_dump('当前登录用户【user_id: ' . UserRedis::fdMappingUserId($base->identifier , $base->fd) . '】的 fd' . $base->fd);
-            foreach ($user_ids as $v)
-            {
-                $fd = UserRedis::userIdMappingFd($base->identifier , $v);
-                var_dump('这边推送的用户id【' . $v . '】对应的 fd' . json_encode($fd));
-            }
-            $base->sendAll($user_ids , 'private_message' , $msg);
-            $base->pushAll($user_ids , 'refresh_session');
-            $base->pushAll($user_ids , 'refresh_unread_count');
-            if (ws_config('app.enable_app_push')) {
-                // todo app 推送
+            if (!$blocked) {
+                $user_ids = [$param['user_id'] , $param['friend_id']];
+                var_dump(json_encode($user_ids));
+                var_dump('当前登录用户【user_id: ' . UserRedis::fdMappingUserId($base->identifier , $base->fd) . '】的 fd' . $base->fd);
+                foreach ($user_ids as $v)
+                {
+                    $fd = UserRedis::userIdMappingFd($base->identifier , $v);
+                    var_dump('这边推送的用户id【' . $v . '】对应的 fd' . json_encode($fd));
+                }
+                if ($push_all) {
+                    // 用于消息转发
+                    $base->pushAll($user_ids , 'private_message' , $msg);
+                } else {
+                    // 用于正常聊天
+                    $base->sendAll($user_ids , 'private_message' , $msg);
+                }
+                $base->pushAll($user_ids , 'refresh_session');
+                $base->pushAll($user_ids , 'refresh_unread_count');
+                if (ws_config('app.enable_app_push')) {
+                    // todo app 推送
+                }
+            } else {
+                if ($push_all) {
+                    // 用于消息转发
+                    $base->push($param['user_id'] , 'private_message' , $msg);
+                }
             }
             return self::success($msg);
         } catch(Exception $e) {
@@ -113,7 +139,7 @@ class ChatUtil extends Util
     /**
      * 群聊消息发送
      */
-    public static function groupSend(Base $base , array $param)
+    public static function groupSend(Base $base , array $param , bool $push_all = false)
     {
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
@@ -124,7 +150,7 @@ class ChatUtil extends Util
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = config('business.message_type');
+        $type_range = ws_config('business.message_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
         }
@@ -165,5 +191,27 @@ class ChatUtil extends Util
             DB::rollBack();
             throw $e;
         }
+    }
+
+    // 获取好友
+    public static function receiver(string $chat_id , int $sender)
+    {
+        if (empty($chat_id)) {
+            return 0;
+        }
+        $res = explode('_' , $chat_id);
+        foreach ($res as $v)
+        {
+            if ($v == $sender) {
+                continue ;
+            }
+            return $v;
+        }
+    }
+
+    // 获取好友双方
+    public static function userIds(string $chat_id)
+    {
+        return explode('_' , $chat_id);
     }
 }

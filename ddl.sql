@@ -95,7 +95,8 @@ create table if not exists `rtc_friend` (
   friend_id int unsigned default 0 comment '好友id：rtc_user.id' ,
   friend_group_id int unsigned default 0 comment 'rtc_friend_group.id' ,
   burn tinyint default 0 comment '阅后即焚：0-否 1-是' ,
-  remark varchar(255) default '' comment '好友备注' ,
+  alias varchar(255) default '' comment '别名（好友备注）' ,
+  can_notice tinyint default 1 comment '消息免打扰：0-否 1-是' ,
   background varchar(1000) default '' comment '聊天背景' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -126,6 +127,7 @@ create table if not exists `rtc_message` (
   message text comment '消息' ,
   extra text comment '额外数据' ,
   flag varchar(255) default 'normal' comment '消息标志：burn-阅后即焚消息；normal-正常消息' ,
+  blocked tinyint default 0 comment '0-正常消息 1-黑名单消息' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '私聊消息';
@@ -221,8 +223,15 @@ create table if not exists `rtc_sms_code` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '短信验证码';
 
--- 私聊-删除消息
--- 群聊-删除消息
--- 黑名单
--- 消息撤回
--- 转发
+
+drop table if exists `rtc_top_session`;
+create table if not exists `rtc_top_session` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  type varchar(255) default '' comment '类型：private-私聊 group-群聊' ,
+  target_id varchar(255) default '' comment 'type=private，则 target_id=chat_id；type=group，target_id=group_id' ,
+  top tinyint default 0 comment '置顶？0-否 1-是' ,
+  update_time datetime default current_timestamp on update current_timestamp ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '置顶会话';

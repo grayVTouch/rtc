@@ -51,6 +51,8 @@ return [
         'refresh_group' ,
         // 指令：刷新好友列表
         'refresh_friend' ,
+        // 指令：更新单条私聊消息
+        'refresh_private_message' ,
     ] ,
 
     /**
@@ -99,6 +101,8 @@ return [
         'random_red_envelope' ,
         // 口令红包
         'password_red_envelope' ,
+        // 撤回消息
+        'withdraw' ,
     ] ,
 
     /**
@@ -162,5 +166,48 @@ return [
         'private' ,
         // 群聊
         'group'
+    ] ,
+
+    // 禁止撤回的消息类型
+    'deny_withdraw_message_type' => [
+        // 撤回消息
+        'withdraw' ,
+    ] ,
+
+    // 禁止转发的消息的类型
+    'deny_forward_message_type' => [
+        'withdraw' ,
+    ] ,
+
+    // 私聊会话标志
+    'burn_for_friend' => [
+        // 正常聊天
+        0 ,
+        // 阅后即焚
+        1
+    ] ,
+
+    // 消息转发类型
+    'forward_type' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group' ,
+    ] ,
+
+    // 置顶会话的类型
+    'type_for_top_session' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group'
+    ] ,
+
+    // 群验证
+    'group_auth' => [
+        // 关闭
+        0 ,
+        // 开启
+        1 ,
     ] ,
 ];

@@ -24,4 +24,8 @@ return [
     'nickname' => '未设置昵称' ,
     // 默认页数
     'page' => 1 ,
+    // 消息撤回允许的时间范围
+    'withdraw_duration' => 2 * 60 ,
+    // app 应用市场
+    'download' => 'http://www.baidu.com' ,
 ];

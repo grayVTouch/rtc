@@ -97,6 +97,8 @@ return [
         'random_red_envelope' ,
         // 口令红包
         'password_red_envelope' ,
+        // 撤回消息
+        'withdraw' ,
     ] ,
 
     /**

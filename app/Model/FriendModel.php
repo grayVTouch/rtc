@@ -93,4 +93,23 @@ class FriendModel extends Model
         }
         return $res;
     }
+
+    public static function updateByUserIdAndFriendId(int $user_id , int $friend_id , array $param)
+    {
+        return self::where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['friend_id' , '=' , $friend_id] ,
+                ])
+                ->update($param);
+    }
+
+    // 好友备注姓名
+    public static function alias(int $user_id , int $friend_id): string
+    {
+        return (string) (self::where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['friend_id' , '=' , $friend_id] ,
+                ])
+                ->value('alias'));
+    }
 }

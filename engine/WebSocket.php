@@ -140,13 +140,13 @@ class WebSocket
     public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
-        var_dump('存在客户端连接');
+        var_dump(date('Y-m-d H:i:s') . ' 存在客户端连接');
 //        $websocket->push($http->fd , '你已经成功连接客户端');
     }
 
     public function close(Server $server , int $fd , int $reacter_id)
     {
-        var_dump('存在客户端下线');
+        var_dump(date('Y-m-d H:i:s') . ' 存在客户端下线');
         $this->isOpen = false;
         $identifier = MiscRedis::fdMappingIdentifier($fd);
         if (empty($identifier)) {
@@ -390,6 +390,9 @@ class WebSocket
 
     }
 
+    /**
+     * 定时任务
+     */
     protected function initTimer()
     {
         // 单位：ms
@@ -410,7 +413,6 @@ class WebSocket
                     $waiter = UserModel::findById($waiter_id);
                     // 检查最近一条消息是否发送超时
                     $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
-//                print_r($last_message);
                     if (!empty($last_message)) {
                         $create_time = strtotime($last_message->create_time);
                         $duration = time() - $create_time;

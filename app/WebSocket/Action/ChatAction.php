@@ -134,8 +134,8 @@ class ChatAction extends Action
     {
         $param['user_id']   = $auth->user->id;
         $param['type']      = $type;
-        // nihao
         return ChatUtil::groupSend($auth , $param);
     }
+
 
 }

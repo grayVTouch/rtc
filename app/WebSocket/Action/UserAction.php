@@ -192,4 +192,27 @@ class UserAction extends Action
         $res = PageUtil::data($page , $res);
         return self::success($res);
     }
+
+    // 个人二维码
+    public static function QRCodeData(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'user_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户信息' , 404);
+        }
+        $download = ws_config('app.download');
+        $data = [
+            'type'  => 'user' ,
+            'id'    => $user->id ,
+        ];
+        $base64 = base64_encode(json_encode($data));
+        $link = sprintf('%s?data=%s' , $download , $base64);
+        return self::success($link);
+    }
 }

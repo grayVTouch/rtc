@@ -139,4 +139,17 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    /**
+     * 个人二维码
+     */
+    public function QRCodeData(array $param)
+    {
+        $param['user_id'] = $param['user_id'] ?? '';
+        $res = UserAction::QRCodeData($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
 }
