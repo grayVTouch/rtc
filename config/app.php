@@ -24,6 +24,10 @@ return [
     'document_root' => '/myself/command/rtc/public' ,
     // 调试模式
     'debug' => true ,
+    // 是否记录错误日志
+    'enable_error_log' => true ,
+    // 是否记录定时器执行日志
+    'enable_timer_log' => true ,
     // redis 默认过期时间（1个月）
     'timeout' => 1 * 30 * 24 * 3600 ,
     // 是否启用访客模式
@@ -45,5 +49,31 @@ return [
     'avatar'        => "" ,
     // 默认群头像
     'group_image'   => "" ,
+    // 验证码类有效时间
+    'code_duration' => 30 * 24 * 3600 ,
+    // 短信验证码 发送频率，单位：s
+    'sms_code_wait_time' => 60 ,
+    // 群人数限制
+    'group_member_limit' => 200 ,
+    // 默认群名称
+    'group_name' => '群聊' ,
+    // 默认个人
+    // 是否开启app推送（使用了极光推送等平台）
+    'enable_app_push' => false ,
+    // 默认的昵称
+    'nickname' => '未设置昵称' ,
+    // 默认页数
+    'page' => 1 ,
+    // 消息撤回允许的时间范围
+    'withdraw_duration' => 2 * 60 ,
+    // app 应用市场
+    'download' => 'http://www.baidu.com' ,
+    // 定时器：私聊记录清理时间点
+    'time_point_for_clear_private_message_timer' => '04:00:00' ,
+    // 定时器：群聊记录清理时间点
+    'time_point_for_clear_group_message_timer' => '04:00:00' ,
+    // 定时器：清理临时群的时间点
+    'time_point_for_clear_tmp_group_timer' => '03:30:00' ,
+    // 搜索好友显示
 
 ];

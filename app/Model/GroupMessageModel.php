@@ -135,4 +135,49 @@ class GroupMessageModel extends Model
             'extra' => $extra ,
         ]);
     }
+
+    // 通过群id获取所有的消息记录id
+    public static function getIdByGroupId(int $group_id): array
+    {
+        $id_list = [];
+        $res = self::where('group_id' , $group_id)->get();
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->id;
+        }
+        return $id_list;
+    }
+
+    public static function getByGroupId(int $group_id)
+    {
+        $res = self::with(['group' , 'user'])
+            ->where('group_id' , $group_id)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            GroupModel::single($v->group);
+        }
+        return $res;
+    }
+
+    public static function getByGroupIdAndUserId(int $group_id , int $user_id)
+    {
+        $res = self::with(['group' , 'user'])
+            ->where([
+                ['group_id' , '=' , $group_id] ,
+                ['user_id' , '=' , $user_id] ,
+            ])
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            GroupModel::single($v->group);
+        }
+        return $res;
+    }
 }

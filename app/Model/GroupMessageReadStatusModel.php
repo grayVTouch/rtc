@@ -98,4 +98,9 @@ class GroupMessageReadStatusModel extends Model
         ])->count());
     }
 
+    public static function delByGroupMessageId(int $group_message_id)
+    {
+        return self::where('group_message_id' , $group_message_id)->delete();
+    }
+
 }

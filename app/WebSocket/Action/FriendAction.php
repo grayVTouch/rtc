@@ -13,6 +13,7 @@ use App\Model\ApplicationModel;
 use App\Model\FriendModel;
 use App\Model\MessageModel;
 use App\Model\UserModel;
+use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
 use App\Util\PushUtil;
 use App\Util\UserUtil;
@@ -22,7 +23,7 @@ use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use function WebSocket\ws_config;
+
 
 class FriendAction extends Action
 {
@@ -72,9 +73,9 @@ class FriendAction extends Action
                 $auth->push($param['friend_id'] , 'refresh_application');
                 // 推送总未读消息数量更新
                 $auth->push($param['friend_id'] , 'refresh_unread_count');
-                if (ws_config('app.enable_app_push')) {
-                    // todo app推送
-                }
+                AppPushUtil::pushCheckForUser($auth->platform , $param['friend_id'] , function() use($param){
+                    AppPushUtil::pushForAppFriend($param['friend_id'] , $param['log'] , '申请成为好友');
+                });
             } else {
                 // 未开启好友认证（直接通过）
                 $user_ids = [$auth->user->id , $param['friend_id']];
@@ -205,7 +206,7 @@ class FriendAction extends Action
         if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
             return self::error('你们并非好友，无权限操作' , 403);
         }
-        $burn_for_friend = ws_config('business.burn_for_friend');
+        $burn_for_friend = config('business.burn_for_friend');
         if (!in_array($param['burn'] , $burn_for_friend)) {
             return self::error('不支持的 flag 类型');
         }

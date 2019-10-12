@@ -38,6 +38,8 @@ create table if not exists `rtc_user_option` (
   group_notification tinyint default 1 comment '群聊通知：0-不允许 1-允许' ,
   write_status tinyint default 1 comment '输入状态开关：0-关闭 1-开启' ,
   friend_auth tinyint default 1 comment '申请我为好友验证：0-关闭 1-开启' ,
+  clear_timer_for_private varchar(255) default 'none' comment '自动清理私聊记录时长: none-关闭 day-天 week-周 month-月' ,
+  clear_timer_for_group varchar(255) default 'none' comment '自动清理群聊记录时长: none-关闭 day-天 week-周 month-月' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户设置表';
@@ -205,6 +207,7 @@ create table if not exists `rtc_delete_message` (
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   type varchar(255) default '' comment 'private-私聊 group-群聊' ,
   message_id int unsigned default 0 comment 'rtc_message.id or rtc_group_message.id' ,
+  target_id varchar(255) default '' comment 'type=private,则 target_id=chat_id；type=group，则target_id=group_id' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户删除的聊天记录';
@@ -218,6 +221,7 @@ create table if not exists `rtc_sms_code` (
   phone varchar(255) default '' comment '手机号码' ,
   `type` int unsigned default 0 comment '1-注册 2-登录 3-修改密码，其他待补充' ,
   code varchar(255) default '' comment '短信验证码' ,
+  used tinyint default 0 comment '是否已经使用：0-未使用 1-已使用' ,
   update_time datetime default current_timestamp on update current_timestamp comment '更新时间' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -235,3 +239,57 @@ create table if not exists `rtc_top_session` (
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '置顶会话';
+
+-- 群消息免打扰
+drop table if exists `rtc_group_notice`;
+create table if not exists `rtc_group_notice` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  group_id int unsigned default 0 comment 'rtc_group.id' ,
+  can_notice tinyint default 1 comment '消息免打扰？0-否 1-是' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群消息免打扰';
+
+drop table if exists `rtc_program_error_log`;
+create table if not exists `rtc_program_error_log` (
+  id int unsigned not null auto_increment ,
+  type varchar(255) default '' comment '日志类型，仅用于搜索区分不同模块的错误日志，辅助快速定位错误' ,
+  name varchar(500) default '' comment '错误描述' ,
+  detail mediumtext comment '错误详情' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '程序错误日志';
+
+drop table if exists `rtc_clear_timer_log`;
+create table if not exists `rtc_clear_timer_log` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  type varchar(255) default '' comment '类型：private-私聊 group-群聊' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '记录清除日志';
+
+drop table if exists `rtc_timer_log`;
+create table if not exists `rtc_timer_log` (
+  id int unsigned not null auto_increment ,
+  type varchar(255) default '' comment '用于区分不同用途的定时器' ,
+  log varchar(1000) default '' comment '定时器执行日志，请随意书写' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '定时器执行日志';
+
+-- 上下线通知
+-- 写入状态通知
+-- 时效群到时解散
+-- 消息记录清除
+
+-- 相关搜索（好友+群组+聊天记录搜索）
+
+-- 会话删除（删除会话，删除该用户的聊天记录，仅当前用户的记录删除）
+-- 密钥管理
+-- 系统公告
+-- 客服聊天
+
+
+

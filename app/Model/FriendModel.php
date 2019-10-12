@@ -10,6 +10,7 @@ namespace App\Model;
 
 
 use function core\convert_obj;
+use function core\obj_to_array;
 
 class FriendModel extends Model
 {
@@ -111,5 +112,59 @@ class FriendModel extends Model
                     ['friend_id' , '=' , $friend_id] ,
                 ])
                 ->value('alias'));
+    }
+
+    // 获取所有好友的id
+    public static function getFriendIdByUserId(int $user_id): array
+    {
+        $res = self::where('user_id' , $user_id)->get();
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->friend_id;
+        }
+        return $id_list;
+    }
+
+
+    public static function searchByUserIdAndNicknameAndLimit(int $user_id , string $nickname = '' , int $limit = 3)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->from('friend as f')
+            ->join('user as u' , 'f.friend_id' , '=' , 'u.id')
+            ->where([
+                ['f.user_id' , '=' , $user_id] ,
+                ['u.nickname' , 'like' , "%{$nickname}%"] ,
+            ])
+            ->select('f.*')
+            ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
+    }
+
+    public static function searchByUserIdAndAliasAndLimit(int $user_id , string $alias = '' , int $limit = 3)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->where([
+                ['user_id' , '=' , $user_id] ,
+                ['alias' , 'like' , "%{$alias}%"] ,
+            ])
+            ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
     }
 }

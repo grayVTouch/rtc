@@ -49,6 +49,14 @@ return [
         'refresh_group_member' ,
         // 指令：刷新群列表
         'refresh_group' ,
+        // 指令：刷新好友列表
+        'refresh_friend' ,
+        // 指令：更新单条私聊消息
+        'refresh_private_message' ,
+        // 指令：更新单条群聊消息
+        'refresh_group_message' ,
+        // 刷新用户信息（上下线通知）
+        'refresh_user' ,
     ] ,
 
     /**
@@ -91,7 +99,7 @@ return [
         'voice_call' ,
         // 消息集合
         'message_set' ,
-        // 群通知
+        // 通知
         'notification' ,
         // 随机红包
         'random_red_envelope' ,
@@ -129,7 +137,8 @@ return [
     'sms_code_type' => [
         1 => '注册' ,
         2 => '登录' ,
-        3 => '修改密码'
+        3 => '修改密码' ,
+        4 => '修改手机号码' ,
     ] ,
 
     // 申请类型
@@ -154,5 +163,103 @@ return [
         1 ,
         // 2-时效群
         2 ,
+    ] ,
+
+    // 删除记录的类型
+    'delete_type' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group'
+    ] ,
+
+    // 禁止撤回的消息类型
+    'deny_withdraw_message_type' => [
+        // 撤回消息
+        'withdraw' ,
+    ] ,
+
+    // 禁止转发的消息的类型
+    'deny_forward_message_type' => [
+        'withdraw' ,
+    ] ,
+
+    // 私聊会话标志
+    'burn_for_friend' => [
+        // 正常聊天
+        0 ,
+        // 阅后即焚
+        1
+    ] ,
+
+    // 消息转发类型
+    'forward_type' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group' ,
+    ] ,
+
+    // 置顶会话的类型
+    'type_for_top_session' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group'
+    ] ,
+
+    // 群验证
+    'group_auth' => [
+        // 关闭
+        0 ,
+        // 开启
+        1 ,
+    ] ,
+
+    // 平台类型
+    'platform' => [
+        // app 应用
+        'app' ,
+        // android
+        'android' ,
+        // ios
+        'ios' ,
+        // 桌面端
+        'pc' ,
+        // 网站应用
+        'web' ,
+    ] ,
+
+    // 禁止推送的平台
+    'deny_platform_for_push' => [
+        'web' ,
+    ] ,
+
+    // 在线状态
+    'online_status' => [
+        // 上线
+        'online' ,
+        // 离线
+        'offline' ,
+    ] ,
+
+    // 写入状态
+    'write_status' => [
+        // 写入中
+        'writing' ,
+        // 写入结束
+        'writed' ,
+    ] ,
+
+    // 定时清理的时间选择
+    'duration_for_regular_clear' => [
+        // 每天
+        'day' ,
+        // 每周
+        'week' ,
+        // 每月
+        'month' ,
+        // 取消定时清理
+        'none' ,
     ] ,
 ];

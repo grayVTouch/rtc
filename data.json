@@ -1,5 +1,5 @@
 {
-  "router": "/Group/QRCodeData",
+  "router": "/User/writeStatusChange",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,6 +7,7 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "group_id": 6
+    "friend_id": 2 ,
+    "status": "writing"
   }
 }

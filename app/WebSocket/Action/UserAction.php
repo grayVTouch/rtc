@@ -9,18 +9,24 @@
 namespace App\WebSocket\Action;
 
 
+use App\Lib\Push\AppPush;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
+use App\Model\FriendModel;
 use App\Model\GroupModel;
+use App\Model\SmsCodeModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
+use App\Util\ChatUtil;
 use App\Util\PageUtil;
 use App\WebSocket\Auth;
 use App\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Validator;
-use function WebSocket\ws_config;
+use Exception;
+use Illuminate\Support\Facades\DB;
+
 
 class UserAction extends Action
 {
@@ -34,8 +40,8 @@ class UserAction extends Action
     // 申请记录
     public static function app(Auth $auth , array $param)
     {
-        $param['page'] = empty($param['page']) ? ws_config('app.page') : $param['page'];
-        $param['limit'] = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
+        $param['page'] = empty($param['page']) ? config('app.page') : $param['page'];
+        $param['limit'] = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $total = ApplicationModel::countByUserId($auth->user->id);
         $page = PageUtil::deal($total , $param['page'] , $param['limit']);
         $res = ApplicationModel::listByUserId($auth->user->id , $page['offset'] , $param['limit']);
@@ -49,11 +55,11 @@ class UserAction extends Action
 
     public static function editUserInfo(Auth $auth , array $param)
     {
-        $param['avatar'] = empty($param['avatar']) ? $auth->user->avatar : $param['avatar'];
-        $param['sex'] = empty($param['sex']) ? $auth->user->sex : $param['sex'];
-        $param['birthday'] = empty($param['birthday']) ? $auth->user->birthday : $param['birthday'];
-        $param['nickname'] = empty($param['nickname']) ? $auth->user->nickname : $param['nickname'];
-        $param['signature'] = empty($param['signature']) ? $auth->user->signature : $param['signature'];
+        $param['avatar'] = $param['avatar'] === '' ? $auth->user->avatar : $param['avatar'];
+        $param['sex'] = $param['sex'] === '' ? $auth->user->sex : $param['sex'];
+        $param['birthday'] = $param['birthday'] === '' ? $auth->user->birthday : $param['birthday'];
+        $param['nickname'] = $param['nickname'] === '' ? $auth->user->nickname : $param['nickname'];
+        $param['signature'] = $param['signature'] === '' ? $auth->user->signature : $param['signature'];
         UserModel::updateById($auth->user->id , array_unit($param , [
             'avatar' ,
             'sex' ,
@@ -121,14 +127,12 @@ class UserAction extends Action
     // 修改用户选项信息
     public static function editUserOption(Auth $auth , array $param)
     {
-        $user_option = UserOptionModel::findByUserId($auth->user->id);
-        if (empty($user_option)) {
-            return self::error('没有找到用户选项信息，数据不完整！请联系开发人员' , 404);
-        }
-        $param['private_notification']  = empty($param['private_notification']) ? $user_option->private_notification : $param['private_notification'];
-        $param['group_notification']    = empty($param['group_notification']) ? $user_option->group_notification : $param['group_notification'];
-        $param['write_status']          = empty($param['write_status']) ? $user_option->write_status : $param['write_status'];
-        $param['friend_auth']           = empty($param['friend_auth']) ? $user_option->friend_auth : $param['friend_auth'];
+        $user_option = $auth->user->user_option;
+        $param['private_notification']  = $param['private_notification'] === '' ? $user_option->private_notification : $param['private_notification'];
+        $param['group_notification']    = $param['group_notification'] === '' ? $user_option->group_notification : $param['group_notification'];
+        $param['write_status']          = $param['write_status'] === '' ? $user_option->write_status : $param['write_status'];
+        $param['friend_auth']           = $param['friend_auth'] === '' ? $user_option->friend_auth : $param['friend_auth'];
+//        print_r($param);
         UserOptionModel::updateById($user_option->id , array_unit($param , [
             'private_notification' ,
             'group_notification' ,
@@ -182,7 +186,7 @@ class UserAction extends Action
     public static function blacklist(Auth $auth , array $param)
     {
         $total = BlacklistModel::countByUserId($auth->user->id);
-        $limit = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
+        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $page = PageUtil::deal($total , $param['page'] , $limit);
         $res = BlacklistModel::listByUserId($auth->user->id , $page['offset'] , $page['limit']);
         foreach ($res as $v)
@@ -206,7 +210,7 @@ class UserAction extends Action
         if (empty($user)) {
             return self::error('未找到用户信息' , 404);
         }
-        $download = ws_config('app.download');
+        $download = config('app.download');
         $data = [
             'type'  => 'user' ,
             'id'    => $user->id ,
@@ -214,5 +218,94 @@ class UserAction extends Action
         $base64 = base64_encode(json_encode($data));
         $link = sprintf('%s?data=%s' , $download , $base64);
         return self::success($link);
+    }
+
+    public static function sync(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'rid' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = AppPush::sync($auth->user->id , $param['rid']);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , 500);
+        }
+        return self::success();
+    }
+
+    public static function changePhone(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'area_code' => 'required' ,
+            'phone'     => 'required' ,
+            'sms_code'  => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 新手机号码是否和旧手机号码一致
+        if (UserUtil::isSamePhoneWithAreaCode($param['area_code'] , $param['phone'] , $auth->user->area_code , $auth->user->phone)) {
+            return self::error('新旧手机号码一致，请检查手机号码' , 403);
+        }
+        // 检查短信验证码
+        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($auth->identifier , $param['area_code'] , $param['phone'] , 4);
+        if (empty($sms_code)) {
+            return self::error('请先发送短信验证码');
+        }
+        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
+            return self::error('验证码已经过期');
+        }
+        if ($sms_code->code != $param['sms_code']) {
+            return self::error('短信验证码不正确');
+        }
+        try {
+            DB::begintransaction();
+            UserModel::updateById($auth->user->id , array_unit($param , [
+                'area_code' ,
+                'phone' ,
+            ]));
+            // 短信验证码标记为已经使用
+            SmsCodeModel::updateById($sms_code->id , [
+                'used' => 1
+            ]);
+            DB::commit();
+            return self::success('操作成功');
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    // 写入状态变更
+    public static function writeStatusChange(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+            'status'     => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查是否是好友
+        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
+            return self::error('你们还不是好友' , 403);
+        }
+        // 检查用户是否开启了输入状态
+        if ($auth->user->user_option->write_status == 0) {
+            return self::error('您尚未开启输入状态展示，禁止操作' , 403);
+        }
+        $write_status = config('business.write_status');
+        if (!in_array($param['status'] , $write_status)) {
+            return self::error('不支持的写入状态，当前受支持的写入状态有' . implode(',' , $write_status));
+        }
+        $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
+        $auth->push($param['friend_id'] , 'write_status' , [
+            'chat_id'       => $chat_id ,
+            'friend_id'     => $param['friend_id'] ,
+            'status'  => $param['status'] ,
+        ]);
+        return self::success();
     }
 }

@@ -15,7 +15,7 @@ class MessageRedis extends Redis
     // 保存消息到未读消息队列中（需要分配服务员处理的消息）
     public static function saveUnhandleMsg($identifier , int $user_id = 0 , array $data = [])
     {
-        $name = sprintf(self::$unhandleMsg , $identifier);
+        $name = sprintf(self::$unhandleMsg , $identifier , $identifier);
         $data = json_encode($data);
         return RedisFacade::hash($name , $user_id , $data , config('app.timeout'));
     }
@@ -23,7 +23,7 @@ class MessageRedis extends Redis
     // 消费未读消息数量
     public static function consumeUnhandleMsg($identifier , int $limit = 0)
     {
-        $name = sprintf(self::$unhandleMsg , $identifier);
+        $name = sprintf(self::$unhandleMsg , $identifier , $identifier);
         $res = RedisFacade::hashAll($name);
         if (empty($res)) {
             return [];

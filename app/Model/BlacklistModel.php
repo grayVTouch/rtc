@@ -68,4 +68,15 @@ class BlacklistModel extends Model
             ])
             ->count()) > 0;
     }
+
+
+    public static function delByUserId(int $user_id)
+    {
+        return self::where('user_id' , $user_id)->delete();
+    }
+
+    public static function delByBlockUserId(int $block_user_id)
+    {
+        return self::where('block_user_id' , $block_user_id)->delete();
+    }
 }

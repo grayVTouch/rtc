@@ -32,9 +32,9 @@ class Validator
 
 
     // 验证规则
-    protected function required($value = null)
+    protected function required($value)
     {
-        return !empty($value);
+        return !($value === null || $value === '');
     }
 
     public function fails()

@@ -177,4 +177,13 @@ class MessageModel extends Model
             ->column('m.id');
     }
 
+    // 获取所有的聊天记录
+    public static function getByChatId(string $chat_id)
+    {
+        $res = self::where('chat_id' , $chat_id)
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
 }

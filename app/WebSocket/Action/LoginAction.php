@@ -25,7 +25,8 @@ use App\WebSocket\Base;
 use function core\random;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use function WebSocket\ws_config;
+
+use App\Util\UserUtil as BaseUserUtil;
 
 class LoginAction extends Action
 {
@@ -180,7 +181,7 @@ class LoginAction extends Action
         if (empty($sms_code)) {
             return self::error('请先发送短信验证码');
         }
-        if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
+        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
             return self::error('请先发送短信验证码');
         }
         if ($sms_code->code != $param['sms_code']) {
@@ -195,40 +196,34 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
-
-        // 绑定 user_id <=> fd
-//        var_dump('当前登录的客户端链接 fd：' . $base->fd);
-        UserRedis::userIdMappingFd($base->identifier , $user->id , $base->fd);
-        UserRedis::fdMappingUserId($base->identifier , $base->fd , $user->id);
-        if ($user->role == 'admin') {
-            // 工作人员
-            // 登录成功后消费未读游客消息（平台咨询）队列
-            UserUtil::consumeUnhandleMsg($user);
-        } else {
-            /*
-             * todo 由用户手动发起平台资讯
-            // 平台用户
-            // 初始化咨询通道
-            UserUtil::initAdvoiseGroup($user->id);
-            // 自动分配客服
-            $group = Group::advoiseGroupByUserId($user->id);
-            // 检查是否分配过客服
-            $bind_waiter = UserRedis::groupBindWaiter($base->identifier , $group->id);
-            if (empty($bind_waiter)) {
-                $res = UserUtil::allocateWaiter($user->id);
-                if ($res['code'] != 200) {
-//                    var_dump($res['data']);
-                    UserUtil::noWaiterTip($base->identifier , $user->id , $group->id);
-                }
+        try {
+            DB::beginTransaction();
+            UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+            // 上线通知
+            $online = UserRedis::isOnline($base->identifier , $user->id);
+            BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);
+            if (!$online) {
+                // 之前如果不在线，现在上线，那么推送更新
+                BaseUserUtil::onlineStatusChange($base->identifier , $param['user_id'] , 'online');
             }
-            */
+            if ($user->role == 'admin') {
+                // 工作人员登陆后，消费未读消息
+                UserUtil::consumeUnhandleMsg($user);
+            }
+            // 短信验证码标记为已经使用
+            SmsCodeModel::updateById($sms_code->id , [
+                'used' => 1
+            ]);
+            DB::commit();
+            // 推送一条未读消息数量
+            return self::success([
+                'user_id'   => $param['user_id'] ,
+                'token'     => $param['token']
+            ]);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-        // 推送一条未读消息数量
-        return self::success([
-            'user_id' => $param['user_id'] ,
-            'token' => $param['token']
-        ]);
     }
 
     public static function registerUsePhone(Base $base , array $param)
@@ -253,6 +248,7 @@ class LoginAction extends Action
         if ($param['password'] != $param['confirm_password']) {
             return self::error('两次输入的密码不一致' , 401);
         }
+
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);
         if (empty($sms_code)) {
@@ -260,7 +256,7 @@ class LoginAction extends Action
                 'sms_code' => '请先发送短信验证码' ,
             ]);
         }
-        if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
+        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
             return self::error([
                 'sms_code' => '验证码已经过期' ,
             ]);
@@ -338,7 +334,7 @@ class LoginAction extends Action
         if (empty($sms_code)) {
             return self::error('请先发送短信验证码');
         }
-        if (strtotime($sms_code->update_time) + ws_config('app.code_duration') < time()) {
+        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
             return self::error('验证码已经过期');
         }
         if ($sms_code->code != $param['sms_code']) {
@@ -378,6 +374,10 @@ class LoginAction extends Action
             UserOptionModel::insertGetId([
                 'user_id' => $id ,
             ]);
+            // 短信验证码标记为已经使用
+            SmsCodeModel::updateById($sms_code->id , [
+                'used' => 1
+            ]);
             DB::commit();
             return self::success();
         } catch(Exception $e) {
@@ -402,7 +402,7 @@ class LoginAction extends Action
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , $type);
         if (!empty($sms_code)) {
-            if (strtotime($sms_code->update_time) + ws_config('app.sms_code_wait_time') > time()) {
+            if (strtotime($sms_code->update_time) + config('app.sms_code_wait_time') > time()) {
                 return self::error('发送的频率过高，请等待1分钟后再发送短信验证码' , 401);
             }
             $res = Zz253::send($param['area_code'] , $param['phone'] , $param['code']);

@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Util;
 
+use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
@@ -21,6 +22,8 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Model\GroupModel;
 use App\Redis\MessageRedis;
+
+use App\Util\UserUtil as BaseUserUtil;
 
 class UserUtil extends Util
 {
@@ -242,10 +245,5 @@ class UserUtil extends Util
         PushUtil::multiple($identifier , $user_ids , 'group_message' , $msg);
         // 是否提示过客服不存在
         UserRedis::noWaiterForGroup($identifier , $group_id , false);
-    }
-
-    public static function isOnline()
-    {
-
     }
 }

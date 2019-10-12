@@ -152,4 +152,40 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    /**
+     * 推送同步
+     */
+    public function sync(array $param)
+    {
+        $param['rid'] = $param['rid'] ?? '';
+        $res = UserAction::sync($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 更改手机号码
+    public function changePhone(array $param)
+    {
+        $param['phone'] = $param['phone'] ?? '';
+        $param['sms_code'] = $param['sms_code'] ?? '';
+        $res = UserAction::changePhone($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 写入状态通知（写入中）
+    public function writeStatusChange(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['status'] = $param['status'] ?? '';
+        $res = UserAction::writeStatusChange($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

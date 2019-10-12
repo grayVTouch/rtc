@@ -14,6 +14,7 @@ use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
 use App\Model\GroupMemberModel;
 use App\Model\UserModel;
+use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\PushUtil;
@@ -28,7 +29,7 @@ use Exception;
 use function core\array_unit;
 use function extra\check_datetime;
 use Illuminate\Support\Facades\DB;
-use function WebSocket\ws_config;
+
 
 class GroupAction extends Action
 {
@@ -69,9 +70,9 @@ class GroupAction extends Action
             ]));
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
-            if (ws_config('app.enable_app_push')) {
-                // todo 发送 app 推送
-            }
+            AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
+                AppPushUtil::pushForAppGroup($param['user_id'] , $param['log'] , '申请进群');
+            });
             return self::success($id);
         }
         // 未开启进群认证
@@ -98,9 +99,9 @@ class GroupAction extends Action
             $message = sprintf('"%s" 加入了群聊' , $auth->user->nickname);
             // 发送群通知
             ChatUtil::groupSend($auth , [
-                'user_id' => 0 ,
-                'type' => 'notification' ,
-                'message' => sprintf($message , $auth->user->nickname) ,
+                'user_id'   => $group->user_id ,
+                'type'      => 'notification' ,
+                'message'   => sprintf($message , $auth->user->nickname) ,
             ]);
             return self::success($id);
         } catch(Exception $e) {
@@ -143,7 +144,7 @@ class GroupAction extends Action
         $log = mb_substr($log , 0 , mb_strlen($log) - 2);
         $param['type']      = 'group';
         $param['op_type']   = 'invite_into_group';
-        $param['log'] = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $log);
+        $param['log']       = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $log);
         $param['user_id']   = $group->user_id;
         $param['invite_user_id'] = $auth->user->id;
         if ($auth->user->id != $group->user_id) {
@@ -163,9 +164,9 @@ class GroupAction extends Action
                 ]));
                 $auth->push($group->user_id , 'refresh_application');
                 $auth->push($group->user_id , 'refresh_unread_count');
-                if (ws_config('app.enable_app_push')) {
-                    // todo 发送 app 推送
-                }
+                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
+                    AppPushUtil::pushForInviteGroup($param['user_id'] , $param['log'] , '邀请进群');
+                });
                 return self::success($id);
             }
         }
@@ -193,9 +194,9 @@ class GroupAction extends Action
             $message = sprintf('"%s" 邀请了 "%s" 加入了群聊');
             // 发送群通知
             ChatUtil::groupSend($auth , [
-                'user_id' => 0 ,
-                'type' => 'notification' ,
-                'message' => sprintf($message , $auth->user->nickname , $log) ,
+                'user_id'   => $group->user_id ,
+                'type'      => 'notification' ,
+                'message'   => sprintf($message , $auth->user->nickname , $log) ,
             ]);
             return self::success($id);
         } catch(Exception $e) {
@@ -224,7 +225,7 @@ class GroupAction extends Action
         if ($app->type != 'group') {
             return self::error('该申请记录类型不是 群！禁止操作' , 403);
         }
-        $op_type = ws_config('business.app_type_for_group');
+        $op_type = config('business.app_type_for_group');
         if (!in_array($app->op_type , $op_type)) {
             return self::error('该申请的记录 op_type 类型错误！禁止操作' , 403);
         }
@@ -273,7 +274,7 @@ class GroupAction extends Action
                 }
                 // 发送群通知
                 ChatUtil::groupSend($auth , [
-                    'user_id' => 0 ,
+                    'user_id' => $auth->user->id ,
                     'type' => 'notification' ,
                     'message' => $message ,
                 ]);
@@ -281,11 +282,6 @@ class GroupAction extends Action
                 // 拒绝
                 $auth->pushAll($user_ids , 'refresh_application');
                 $auth->pushAll($user_ids , 'refresh_unread_count');
-                if (ws_config('app.enable_app_push')) {
-                    // todo app 推送
-                    // 如果是申请进群，那么给申请用户推送一个结果通知
-                    // 如果是邀请进群，那么给邀请用户推送一个结果通知
-                }
             }
             return self::success();
         } catch(Exception $e) {
@@ -324,7 +320,7 @@ class GroupAction extends Action
             {
                 GroupMemberModel::delByUserIdAndGroupId($v , $group->id);
                 $user = UserModel::findById($v);
-                $nickname = empty($user->nickname) ? ws_config('app.nickname') : $user->nickname;
+                $nickname = empty($user->nickname) ? config('app.nickname') : $user->nickname;
                 $message .= $nickname . ',';
             }
             $message = mb_substr($message , 0 , mb_strlen($message) - 1);
@@ -334,17 +330,17 @@ class GroupAction extends Action
             $auth->pushAll($group_member_ids , 'refresh_group_member');
             $auth->pushAll($kick_user_ids , 'refresh_group');
             ChatUtil::groupSend($auth , [
-                'user_id' => $group->user_id ,
-                'group_id' => $group->id ,
-                'type' => 'notification' ,
-                'message' => $message
+                'user_id'   => $group->user_id ,
+                'group_id'  => $group->id ,
+                'type'      => 'notification' ,
+                'message'   => $message
             ]);
-            if (ws_config('app.enable_app_push')) {
-                foreach ($kick_user_ids as $v)
-                {
-                    // todo app 推送
-                    // 通知被移除的成员他们已经被移除群聊
-                }
+            foreach ($kick_user_ids as $v)
+            {
+                // 通知被移除的成员他们已经被移除群聊
+                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($v , $group){
+                    AppPushUtil::push($v , sprintf('你被踢出了群 %s' , $group->name) , '退群通知');
+                });
             }
             return self::success();
         } catch(Exception $e) {
@@ -361,7 +357,7 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $group_type_range = ws_config('business.group_type');
+        $group_type_range = config('business.group_type');
         if (!in_array($param['type'] , $group_type_range)) {
             return self::error([
                 'type' => '不支持的群类型，当前受支持的群类型有' . implode(',' , $group_type_range) ,
@@ -466,8 +462,14 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
             $auth->pushAll($user_ids , 'refresh_session');
-            if (ws_config('app.enable_app_push')) {
-                // todo app 推送（通知所有群成员群已经解散）
+            foreach ($user_ids as $v)
+            {
+                if ($v == $auth->user->id) {
+                    continue ;
+                }
+                AppPushUtil::pushCheckForUser($auth->platform , $v , function() use($v , $group){
+                    AppPushUtil::push($v , '群组解散了群 ' . $group->name);
+                });
             }
             return self::success();
         } catch(Exception $e) {
@@ -533,7 +535,7 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $group_auth = ws_config('business.group_auth');
+        $group_auth = config('business.group_auth');
         if (!in_array($param['auth'] , $group_auth)) {
             return self::error('auth 字段值不在支持的范围');
         }
@@ -556,7 +558,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群信息' , 404);
         }
-        $download = ws_config('app.download');
+        $download = config('app.download');
         $data = [
             'type'  => 'group' ,
             'id'    => $param['group_id'] ,

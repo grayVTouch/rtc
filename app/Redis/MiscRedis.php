@@ -12,7 +12,7 @@ use Engine\Facade\Redis as RedisFacade;
 
 class MiscRedis extends Redis
 {
-    public static function fdMappingIdentifier($fd , $identifier = '')
+    public static function fdMappingIdentifier(int $fd , string $identifier = '')
     {
         $name = sprintf(self::$fdMappingIdentifier , $fd);
         if (empty($identifier)) {
@@ -21,7 +21,7 @@ class MiscRedis extends Redis
         return RedisFacade::string($name , $identifier);
     }
 
-    public static function delfdMappingIdentifier($fd)
+    public static function delfdMappingIdentifier(int $fd)
     {
         $name = sprintf(self::$fdMappingIdentifier , $fd);
         return RedisFacade::del($name);

@@ -234,4 +234,38 @@ class UserModel extends Model
         UserOptionModel::single($res->user_option);
         return $res;
     }
+
+    // 开启了定时清理私聊消息的用户
+    public static function getWithEnableRegularClearForPrivate()
+    {
+        $res = self::with(['userOption'])
+            ->from('user as u')
+            ->join('user_option as uo' , 'u.id' , '=' , 'uo.user_id')
+            ->where('uo.clear_timer_for_private' , '<>' , 'none')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserOptionModel::single($v->user_option);
+        }
+        return $res;
+    }
+
+    // 开启了定时清理群消息的用户
+    public static function getWithEnableRegularClearForGroup()
+    {
+        $res = self::with(['userOption'])
+            ->from('user as u')
+            ->join('user_option as uo' , 'u.id' , '=' , 'uo.user_id')
+            ->where('uo.clear_timer_for_group' , '<>' , 'none')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserOptionModel::single($v->user_option);
+        }
+        return $res;
+    }
 }

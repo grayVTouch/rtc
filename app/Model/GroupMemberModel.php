@@ -171,4 +171,30 @@ class GroupMemberModel extends Model
         }
         return $res;
     }
+
+    public static function countByGroupId(int $group_id): int
+    {
+        return (int) (self::where('group_id' , $group_id)->count());
+    }
+
+    public static function searchByUserIdAndGroupName(int $user_id , string $group_name)
+    {
+        $res = self::with(['group' , 'user'])
+            ->from('group_member as gm')
+            ->join('group as g' , 'gm.group_id' , '=' , 'g.id')
+            ->where([
+                ['gm.user_id' , '=' , $user_id] ,
+                ['g.name' , 'like' , "%{$group_name}%"] ,
+            ])
+            ->select('gm.*')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            GroupModel::single($v->group);
+        }
+        return $res;
+    }
 }

@@ -172,4 +172,10 @@ class MessageReadStatusModel extends Model
         return self::whereIn('message_id' , $message_ids)
             ->delete();
     }
+
+    // 删除读取状态-单条
+    public static function delByMessageId(int $message_id)
+    {
+        return self::delByMessageIds([$message_id]);
+    }
 }

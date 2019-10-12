@@ -47,4 +47,12 @@ class TopSessionModel extends Model
         self::single($res);
         return $res;
     }
+
+    public static function delByTypeAndTargetId(string $type , $target_id)
+    {
+        return self::where([
+            ['type' , '=' , $type] ,
+            ['target_id' , '=' , $target_id] ,
+        ])->delete();
+    }
 }

@@ -26,7 +26,7 @@ use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use App\WebSocket\Auth;
-use function WebSocket\ws_config;
+
 
 class ChatAction extends Action
 {
@@ -60,7 +60,6 @@ class ChatAction extends Action
                     // 没有绑定客服的情况下
                     $allocate = UserUtil::allocateWaiter($user->id);
                     if ($allocate['code'] != 200) {
-                        // todo 调试
 //                        var_dump($allocate['data']);
                         // 没有分配到客服，保存到未读消息队列
                         MessageRedis::saveUnhandleMsg($user->identifier , $user->id , $param);

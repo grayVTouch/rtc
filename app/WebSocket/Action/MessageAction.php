@@ -25,7 +25,7 @@ use function core\array_unit;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use function WebSocket\ws_config;
+
 
 class MessageAction extends Action
 {
@@ -39,7 +39,7 @@ class MessageAction extends Action
             return self::error($validator->message());
         }
         $limit_id  = empty($param['limit_id']) ? 0 : $param['limit_id'];
-        $limit     = empty($param['limit']) ? ws_config('app.limit') : $param['limit'];
+        $limit     = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
         try {
             DB::beginTransaction();
@@ -92,10 +92,16 @@ class MessageAction extends Action
             DB::beginTransaction();
             foreach ($message_id as $v)
             {
+                $message = MessageModel::findById($v);
+                if (empty($message)) {
+                    DB::rollBack();
+                    return self::error('包含不存在的消息id' , 404);
+                }
                 $data = [
                     'user_id'   => $auth->user->id ,
                     'type'      => 'private' ,
-                    'message_id' => $v
+                    'message_id' => $v ,
+                    'target_id'   => $message->chat_id ,
                 ];
                 DeleteMessageModel::insert($data);
             }
@@ -139,11 +145,11 @@ class MessageAction extends Action
         if ($res->user_id != $auth->user->id) {
             return self::error('您无权限撤回他人消息' , 403);
         }
-        $deny_withdraw_message_type = ws_config('business.deny_withdraw_message_type');
+        $deny_withdraw_message_type = config('business.deny_withdraw_message_type');
         if (in_array($res->type , $deny_withdraw_message_type)) {
             return self::error('该消息类型不支持撤回' , 403);
         }
-        $withdraw_duration = ws_config('app.withdraw_duration');
+        $withdraw_duration = config('app.withdraw_duration');
         if ($withdraw_duration > time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
@@ -158,9 +164,6 @@ class MessageAction extends Action
         // 刷新会话
         $auth->pushAll($user_ids , 'refresh_session');
         $auth->sendAll($user_ids , 'refresh_private_message' , $res);
-        if (ws_config('app.enable_app_push')) {
-            // todo app 推送
-        }
         return self::success($res);
     }
 
@@ -175,7 +178,7 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = ws_config('business.forward_type');
+        $type_range = config('business.forward_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的转发类型，当前受支持的转发类型：' . implode(',' , $type_range));
         }
@@ -192,7 +195,7 @@ class MessageAction extends Action
             if (empty($message_id)) {
                 return self::error('请选择要转发的消息');
             }
-            $deny_forward_message_type = ws_config('business.deny_forward_message_type');
+            $deny_forward_message_type = config('business.deny_forward_message_type');
             $msgs = [];
             foreach ($message_id as $v)
             {
@@ -242,7 +245,7 @@ class MessageAction extends Action
             if (empty($message_id)) {
                 return self::error('请选择要转发的消息');
             }
-            $deny_forward_message_type = ws_config('business.deny_forward_message_type');
+            $deny_forward_message_type = config('business.deny_forward_message_type');
             $msgs = [];
             foreach ($message_id as $v)
             {
@@ -278,7 +281,7 @@ class MessageAction extends Action
             }
             return self::success($res);
         } else {
-            // todo 待扩充
+            // 待扩充
         }
 
 
@@ -295,7 +298,7 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = ws_config('business.forward_type');
+        $type_range = config('business.forward_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的转发类型，当前受支持的转发类型：' . implode(',' , $type_range));
         }
@@ -312,7 +315,7 @@ class MessageAction extends Action
             if (empty($message_id)) {
                 return self::error('请选择要转发的消息');
             }
-            $deny_forward_message_type = ws_config('business.deny_forward_message_type');
+            $deny_forward_message_type = config('business.deny_forward_message_type');
             $msgs = [];
             foreach ($message_id as $v)
             {
@@ -348,7 +351,7 @@ class MessageAction extends Action
             if (empty($message_id)) {
                 return self::error('请选择要转发的消息');
             }
-            $deny_forward_message_type = ws_config('business.deny_forward_message_type');
+            $deny_forward_message_type = config('business.deny_forward_message_type');
             $msgs = [];
             foreach ($message_id as $v)
             {
@@ -370,7 +373,7 @@ class MessageAction extends Action
             }
             return self::success();
         } else {
-            // todo 待扩充
+            // 待扩充
         }
     }
 }

@@ -16,8 +16,11 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
+use App\Model\GroupNoticeModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
+use App\Model\ProgramErrorLogModel;
+use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
@@ -26,7 +29,8 @@ use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use function WebSocket\ws_config;
+use Push\AppPush;
+
 
 class ChatUtil extends Util
 {
@@ -59,7 +63,7 @@ class ChatUtil extends Util
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = ws_config('business.message_type');
+        $type_range = config('business.message_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
         }
@@ -67,8 +71,6 @@ class ChatUtil extends Util
         // 检查是否时好友
         $relation = FriendModel::findByUserIdAndFriendId($param['user_id'] , $param['friend_id']);
         if (empty($relation)) {
-            // todo 这个地方可能需要返回一个特殊的状态码
-            // todo 目前的设计表明即使是陌生人也可以发送消息
 //            return self::error('你们还不是好友，禁止操作' , 403);
         }
         // 该条消息是否是阅后即焚的消息
@@ -96,7 +98,8 @@ class ChatUtil extends Util
                 DeleteMessageModel::insertGetId([
                     'user_id'   => $param['friend_id'] ,
                     'type'      => 'private' ,
-                    'message_id' => $id
+                    'message_id' => $id ,
+                    'target_id' => $param['chat_id'] ,
                 ]);
             }
             $msg = MessageModel::findById($id);
@@ -120,9 +123,12 @@ class ChatUtil extends Util
                 }
                 $base->pushAll($user_ids , 'refresh_session');
                 $base->pushAll($user_ids , 'refresh_unread_count');
-                if (ws_config('app.enable_app_push')) {
-                    // todo app 推送
-                }
+                AppPushUtil::pushCheckForFriend($base->platform , $param['user_id'] , $param['friend_id'] , function() use($param , $msg){
+                    $res = AppPushUtil::pushForPrivate($param['friend_id'] , $msg->message , '你收到了一条好友消息' , $msg);
+                    if ($res['code'] != 200) {
+                        ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$param['chat_id']}] [sender: {$param['user_id']}; receiver: {$param['friend_id']}]");
+                    }
+                });
             } else {
                 if ($push_all) {
                     // 用于消息转发
@@ -150,7 +156,7 @@ class ChatUtil extends Util
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = ws_config('business.message_type');
+        $type_range = config('business.message_type');
         if (!in_array($param['type'] , $type_range)) {
             return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
         }
@@ -162,7 +168,6 @@ class ChatUtil extends Util
         // 检查是否时好友
         $exist = GroupMemberModel::exist($param['user_id'] , $param['group_id']);
         if (!$exist) {
-            // todo 这个地方可能需要返回一个特殊的状态码
             return self::error('您不在该群，禁止操作' , 403);
         }
         $param['extra'] = $param['extra'] ?? '';
@@ -183,8 +188,18 @@ class ChatUtil extends Util
             $base->sendAll($user_ids , 'group_message' , $msg);
             $base->pushAll($user_ids , 'refresh_session');
             $base->pushAll($user_ids , 'refresh_unread_count');
-            if (ws_config('app.enable_app_push')) {
-                // todo app 推送
+            foreach ($user_ids as $v)
+            {
+                if ($v == $param['user_id']) {
+                    // 跳过发送消息的人
+                    continue ;
+                }
+                AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , $v , function() use($v , $param , $msg){
+                    $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                    if ($res['code'] != 200) {
+                        ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
+                    }
+                });
             }
             return self::success($msg);
         } catch(Exception $e) {

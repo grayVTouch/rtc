@@ -9,6 +9,7 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
 use function core\random;
 
 class GroupModel extends Model
@@ -73,4 +74,18 @@ class GroupModel extends Model
         self::single($res);
         return $res;
     }
+
+    // 时效群，并且已经过期
+    public static function expiredGroup()
+    {
+        $datetime = date('Y-m-d H:i:s' , time());
+        $res = self::where([
+            ['type' , '=' , 2] ,
+            ['expire' , '<' , $datetime] ,
+        ])->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
 }

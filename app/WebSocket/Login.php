@@ -112,4 +112,16 @@ class Login extends Base
         }
         return $this->success($res['data']);
     }
+
+    // 修改手机号码验证码
+    public function smsCodeForPhone(array $param)
+    {
+        $param['area_code'] = $param['area_code'] ?? '';
+        $param['phone'] = $param['phone'] ?? '';
+        $res = LoginAction::smsCode($this , 4 , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

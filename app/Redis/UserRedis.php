@@ -16,7 +16,7 @@ class UserRedis extends Redis
     // 绑定 user_id 和 客户端连接
     public static function userIdMappingFd(string $identifier , int $user_id , int $fd = null)
     {
-        $name = sprintf(self::$fdKey , $identifier , $user_id);
+        $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         if (is_null($fd)) {
             $res = RedisFacade::string($name);
             return json_decode($res , true);
@@ -44,7 +44,7 @@ class UserRedis extends Redis
 
     public static function delFdByUserId($identifier , $user_id , int $fd)
     {
-        $name = sprintf(self::$fdKey , $identifier , $user_id);
+        $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         $res = self::userIdMappingFd($identifier , $user_id);
         if (empty($res)) {
             return true;
@@ -64,7 +64,7 @@ class UserRedis extends Redis
     }
 
     // 检查用户是否在线
-    public static function isOnline(string $identifier = '' , int $user_id = 0)
+    public static function isOnline(string $identifier = '' , int $user_id = 0): bool
     {
         return !empty(self::userIdMappingFd($identifier , $user_id));
     }
@@ -162,7 +162,7 @@ class UserRedis extends Redis
 
     public static function fdMappingUserId($identifier , $fd , int $user_id = 0)
     {
-        $name = sprintf(self::$fdMappingUserIdKey , $identifier , $fd);
+        $name = sprintf(self::$fdMappingUserId , $identifier , $fd);
         if (empty($user_id)) {
             return RedisFacade::string($name);
         }
@@ -171,7 +171,7 @@ class UserRedis extends Redis
 
     public static function delFdMappingUserId($identifier , $fd)
     {
-        $name = sprintf(self::$fdMappingUserIdKey , $identifier , $fd);
+        $name = sprintf(self::$fdMappingUserId , $identifier , $fd);
         return RedisFacade::del($name);
     }
 
