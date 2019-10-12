@@ -10,6 +10,7 @@ namespace App\WebSocket\Action;
 
 
 use App\Model\FriendModel;
+use App\Model\GroupMemberModel;
 use App\WebSocket\Auth;
 use Core\Lib\Validator;
 
@@ -32,9 +33,13 @@ class SearchAction extends Action
         // 搜索好友（别名）
         $friend_for_alias = FriendModel::searchByUserIdAndAliasAndLimit($auth->user->id , $param['value'] , $limit);
 
-        // 搜索群组
-//        $group =
+        // 搜索群组（搜索群名称）
+        $group = GroupMemberModel::searchByUserIdAndGroupNameAndLimit($auth->user->id , $param['value'] , $limit);
+        // 搜索群组（通过群成员的用户名搜索）
+        // 搜索群组（通过群成员，如果是好友的话，通过别名搜索）
+
 
         // 搜索聊天记录
+
     }
 }

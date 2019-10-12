@@ -177,7 +177,7 @@ class GroupMemberModel extends Model
         return (int) (self::where('group_id' , $group_id)->count());
     }
 
-    public static function searchByUserIdAndGroupName(int $user_id , string $group_name)
+    public static function searchByUserIdAndGroupNameAndLimit(int $user_id , string $group_name , int $limit = 10)
     {
         $res = self::with(['group' , 'user'])
             ->from('group_member as gm')
@@ -187,6 +187,7 @@ class GroupMemberModel extends Model
                 ['g.name' , 'like' , "%{$group_name}%"] ,
             ])
             ->select('gm.*')
+            ->limit($limit)
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)
