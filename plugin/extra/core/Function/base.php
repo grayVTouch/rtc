@@ -248,16 +248,18 @@ function ssl_random(int $len = 256){
 }
 
 
-/**
- * @param $total
- * @param $num
- * @param int $scale
- * @return array|bool
- */
-function decimal_random(float $total , int $num , int $scale = 2)
+// 精确的随机数分配
+// 精确的随机数分配
+function decimal_random($total , $num , $scale = 2)
 {
-    $min = 1;
-    $max = 50;
+    $avg = bcdiv($total , $num , $scale);
+    // 浮动增量上限
+    $up   = 50;
+    // 浮动增量下限
+    $down = 50;
+    $minimum = bcmul($avg , bcdiv(100 - $down , 100 , 2) , $scale);
+    $maximum = bcmul($avg , bcdiv(100 + $up , 100 , 2) , $scale);
+    $range = bcsub($maximum , $minimum , $scale);
     $last = $total;
     $res = [];
     $count = 0;
@@ -273,16 +275,17 @@ function decimal_random(float $total , int $num , int $scale = 2)
             break;
         } else {
             // 随机分配
-            $cur = mt_rand($min , $max);
+            $cur = mt_rand(1 , 100);
             $ratio = bcdiv($cur , 100 , 2);
-            $amount = bcmul($last , $ratio , $scale);
-            if ($amount == 0) {
+            $change = bcmul($range , $ratio , $scale);
+            $amount = bcadd($change , $minimum , $scale);
+            if ($amount <= 0) {
                 $res = [];
                 $last = $total;
                 continue ;
             }
             $last = bcsub($last , $amount , $scale);
-            if ($last == 0) {
+            if ($last <= 0) {
                 $res = [];
                 $last = $total;
                 continue ;

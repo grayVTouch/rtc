@@ -35,7 +35,9 @@ class SearchAction extends Action
 
         // 搜索群组（搜索群名称）
         $group = GroupMemberModel::searchByUserIdAndGroupNameAndLimit($auth->user->id , $param['value'] , $limit);
+
         // 搜索群组（通过群成员的用户名搜索）
+
         // 搜索群组（通过群成员，如果是好友的话，通过别名搜索）
 
 
