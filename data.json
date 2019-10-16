@@ -1,12 +1,14 @@
 {
-  "router": "/Search/searchInLocal",
+  "router": "/Message/history",
   "identifier": "test",
-  "user_id": 1 ,
+  "user_id": 4 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "value": "test"
+    "friend_id":9,
+    "limit":30,
+    "limit_id":466
   }
 }

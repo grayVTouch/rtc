@@ -162,9 +162,9 @@ class MessageModel extends Model
     }
 
     // 获取所有阅后即焚消息（好友已读）
-    public static function getIdsWithFriendReadedByChatId(string $chat_id)
+    public static function getIdsWithFriendReadedByChatId(string $chat_id): array
     {
-        return self::from('message as m')
+        $res = self::from('message as m')
             ->where('m.chat_id' , $chat_id)
             ->whereExists(function($query){
                 // 对方已读
@@ -174,7 +174,14 @@ class MessageModel extends Model
                     ->whereRaw('rtc_mrs.user_id != rtc_m.user_id')
                     ->where('mrs.is_read' , 1);
             })
-            ->column('m.id');
+            ->select('m.id')
+            ->get();
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->id;
+        }
+        return $id_list;
     }
 
     // 获取所有的聊天记录
