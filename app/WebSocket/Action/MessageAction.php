@@ -152,7 +152,7 @@ class MessageAction extends Action
             return self::error('该消息类型不支持撤回' , 403);
         }
         $withdraw_duration = config('app.withdraw_duration');
-        if ($withdraw_duration > time() - strtotime($res->create_time)) {
+        if ($withdraw_duration < time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
         $receiver = ChatUtil::receiver($res->chat_id , $res->user_id);

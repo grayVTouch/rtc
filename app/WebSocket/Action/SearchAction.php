@@ -48,7 +48,6 @@ class SearchAction extends Action
             $res[] = $user_use_phone;
         }
         return self::success($res);
-
     }
 
     // 本地搜索
