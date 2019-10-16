@@ -9,7 +9,7 @@
 namespace App\Http;
 
 
-use App\Model\UserToken;
+use App\Model\UserTokenModel;
 use App\Model\UserModel;
 
 class Auth extends Base
@@ -34,7 +34,7 @@ class Auth extends Base
             $this->error('用户认证失败' , 403);
             return false;
         }
-        $token = UserToken::findByToken($authorization);
+        $token = UserTokenModel::findByToken($authorization);
         if (empty($token)) {
             $this->error('Token 错误' , 403);
             return false;

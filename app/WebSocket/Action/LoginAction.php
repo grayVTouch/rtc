@@ -14,7 +14,7 @@ use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
-use App\Model\UserToken;
+use App\Model\UserTokenModel;
 use App\Redis\UserRedis;
 use App\Util\MiscUtil;
 use App\WebSocket\Util\UserUtil;
@@ -63,7 +63,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+        UserTokenModel::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
@@ -132,7 +132,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+        UserTokenModel::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
@@ -198,7 +198,7 @@ class LoginAction extends Action
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         try {
             DB::beginTransaction();
-            UserToken::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire']);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);

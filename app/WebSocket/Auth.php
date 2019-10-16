@@ -8,7 +8,7 @@
 
 namespace App\WebSocket;
 
-use App\Model\UserToken;
+use App\Model\UserTokenModel;
 use App\Model\UserModel;
 use App\Redis\UserRedis;
 use App\Util\DataUtil;
@@ -31,7 +31,7 @@ class Auth extends Base
     // 用户认证
     public function auth() :bool
     {
-        $token = UserToken::findByToken($this->token);
+        $token = UserTokenModel::findByToken($this->token);
         if ($this->debug != 'running') {
             if (empty($token)) {
                 $this->error('用户认证失败【empty token】' , 403);

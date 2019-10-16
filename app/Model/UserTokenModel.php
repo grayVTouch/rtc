@@ -8,7 +8,7 @@
 
 namespace App\Model;
 
-class UserToken extends Model
+class UserTokenModel extends Model
 {
     protected $table = 'user_token';
     public $timestamps = false;
@@ -21,10 +21,9 @@ class UserToken extends Model
         return $res;
     }
 
-    public static function u_insertGetId(string $identifier , int $user_id , string $token , string $expire)
+    public static function u_insertGetId(int $user_id , string $token , string $expire)
     {
         return self::insertGetId([
-            'identifier' => $identifier ,
             'user_id' => $user_id ,
             'token' => $token ,
             'expire' => $expire

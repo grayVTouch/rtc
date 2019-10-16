@@ -1,5 +1,5 @@
 {
-  "router": "/Message/delete",
+  "router": "/Login/loginUsePhone",
   "identifier": "test",
   "user_id": 4 ,
   "debug": "running" ,
@@ -7,6 +7,8 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "message_id": [502]
+    "area_code":"86",
+    "phone":"17605919933",
+    "sms_code":"4858"
   }
 }

@@ -12,7 +12,7 @@ use App\Http\Base;
 use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserInfoModel;
-use App\Model\UserToken;
+use App\Model\UserTokenModel;
 use App\Redis\UserRedis;
 use App\Util\MiscUtil;
 use function core\array_unit;
@@ -105,7 +105,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserToken::insert(array_unit($param , [
+        UserTokenModel::insert(array_unit($param , [
             'token' ,
             'expire' ,
             'user_id' ,
@@ -143,7 +143,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserToken::insert(array_unit($param , [
+        UserTokenModel::insert(array_unit($param , [
             'token' ,
             'expire' ,
             'user_id' ,
