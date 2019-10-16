@@ -63,10 +63,13 @@ class SessionAction extends Action
             $session[] = $v;
         }
         $friend = FriendModel::getByUserId($auth->user->id);
+//        print_r($friend);
         foreach ($friend as $v)
         {
             $chat_id = ChatUtil::chatId($v->user_id , $v->friend_id);
             $recent_message = MessageModel::recentMessage($auth->user->id , $chat_id);
+            print_r($recent_message);
+            var_dump($recent_message);
             if (empty($recent_message)) {
                 continue ;
             }
