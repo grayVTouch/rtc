@@ -63,7 +63,6 @@ class SessionAction extends Action
             $session[] = $v;
         }
         $friend = FriendModel::getByUserId($auth->user->id);
-//        print_r($friend);
         foreach ($friend as $v)
         {
             $chat_id = ChatUtil::chatId($v->user_id , $v->friend_id);

@@ -1,5 +1,5 @@
 {
-  "router": "/Chat/sendTextForPrivate",
+  "router": "/Message/history",
   "identifier": "test",
   "user_id": 4 ,
   "debug": "running" ,
@@ -8,6 +8,7 @@
   "platform": "pc",
   "data": {
     "friend_id":9,
-    "message":"测试"
+    "limit_id": 0 ,
+    "limit": 30
   }
 }
