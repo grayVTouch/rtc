@@ -1,5 +1,5 @@
 {
-  "router": "/Login/loginUsePhone",
+  "router": "/Chat/sendTextForPrivate",
   "identifier": "test",
   "user_id": 4 ,
   "debug": "running" ,
@@ -7,8 +7,7 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "area_code":"86",
-    "phone":"17605919933",
-    "sms_code":"4858"
+    "friend_id":9,
+    "message":"测试"
   }
 }
