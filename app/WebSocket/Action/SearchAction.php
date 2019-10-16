@@ -14,6 +14,7 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
+use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\UserUtil;
@@ -22,6 +23,34 @@ use Core\Lib\Validator;
 
 class SearchAction extends Action
 {
+
+    // 全网搜索（）
+    public static function searchInNet(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'keyword' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = [];
+        // 搜索好友
+        if ($user_use_id = UserModel::findById($param['keyword'])) {
+            UserUtil::handle($user_use_id);
+            $res[] = $user_use_id;
+        }
+        if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['keyword'])) {
+            UserUtil::handle($user_use_nickname);
+            $res[] = $user_use_nickname;
+        }
+        if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['keyword'])) {
+            UserUtil::handle($user_use_phone);
+            $res[] = $user_use_phone;
+        }
+        return self::success($res);
+
+    }
+
     // 本地搜索
     public static function searchInLocal(Auth $auth , array $param)
     {
@@ -34,19 +63,26 @@ class SearchAction extends Action
 
         $limit = 3;
 
+        // 搜索自身
+        $qualified_friends = [];
+        if (mb_strpos($auth->user->nickname , $param['value']) !== false) {
+            $qualified_friends[] = $auth->user;
+        }
+
         // 搜索好友
-        $qualified_friends = FriendModel::searchByUserIdAndValueAndLimitIdAndLimit($auth->user->id, $param['value'], 0 , $limit);
-        foreach ($qualified_friends as $v)
+        $friends = FriendModel::searchByUserIdAndValueAndLimitIdAndLimit($auth->user->id, $param['value'], 0 , empty($qualified_friends) ? $limit : $limit - 1);
+        foreach ($friends as $v)
         {
-            UserUtil::handle($v->user , $v->friend_id);
             UserUtil::handle($v->friend , $auth->user->id);
+            $qualified_friends[] = $v->friend;
         }
 
         // 搜索群组（搜索群名称）
-        $group_ids = GroupMemberModel::getGroupIdByUserId($auth->user->id);
         $qualified_group = GroupMemberModel::searchByUserIdAndValueAndLimitIdAndLimit($auth->user->id, $param['value'], 0 , $limit);
+        $group_ids = GroupMemberModel::getGroupIdByUserId($auth->user->id);
         foreach ($group_ids as $v)
         {
+
             GroupUtil::handle($v->group);
             UserUtil::handle($v->user);
             UserUtil::handle($v->member , $auth->user->id);

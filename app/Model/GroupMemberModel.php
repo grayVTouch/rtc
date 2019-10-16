@@ -177,11 +177,10 @@ class GroupMemberModel extends Model
         return (int) (self::where('group_id' , $group_id)->count());
     }
 
-    public static function searchByUserIdAndValueAndLimitIdAndLimit(int $user_id , string $value , int $limit_id = 0 , int $limit = 10)
+    public static function firstByGroupIdAndValueAndLimitIdAndLimit(int $group_id , string $value , int $limit_id = 0 , int $limit = 10)
     {
         $where = [
-            ['gm.user_id' , '=' , $user_id] ,
-            ['g.name' , 'like' , "%{$value}%"] ,
+            ['gm.group_id' , '=' , $group_id] ,
             ['u.nickname' , 'like' , "%{$value}%"] ,
         ];
         if (!empty($limit_id)) {
@@ -189,7 +188,6 @@ class GroupMemberModel extends Model
         }
         $res = self::with(['group' , 'user'])
             ->from('group_member as gm')
-            ->join('group as g' , 'gm.group_id' , '=' , 'g.id')
             ->join('user as u' , 'gm.user_id' , '=' , 'u.id')
             ->where($where)
             ->select('gm.*,')
@@ -205,4 +203,6 @@ class GroupMemberModel extends Model
         }
         return $res;
     }
+
+
 }

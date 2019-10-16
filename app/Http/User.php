@@ -26,4 +26,8 @@ class User extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 联系人（包含好友 和 群组）
+
+
 }

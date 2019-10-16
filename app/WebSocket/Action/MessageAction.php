@@ -97,6 +97,8 @@ class MessageAction extends Action
                     DB::rollBack();
                     return self::error('包含不存在的消息id' , 404);
                 }
+                // 检查消息是否已经被删除
+
                 $data = [
                     'user_id'   => $auth->user->id ,
                     'type'      => 'private' ,

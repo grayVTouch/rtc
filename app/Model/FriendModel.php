@@ -175,22 +175,22 @@ class FriendModel extends Model
     public static function searchByUserIdAndValueAndLimitIdAndLimit(int $user_id , string $value , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
-            ['user_id' , '=' , $user_id]
+            ['f.user_id' , '=' , $user_id]
         ];
         if (!empty($limit_id)) {
             $where[] = ['f.id' , '<' , $limit_id];
         }
         $res = self::with(['user' , 'friend'])
-            ->from('user as u')
-            ->join('friend as f' , 'u.id' , '=' , 'f.friend_id')
+            ->from('friend as f')
+            ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
             ->orWhere([
                 ['f.alias' , 'like' , "%{$value}%"] ,
                 ['u.nickname' , 'like' , "%{$value}%"] ,
             ])
-            ->limit($limit)
             ->select('f.*')
             ->orderBy('f.id' , 'desc')
+            ->limit($limit)
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)

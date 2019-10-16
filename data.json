@@ -1,5 +1,5 @@
 {
-  "router": "/Message/history",
+  "router": "/Message/delete",
   "identifier": "test",
   "user_id": 4 ,
   "debug": "running" ,
@@ -7,8 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "friend_id":9,
-    "limit":30,
-    "limit_id":466
+    "message_id": [502]
   }
 }

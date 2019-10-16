@@ -34,13 +34,13 @@ class Auth extends Base
         $token = UserToken::findByToken($this->token);
         if ($this->debug != 'running') {
             if (empty($token)) {
-                $this->error('用户认证失败' , 403);
+                $this->error('用户认证失败【empty token】' , 403);
 //                $this->conn
                 return false;
             }
             $user = UserModel::findById($token->user_id);
             if (empty($user)) {
-                $this->error('用户认证失败' , 403);
+                $this->error('用户认证失败【token mapping user not found】' , 403);
                 return false;
             }
             $this->user = $user;

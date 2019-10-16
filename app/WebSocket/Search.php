@@ -16,7 +16,12 @@ class Search extends Auth
     // 全网搜索
     public function searchInNet()
     {
-
+        $param['value'] = $param['value'] ?? '';
+        $res = SearchAction::searchInNet($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
     }
 
     // 本地搜索
