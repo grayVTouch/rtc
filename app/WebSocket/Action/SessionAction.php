@@ -87,9 +87,6 @@ class SessionAction extends Action
             $session[] = $v;
         }
 
-        print_r($top_session);
-        print_r($session);
-
         // 置顶会话排序
         $top_session = obj_to_array($top_session);
         usort($top_session , function($a , $b){
