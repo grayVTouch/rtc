@@ -23,12 +23,15 @@ class FriendModel extends Model
      * @return mixed
      * @throws \Exception
      */
-    public static function findByUserIdAndFriendId(int $user_id , int $friend_id): ?FriendModel
+    public static function findByUserIdAndFriendId(int $user_id , int $friend_id)
     {
-        $res = self::where([
-            ['user_id' , '=' , $user_id] ,
-            ['friend_id' , '=' , $friend_id] ,
-        ])->first();
+        $res = self::with(['user' , 'friend'])
+            ->where([
+                ['user_id' , '=' , $user_id] ,
+                ['friend_id' , '=' , $friend_id] ,
+            ])
+            ->first();
+        $res = convert_obj($res);
         self::single($res);
         return $res;
     }
@@ -157,6 +160,37 @@ class FriendModel extends Model
                 ['alias' , 'like' , "%{$alias}%"] ,
             ])
             ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
+    }
+
+    // 搜索好友（用户名 + 昵称）
+    public static function searchByUserIdAndValueAndLimitIdAndLimit(int $user_id , string $value , int $limit_id = 0 , int $limit = 20)
+    {
+        $where = [
+            ['user_id' , '=' , $user_id]
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['f.id' , '<' , $limit_id];
+        }
+        $res = self::with(['user' , 'friend'])
+            ->from('user as u')
+            ->join('friend as f' , 'u.id' , '=' , 'f.friend_id')
+            ->where($where)
+            ->orWhere([
+                ['f.alias' , 'like' , "%{$value}%"] ,
+                ['u.nickname' , 'like' , "%{$value}%"] ,
+            ])
+            ->limit($limit)
+            ->select('f.*')
+            ->orderBy('f.id' , 'desc')
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)

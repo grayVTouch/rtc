@@ -1,5 +1,5 @@
 {
-  "router": "/User/writeStatusChange",
+  "router": "/Search/searchInLocal",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,7 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "friend_id": 2 ,
-    "status": "writing"
+    "value": "test"
   }
 }

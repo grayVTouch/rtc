@@ -39,9 +39,13 @@ class UserUtil extends Util
             // 黑名单
             $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id) ? 1 : 0;
             $user->is_friend = FriendModel::isFriend($relation_user_id , $user->id) ? 1 : 0;
+            // 保存用户自身设置的昵称
+            $user->origin_nickname = $user->nickname;
             // 好友名称
             $alias = FriendModel::alias($relation_user_id , $user->id);
+            // 处理后的名称
             $user->nickname = empty($alias) ? $user->nickname : $alias;
+
         }
     }
 

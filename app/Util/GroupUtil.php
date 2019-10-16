@@ -29,6 +29,8 @@ class GroupUtil extends Util
             $member_avatar[] = empty($v->user) ? $v->user->avatar : '';
         }
         $group->member_avatar = $member_avatar;
+        // 成员数量
+        $group->member_count = GroupMemberModel::countByGroupId($group->id);
     }
 
     // 删除群（执行该方法请始终使用事务的方式执行）

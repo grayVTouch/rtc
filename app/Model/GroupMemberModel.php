@@ -177,16 +177,23 @@ class GroupMemberModel extends Model
         return (int) (self::where('group_id' , $group_id)->count());
     }
 
-    public static function searchByUserIdAndGroupNameAndLimit(int $user_id , string $group_name , int $limit = 10)
+    public static function searchByUserIdAndValueAndLimitIdAndLimit(int $user_id , string $value , int $limit_id = 0 , int $limit = 10)
     {
+        $where = [
+            ['gm.user_id' , '=' , $user_id] ,
+            ['g.name' , 'like' , "%{$value}%"] ,
+            ['u.nickname' , 'like' , "%{$value}%"] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['gm.id' , '<' , $limit_id];
+        }
         $res = self::with(['group' , 'user'])
             ->from('group_member as gm')
             ->join('group as g' , 'gm.group_id' , '=' , 'g.id')
-            ->where([
-                ['gm.user_id' , '=' , $user_id] ,
-                ['g.name' , 'like' , "%{$group_name}%"] ,
-            ])
-            ->select('gm.*')
+            ->join('user as u' , 'gm.user_id' , '=' , 'u.id')
+            ->where($where)
+            ->select('gm.*,')
+            ->orderBy('gm.id' , 'desc')
             ->limit($limit)
             ->get();
         $res = convert_obj($res);

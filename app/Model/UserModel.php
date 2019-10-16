@@ -47,7 +47,7 @@ class UserModel extends Model
         return $res;
     }
 
-    public static function findByIdentifierAndUsername(string $identifier = '' , string $username = ''): ?UserModel
+    public static function findByIdentifierAndUsername(string $identifier = '' , string $username = '')
     {
         $res = self::where([
                 ['identifier' , '=' , $identifier] ,

@@ -186,4 +186,36 @@ class MessageModel extends Model
         self::multiple($res);
         return $res;
     }
+
+    public static function countByChatIdAndValue(string $chat_id , $value)
+    {
+        return self::where([
+                ['chat_id' , '=' , $chat_id] ,
+                ['message' , 'like' , "%{$value}%"] ,
+            ])
+            ->count();
+    }
+
+    public static function searchByChatIdAndValueAndAndLimitIdAndLimit(string $chat_id , $value , int $limit_id = 0 , int $limit = 20)
+    {
+        $where = [
+            ['chat_id' , '=' , $chat_id] ,
+            ['message' , 'like' , "%{$value}%"] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '<' , $limit_id];
+        }
+        $res = self::with(['user'])
+            ->where($where)
+            ->limit($limit)
+            ->orderBy('id' , 'desc')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
 }

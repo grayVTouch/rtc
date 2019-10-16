@@ -180,4 +180,34 @@ class GroupMessageModel extends Model
         }
         return $res;
     }
+
+    public static function countByGroupIdAndValue(int $group_id , string $value)
+    {
+        return self::where([
+            ['group_id' , '=' , $group_id] ,
+            ['message' , 'like' , "%{$value}%"] ,
+        ])->count();
+    }
+
+    public static function countByGroupIdAndValueAndLimitIdAndLimit(int $group_id , string $value , int $limit_id = 0 , int $limit = 20)
+    {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+            ['message' , 'like' , "%{$value}%"] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '<' , $limit_id];
+        }
+        $res = self::with(['user'])
+            ->where($where)
+            ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
 }
