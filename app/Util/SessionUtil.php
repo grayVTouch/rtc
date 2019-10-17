@@ -34,10 +34,11 @@ class SessionUtil extends Util
                 'top'       => $top ,
             ]);
             // var_dump("session_id {$id}");
+        } else {
+            SessionModel::updateById($session->id , [
+                'update_time' => date('Y-m-d H:i:s') ,
+            ]);
         }
-        SessionModel::updateById($session->id , [
-            'update_time' => date('Y-m-d H:i:s') ,
-        ]);
         return self::success();
     }
 }

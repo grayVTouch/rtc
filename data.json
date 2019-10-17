@@ -1,11 +1,10 @@
 {
-  "router": "/Friend/delFriend",
+  "router": "/Session/session",
   "identifier": "test",
-  "user_id": 4 ,
+  "user_id": 1 ,
   "debug": "running" ,
+  "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
-  "data": {
-    "friend_id":9
-  }
+  "data": {}
 }
