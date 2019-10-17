@@ -36,15 +36,22 @@ class UserUtil extends Util
         }
         $user->online = UserRedis::isOnline($user->identifier , $user->id) ? 1 : 0;
         if (!empty($relation_user_id)) {
+            $friend = FriendModel::findByUserIdAndFriendId($relation_user_id , $user->id);
             // 黑名单
             $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id) ? 1 : 0;
-            $user->is_friend = FriendModel::isFriend($relation_user_id , $user->id) ? 1 : 0;
+            $user->is_friend = empty($friend) ? 0 : 1;
             // 保存用户自身设置的昵称
             $user->origin_nickname = $user->nickname;
             // 好友名称
-            $alias = FriendModel::alias($relation_user_id , $user->id);
+//            $alias = FriendModel::alias($relation_user_id , $user->id);
             // 处理后的名称
-            $user->nickname = empty($alias) ? $user->nickname : $alias;
+            $user->nickname = empty($friend) ?
+                $user->nickname :
+                (empty($friend->alias) ?
+                    $user->nickname :
+                    $friend->alias);
+            // 是否阅后即焚
+            $user->burn = empty($friend) ? 0 : $friend->burn;
 
         }
     }
