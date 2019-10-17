@@ -189,7 +189,7 @@ class ChatUtil extends Util
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
             foreach ($user_ids as $v)
             {
-                SessionUtil::createOrUpdate($param['user_id'] , 'group' , $param['group_id']);
+                SessionUtil::createOrUpdate($v , 'group' , $param['group_id']);
             }
             DB::commit();
             $base->sendAll($user_ids , 'group_message' , $msg);

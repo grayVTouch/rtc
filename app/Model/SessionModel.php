@@ -9,6 +9,8 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
+
 class SessionModel extends Model
 {
     protected $table = 'session';
@@ -65,6 +67,47 @@ class SessionModel extends Model
             ])
             ->first();
         self::single($res);
+        return $res;
+    }
+
+    // 获取置顶会话
+    public static function topSessionByUserId(int $user_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['top' , '=' , 1] ,
+            ])
+            ->get();
+        self::multiple($res);
+        return $res;
+    }
+
+    public static function noTopCountByUserId(int $user_id , int $offset = 0 , int $limit = 10)
+    {
+        return self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['top' , '=' , 0] ,
+            ])
+            ->count();
+    }
+
+    public static function noTopGetByUserIdAndOffsetAndLimit(int $user_id , int $offset = 0 , int $limit = 10)
+    {
+        $where = [
+            ['user_id' , '=' , $user_id] ,
+            ['top' , '=' , 0] ,
+        ];
+        $res = self::where($where)
+            ->orderBy('update_time' , 'desc')
+            ->orderBy('id' , 'desc')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+        }
         return $res;
     }
 }

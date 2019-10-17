@@ -53,6 +53,10 @@ class UserAction extends Action
                 $v->group = GroupModel::findById($v->group_id);
                 GroupUtil::handle($v->group);
             }
+            if ($v->type == 'private') {
+                $v->relation_user = UserModel::findById($v->relation_user_id);
+                UserUtil::handle($v->relation_user);
+            }
         }
         $res = PageUtil::data($page , $res);
         return self::success($res);

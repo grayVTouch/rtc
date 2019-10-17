@@ -19,6 +19,7 @@ use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
+use App\Util\PageUtil;
 use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
@@ -32,8 +33,30 @@ class SessionAction extends Action
 
     public static function session(Auth $auth , array $param)
     {
-        $top_session = [];
-        $session = [];
+//        $top_session = SessionModel::topSessionByUserId($auth->user->id);
+//        $no_top_total  = SessionModel::noTopCountByUserId($auth->user->id);
+//        $no_top_page   = PageUtil::deal($no_top_total , $param['page'] , $param['limit']);
+//        $general_session = SessionModel::noTopGetByUserIdAndOffsetAndLimit($auth->user->id , $no_top_page['offset'] , $no_top_page['limit']);
+        foreach ($general_session as $v)
+        {
+            if ($v->type == 'private') {
+                $recent_message = MessageModel::recentMessage($auth->user->id , $v->target_id);
+                if (empty($recent_message)) {
+                    continue ;
+                }
+                UserUtil::handle($v->user);
+                UserUtil::handle($v->friend);
+                // 私聊消息处理
+                MessageUtil::handleMessage($recent_message , $v->user_id , $v->friend_id);
+                $v->recent_message = $recent_message;
+                $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
+            } else if ($v->type == 'group') {
+
+            }
+            $general_session[] = $v;
+        }
+        $session = PageUtil::data($page , $session);
+
         // 群聊
         $group = GroupMemberModel::getByUserId($auth->user->id);
         foreach ($group as $v)
