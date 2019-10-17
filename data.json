@@ -1,5 +1,5 @@
 {
-  "router": "/Message/history",
+  "router": "/Friend/decideApp",
   "identifier": "test",
   "user_id": 4 ,
   "debug": "running" ,
@@ -7,8 +7,8 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "friend_id":9,
-    "limit_id": 0 ,
-    "limit": 30
+    "application_id":2,
+    "status":"refuse"
   }
 }
+

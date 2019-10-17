@@ -131,9 +131,9 @@ class FriendAction extends Action
                 FriendModel::u_insertGetId($app->relation_user_id , $app->user_id);
             }
             DB::commit();
-            $auth->pushAll($param['friend_id'] , 'refresh_application');
+            $auth->push($app->user_id , 'refresh_application');
             if ($param['status'] == 'approve') {
-                // 未开启好友认证（直接通过）
+                // 同意成为好友
                 $user_ids = [$app->user_id , $param['friend_id']];
                 $auth->pushAll($user_ids , 'refresh_friend');
                 ChatUtil::send($auth , [
