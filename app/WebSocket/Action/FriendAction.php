@@ -142,7 +142,7 @@ class FriendAction extends Action
             $auth->push($app->user_id , 'refresh_application');
             if ($param['status'] == 'approve') {
                 // 同意成为好友
-                $user_ids = [$app->user_id , $param['friend_id']];
+                $user_ids = [$app->user_id , $app->relation_user_id];
                 $auth->pushAll($user_ids , 'refresh_friend');
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
