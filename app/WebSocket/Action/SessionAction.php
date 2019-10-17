@@ -13,6 +13,7 @@ use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
+use App\Model\GroupModel;
 use App\Model\MessageModel;
 use App\Model\SessionModel;
 use App\Model\UserModel;
@@ -37,36 +38,34 @@ class SessionAction extends Action
 //        $no_top_total  = SessionModel::noTopCountByUserId($auth->user->id);
 //        $no_top_page   = PageUtil::deal($no_top_total , $param['page'] , $param['limit']);
 //        $general_session = SessionModel::noTopGetByUserIdAndOffsetAndLimit($auth->user->id , $no_top_page['offset'] , $no_top_page['limit']);
-        foreach ($general_session as $v)
+        $top_session = [];
+        $general_session = [];
+        $sessions = SessionModel::getByUserId($auth->user->id);
+        foreach ($sessions as $v)
         {
             if ($v->type == 'private') {
+                $other_id = ChatUtil::otherId($v->chat_id , $auth->user->id);
+                $v->other = UserModel::findById($other_id);
+                UserUtil::handle($v->other);
                 $recent_message = MessageModel::recentMessage($auth->user->id , $v->target_id);
-                if (empty($recent_message)) {
-                    continue ;
-                }
-                UserUtil::handle($v->user);
-                UserUtil::handle($v->friend);
+                MessageUtil::handleMessage($recent_message , $v->user_id , $v->other_id);
                 // 私聊消息处理
-                MessageUtil::handleMessage($recent_message , $v->user_id , $v->friend_id);
                 $v->recent_message = $recent_message;
                 $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
-            } else if ($v->type == 'group') {
-
-            }
-            $general_session[] = $v;
-        }
-        $session = PageUtil::data($page , $session);
-
-        // 群聊
-        $group = GroupMemberModel::getByUserId($auth->user->id);
-        foreach ($group as $v)
-        {
-            $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->group_id , 'none');
-            if (empty($recent_message)) {
+                if ($v->top == 1) {
+                    // 置顶群聊
+                    $top_session[] = $v;
+                    continue ;
+                }
+                $general_session[] = $v;
                 continue ;
             }
-            // 群处理
+
+            // 群聊
+            $v->group = GroupModel::findById($v->target_id);
             GroupUtil::handle($v->group);
+            $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->target_id , 'none');
+            // 群处理
             $v->recent_message = $recent_message;
             // 群消息处理
             MessageUtil::handleGroupMessage($v->recent_message);
@@ -75,64 +74,13 @@ class SessionAction extends Action
                 $v->group->name = '平台咨询';
             }
             $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->group_id , 0);
-            $v->type = 'group';
-            // 会话id仅是用于同意管理会话用的
-            $v->session_id = ChatUtil::sessionId('group' , $v->group_id);
-            $top = SessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'group' , $v->group_id , 1);
-            if (!empty($top)) {
-                $v->top = $top;
+            if ($v->top == 1) {
                 $top_session[] = $v;
                 continue ;
             }
-            $session[] = $v;
+            $general_session[] = $v;
         }
-        $friend = FriendModel::getByUserId($auth->user->id);
-        foreach ($friend as $v)
-        {
-            $chat_id = ChatUtil::chatId($v->user_id , $v->friend_id);
-            $recent_message = MessageModel::recentMessage($auth->user->id , $chat_id);
-            print_r($recent_message);
-            var_dump($recent_message);
-            if (empty($recent_message)) {
-                continue ;
-            }
-            UserUtil::handle($v->user);
-            UserUtil::handle($v->friend);
-            // 私聊消息处理
-            MessageUtil::handleMessage($recent_message , $v->user_id , $v->friend_id);
-            $v->recent_message = $recent_message;
-            $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($chat_id , $v->user_id , 0);
-            $v->type = 'private';
-            $v->session_id = ChatUtil::sessionId('private' , $chat_id);
-            $top = SessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'private' , $chat_id , 1);
-            if (!empty($top)) {
-                $v->top = $top;
-                $top_session[] = $v;
-                continue ;
-            }
-            $session[] = $v;
-        }
-
-        // 置顶会话排序
-        $top_session = obj_to_array($top_session);
-        usort($top_session , function($a , $b){
-            if ($a['top']['update_time'] == $b['top']['update_time']) {
-                return 0;
-            }
-            return $a['top']['update_time'] > $b['top']['update_time'] ? -1 : 1;
-        });
-        // 非置顶会话排序
-        $session = obj_to_array($session);
-        usort($session , function($a , $b){
-            if (empty($a['recent_message'])) {
-                return 0;
-            }
-            if ($a['recent_message']['create_time'] == $b['recent_message']['create_time']) {
-                return 0;
-            }
-            return $a['recent_message']['create_time'] > $b['recent_message']['create_time'] ? -1 : 1;
-        });
-        $res = array_merge($top_session , $session);
+        $res = array_merge($top_session , $general_session);
         return self::success($res);
     }
 

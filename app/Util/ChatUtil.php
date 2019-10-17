@@ -231,6 +231,21 @@ class ChatUtil extends Util
         }
     }
 
+    public static function otherId(string $chat_id , int $user_id)
+    {
+        if (empty($chat_id)) {
+            return 0;
+        }
+        $res = explode('_' , $chat_id);
+        foreach ($res as $v)
+        {
+            if ($v == $user_id) {
+                continue ;
+            }
+            return $v;
+        }
+    }
+
     // 获取好友双方
     public static function userIds(string $chat_id)
     {

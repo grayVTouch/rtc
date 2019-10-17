@@ -112,7 +112,7 @@ create table if not exists `rtc_application` (
   user_id int unsigned default 0 comment '受理方: rtc_user.id' ,
   invite_user_id int unsigned default 0 comment '邀请用户（群用户）：rtc_user.id' ,
   group_id int unsigned default 0 comment '如果 type = group，那么这个字段将会有用' ,
-  relation_user_id varchar(255) default '' comment '如果是邀请用户进群，那么这个字段就会有用，关联用户，rtc_user.id 的集合，用,分割；如果是单人，那么就是 rtc_user.id' ,
+  relation_user_id varchar(255) default '' comment '如果是邀请用户进群，那么这个字段就会有用，关联用户，rtc_user.id 的集合，用,分割；如果是 type=private，那么就是 rtc_user.id' ,
   status varchar(500) default 'wait' comment '申请状态：approve-同意；refuse-拒绝；wait-等待处理' ,
   remark varchar(500) default '' comment '备注信息' ,
   log varchar(500) default '' comment '系统日志' ,

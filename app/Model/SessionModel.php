@@ -110,4 +110,17 @@ class SessionModel extends Model
         }
         return $res;
     }
+
+    public static function getByUserId(int $user_id)
+    {
+        $where = [
+            ['user_id' , '=' , $user_id] ,
+        ];
+        $res = self::where($where)
+            ->orderBy('update_time' , 'desc')
+            ->orderBy('id' , 'desc')
+            ->get();
+        self::multiple($res);
+        return $res;
+    }
 }

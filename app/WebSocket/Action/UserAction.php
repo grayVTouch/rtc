@@ -50,10 +50,12 @@ class UserAction extends Action
         {
             UserUtil::handle($v->user);
             if ($v->type == 'group') {
+                // 群聊
                 $v->group = GroupModel::findById($v->group_id);
                 GroupUtil::handle($v->group);
             }
             if ($v->type == 'private') {
+                // 私聊
                 $v->relation_user = UserModel::findById($v->relation_user_id);
                 UserUtil::handle($v->relation_user);
             }
