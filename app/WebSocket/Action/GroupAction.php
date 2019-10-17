@@ -100,6 +100,7 @@ class GroupAction extends Action
             // 发送群通知
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
+                'group_id'   => $group->id ,
                 'type'      => 'notification' ,
                 'message'   => sprintf($message , $auth->user->nickname) ,
             ]);
@@ -195,6 +196,7 @@ class GroupAction extends Action
             // 发送群通知
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
+                'group_id'   => $group->id ,
                 'type'      => 'notification' ,
                 'message'   => sprintf($message , $auth->user->nickname , $log) ,
             ]);
@@ -282,6 +284,7 @@ class GroupAction extends Action
                 // 发送群通知
                 ChatUtil::groupSend($auth , [
                     'user_id' => $auth->user->id ,
+                    'group_id' => $app->group_id ,
                     'type' => 'notification' ,
                     'message' => $message ,
                 ]);
