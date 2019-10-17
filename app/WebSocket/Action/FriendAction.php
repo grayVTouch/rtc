@@ -120,6 +120,10 @@ class FriendAction extends Action
         if ($app->user_id != $auth->user->id) {
             return self::error('你并非该记录的拥有者！非法操作' , 403);
         }
+        $deny_application_status = config('business.deny_application_status');
+        if (in_array($app->status , $deny_application_status)) {
+            return self::error('该申请记录的状态无法被更改');
+        }
         try {
             DB::beginTransaction();
             ApplicationModel::updateById($app->id , [

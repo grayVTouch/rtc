@@ -1,14 +1,12 @@
 {
-  "router": "/Friend/decideApp",
+  "router": "/User/app",
   "identifier": "test",
-  "user_id": 4 ,
+  "user_id": 1 ,
   "debug": "running" ,
-  "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "application_id":2,
-    "status":"refuse"
+    "page": 1 ,
+    "limit": 20
   }
 }
-

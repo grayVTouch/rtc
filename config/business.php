@@ -131,6 +131,16 @@ return [
         'refuse'
     ] ,
 
+    // 拒绝操作的申请记录
+    'deny_application_status' => [
+        // 同意
+        'approve' ,
+        // 拒绝
+        'refuse' ,
+        // 自动通过
+        'auto_approve' ,
+    ] ,
+
     /**
      * 短信验证码类型
      */
