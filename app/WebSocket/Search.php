@@ -14,7 +14,7 @@ use App\WebSocket\Action\SearchAction;
 class Search extends Auth
 {
     // 全网搜索
-    public function searchInNet()
+    public function searchInNet(array $param)
     {
         $param['value'] = $param['value'] ?? '';
         $res = SearchAction::searchInNet($this , $param);

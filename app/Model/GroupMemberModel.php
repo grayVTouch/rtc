@@ -204,5 +204,24 @@ class GroupMemberModel extends Model
         return $res;
     }
 
+    public static function searchByGroupIdAndValueOnlyFirst(int $group_id , string $value)
+    {
+        $res = self::with(['group' , 'user'])
+            ->from('group_member as gm')
+            ->join('user as u' , 'gm.user_id' , '=' , 'u.id')
+            ->where([
+                ['gm.group_id' , '=' , $group_id] ,
+                ['u.nickname' , 'like' , "%{$value}%"] ,
+            ])
+            ->first();
+        if (empty($res)) {
+            return ;
+        }
+        self::single($res);
+        UserModel::single($res->user);
+        GroupModel::single($res->group);
+        return $res;
+    }
+
 
 }

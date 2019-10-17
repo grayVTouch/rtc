@@ -28,22 +28,22 @@ class SearchAction extends Action
     public static function searchInNet(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
-            'keyword' => 'required'
+            'value' => 'required'
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
         $res = [];
         // 搜索好友
-        if ($user_use_id = UserModel::findById($param['keyword'])) {
+        if ($user_use_id = UserModel::findById($param['value'])) {
             UserUtil::handle($user_use_id);
             $res[] = $user_use_id;
         }
-        if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['keyword'])) {
+        if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['value'])) {
             UserUtil::handle($user_use_nickname);
             $res[] = $user_use_nickname;
         }
-        if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['keyword'])) {
+        if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['value'])) {
             UserUtil::handle($user_use_phone);
             $res[] = $user_use_phone;
         }
@@ -62,33 +62,32 @@ class SearchAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-
         $limit = 3;
-
         // 搜索自身
-        $qualified_friends = [];
+        $qualified_users = [];
         if (mb_strpos($auth->user->nickname , $param['value']) !== false) {
-            $qualified_friends[] = $auth->user;
+            $qualified_users[] = $auth->user;
         }
-
         // 搜索好友
-        $friends = FriendModel::searchByUserIdAndValueAndLimit($auth->user->id, $param['value'], empty($qualified_friends) ? $limit : $limit - 1);
+        $friends = FriendModel::searchByUserIdAndValueAndLimit($auth->user->id, $param['value'], empty($qualified_users) ? $limit : $limit - 1);
         foreach ($friends as $v)
         {
             UserUtil::handle($v->friend , $auth->user->id);
-            $qualified_friends[] = $v->friend;
+            $qualified_users[] = $v->friend;
         }
-
         // 搜索群组（搜索群名称）
-        $qualified_group = GroupMemberModel::searchByUserIdAndValueAndLimitIdAndLimit($auth->user->id, $param['value'], 0 , $limit);
+        $qualified_groups = [];
         $group_ids = GroupMemberModel::getGroupIdByUserId($auth->user->id);
         foreach ($group_ids as $v)
         {
-            GroupUtil::handle($v->group);
-            UserUtil::handle($v->user);
-            UserUtil::handle($v->member , $auth->user->id);
+            $member = GroupMemberModel::searchByGroupIdAndValueOnlyFirst($v , $param['value']);
+            if (empty($member)) {
+                continue ;
+            }
+            GroupUtil::handle($member->group);
+            UserUtil::handle($member->user , $auth->user->id);
+            $qualified_groups[] = $member;
         }
-
         // 好友列表
         $friend_ids = FriendModel::getFriendIdByUserId($auth->user->id);
         $qualified_friend_for_history = [];
@@ -97,7 +96,7 @@ class SearchAction extends Action
             $chat_id = ChatUtil::chatId($auth->user->id , $v);
             $relation_message_count= MessageModel::countByChatIdAndValue($chat_id , $param['value']);
             $friend = FriendModel::findByUserIdAndFriendId($auth->user->id , $v);
-            if ($relation_message_count < 1) {
+            if ($relation_message_count < 1 || count($qualified_friend_for_history) >= 3) {
                 // 没有相关聊天记录，跳过
                 continue ;
             }
@@ -108,13 +107,12 @@ class SearchAction extends Action
             UserUtil::handle($friend->friend , $auth->user->id);
             $qualified_friend_for_history[] = $friend;
         }
-
         // 群列表
         $qualified_group_for_history = [];
         foreach ($group_ids as $v)
         {
             $relation_message_count = GroupMessageModel::countByGroupIdAndValue($v , $param['value']);
-            if ($relation_message_count < 1) {
+            if ($relation_message_count < 1 || count($qualified_group_for_history) >= 3) {
                 // 没有相关聊天记录
                 continue ;
             }
@@ -123,23 +121,23 @@ class SearchAction extends Action
             // 群聊
             $group->type = 'group';
             GroupUtil::handle($group);
-            UserUtil::handle($group->user);
+            UserUtil::handle($group->user , $auth->user->id);
             $qualified_group_for_history[] = $group;
         }
         // 合并消息列表
         $history = array_merge($qualified_friend_for_history , $qualified_group_for_history);
         // 合并记录排序
         usort($history , function($a , $b){
-            if ($a['create_time'] == $b['create_time']) {
+            if ($a->create_time == $b->create_time) {
                 return 0;
             }
-            return $a['create_time'] > $b['create_time'] ? -1 : 1;
+            return $a->create_time > $b->create_time ? -1 : 1;
         });
         $res = [
             // 符合提交的好友
-            'friend' => $qualified_friends ,
+            'user' => $qualified_users ,
             // 符合条件的群组
-//            'group' => $qualified_groups ,
+            'group' => $qualified_groups ,
             // 符合条件的聊天记录
             'history' => $history ,
         ];

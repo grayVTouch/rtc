@@ -182,7 +182,7 @@ class FriendModel extends Model
         if (!empty($limit_id)) {
             $where[] = ['f.id' , '<' , $limit_id];
         }
-        $res = self::with(['user' , 'friend'])
+        $ins = self::with(['user' , 'friend'])
             ->from('friend as f')
             ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
@@ -191,9 +191,11 @@ class FriendModel extends Model
                 ['u.nickname' , 'like' , "%{$value}%"] ,
             ])
             ->select('f.*')
-            ->orderBy('f.id' , 'desc')
-            ->limit($limit)
-            ->get();
+            ->orderBy('f.id' , 'desc');
+        if (!empty($limit)) {
+            $ins->limit($limit);
+        }
+        $res = $ins->get();
         $res = convert_obj($res);
         foreach ($res as $v)
         {
