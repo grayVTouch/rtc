@@ -154,13 +154,15 @@ class FriendModel extends Model
 
     public static function searchByUserIdAndAliasAndLimit(int $user_id , string $alias = '' , int $limit = 3)
     {
-        $res = self::with(['user' , 'friend'])
+        $ins = self::with(['user' , 'friend'])
             ->where([
                 ['user_id' , '=' , $user_id] ,
                 ['alias' , 'like' , "%{$alias}%"] ,
-            ])
-            ->limit($limit)
-            ->get();
+            ]);
+        if (!empty($limit)) {
+            $ins->limit($limit);
+        }
+        $res = $ins->get();
         $res = convert_obj($res);
         foreach ($res as $v)
         {
@@ -172,7 +174,7 @@ class FriendModel extends Model
     }
 
     // 搜索好友（用户名 + 昵称）
-    public static function searchByUserIdAndValueAndLimitIdAndLimit(int $user_id , string $value , int $limit_id = 0 , int $limit = 20)
+    public static function searchByUserIdAndValueAndLimit(int $user_id , string $value , int $limit = 20)
     {
         $where = [
             ['f.user_id' , '=' , $user_id]

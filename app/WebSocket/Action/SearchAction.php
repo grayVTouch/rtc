@@ -72,7 +72,7 @@ class SearchAction extends Action
         }
 
         // 搜索好友
-        $friends = FriendModel::searchByUserIdAndValueAndLimitIdAndLimit($auth->user->id, $param['value'], 0 , empty($qualified_friends) ? $limit : $limit - 1);
+        $friends = FriendModel::searchByUserIdAndValueAndLimit($auth->user->id, $param['value'], empty($qualified_friends) ? $limit : $limit - 1);
         foreach ($friends as $v)
         {
             UserUtil::handle($v->friend , $auth->user->id);

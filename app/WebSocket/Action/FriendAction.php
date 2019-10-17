@@ -175,7 +175,7 @@ class FriendAction extends Action
             MessageModel::delByChatId($chat_id);
             DB::commit();
             // 刷新好友列表
-            $user_ids = [$auth->user->id , $param['user_id']];
+            $user_ids = [$auth->user->id , $param['friend_id']];
             $auth->pushAll($user_ids , 'refresh_friend');
             $auth->pushAll($user_ids , 'refresh_session');
             return self::success();
