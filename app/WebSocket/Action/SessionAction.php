@@ -46,7 +46,7 @@ class SessionAction extends Action
             if ($v->type == 'private') {
                 $other_id = ChatUtil::otherId($v->target_id , $auth->user->id);
                 $v->other = UserModel::findById($other_id);
-                UserUtil::handle($v->other);
+                UserUtil::handle($v->other , $auth->user->id);
                 $recent_message = MessageModel::recentMessage($auth->user->id , $v->target_id);
                 MessageUtil::handleMessage($recent_message , $v->user_id , $other_id);
                 // 私聊消息处理

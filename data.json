@@ -1,10 +1,12 @@
 {
-  "router": "/Session/session",
+  "router": "/User/other",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
-  "data": {}
+  "data": {
+    "other_id": ""
+  }
 }
