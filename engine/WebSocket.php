@@ -16,7 +16,7 @@ use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\ProgramErrorLogModel;
 use App\Model\TimerLogModel;
-use App\Model\TopSessionModel;
+use App\Model\SessionModel;
 use App\Redis\TimerRedis;
 use App\Util\ChatUtil;
 use App\Util\GroupMessageUtil;

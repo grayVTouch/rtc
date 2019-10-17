@@ -9,9 +9,9 @@
 namespace App\Model;
 
 
-class TopSessionModel extends Model
+class SessionModel extends Model
 {
-    protected $table = 'top_session';
+    protected $table = 'session';
 
     // 检查是否存在
     public static function exist(int $user_id , string $type , string $target_id)
@@ -54,5 +54,17 @@ class TopSessionModel extends Model
             ['type' , '=' , $type] ,
             ['target_id' , '=' , $target_id] ,
         ])->delete();
+    }
+
+    public static function findByUserIdAndTypeAndTargetId(int $user_id , string $type , string $target_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['type' , '=' , $type] ,
+                ['target_id' , '=' , $target_id] ,
+            ])
+            ->first();
+        self::single($res);
+        return $res;
     }
 }

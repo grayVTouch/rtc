@@ -12,7 +12,7 @@ namespace App\Util;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
-use App\Model\TopSessionModel;
+use App\Model\SessionModel;
 
 class GroupUtil extends Util
 {
@@ -43,7 +43,7 @@ class GroupUtil extends Util
             GroupMessageUtil::delete($v1);
         }
         // 删除置顶群（会话）
-        TopSessionModel::delByTypeAndTargetId('group' , $group_id);
+        SessionModel::delByTypeAndTargetId('group' , $group_id);
         // 删除群成员
         GroupMemberModel::delByGroupId($group_id);
         // 删除群

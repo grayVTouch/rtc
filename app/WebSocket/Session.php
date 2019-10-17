@@ -36,5 +36,18 @@ class Session extends Auth
         return $this->success($res['data']);
     }
 
-    // 消息免打扰
+    // todo 消息免打扰
+
+    // 创建并更新
+    public function createOrUpdate(array $param)
+    {
+        $param['type']      = $param['type'] ?? '';
+        $param['target_id'] = $param['target_id'] ?? '';
+        $param['top']       = $param['top'] ?? '';
+        $res = SessionAction::createOrUpdate($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

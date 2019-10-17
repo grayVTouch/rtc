@@ -24,7 +24,7 @@ use Core\Lib\Validator;
 class SearchAction extends Action
 {
 
-    // 全网搜索（）
+    // 全网搜索
     public static function searchInNet(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
@@ -51,6 +51,9 @@ class SearchAction extends Action
     }
 
     // 本地搜索
+    // 第一：好友搜索
+    // 第二：群搜索
+    // 第三：历史消息记录
     public static function searchInLocal(Auth $auth , array $param)
     {
         $validator = Validator::make($param, [
@@ -81,7 +84,6 @@ class SearchAction extends Action
         $group_ids = GroupMemberModel::getGroupIdByUserId($auth->user->id);
         foreach ($group_ids as $v)
         {
-
             GroupUtil::handle($v->group);
             UserUtil::handle($v->user);
             UserUtil::handle($v->member , $auth->user->id);

@@ -19,6 +19,7 @@ use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
 use App\Util\ChatUtil;
+use App\Util\GroupUtil;
 use App\Util\PageUtil;
 use App\WebSocket\Auth;
 use App\Util\UserUtil;
@@ -48,6 +49,10 @@ class UserAction extends Action
         foreach ($res as $v)
         {
             UserUtil::handle($v->user);
+            if ($v->type == 'group') {
+                $v->group = GroupModel::findById($v->group_id);
+                GroupUtil::handle($v->group);
+            }
         }
         $res = PageUtil::data($page , $res);
         return self::success($res);

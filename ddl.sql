@@ -227,18 +227,18 @@ create table if not exists `rtc_sms_code` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '短信验证码';
 
-
-drop table if exists `rtc_top_session`;
-create table if not exists `rtc_top_session` (
+drop table if exists `rtc_session`;
+create table if not exists `rtc_session` (
   id int unsigned not null auto_increment ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   type varchar(255) default '' comment '类型：private-私聊 group-群聊' ,
   target_id varchar(255) default '' comment 'type=private，则 target_id=chat_id；type=group，target_id=group_id' ,
+  session_id varchar(255) default '' comment '会话id，生成规则 type=private，session_id=md5("private_" + chat_id); type=group,session_id=md5("group_" + group_id)' ,
   top tinyint default 0 comment '置顶？0-否 1-是' ,
   update_time datetime default current_timestamp on update current_timestamp ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
-) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '置顶会话';
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '会话列表';
 
 -- 群消息免打扰
 drop table if exists `rtc_group_notice`;
@@ -278,6 +278,9 @@ create table if not exists `rtc_timer_log` (
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '定时器执行日志';
+
+
+
 
 -- 上下线通知
 -- 写入状态通知

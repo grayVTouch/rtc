@@ -10,6 +10,7 @@ namespace App\WebSocket\Util;
 
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
+use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
 use App\Util\UserUtil as TopUserUtil;
@@ -24,7 +25,7 @@ class MessageUtil extends Util
         if (empty($group_message)) {
             return ;
         }
-        $group_message->session_id = MiscUtil::sessionId('group' , $group_message->group_id);
+        $group_message->session_id = ChatUtil::sessionId('group' , $group_message->group_id);
         if (isset($group_message->group)) {
             GroupUtil::handle($group_message->group);
             if (isset($group_message->user)) {
@@ -52,7 +53,7 @@ class MessageUtil extends Util
         if (empty($msg)) {
             return ;
         }
-        $msg->session_id = MiscUtil::sessionId('private' , $msg->chat_id);
+        $msg->session_id = ChatUtil::sessionId('private' , $msg->chat_id);
         $msg->self_is_read = MessageReadStatusModel::isRead($user_id , $msg->id);
         $msg->friend_is_read = MessageReadStatusModel::isRead($friend_id , $msg->id);
         if (isset($msg->user)) {

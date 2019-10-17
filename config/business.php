@@ -201,7 +201,7 @@ return [
     ] ,
 
     // 置顶会话的类型
-    'type_for_top_session' => [
+    'session_type' => [
         // 私聊
         'private' ,
         // 群聊

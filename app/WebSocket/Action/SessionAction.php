@@ -14,11 +14,12 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageModel;
-use App\Model\TopSessionModel;
+use App\Model\SessionModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
+use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
@@ -53,8 +54,8 @@ class SessionAction extends Action
             $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->group_id , 0);
             $v->type = 'group';
             // 会话id仅是用于同意管理会话用的
-            $v->session_id = MiscUtil::sessionId('group' , $v->group_id);
-            $top = TopSessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'group' , $v->group_id , 1);
+            $v->session_id = ChatUtil::sessionId('group' , $v->group_id);
+            $top = SessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'group' , $v->group_id , 1);
             if (!empty($top)) {
                 $v->top = $top;
                 $top_session[] = $v;
@@ -79,8 +80,8 @@ class SessionAction extends Action
             $v->recent_message = $recent_message;
             $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($chat_id , $v->user_id , 0);
             $v->type = 'private';
-            $v->session_id = MiscUtil::sessionId('private' , $chat_id);
-            $top = TopSessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'private' , $chat_id , 1);
+            $v->session_id = ChatUtil::sessionId('private' , $chat_id);
+            $top = SessionModel::findByUserIdAndTypeAndTargetIdAndTop($auth->user->id , 'private' , $chat_id , 1);
             if (!empty($top)) {
                 $v->top = $top;
                 $top_session[] = $v;
@@ -122,13 +123,13 @@ class SessionAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $exist = TopSessionModel::exist($auth->user->id , $param['type'] , $param['target_id']);
+        $exist = SessionModel::exist($auth->user->id , $param['type'] , $param['target_id']);
         if ($exist) {
             // 更改类型
-            TopSessionModel::updateByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
+            SessionModel::updateByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
         } else {
             $param['user_id'] = $auth->user->id;
-            $id = TopSessionModel::insertGetId(array_unit($param , [
+            $id = SessionModel::insertGetId(array_unit($param , [
                 'user_id' ,
                 'type' ,
                 'target_id' ,
@@ -137,6 +138,25 @@ class SessionAction extends Action
             // var_dump($id);
         }
         // 刷新会话
+        $auth->push($auth->user->id , 'refresh_session');
+        return self::success();
+    }
+
+    public static function createOrUpdate(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'type'      => 'required' ,
+            'target_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $param['user_id'] = $auth->user->id;
+        $param['top'] = $param['top'] == '' ? 0 : $param['top'];
+        $res = SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
         $auth->push($auth->user->id , 'refresh_session');
         return self::success();
     }

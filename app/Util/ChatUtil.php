@@ -101,8 +101,11 @@ class ChatUtil extends Util
                     'message_id' => $id ,
                     'target_id' => $param['chat_id'] ,
                 ]);
+            } else {
+                SessionUtil::createOrUpdate($param['friend_id'] , 'private' , $param['chat_id']);
             }
             $msg = MessageModel::findById($id);
+            SessionUtil::createOrUpdate($param['user_id'] , 'private' , $param['chat_id']);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
             DB::commit();
             if (!$blocked) {
@@ -184,6 +187,10 @@ class ChatUtil extends Util
             $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
+            foreach ($user_ids as $v)
+            {
+                SessionUtil::createOrUpdate($param['user_id'] , 'group' , $param['group_id']);
+            }
             DB::commit();
             $base->sendAll($user_ids , 'group_message' , $msg);
             $base->pushAll($user_ids , 'refresh_session');
@@ -228,5 +235,11 @@ class ChatUtil extends Util
     public static function userIds(string $chat_id)
     {
         return explode('_' , $chat_id);
+    }
+
+    // 会话ID（群聊|私聊）
+    public static function sessionId(string $type = '' , $id = 0)
+    {
+        return md5(sprintf('%s_%s' , $type , $id));
     }
 }
