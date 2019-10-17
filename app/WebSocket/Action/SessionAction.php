@@ -44,11 +44,11 @@ class SessionAction extends Action
         foreach ($sessions as $v)
         {
             if ($v->type == 'private') {
-                $other_id = ChatUtil::otherId($v->chat_id , $auth->user->id);
+                $other_id = ChatUtil::otherId($v->target_id , $auth->user->id);
                 $v->other = UserModel::findById($other_id);
                 UserUtil::handle($v->other);
                 $recent_message = MessageModel::recentMessage($auth->user->id , $v->target_id);
-                MessageUtil::handleMessage($recent_message , $v->user_id , $v->other_id);
+                MessageUtil::handleMessage($recent_message , $v->user_id , $other_id);
                 // 私聊消息处理
                 $v->recent_message = $recent_message;
                 $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
@@ -73,7 +73,7 @@ class SessionAction extends Action
                 // 用户使用的平台
                 $v->group->name = '平台咨询';
             }
-            $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->group_id , 0);
+            $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
             if ($v->top == 1) {
                 $top_session[] = $v;
                 continue ;

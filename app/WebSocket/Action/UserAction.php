@@ -46,6 +46,7 @@ class UserAction extends Action
         $total = ApplicationModel::countByUserId($auth->user->id);
         $page = PageUtil::deal($total , $param['page'] , $param['limit']);
         $res = ApplicationModel::listByUserId($auth->user->id , $page['offset'] , $param['limit']);
+
         foreach ($res as $v)
         {
             UserUtil::handle($v->user);
