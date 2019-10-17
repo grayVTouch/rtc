@@ -124,6 +124,10 @@ class FriendAction extends Action
         if (in_array($app->status , $deny_application_status)) {
             return self::error('该申请记录的状态无法被更改');
         }
+        // 检查是否已经成为好友
+        if (FriendModel::isFriend($auth->user->id , $app->relation_user_id)) {
+            return self::error('你们已经是好友！拒绝操作' , 403);
+        }
         try {
             DB::beginTransaction();
             ApplicationModel::updateById($app->id , [

@@ -229,8 +229,16 @@ class GroupAction extends Action
         if (!in_array($app->op_type , $op_type)) {
             return self::error('该申请的记录 op_type 类型错误！禁止操作' , 403);
         }
-        if (!in_array($app->status , ['wait'])) {
+        $deny_application_status = config('business.deny_application_status');
+        if (!in_array($app->status , $deny_application_status)) {
             return self::error('当前申请记录的状态禁止操作');
+        }
+        $relation_user_id = json_decode($app->relation_user_id , true);
+        foreach ($relation_user_id as $v)
+        {
+            if (GroupMemberModel::exist($v , $app->group_id)) {
+                return self::error('用户列表中包含群成员！禁止操作' , 403);
+            }
         }
         try {
             DB::beginTransaction();
@@ -239,7 +247,6 @@ class GroupAction extends Action
             ]);
             if ($param['status'] == 'approve') {
                 // 同意进群
-                $relation_user_id = json_decode($app->relation_user_id , true);
                 $remark = '';
                 foreach ($relation_user_id as $v)
                 {
