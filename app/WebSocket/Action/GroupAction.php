@@ -578,7 +578,7 @@ class GroupAction extends Action
         return self::success($link);
     }
 
-    public static function groupMemberLimit()
+    public static function groupMemberLimit(Auth $auth , array $param)
     {
         return self::success(config('app.group_member_limit'));
     }
