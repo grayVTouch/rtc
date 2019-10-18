@@ -29,7 +29,10 @@ class GroupUtil extends Util
         $member_avatar = [];
         foreach ($member as $v)
         {
-            $member_avatar[] = empty($v->user) ? $v->user->avatar : '';
+            $member_avatar[] = [
+                'avatar'    => empty($v->user) ? $v->user->avatar : '' ,
+                'nickname'  => empty($v->user) ? $v->user->nickname : '' ,
+            ];
         }
         $group->member_avatar = $member_avatar;
         // 成员数量
