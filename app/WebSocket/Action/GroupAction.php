@@ -395,6 +395,7 @@ class GroupAction extends Action
         }
         $single   = empty($user_ids) ? true : false;
         $user_ids[] = $auth->user->id;
+        $param['anonymous'] = empty($param['anonymous']) ? 0 : $param['anonymous'];
         try {
             DB::beginTransaction();
             $group_id = GroupModel::insertGetId(array_unit($param , [
@@ -402,6 +403,7 @@ class GroupAction extends Action
                 'name' ,
                 'type' ,
                 'expire' ,
+                'anonymous' ,
             ]));
             $message = '""%s"邀请了"%s"加入了群聊';
             $member_string = '';

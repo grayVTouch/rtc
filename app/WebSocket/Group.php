@@ -112,6 +112,7 @@ class Group extends Auth
         $param['name'] = $param['name'] ?? '';
         $param['type'] = $param['type'] ?? '';
         $param['expire'] = $param['expire'] ?? '';
+        $param['anonymous'] = $param['anonymous'] ?? '';
         $param['user_ids'] = $param['user_ids'] ?? '';
         $res = GroupAction::create($this , $param);
         if ($res['code'] != 200) {
