@@ -184,4 +184,16 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    /**
+     * 群成员限制
+     */
+    public function groupMmeberLimit(array $param)
+    {
+        $res = GroupAction::groupMemberLimit($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

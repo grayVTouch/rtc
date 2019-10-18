@@ -577,4 +577,9 @@ class GroupAction extends Action
         $link = sprintf('%s?data=%s' , $download , $base64);
         return self::success($link);
     }
+
+    public static function groupMemberLimit()
+    {
+        return self::success(config('app.group_member_limit'));
+    }
 }
