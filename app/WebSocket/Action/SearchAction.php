@@ -130,7 +130,26 @@ class SearchAction extends Action
     // 本地搜索-单个私聊会话的聊天记录
     public static function searchForPrivateHistoryInLocal(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'chat_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['chat_id'] , $param['limit_id'] , $param['limit']);
+        return self::success($res);
+    }
 
-        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal();
+    // 本地搜索-单个私聊会话的聊天记录
+    public static function searchForGroupHistoryInLocal(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = SearchUtil::searchGroupHistoryByUserIdAndGroupIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['group_id'] , $param['limit_id'] , $param['limit']);
+        return self::success($res);
     }
 }

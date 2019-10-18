@@ -369,21 +369,15 @@ class GroupAction extends Action
         }
         $group_type_range = config('business.group_type');
         if (!in_array($param['type'] , $group_type_range)) {
-            return self::error([
-                'type' => '不支持的群类型，当前受支持的群类型有' . implode(',' , $group_type_range) ,
-            ]);
+            return self::error('不支持的群类型，当前受支持的群类型有' . implode(',' , $group_type_range));
         }
         if ($param['type'] == 2) {
             if (empty($param['expire'])) {
-                return self::error([
-                    'expire' => '当 type = 2（时效群）时，过期时间必须提供' ,
-                ]);
+                return self::error('当 type = 2（时效群）时，过期时间必须提供');
             }
             // 检查
             if (!check_datetime($param['expire'] , 'minute')) {
-                return self::error([
-                    'expire' => '过期时间格式错误' ,
-                ]);
+                return self::error('过期时间格式错误');
             }
         }
         $param['user_id'] = $auth->user->id;

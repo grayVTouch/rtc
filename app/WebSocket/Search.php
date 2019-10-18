@@ -81,4 +81,18 @@ class Search extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 本地搜索-单个会话通道的聊天记录
+    public function searchForGroupHistoryInLocal()
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['value'] = $param['value'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $res = SearchAction::searchForGroupHistoryInLocal($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }
