@@ -30,8 +30,8 @@ class GroupUtil extends Util
         foreach ($member as $v)
         {
             $member_avatar[] = [
-                'avatar'    => empty($v->user) ? $v->user->avatar : '' ,
-                'nickname'  => empty($v->user) ? $v->user->nickname : '' ,
+                'avatar'    => !empty($v->user) ? $v->user->avatar : '' ,
+                'nickname'  => !empty($v->user) ? $v->user->nickname : '' ,
             ];
         }
         $group->member_avatar = $member_avatar;
