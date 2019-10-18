@@ -72,8 +72,8 @@ return [
     'time_point_for_clear_private_message_timer' => '04:00:00' ,
     // 定时器：群聊记录清理时间点
     'time_point_for_clear_group_message_timer' => '04:00:00' ,
-    // 定时器：清理临时群的时间点
-    'time_point_for_clear_tmp_group_timer' => '03:30:00' ,
+    // 定时器：清理临时群 + 临时用户的时间点
+    'time_point_for_clear_tmp_group_and_user_timer' => '03:30:00' ,
     // 搜索好友显示
 
 ];

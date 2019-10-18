@@ -488,14 +488,14 @@ class WebSocket
         });
 
         /**
-         * todo 清理临时群（数据量大时必须更改！）
+         * todo 清理临时群 + 临时用户（数据量大时必须更改！）
          */
         Timer::tick( 1 * 3600 * 1000 , function(){
 //        Timer::tick(2 * 1000 , function(){
             // 记录定时执行日志
             $timer_log_id = 0;
             TimerLogUtil::logCheck(function() use(&$timer_log_id){
-                $timer_log_id = TimerLogModel::u_insertGetId('清理临时群中...' , 'clear_tmp_group');
+                $timer_log_id = TimerLogModel::u_insertGetId('清理临时群 + 用户中...' , 'clear_tmp_group_and_user');
             });
             $date = date('Y-m-d');
             $once_for_clear_tmp_group_timer = TimerRedis::onceForClearTmpGroupTimer();
@@ -508,7 +508,7 @@ class WebSocket
                 return ;
             }
             $time = date('H:i:s' , time());
-            $time_point_for_clear_tmp_group_timer = config('app.time_point_for_clear_tmp_group_timer');
+            $time_point_for_clear_tmp_group_timer = config('app.time_point_for_clear_tmp_group_and_user_timer');
             if ($time < $time_point_for_clear_tmp_group_timer) {
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '还未到执行的时间点，结束');
