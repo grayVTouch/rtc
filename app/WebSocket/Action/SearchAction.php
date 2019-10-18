@@ -17,6 +17,8 @@ use App\Model\MessageModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
+use App\Util\SearchUtil;
+use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use Core\Lib\Validator;
@@ -63,69 +65,17 @@ class SearchAction extends Action
             return self::error($validator->message());
         }
         $limit = 3;
+
         // 搜索自身
-        $qualified_users = [];
-        if (mb_strpos($auth->user->nickname , $param['value']) !== false) {
-            $qualified_users[] = $auth->user;
-        }
-        // 搜索好友
-        $friends = FriendModel::searchByUserIdAndValueAndLimit($auth->user->id, $param['value'], empty($qualified_users) ? $limit : $limit - 1);
-        foreach ($friends as $v)
-        {
-            UserUtil::handle($v->friend , $auth->user->id);
-            $qualified_users[] = $v->friend;
-        }
+        $qualified_users = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
         // 搜索群组（搜索群名称）
-        $qualified_groups = [];
-        $group_ids = GroupMemberModel::getGroupIdByUserId($auth->user->id);
-        foreach ($group_ids as $v)
-        {
-            $member = GroupMemberModel::searchByGroupIdAndValueOnlyFirst($v , $param['value']);
-            if (empty($member)) {
-                continue ;
-            }
-            GroupUtil::handle($member->group);
-            UserUtil::handle($member->user , $auth->user->id);
-            $qualified_groups[] = $member;
-        }
-        // 好友列表
-        $friend_ids = FriendModel::getFriendIdByUserId($auth->user->id);
-        $qualified_friend_for_history = [];
-        foreach ($friend_ids as $v)
-        {
-            $chat_id = ChatUtil::chatId($auth->user->id , $v);
-            $relation_message_count= MessageModel::countByChatIdAndValue($chat_id , $param['value']);
-            $friend = FriendModel::findByUserIdAndFriendId($auth->user->id , $v);
-            if ($relation_message_count < 1 || count($qualified_friend_for_history) >= 3) {
-                // 没有相关聊天记录，跳过
-                continue ;
-            }
-            $friend->relation_message_count = $relation_message_count;
-            // 私聊
-            $friend->type = 'private';
-            UserUtil::handle($friend->user);
-            UserUtil::handle($friend->friend , $auth->user->id);
-            $qualified_friend_for_history[] = $friend;
-        }
-        // 群列表
-        $qualified_group_for_history = [];
-        foreach ($group_ids as $v)
-        {
-            $relation_message_count = GroupMessageModel::countByGroupIdAndValue($v , $param['value']);
-            if ($relation_message_count < 1 || count($qualified_group_for_history) >= 3) {
-                // 没有相关聊天记录
-                continue ;
-            }
-            $group = GroupModel::findById($v);
-            $group->relation_message_count = $relation_message_count;
-            // 群聊
-            $group->type = 'group';
-            GroupUtil::handle($group);
-            UserUtil::handle($group->user , $auth->user->id);
-            $qualified_group_for_history[] = $group;
-        }
+        $qualified_groups = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
+        // 私聊记录
+        $qualified_private_for_history = SearchUtil::searchPrivateSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
+        // 群聊记录
+        $qualified_group_for_history = SearchUtil::searchGroupSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
         // 合并消息列表
-        $history = array_merge($qualified_friend_for_history , $qualified_group_for_history);
+        $history = array_merge($qualified_private_for_history , $qualified_group_for_history);
         // 合并记录排序
         usort($history , function($a , $b){
             if ($a->create_time == $b->create_time) {
@@ -142,5 +92,45 @@ class SearchAction extends Action
             'history' => $history ,
         ];
         return self::success($res);
+    }
+
+    // 本地搜索-完整的好友列表
+    public static function searchForFriendInLocal(Auth $auth , array $param)
+    {
+        $res = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        return self::success($res);
+    }
+
+    // 本地搜索-完整的群列表
+    public static function searchForGroupInLocal(Auth $auth , array $param)
+    {
+        $res = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        return self::success($res);
+    }
+
+    // 本地搜索-私聊会话记录
+    public static function searchForSessionInLocal(Auth $auth , array $param)
+    {
+        // 私聊记录
+        $qualified_private_for_history = SearchUtil::searchPrivateSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        // 群聊记录
+        $qualified_group_for_history = SearchUtil::searchGroupSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        // 合并消息列表
+        $history = array_merge($qualified_private_for_history , $qualified_group_for_history);
+        // 合并记录排序
+        usort($history , function($a , $b){
+            if ($a->create_time == $b->create_time) {
+                return 0;
+            }
+            return $a->create_time > $b->create_time ? -1 : 1;
+        });
+        return self::success($history);
+    }
+
+    // 本地搜索-单个私聊会话的聊天记录
+    public static function searchForPrivateHistoryInLocal(Auth $auth , array $param)
+    {
+
+        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal();
     }
 }

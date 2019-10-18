@@ -189,7 +189,7 @@ class GroupMessageModel extends Model
         ])->count();
     }
 
-    public static function countByGroupIdAndValueAndLimitIdAndLimit(int $group_id , string $value , int $limit_id = 0 , int $limit = 20)
+    public static function searchByGroupIdAndValueAndLimitIdAndLimit(int $group_id , string $value , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
@@ -201,6 +201,7 @@ class GroupMessageModel extends Model
         $res = self::with(['user'])
             ->where($where)
             ->limit($limit)
+            ->orderBy('id' , 'desc')
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)

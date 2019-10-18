@@ -203,7 +203,7 @@ class MessageModel extends Model
             ->count();
     }
 
-    public static function searchByChatIdAndValueAndAndLimitIdAndLimit(string $chat_id , $value , int $limit_id = 0 , int $limit = 20)
+    public static function searchByChatIdAndValueAndLimitIdAndLimit(string $chat_id , $value , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['chat_id' , '=' , $chat_id] ,

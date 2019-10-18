@@ -11,6 +11,7 @@ namespace App\Model;
 
 use function core\convert_obj;
 use function core\obj_to_array;
+use Illuminate\Support\Facades\DB;
 
 class FriendModel extends Model
 {
@@ -186,10 +187,12 @@ class FriendModel extends Model
             ->from('friend as f')
             ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
-            ->orWhere([
-                ['f.alias' , 'like' , "%{$value}%"] ,
-                ['u.nickname' , 'like' , "%{$value}%"] ,
-            ])
+            ->where(function($query) use($value){
+                // 利用子查询实现
+                // where user_id = 1 and (alias like "%{$value}%" or nickname like "%{$value}%")
+                $query->where('f.alias' , 'like' , "%{$value}%")
+                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
+            })
             ->select('f.*')
             ->orderBy('f.id' , 'desc');
         if (!empty($limit)) {

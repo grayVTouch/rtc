@@ -123,4 +123,15 @@ class SessionModel extends Model
         self::multiple($res);
         return $res;
     }
+
+    public static function getByUserIdAndType(int $user_id , string $type)
+    {
+        $res = self::where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['type' , '=' , $type] ,
+                ])
+                ->get();
+        self::multiple($res);
+        return $res;
+    }
 }

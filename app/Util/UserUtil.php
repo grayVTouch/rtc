@@ -28,6 +28,7 @@ class UserUtil extends Util
      * 处理用户信息
      *
      * @param \App\Model\UserModel|\StdClass $user
+     * @throws \Exception
      */
     public static function handle($user , int $relation_user_id = 0)
     {

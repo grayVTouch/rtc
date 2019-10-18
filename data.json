@@ -1,5 +1,5 @@
 {
-  "router": "/User/other",
+  "router": "/Search/searchInLocal",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,6 +7,7 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "other_id": ""
+    "value": "he"
   }
 }
+
