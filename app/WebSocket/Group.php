@@ -188,7 +188,7 @@ class Group extends Auth
     /**
      * 群成员限制
      */
-    public function groupMmeberLimit(array $param)
+    public function groupMemberLimit(array $param)
     {
         $res = GroupAction::groupMemberLimit($this , $param);
         if ($res['code'] != 200) {
