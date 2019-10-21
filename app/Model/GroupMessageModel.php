@@ -36,7 +36,6 @@ class GroupMessageModel extends Model
         if (!is_object($m)) {
             throw new Exception('参数 1 错误');
         }
-        $m->message_type = 'group';
     }
 
     public static function findById(int $id = 0)

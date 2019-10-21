@@ -132,11 +132,13 @@ class SearchAction extends Action
     {
         $validator = Validator::make($param , [
             'chat_id' => 'required' ,
+            'value' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['chat_id'] , $param['limit_id'] , $param['limit']);
+//        print_r($param);
+        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['chat_id'] , $param['value'] , $param['limit_id'] , $param['limit']);
         return self::success($res);
     }
 
@@ -145,11 +147,12 @@ class SearchAction extends Action
     {
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
+            'value' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = SearchUtil::searchGroupHistoryByUserIdAndGroupIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['group_id'] , $param['limit_id'] , $param['limit']);
+        $res = SearchUtil::searchGroupHistoryByUserIdAndGroupIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['group_id'] , $param['value'] , $param['limit_id'] , $param['limit']);
         return self::success($res);
     }
 }

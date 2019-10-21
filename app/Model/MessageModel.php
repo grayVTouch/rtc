@@ -215,11 +215,16 @@ class MessageModel extends Model
         if (!empty($limit_id)) {
             $where[] = ['id' , '<' , $limit_id];
         }
+
+//        DB::enableQueryLog();
         $res = self::with(['user'])
             ->where($where)
             ->limit($limit)
             ->orderBy('id' , 'desc')
             ->get();
+//        $res = DB::getQueryLog();
+//        print_r($res);
+
         $res = convert_obj($res);
         foreach ($res as $v)
         {

@@ -68,7 +68,7 @@ class Search extends Auth
         return $this->success($res['data']);
     }
 
-    // 本地搜索-单个会话通道的聊天记录
+    // 本地搜索-私聊-单个会话通道的聊天记录
     public function searchForPrivateHistoryInLocal(array $param)
     {
         $param['chat_id'] = $param['chat_id'] ?? '';
@@ -82,7 +82,7 @@ class Search extends Auth
         return $this->success($res['data']);
     }
 
-    // 本地搜索-单个会话通道的聊天记录
+    // 本地搜索-群聊-单个会话通道的聊天记录
     public function searchForGroupHistoryInLocal(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';

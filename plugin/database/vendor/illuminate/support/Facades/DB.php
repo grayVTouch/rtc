@@ -23,6 +23,8 @@ namespace Illuminate\Support\Facades;
  * @method static void rollBack()
  * @method static int transactionLevel()
  * @method static array pretend(\Closure $callback)
+ * @method static bool enableQueryLog()
+ * @method static string getQueryLog()
  *
  * @see \Illuminate\Database\DatabaseManager
  * @see \Illuminate\Database\Connection

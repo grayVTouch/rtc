@@ -1,5 +1,5 @@
 {
-  "router": "/Search/searchInLocal",
+  "router": "/Search/searchForGroupHistoryInLocal",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,7 +7,10 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "value": "he"
+    "group_id": 1 ,
+    "value": "h" ,
+    "limit_id": 0 ,
+    "limit": 30
   }
 }
 
