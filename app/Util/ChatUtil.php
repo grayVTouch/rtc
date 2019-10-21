@@ -201,7 +201,6 @@ class ChatUtil extends Util
                     // 跳过发送消息的人
                     continue ;
                 }
-                // string $platform , int $user_id , int $group_id , callable $callback)
                 AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
                     $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
                     if ($res['code'] != 200) {

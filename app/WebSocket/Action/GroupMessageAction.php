@@ -82,7 +82,7 @@ class GroupMessageAction extends Action
             return self::error($validator->message());
         }
         $group_message_id = json_decode($param['group_message_id'] , true);
-        if (empty($message_id)) {
+        if (empty($group_message_id)) {
             return self::error('请提供待删除的消息');
         }
         try {
@@ -132,7 +132,7 @@ class GroupMessageAction extends Action
             return self::error('您无权限撤回他人消息' , 403);
         }
         $withdraw_duration = config('app.withdraw_duration');
-        if ($withdraw_duration > time() - strtotime($res->create_time)) {
+        if ($withdraw_duration < time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
         GroupMessageModel::updateById($param['group_message_id'] , [
