@@ -97,7 +97,7 @@ class GroupMessageAction extends Action
                 $data = [
                     'user_id'   => $auth->user->id ,
                     'type'      => 'group' ,
-                    'group_message_id' => $v ,
+                    'message_id' => $v ,
                     'target_id' => $group_message->group_id ,
                 ];
                 DeleteMessageModel::insert($data);
