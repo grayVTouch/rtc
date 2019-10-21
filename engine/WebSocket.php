@@ -425,6 +425,7 @@ class WebSocket
          * 客服自动退出
          */
         Timer::tick(2 * 1000 , function(){
+            return ;
             $timer_log_id = 0;
             TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = TimerLogModel::u_insertGetId('客服通话检测中...' , 'platform_advoise');
@@ -490,7 +491,9 @@ class WebSocket
         /**
          * todo 清理临时群 + 临时用户（数据量大时必须更改！）
          */
-        Timer::tick( 1 * 3600 * 1000 , function(){
+//        Timer::tick( 1 * 3600 * 1000 , function(){
+        Timer::tick( 2 * 1000 , function(){
+            return ;
 //        Timer::tick(2 * 1000 , function(){
             // 记录定时执行日志
             $timer_log_id = 0;
@@ -575,7 +578,8 @@ class WebSocket
         /**
          * todo 清理到期的时效群（数据量过大时这种方式不行！后期必须更换）
          */
-        Timer::tick(30 * 1000 , function(){
+//        Timer::tick(30 * 1000 , function(){
+        Timer::tick(2 * 1000 , function(){
 //        Timer::tick(10 * 1000 , function(){
             // 时效群
             $timer_log_id = 0;
@@ -614,6 +618,8 @@ class WebSocket
          * todo 清理消息记录（数据量大时不行！后期必须更改）
          */
         Timer::tick(12 * 3600 * 1000 , function(){
+            return ;
+//        Timer::tick(2 * 1000 , function(){
             $timer_log_id = 0;
             TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = TimerLogModel::u_insertGetId('消息记录清理中...' , 'clear_message');

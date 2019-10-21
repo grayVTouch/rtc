@@ -162,10 +162,13 @@ class MessageModel extends Model
     }
 
     // 获取所有阅后即焚消息（好友已读）
-    public static function getIdsWithFriendReadedByChatId(string $chat_id): array
+    public static function getBurnIdsWithFriendReadedByChatId(string $chat_id): array
     {
         $res = self::from('message as m')
-            ->where('m.chat_id' , $chat_id)
+            ->where([
+                ['m.chat_id' , '=' , $chat_id] ,
+                ['m.flag' , '=' , 'burn'] ,
+            ])
             ->whereExists(function($query){
                 // 对方已读
                 $query->select('mrs.id')

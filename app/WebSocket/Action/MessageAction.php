@@ -44,7 +44,7 @@ class MessageAction extends Action
         try {
             DB::beginTransaction();
             // 删除阅后即焚消息
-            $id_list = MessageModel::getIdsWithFriendReadedByChatId($chat_id);
+            $id_list = MessageModel::getBurnIdsWithFriendReadedByChatId($chat_id);
             MessageUtil::delMessageByIds($id_list);
             $res = MessageModel::history($auth->user->id , $chat_id , $limit_id , $limit);
             foreach ($res as $v)
