@@ -217,6 +217,7 @@ class GroupMemberModel extends Model
         if (empty($res)) {
             return ;
         }
+        $res = convert_obj($res);
         self::single($res);
         UserModel::single($res->user);
         GroupModel::single($res->group);

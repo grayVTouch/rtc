@@ -53,8 +53,7 @@ class SearchUtil extends Util
             }
             $group = $member->group;
             $group->member = $member->user;
-
-            GroupUtil::handle($group->group , $user_id);
+            GroupUtil::handle($group , $user_id);
             UserUtil::handle($group->member , $user_id);
             $qualified_groups[] = $group;
         }
