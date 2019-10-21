@@ -76,4 +76,7 @@ return [
     'time_point_for_clear_tmp_group_and_user_timer' => '03:30:00' ,
     // 搜索好友显示
 
+    // 平台标识符（用以二维码数据区分平台使用）
+    'identity' => 'test' ,
+
 ];

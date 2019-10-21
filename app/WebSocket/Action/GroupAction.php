@@ -490,7 +490,7 @@ class GroupAction extends Action
         foreach ($my_group as $v)
         {
             UserUtil::handle($v->user);
-            GroupUtil::handle($v->group);
+            GroupUtil::handle($v->group , $auth->user->id);
         }
         return self::success($my_group);
     }
@@ -511,7 +511,7 @@ class GroupAction extends Action
         foreach ($member as $v)
         {
             UserUtil::handle($v->user);
-            GroupUtil::handle($v->group);
+            GroupUtil::handle($v->group , $auth->user->id);
         }
         return self::success($member);
     }
@@ -528,7 +528,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群' , 404);
         }
-        GroupUtil::handle($group);
+        GroupUtil::handle($group , $auth->user->id);
         return self::success($group);
     }
 
@@ -570,7 +570,7 @@ class GroupAction extends Action
             'id'    => $param['group_id'] ,
         ];
         $base64 = base64_encode(json_encode($data));
-        $link = sprintf('%s?data=%s' , $download , $base64);
+        $link = sprintf('%s?identity=%s&data=%s' , $download , config('app.identity') , $base64);
         return self::success($link);
     }
 

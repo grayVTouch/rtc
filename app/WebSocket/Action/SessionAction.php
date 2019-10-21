@@ -63,7 +63,7 @@ class SessionAction extends Action
 
             // 群聊
             $v->group = GroupModel::findById($v->target_id);
-            GroupUtil::handle($v->group);
+            GroupUtil::handle($v->group , $auth->user->id);
             $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->target_id , 'none');
             // 群处理
             $v->recent_message = $recent_message;

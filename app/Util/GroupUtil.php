@@ -13,6 +13,7 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
 use App\Model\SessionModel;
+use App\Model\UserModel;
 
 class GroupUtil extends Util
 {
@@ -20,7 +21,7 @@ class GroupUtil extends Util
      * @param \App\Model\GroupModel|\StdClass $group
      * @return null
      */
-    public static function handle($group)
+    public static function handle($group , int $user_id = 0)
     {
         if (empty($group)) {
             return ;
@@ -39,6 +40,20 @@ class GroupUtil extends Util
         $group->member_count = GroupMemberModel::countByGroupId($group->id);
         // 群聊人数限制
         $group->group_member_limit = config('app.group_member_limit');
+
+        if (!empty($user_id)) {
+            // 我再本群的昵称
+            $myself = GroupMemberModel::findByUserIdAndGroupId($user_id , $group->id);
+            if (!empty($myself)) {
+                $user = UserModel::findById($user_id);
+                if (!empty($user)) {
+                    $group->my_alias = empty($myself->alias) ?
+                        $user->nickname :
+                        $myself->alias;
+                }
+
+            }
+        }
     }
 
     // 删除群（执行该方法请始终使用事务的方式执行）

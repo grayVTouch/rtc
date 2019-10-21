@@ -54,7 +54,7 @@ class SearchUtil extends Util
             $group = $member->group;
             $group->member = $member->user;
 
-            GroupUtil::handle($group->group);
+            GroupUtil::handle($group->group , $user_id);
             UserUtil::handle($group->member , $user_id);
             $qualified_groups[] = $group;
         }
@@ -106,7 +106,7 @@ class SearchUtil extends Util
             $group->relation_message_count = $relation_message_count;
             // 群聊
             $group->type = 'group';
-            GroupUtil::handle($group);
+            GroupUtil::handle($group , $user_id);
             $qualified_group_for_history[] = $group;
         }
         return $qualified_group_for_history;

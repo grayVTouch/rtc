@@ -53,7 +53,7 @@ class UserAction extends Action
             if ($v->type == 'group') {
                 // 群聊
                 $v->group = GroupModel::findById($v->group_id);
-                GroupUtil::handle($v->group);
+                GroupUtil::handle($v->group , $auth->user->id);
             }
             if ($v->type == 'private') {
                 // 私聊
@@ -228,7 +228,7 @@ class UserAction extends Action
             'id'    => $user->id ,
         ];
         $base64 = base64_encode(json_encode($data));
-        $link = sprintf('%s?data=%s' , $download , $base64);
+        $link = sprintf('%s?identity=%sdata=%s' , $download , config('app.identity') , $base64);
         return self::success($link);
     }
 
