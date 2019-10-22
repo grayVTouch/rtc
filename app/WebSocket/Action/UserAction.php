@@ -201,7 +201,7 @@ class UserAction extends Action
 //        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
 //        $page = PageUtil::deal($total , $param['page'] , $limit);
 //        $res = BlacklistModel::listByUserId($auth->user->id , $page['offset'] , $page['limit']);
-        $res = BlacklistModel::getAll($auth->user->id);
+        $res = BlacklistModel::getByUserId($auth->user->id);
         foreach ($res as $v)
         {
             UserUtil::handle($v->block_user , $auth->user->id);

@@ -51,7 +51,7 @@ class BlacklistModel extends Model
         return $res;
     }
 
-    public static function getAll(int $user_id)
+    public static function getByUserId(int $user_id)
     {
         $res = self::with('blockUser')
             ->where('user_id' , $user_id)
