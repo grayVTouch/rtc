@@ -131,11 +131,12 @@ class GroupMemberModel extends Model
         return $this->belongsTo(UserModel::class , 'user_id' , 'id');
     }
 
-    public static function u_insertGetId(int $user_id , int $group_id)
+    public static function u_insertGetId(int $user_id , int $group_id , string $alias = '')
     {
         return self::insertGetId([
             'user_id' => $user_id ,
-            'group_id' => $group_id
+            'group_id' => $group_id ,
+            'alias' => $alias
         ]);
     }
 

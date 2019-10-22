@@ -269,5 +269,24 @@ class UserModel extends Model
         return $res;
     }
 
+    public static function systemUser(string $identifier)
+    {
+        $res = self::where([
+                    ['identifier' , '=' , $identifier] ,
+                    ['is_system' , '=' , 1] ,
+                ])
+                ->first();
+        self::single($res);
+        return $res;
+    }
+
+    // 系统用户
+    public static function createSystemUser(string $identifier)
+    {
+        return self::insertGetId([
+            'identifier' => $identifier ,
+            ''
+        ]);
+    }
 
 }

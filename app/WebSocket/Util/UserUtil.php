@@ -228,8 +228,8 @@ class UserUtil extends Util
         }
         $waiter_ids = GroupMemberModel::getWaiterIdByGroupId($group_id);
         if (empty($waiter_ids)) {
-            // 在该群组里面没有客服，生成一个随机用户
-            $admin = UserModel::tempAdmin($identifier);
+            // 在该群组里面没有客服，使用系统客服
+            $admin = UserModel::systemUser($identifier);
         } else {
             $admin = UserModel::findById($waiter_ids[0]);
         }

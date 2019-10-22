@@ -8,10 +8,14 @@
 
 namespace Engine;
 
+use App\Model\ProjectModel;
+use App\Model\UserModel;
+use App\Model\UserOptionModel;
 use Exception;
 
 use Core\Lib\Redis;
 use Engine\Facade\Redis as RedisFacade;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Core\Lib\Facade as FacadeLib;
@@ -117,6 +121,42 @@ class Application
     }
 
     /**
+     * 系统初始化
+     */
+    public function initialize()
+    {
+        try {
+            DB::beginTransaction();
+            $system_waiter_name = config('app.system_waiter_name');
+            // 为每个项目创建系统用户
+            $project = ProjectModel::all();
+            foreach ($project as $v)
+            {
+                // 检查系统用户是否存在
+                $system_user = UserModel::systemUser($v->identifier);
+                if (!empty($system_user)) {
+                    continue ;
+                }
+                // 系统用户不存在，新增系统用户
+                $id = UserModel::insertGetId([
+                    'identifier' => $v->identifier ,
+                    'is_system' => 1 ,
+                    'is_temp' => 0 ,
+                    'nickname' => $system_waiter_name ,
+                    'username' => $system_waiter_name ,
+                ]);
+                UserOptionModel::insertGetId([
+                    'user_id' => $id
+                ]);
+            }
+            DB::commit();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * 开始运行程序
      *
      * @throws Exception
@@ -127,7 +167,7 @@ class Application
         $this->initRedis();
         $this->clearRedis();
         $this->initLog();
-//        $this->initHttp();
+        $this->initialize();
         // 这个务必在最后执行！！
         // 因为 WebSocket 实例一旦创建成功
         // 那么实际上

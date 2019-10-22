@@ -264,13 +264,34 @@ class ChatUtil extends Util
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        $type_range = config('business.message_type');
+        if (!in_array($param['type'] , $type_range)) {
+            return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
+        }
+        // 检查群是否还存在
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在！' , 404);
+        }
+        // 检查群是否是客服群
+        if ($group->is_service == 0) {
+            return self::error('不是客服群，禁止操作' , 403);
+        }
         $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('用户不存在！' , 404);
+        }
+        // 检查是否时好友
+        $exist = GroupMemberModel::exist($param['user_id'] , $param['group_id']);
+        if (!$exist) {
+            return self::error('您不在该群，禁止操作' , 403);
+        }
+        $param['extra'] = $param['extra'] ?? '';
         // 检查当前登录类型
         if ($user->role == 'user') {
             try {
                 DB::beginTransaction();
-                $group = GroupModel::advoiseGroupByUserId($user->id);
-                $param['group_id'] = $group->id;
+//                $group = GroupModel::advoiseGroupByUserId($user->id);
                 $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $param['type'] , $param['message'] , $param['extra']);
                 $bind_waiter = UserRedis::groupBindWaiter($user->identifier , $group->id);
                 if (empty($bind_waiter)) {

@@ -9,6 +9,7 @@
 namespace App\WebSocket\Action;
 
 use App\Lib\SMS\Zz253;
+use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
@@ -378,6 +379,17 @@ class LoginAction extends Action
             SmsCodeModel::updateById($sms_code->id , [
                 'used' => 1
             ]);
+            // 创建平台咨询的群（用户注册后自动创建官方客服群）
+            $group_id = GroupModel::insertGetId([
+                'user_id' => $id ,
+                // 是否是临时群
+                'is_temp' => 0 ,
+                // 是否是客服群
+                'is_service' => 1 ,
+            ]);
+            // 将系统用户加入该群
+            $system_user = UserModel::systemUser($base->identifier);
+            GroupMemberModel::u_insertGetId($system_user->id , $group_id);
             DB::commit();
             return self::success();
         } catch(Exception $e) {

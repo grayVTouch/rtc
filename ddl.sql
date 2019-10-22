@@ -19,6 +19,7 @@ create table if not exists `rtc_user` (
   role enum('admin' , 'user') default 'user' comment 'admin-后台用户 user-平台用户' ,
   unique_code varchar(255) default '' comment '唯一码，同一项目不允许重复！我们系统的唯一标识符' ,
   is_temp tinyint default 0 comment '是否是临时用户: 0-否 1-是' ,
+  is_system tinyint default 0 comment '是否是系统用户: 0-否 1-是' ,
   p_id int unsigned default 0 comment '上级用户（推荐人）：rtc_user.id' ,
   invite_code varchar(255) default '' comment '邀请码' ,
   nickname varchar(255) default '' comment '昵称' ,

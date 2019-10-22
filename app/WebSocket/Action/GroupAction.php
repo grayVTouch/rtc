@@ -185,8 +185,11 @@ class GroupAction extends Action
                 'remark' ,
                 'log' ,
             ]));
-            // 未开启进群认证
-            GroupMemberModel::u_insertGetId($auth->user->id , $group->id);
+            // 未开启进群认证 or 群组操作
+            foreach ($relation_user_id as $v)
+            {
+                GroupMemberModel::u_insertGetId($v , $group->id);
+            }
             $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             DB::commit();
             $auth->pushAll($user_ids , 'refresh_group');

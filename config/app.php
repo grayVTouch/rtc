@@ -79,4 +79,7 @@ return [
     // 平台标识符（用以二维码数据区分平台使用）
     'identity' => 'test' ,
 
+    // 系统服务员名称
+    'system_waiter_name' => '系统客服' ,
+
 ];
