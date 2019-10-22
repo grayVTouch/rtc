@@ -60,10 +60,10 @@ class GroupUtil extends Util
     public static function delete(int $group_id)
     {
         $group_message_ids = GroupMessageModel::getIdByGroupId($group_id);
-        foreach ($group_message_ids as $v1)
+        foreach ($group_message_ids as $v)
         {
             // 删除消息
-            GroupMessageUtil::delete($v1);
+            GroupMessageUtil::delete($v);
         }
         // 删除会话
         SessionModel::delByTypeAndTargetId('group' , $group_id);

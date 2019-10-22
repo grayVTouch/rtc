@@ -197,4 +197,15 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 设置群名称
+    public function setGroupName(array $param)
+    {
+        $param['group_name'] = $param['group_name'] ?? '';
+        $res = GroupAction::setGroupName($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

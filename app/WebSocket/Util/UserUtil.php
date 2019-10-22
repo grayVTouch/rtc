@@ -226,7 +226,7 @@ class UserUtil extends Util
             // 已经提醒过了，退出
             return ;
         }
-        $waiter_ids = GroupMemberModel::getWaiterIdByGroupId($group_id);
+        $waiter_ids = GroupMemberModel:: getWaiterIdByGroupId($group_id);
         if (empty($waiter_ids)) {
             // 在该群组里面没有客服，使用系统客服
             $admin = UserModel::systemUser($identifier);

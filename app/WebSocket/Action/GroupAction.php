@@ -465,14 +465,7 @@ class GroupAction extends Action
             DB::beginTransaction();
             // 获取群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-            // 删除群消息
-            GroupMessageModel::delByGroupId($group->id);
-            // 删除群已读未读消息
-            GroupMessageReadStatusModel::delByGroupId($group->id);
-            // 删除群成员
-            GroupMemberModel::delByGroupId($group->id);
-            // 删除群
-            GroupModel::delById($group->id);
+            GroupUtil::delete($param['user_id']);
             DB::commit();
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
@@ -587,4 +580,7 @@ class GroupAction extends Action
     {
         return self::success(config('app.group_member_limit'));
     }
+
+
+
 }
