@@ -281,7 +281,7 @@ class ChatUtil extends Util
         if (empty($user)) {
             return self::error('用户不存在！' , 404);
         }
-        // 检查是否时好友
+        // 检查是否在群里面
         $exist = GroupMemberModel::exist($param['user_id'] , $param['group_id']);
         if (!$exist) {
             return self::error('您不在该群，禁止操作' , 403);
@@ -291,7 +291,6 @@ class ChatUtil extends Util
         if ($user->role == 'user') {
             try {
                 DB::beginTransaction();
-//                $group = GroupModel::advoiseGroupByUserId($user->id);
                 $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $param['type'] , $param['message'] , $param['extra']);
                 $bind_waiter = UserRedis::groupBindWaiter($user->identifier , $group->id);
                 if (empty($bind_waiter)) {
@@ -335,7 +334,7 @@ class ChatUtil extends Util
                 return self::error('您并非当前咨询通道的活跃客服！' , 403);
             }
             // 工作人员回复
-            $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $type , $param['message'] , $param['extra']);
+            $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $param['type'] , $param['message'] , $param['extra']);
             $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
             GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $user->id);

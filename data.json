@@ -1,5 +1,5 @@
 {
-  "router": "/Session/top",
+  "router": "/Session/delete",
   "identifier": "test",
   "user_id": 1 ,
   "debug": "running" ,
@@ -7,9 +7,7 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "type": "private" ,
-    "target_id": "1_2" ,
-    "top": 1
+    "id_list": "[10]"
   }
 }
 

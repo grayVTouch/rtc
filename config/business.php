@@ -280,4 +280,27 @@ return [
         // 是
         1 ,
     ] ,
+
+
+    'clear_timer_for_private' => [
+        // 不做任何设置
+        'none' ,
+        // 每日清除私聊消息
+        'day' ,
+        // 每周清除私聊消息
+        'week' ,
+        // 每月清除私聊消息
+        'month' ,
+    ] ,
+
+    'clear_timer_for_group' => [
+        // 不做任何设置
+        'none' ,
+        // 每日清除私聊消息
+        'day' ,
+        // 每周清除私聊消息
+        'week' ,
+        // 每月清除私聊消息
+        'month' ,
+    ] ,
 ];

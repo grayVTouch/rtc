@@ -98,6 +98,8 @@ class User extends Auth
         $param['group_notification']    = $param['group_notification'] ?? '';
         $param['write_status']          = $param['write_status'] ?? '';
         $param['friend_auth']           = $param['friend_auth'] ?? '';
+        $param['clear_timer_for_private']           = $param['clear_timer_for_private'] ?? '';
+        $param['clear_timer_for_group']           = $param['clear_timer_for_group'] ?? '';
         $res = UserAction::editUserOption($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);

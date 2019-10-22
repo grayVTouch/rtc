@@ -54,7 +54,7 @@ class Session extends Auth
     }
 
     // 删除会话
-    public function delete()
+    public function delete(array $param)
     {
         $param['id_list'] = $param['id_list'] ?? '';
         $res = SessionAction::delete($this , $param);

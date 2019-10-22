@@ -144,12 +144,15 @@ class UserAction extends Action
         $param['group_notification']    = $param['group_notification'] === '' ? $user_option->group_notification : $param['group_notification'];
         $param['write_status']          = $param['write_status'] === '' ? $user_option->write_status : $param['write_status'];
         $param['friend_auth']           = $param['friend_auth'] === '' ? $user_option->friend_auth : $param['friend_auth'];
-//        print_r($param);
+        $param['clear_timer_for_private']           = $param['clear_timer_for_private'] === '' ? $user_option->clear_timer_for_private : $param['clear_timer_for_private'];
+        $param['clear_timer_for_group']           = $param['clear_timer_for_group'] === '' ? $user_option->clear_timer_for_group : $param['clear_timer_for_group'];
         UserOptionModel::updateById($user_option->id , array_unit($param , [
             'private_notification' ,
             'group_notification' ,
             'write_status' ,
             'friend_auth' ,
+            'clear_timer_for_private' ,
+            'clear_timer_for_group' ,
         ]));
         return self::success();
     }
