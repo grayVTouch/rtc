@@ -20,7 +20,9 @@ use App\Model\GroupNoticeModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\ProgramErrorLogModel;
+use App\Model\UserModel;
 use App\Model\UserOptionModel;
+use App\Redis\MessageRedis;
 use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
@@ -29,7 +31,8 @@ use Core\Lib\Throwable;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Push\AppPush;
+
+use App\Websocket\Util\UserUtil as UserUtilWebSocket;
 
 
 class ChatUtil extends Util
@@ -240,5 +243,89 @@ class ChatUtil extends Util
     public static function sessionId(string $type = '' , $id = 0)
     {
         return md5(sprintf('%s_%s' , $type , $id));
+    }
+
+
+    /**
+     * 平台咨询
+     *
+     * @param Base $auth
+     * @param array $param
+     * @return array
+     */
+    public static function advoise(Base $base , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'type' => 'required' ,
+            'user_id' => 'required' ,
+            'message' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $user = UserModel::findById($param['user_id']);
+        // 检查当前登录类型
+        if ($user->role == 'user') {
+            try {
+                DB::beginTransaction();
+                $group = GroupModel::advoiseGroupByUserId($user->id);
+                $param['group_id'] = $group->id;
+                $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $param['type'] , $param['message'] , $param['extra']);
+                $bind_waiter = UserRedis::groupBindWaiter($user->identifier , $group->id);
+                if (empty($bind_waiter)) {
+                    // 没有绑定客服的情况下
+                    $allocate = UserUtilWebSocket::allocateWaiter($user->id);
+                    if ($allocate['code'] != 200) {
+//                        var_dump($allocate['data']);
+                        // 没有分配到客服，保存到未读消息队列
+                        MessageRedis::saveUnhandleMsg($base->identifier , $user->id , $param);
+                        // 通知客户端没有客服
+                        UserUtilWebSocket::noWaiterTip($base->identifier , $user->id , $group->id);
+                    }
+                }
+                // 初始化消息已读/未读
+                GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $user->id);
+                $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
+                // 找到该条消息
+                $msg = GroupMessageModel::findById($group_message_id);
+                // 处理消息
+                MessageUtil::handleGroupMessage($msg);
+                DB::commit();
+                $base->sendAll($user_ids , 'group_message' , $msg);
+                if (isset($msg_with_no_waiter)) {
+                    // 没有客服
+                    $base->pushAll($user_ids , 'group_message' , $msg_with_no_waiter);
+                }
+                $base->pushAll($user_ids , 'refresh_unread_message');
+                return self::success($msg);
+            } catch(Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        }
+        try {
+            DB::beginTransaction();
+            // 检查当前群组是否绑定当前用户
+            $waiter = UserRedis::groupBindWaiter($base->identifier , $param['group_id']);
+            if ($waiter != $user->id) {
+                DB::rollBack();
+                // 当前群的活跃客服并非您的情况下
+                return self::error('您并非当前咨询通道的活跃客服！' , 403);
+            }
+            // 工作人员回复
+            $group_message_id = GroupMessageModel::u_insertGetId($param['user_id'] , $param['group_id'] , $type , $param['message'] , $param['extra']);
+            $msg = GroupMessageModel::findById($group_message_id);
+            MessageUtil::handleGroupMessage($msg);
+            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $user->id);
+            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
+            DB::commit();
+            $base->sendAll($user_ids , 'group_message' , $msg);
+            $base->pushAll($user_ids , 'refresh_unread_message');
+            return self::success($msg);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+        }
     }
 }

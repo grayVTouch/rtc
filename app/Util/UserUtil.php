@@ -158,4 +158,6 @@ class UserUtil extends Util
         UserModel::delById($user_id);
         WebSocket::clearRedis($user_id);
     }
+
+    //
 }

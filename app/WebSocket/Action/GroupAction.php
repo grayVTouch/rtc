@@ -420,8 +420,11 @@ class GroupAction extends Action
             if (!$single) {
                 // 群成员数量不只一个人
                 // 发送邀请通知
+                $group_owner_name = empty($auth->user->nickname) ?
+                    $auth->user->username :
+                    $auth->user->nickname;
                 $member_string = mb_substr($member_string , 0 , mb_strlen($member_string) - 2);
-                $group_message_id = GroupMessageModel::u_insertGetId($auth->user->id , $group_id , 'notification' , sprintf($message , $auth->user->username , $member_string) , json_encode($user_ids));
+                $group_message_id = GroupMessageModel::u_insertGetId($auth->user->id , $group_id , 'notification' , sprintf($message , $group_owner_name , $member_string) , json_encode($user_ids));
                 GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group_id , $auth->user->id);
                 $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
             }
