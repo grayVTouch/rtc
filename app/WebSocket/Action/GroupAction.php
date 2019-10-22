@@ -399,7 +399,7 @@ class GroupAction extends Action
                 'expire' ,
                 'anonymous' ,
             ]));
-            $message = '""%s"邀请了"%s"加入了群聊';
+            $message = '"%s" 邀请了 "%s"加入了群聊';
             $member_string = '';
             // 如果有群成员的话
             foreach ($user_ids as $v)
@@ -412,7 +412,10 @@ class GroupAction extends Action
                 if ($v == $auth->user->id) {
                     continue ;
                 }
-                $member_string .= $member->username . ' ,';
+                $member_string .= empty($member->nickname) ?
+                        $member->username :
+                        $member->nickname;
+                $member_string .= ' ,';
             }
             if (!$single) {
                 // 群成员数量不只一个人

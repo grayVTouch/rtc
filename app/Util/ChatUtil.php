@@ -110,13 +110,13 @@ class ChatUtil extends Util
             DB::commit();
             if (!$blocked) {
                 $user_ids = [$param['user_id'] , $param['friend_id']];
-                var_dump(json_encode($user_ids));
-                var_dump('当前登录用户【user_id: ' . UserRedis::fdMappingUserId($base->identifier , $base->fd) . '】的 fd' . $base->fd);
-                foreach ($user_ids as $v)
-                {
-                    $fd = UserRedis::userIdMappingFd($base->identifier , $v);
-                    var_dump('这边推送的用户id【' . $v . '】对应的 fd' . json_encode($fd));
-                }
+//                var_dump(json_encode($user_ids));
+//                var_dump('当前登录用户【user_id: ' . UserRedis::fdMappingUserId($base->identifier , $base->fd) . '】的 fd' . $base->fd);
+//                foreach ($user_ids as $v)
+//                {
+//                    $fd = UserRedis::userIdMappingFd($base->identifier , $v);
+//                    var_dump('这边推送的用户id【' . $v . '】对应的 fd' . json_encode($fd));
+//                }
                 if ($push_all) {
                     // 用于消息转发
                     $base->pushAll($user_ids , 'private_message' , $msg);
@@ -212,22 +212,6 @@ class ChatUtil extends Util
         } catch(Exception $e) {
             DB::rollBack();
             throw $e;
-        }
-    }
-
-    // 获取好友
-    public static function receiver(string $chat_id , int $sender)
-    {
-        if (empty($chat_id)) {
-            return 0;
-        }
-        $res = explode('_' , $chat_id);
-        foreach ($res as $v)
-        {
-            if ($v == $sender) {
-                continue ;
-            }
-            return $v;
         }
     }
 

@@ -65,7 +65,7 @@ class GroupUtil extends Util
             // 删除消息
             GroupMessageUtil::delete($v1);
         }
-        // 删除置顶群（会话）
+        // 删除会话
         SessionModel::delByTypeAndTargetId('group' , $group_id);
         // 删除群成员
         GroupMemberModel::delByGroupId($group_id);
