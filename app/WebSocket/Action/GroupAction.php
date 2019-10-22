@@ -591,7 +591,7 @@ class GroupAction extends Action
             return self::error($validator->message());
         }
         $group = GroupModel::findById($param['group_id']);
-        if (!empty($group)) {
+        if (empty($group)) {
             return self::error('群不存在，禁止操作' , 404);
         }
         GroupModel::updateById($group->id , [
@@ -616,13 +616,13 @@ class GroupAction extends Action
     {
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
-            'name'     => 'required' ,
+            'alias'     => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
         $group = GroupModel::findById($param['group_id']);
-        if (!empty($group)) {
+        if (empty($group)) {
             return self::error('群不存在，禁止操作' , 404);
         }
         if (!GroupMemberModel::exist($auth->user->id , $param['group_id'])) {

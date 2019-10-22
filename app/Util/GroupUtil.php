@@ -9,6 +9,7 @@
 namespace App\Util;
 
 
+use App\Model\ApplicationModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
@@ -71,5 +72,7 @@ class GroupUtil extends Util
         GroupMemberModel::delByGroupId($group_id);
         // 删除群
         GroupModel::delById($group_id);
+        // 验证消息
+        ApplicationModel::delGroupApplication($group_id);
     }
 }
