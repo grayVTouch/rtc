@@ -24,7 +24,7 @@ class Unread extends Auth
     }
 
     // 所有未读消息总量
-    public function unreadForChat(array $param)
+    public function unreadForSession(array $param)
     {
         $res = UnreadAction::unreadForSession($this , $param);
         if ($res['code'] != 200) {
