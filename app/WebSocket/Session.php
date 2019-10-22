@@ -52,4 +52,15 @@ class Session extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 删除会话
+    public function delete()
+    {
+        $param['id_list'] = $param['id_list'] ?? '';
+        $res = SessionAction::delete($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

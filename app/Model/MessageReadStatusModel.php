@@ -178,4 +178,10 @@ class MessageReadStatusModel extends Model
     {
         return self::delByMessageIds([$message_id]);
     }
+
+    public static function delByChatId(string $chat_id)
+    {
+        return self::where('chat_id' , $chat_id)
+            ->delete();
+    }
 }

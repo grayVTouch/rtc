@@ -28,6 +28,8 @@ use App\WebSocket\Util\MessageUtil;
 use function core\array_unit;
 use Core\Lib\Validator;
 use function core\obj_to_array;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class SessionAction extends Action
 {
@@ -132,4 +134,32 @@ class SessionAction extends Action
         return self::success();
     }
 
+    // 删除会话
+    public static function delete(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'id_list'      => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $id_list = json_decode($param['id_list'] , true);
+        if (empty($id_list)) {
+            return self::error('请提供待删除的会话');
+        }
+        // 检查所有的会话是否包含他人的会话
+        if (SessionModel::existOtherByIds($auth->user->id , $id_list)) {
+            return self::error('包含他人的会话，禁止操作' , 403);
+        }
+        try {
+            DB::beginTransaction();
+//            foreach ()
+            DB::commit();
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+    }
 }

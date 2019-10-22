@@ -134,4 +134,12 @@ class SessionModel extends Model
         self::multiple($res);
         return $res;
     }
+
+    // 是否
+    public static function existOtherByIds(int $user_id , array $id_list)
+    {
+        return (self::where('user_id' , '!=' , $user_id)
+                ->whereIn('id' , $id_list)
+                ->count()) >= 1;
+    }
 }

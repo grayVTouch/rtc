@@ -9,6 +9,11 @@
 namespace App\Util;
 
 
+use App\Model\DeleteMessageModel;
+use App\Model\GroupMessageModel;
+use App\Model\GroupMessageReadStatusModel;
+use App\Model\MessageModel;
+use App\Model\MessageReadStatusModel;
 use App\Model\SessionModel;
 use function core\array_unit;
 
@@ -39,6 +44,30 @@ class SessionUtil extends Util
                 'update_time' => date('Y-m-d H:i:s') ,
             ]);
         }
+        return self::success();
+    }
+
+    // 删除会话
+    public static function delete(int $session_id)
+    {
+        $session = SessionModel::findById($session_id);
+        if (empty($session)) {
+            return self::error('会话不存在' , 404);
+        }
+        SessionModel::delById($session_id);
+        if ($session->type == 'private') {
+            // 删除屏蔽的消息
+            DeleteMessageModel::delByTypeAndTargetId('private' , $session->target_id);
+            // 删除未读状态
+            MessageReadStatusModel::delByChatId($session->target_id);
+            // 删除私聊消息
+            MessageModel::delByChatId($session->target_id);
+            return self::success();
+        }
+        // 群聊
+        DeleteMessageModel::delByTypeAndTargetId('group' , $session->target_id);
+        GroupMessageReadStatusModel::delByGroupId($session->target_id);
+        GroupMessageModel::delByGroupId($session->target_id);
         return self::success();
     }
 }

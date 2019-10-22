@@ -93,4 +93,12 @@ class BlacklistModel extends Model
     {
         return self::where('block_user_id' , $block_user_id)->delete();
     }
+
+    public static function exist(int $user_id , int $block_user_id)
+    {
+        return (self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['block_user_id' , '=' , $block_user_id] ,
+            ])->count()) > 0;
+    }
 }

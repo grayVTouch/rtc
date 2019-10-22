@@ -177,10 +177,14 @@ class UserAction extends Action
         switch ($param['blocked'])
         {
             case 0:
-                BlacklistModel::u_insertGetId($auth->user->id , $user->id);
+                BlacklistModel::unblockUser($auth->user->id , $user->id);
                 break;
             case 1:
-                BlacklistModel::unblockUser($auth->user->id , $user->id);
+                // 检查是否已经在黑名单列表
+                if (BlacklistModel::exist($auth->user->id , $user->id)) {
+                    return self::error('已经在黑名单列表' , 403);
+                }
+                BlacklistModel::u_insertGetId($auth->user->id , $user->id);
                 break;
         }
         return self::success();
