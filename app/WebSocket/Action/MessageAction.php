@@ -155,13 +155,13 @@ class MessageAction extends Action
         if ($withdraw_duration < time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
-        $receiver = ChatUtil::receiver($res->chat_id , $res->user_id);
+        $other_id = ChatUtil::otherId($res->chat_id , $res->user_id);
         MessageModel::updateById($param['message_id'] , [
             'type' => 'withdraw' ,
             'message' => sprintf('"%s" 撤回了消息' , $res->user->nickname) ,
         ]);
         $res = MessageModel::findById($param['message_id']);
-        MessageUtil::handleMessage($res , $res->user_id , $receiver);
+        MessageUtil::handleMessage($res , $res->user_id , $other_id);
         $user_ids = ChatUtil::userIds($res->chat_id);
         // 刷新会话
         $auth->pushAll($user_ids , 'refresh_session');
