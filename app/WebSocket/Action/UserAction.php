@@ -157,42 +157,33 @@ class UserAction extends Action
     public static function blockUser(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
-            'user_id' => 'required'
+            'user_id' => 'required' ,
+            'blocked' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $block_user = UserModel::findById($param['user_id']);
-        if (empty($block_user)) {
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
             return self::error('未找到用户信息' , 404);
         }
-        if ($auth->user->id == $block_user->id) {
-            return self::error('不能添加自身到黑名单');
+        if ($auth->user->id == $user->id) {
+            return self::error('设置的用户主体不能是自身');
         }
-        BlacklistModel::u_insertGetId($auth->user->id , $block_user->id);
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['blocked'] , $bool_for_int)) {
+            return self::error('不支持的 blocked 值，当前受支持的值有 ' . implode(' , ' , $bool_for_int));
+        }
+        switch ($param['blocked'])
+        {
+            case 0:
+                BlacklistModel::u_insertGetId($auth->user->id , $user->id);
+                break;
+            case 1:
+                BlacklistModel::unblockUser($auth->user->id , $user->id);
+                break;
+        }
         return self::success();
-    }
-
-    public static function unblockUser(Auth $auth , array $param)
-    {
-        $validator = Validator::make($param , [
-            'user_id' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $unblock_user = UserModel::findById($param['user_id']);
-        if (empty($unblock_user)) {
-            return self::error('未找到用户信息' , 404);
-        }
-        if ($auth->user->id == $unblock_user->id) {
-            return self::error('不能从黑名单中删除自身');
-        }
-        $res = BlacklistModel::unblockUser($auth->user->id , $unblock_user->id);
-        if ($res == 0) {
-            return self::error('您并没有将对方加入黑名单');
-        }
-        return self::success('操作成功');
     }
 
     public static function blacklist(Auth $auth , array $param)

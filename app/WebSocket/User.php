@@ -105,10 +105,11 @@ class User extends Auth
         return self::success($res['data']);
     }
 
-    // 添加到黑名单
+    // 黑名单设置
     public function blockUser(array $param)
     {
         $param['user_id']  = $param['user_id'] ?? '';
+        $param['blocked']  = $param['blocked'] ?? '';
         $res = UserAction::blockUser($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
