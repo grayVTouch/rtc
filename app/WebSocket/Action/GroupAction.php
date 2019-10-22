@@ -465,7 +465,7 @@ class GroupAction extends Action
             DB::beginTransaction();
             // 获取群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-            GroupUtil::delete($param['user_id']);
+            GroupUtil::delete($param['group_id']);
             DB::commit();
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
