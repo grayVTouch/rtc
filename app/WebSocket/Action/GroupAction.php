@@ -129,7 +129,7 @@ class GroupAction extends Action
         if (empty($relation_user_id)) {
             return self::error('请提供邀请的用户');
         }
-        if (!UserModel::allExist($relation_user_id)) {
+        if (GroupMemberModel::someoneExist($relation_user_id , $group->id)) {
             // 检查用户是否存在（批量检测）
             return self::error('包含现有群成员，请重新选择' , 403);
         }

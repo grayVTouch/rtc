@@ -225,6 +225,13 @@ class GroupMemberModel extends Model
         return $res;
     }
 
+    // 是否部分存在
+    public static function someoneExist(array $id_list , int $group_id)
+    {
+        return (self::whereIn('user_id' , $id_list)
+            ->where('group_id' , $group_id)
+            ->count()) > 0;
+    }
 
 
 }
