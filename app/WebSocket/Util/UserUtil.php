@@ -246,4 +246,6 @@ class UserUtil extends Util
         // 是否提示过客服不存在
         UserRedis::noWaiterForGroup($identifier , $group_id , false);
     }
+
+
 }

@@ -131,4 +131,5 @@ class SessionAction extends Action
         $auth->push($auth->user->id , 'refresh_session');
         return self::success();
     }
+
 }

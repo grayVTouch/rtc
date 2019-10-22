@@ -581,6 +581,86 @@ class GroupAction extends Action
         return self::success(config('app.group_member_limit'));
     }
 
+    public static function setGroupName(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'name'     => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (!empty($group)) {
+            return self::error('群不存在，禁止操作' , 404);
+        }
+        GroupModel::updateById($group->id , [
+            'name' => $param['name'] ,
+        ]);
+        // 获取用户
+        $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
+        // 刷新群信息
+        $auth->pushAll($user_ids , 'refresh_group');
+        // 发送消息
+        ChatUtil::groupSend($auth , [
+            'user_id'   => $auth->user->id ,
+            'type'      => 'notification' ,
+            'message'   => sprintf('"%s" 修改群名为 "%s"' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username) , $param['name']) ,
+            'extra'     => '' ,
+        ]);
+        return self::success();
+    }
+
+    // 设置我再群里面的别名
+    public static function setAlias(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'name'     => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (!empty($group)) {
+            return self::error('群不存在，禁止操作' , 404);
+        }
+        if (!GroupMemberModel::exist($auth->user->id , $param['group_id'])) {
+            return self::error('您不再该群内，禁止操作' , 403);
+        }
+        GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['group_id'] , [
+            'alias' => $param['alias']
+        ]);
+        return self::success();
+    }
+
+    public static function setCanNotice(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'can_notice' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (!empty($group)) {
+            return self::error('群不存在，禁止操作' , 404);
+        }
+        if (!GroupMemberModel::exist($auth->user->id , $param['group_id'])) {
+            return self::error('您不再该群内，禁止操作' , 403);
+        }
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['can_notice'] , $bool_for_int)) {
+            return self::error('不支持的 can_notice 值，当前受支持的值类型有' . implode(' , ' , $bool_for_int));
+        }
+        GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['group_id'] , [
+            'can_notice' => $param['can_notice']
+        ]);
+        // 刷新群会话
+        $auth->push($auth->user->id , 'refresh_session');
+        return self::success();
+    }
 
 
 }

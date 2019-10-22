@@ -201,11 +201,38 @@ class Group extends Auth
     // 设置群名称
     public function setGroupName(array $param)
     {
-        $param['group_name'] = $param['group_name'] ?? '';
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['name']      = $param['name'] ?? '';
         $res = GroupAction::setGroupName($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }
         return self::success($res['data']);
     }
+
+    // 设置我在群里面的别名
+    public function setAlias(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['alias']      = $param['alias'] ?? '';
+        $res = GroupAction::setAlias($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 消息免打扰
+    public function setCanNotice()
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['can_notice'] = $param['can_notice'] ?? '';
+        $res = GroupAction::setCanNotice($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+
 }

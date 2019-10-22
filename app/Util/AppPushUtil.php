@@ -10,9 +10,11 @@ namespace App\Util;
 
 
 use App\Model\FriendModel;
+use App\Model\GroupMemberModel;
 use App\Model\GroupNoticeModel;
 use App\Model\ProgramErrorLogModel;
 use App\Model\UserOptionModel;
+use Exception;
 use Push\AppPush;
 
 
@@ -156,12 +158,13 @@ class AppPushUtil extends Util
             return ;
         }
         // 开启了全局推送
-        $group_notice = GroupNoticeModel::findByUserIdAndGroupId($user_id , $group_id);
-        if (empty($group_notice)) {
-            ProgramErrorLogModel::u_insertGetId("Bug: 用户群信息不完善（请在 rtc_group_notice 中为用户新增记录） [group_id: {$group_id}；user_id: {$user_id}]");
+//        $group_notice = GroupNoticeModel::findByUserIdAndGroupId($user_id , $group_id);
+        $member = GroupMemberModel::findByUserIdAndGroupId($user_id , $group_id);
+        if (empty($member)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户群信息不完善（请在 rtc_group_member 中为用户新增记录） [group_id: {$group_id}；user_id: {$user_id}]");
             return ;
         }
-        if ($group_notice->can_notice != 1) {
+        if ($member->can_notice != 1) {
             return ;
         }
         call_user_func($callback);

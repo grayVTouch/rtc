@@ -159,5 +159,9 @@ class UserUtil extends Util
         WebSocket::clearRedis($user_id);
     }
 
-    //
+    // 获取用户名
+    public static function getNameFromNicknameAndUsername($nickname = '' , $username = '')
+    {
+        return empty($nickname) ? $username : $nickname;
+    }
 }

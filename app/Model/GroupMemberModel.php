@@ -233,5 +233,13 @@ class GroupMemberModel extends Model
             ->count()) > 0;
     }
 
+    //
+    public static function updateByUserIdAndGroupId(int $user_id , int $group_id , array $param = [])
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['group_id' , '=' , $group_id] ,
+        ])->update($param);
+    }
 
 }
