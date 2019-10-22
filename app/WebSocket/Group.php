@@ -223,7 +223,7 @@ class Group extends Auth
     }
 
     // 消息免打扰
-    public function setCanNotice()
+    public function setCanNotice(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';
         $param['can_notice'] = $param['can_notice'] ?? '';

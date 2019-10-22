@@ -22,4 +22,24 @@ class Unread extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 所有未读消息总量
+    public function unreadForChat(array $param)
+    {
+        $res = UnreadAction::unreadForSession($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 所有未读消息总量
+    public function unreadForApp(array $param)
+    {
+        $res = UnreadAction::unreadForApp($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

@@ -604,6 +604,7 @@ class GroupAction extends Action
         // 发送消息
         ChatUtil::groupSend($auth , [
             'user_id'   => $auth->user->id ,
+            'group_id' => $group->id ,
             'type'      => 'notification' ,
             'message'   => sprintf('"%s" 修改群名为 "%s"' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username) , $param['name']) ,
             'extra'     => '' ,
@@ -644,7 +645,7 @@ class GroupAction extends Action
             return self::error($validator->message());
         }
         $group = GroupModel::findById($param['group_id']);
-        if (!empty($group)) {
+        if (empty($group)) {
             return self::error('群不存在，禁止操作' , 404);
         }
         if (!GroupMemberModel::exist($auth->user->id , $param['group_id'])) {

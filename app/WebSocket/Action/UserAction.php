@@ -197,15 +197,16 @@ class UserAction extends Action
 
     public static function blacklist(Auth $auth , array $param)
     {
-        $total = BlacklistModel::countByUserId($auth->user->id);
-        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
-        $page = PageUtil::deal($total , $param['page'] , $limit);
-        $res = BlacklistModel::listByUserId($auth->user->id , $page['offset'] , $page['limit']);
+//        $total = BlacklistModel::countByUserId($auth->user->id);
+//        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
+//        $page = PageUtil::deal($total , $param['page'] , $limit);
+//        $res = BlacklistModel::listByUserId($auth->user->id , $page['offset'] , $page['limit']);
+        $res = BlacklistModel::getAll($auth->user->id);
         foreach ($res as $v)
         {
             UserUtil::handle($v->block_user , $auth->user->id);
         }
-        $res = PageUtil::data($page , $res);
+//        $res = PageUtil::data($page , $res);
         return self::success($res);
     }
 
