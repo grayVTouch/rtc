@@ -297,7 +297,10 @@ class ChatUtil extends Util
                 $bind_waiter = UserRedis::groupBindWaiter($user->identifier , $group->id);
                 if (empty($bind_waiter)) {
                     // 没有绑定客服的情况下
-                    $allocate = UserUtilWebSocket::allocateWaiter($user->id);
+                    $allocate = UserUtilWebSocket::allocateWaiter($user->id , $group->id);
+
+                    print_r($allocate);
+
                     if ($allocate['code'] != 200) {
 //                        var_dump($allocate['data']);
                         // 没有分配到客服，保存到未读消息队列
@@ -319,6 +322,19 @@ class ChatUtil extends Util
                 }
                 $base->pushAll($user_ids , 'refresh_unread_count');
                 $base->pushAll($user_ids , 'refresh_session_unread_count');
+                foreach ($user_ids as $v)
+                {
+                    if ($v == $param['user_id']) {
+                        // 跳过发送消息的人
+                        continue ;
+                    }
+                    AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
+                        $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                        if ($res['code'] != 200) {
+                            ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
+                        }
+                    });
+                }
                 return self::success($msg);
             } catch(Exception $e) {
                 DB::rollBack();
@@ -344,6 +360,19 @@ class ChatUtil extends Util
             $base->sendAll($user_ids , 'group_message' , $msg);
             $base->pushAll($user_ids , 'refresh_unread_count');
             $base->pushAll($user_ids , 'refresh_session_unread_count');
+            foreach ($user_ids as $v)
+            {
+                if ($v == $param['user_id']) {
+                    // 跳过发送消息的人
+                    continue ;
+                }
+                AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
+                    $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                    if ($res['code'] != 200) {
+                        ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
+                    }
+                });
+            }
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();

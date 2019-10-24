@@ -28,7 +28,7 @@ use App\Util\UserUtil as BaseUserUtil;
 class UserUtil extends Util
 {
     // 自动分配客服，已经分配到客服时返回 true；其他情况返回 false（没有客服|程序代码报错）
-    public static function allocateWaiter($user_id)
+    public static function allocateWaiter($user_id , $group_id)
     {
         $user = UserModel::findById($user_id);
         if ($user->role != 'user') {
@@ -93,8 +93,7 @@ class UserUtil extends Util
             return self::success($waiter->id);
         } catch(Exception $e) {
             DB::rollBack();
-            PushUtil::single($user->identifier , $user->id , 'error' , (new Throwable())->exceptionJsonHandlerInDev($e , true));
-            return self::error((new Throwable())->exceptionJsonHandlerInDev($e , true) , 500);
+            throw $e;
         }
     }
 
