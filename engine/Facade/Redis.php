@@ -25,6 +25,10 @@ use Core\Lib\Facade;
  * @method static parse(string $str = '')
  * @method static json($obj = null)
  * @method static flushAll()
+ * @method static setAll(string $name , array $data = [] , int $timeout = 0)
+ * @method static sAdd(string $name , $value)
+ * @method static SRem(string $name , $value)
+ * @method static sIsMember(string $name , $value)
  *
  */
 class Redis extends Facade

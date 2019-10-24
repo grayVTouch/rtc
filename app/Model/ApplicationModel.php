@@ -81,4 +81,13 @@ class ApplicationModel extends Model
             ['group_id' , '=' , $group_id]
         ])->delete();
     }
+
+    public static function hasOther(int $user_id , array $id_list = [])
+    {
+        return (self::where([
+                        ['user_id' , '!=' , $user_id] ,
+                    ])
+                    ->whereIn('id' , $id_list)
+                    ->count()) > 0;
+    }
 }

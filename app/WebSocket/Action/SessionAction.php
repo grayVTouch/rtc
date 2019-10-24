@@ -17,6 +17,7 @@ use App\Model\GroupModel;
 use App\Model\MessageModel;
 use App\Model\SessionModel;
 use App\Model\UserModel;
+use App\Redis\SessionRedis;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
@@ -167,6 +168,37 @@ class SessionAction extends Action
             DB::rollBack();
             throw $e;
         }
+    }
 
+    // 会话处理
+    public static function sessionProcess(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'type'      => 'required' ,
+            'target_id' => 'required' ,
+            'status'    => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $type_range = config('business.session_type');
+        if (!in_array($param['type'] , $type_range)) {
+            return self::error('不支持的会话类型' . implode(' , ' , $type_range));
+        }
+        $session_process_status = config('business.session_process_status');
+        if (!in_array($param['status'] , $session_process_status)) {
+            return self::error('不支持的会话处理状态' . implode(' , ' , $type_range));
+        }
+        $session_id = ChatUtil::sessionId($param['type'] , $param['target_id']);
+        switch ($param['status'])
+        {
+            case 'join':
+                SessionRedis::sessionMember($auth->identifier , $session_id , $auth->user->id);
+                break;
+            case 'leave':
+                SessionRedis::delSessionMember($auth->identifier , $session_id , $auth->user->id);
+                break;
+        }
+        return self::success();
     }
 }

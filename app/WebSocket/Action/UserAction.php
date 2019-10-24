@@ -329,28 +329,22 @@ class UserAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $application_id = json_decode($param['application_id'] , true);
-        if (empty($application_id)) {
+        $id_list = json_decode($param['application_id'] , true);
+        if (empty($id_list)) {
             return self::error('请提供待删除的信息');
         }
-        try {
-            DB::beginTransaction();
-            foreach ($application_id as $v)
-            {
-                // 检查是否是本人的 应用
-                ApplicationModel::delById($v);
-            }
-            DB::commit();
-            return self::success();
-        } catch(Exception $e) {
-            DB::rollBack();
-            throw $e;
+        // 检查是否存在不属于自己的验证信息
+        if (ApplicationModel::hasOther($auth->user->id , $id_list)) {
+            return self::error('包含他人的申请信息，禁止操作' , 403);
         }
+        ApplicationModel::delByIds($id_list);
+        return self::success();
     }
 
     // 清空申请
-    public static function deleteAll()
+    public static function emptyApp(Auth $auth , array $param)
     {
-
+        ApplicationModel::delByUserId($auth->user->id);
+        return self::success();
     }
 }

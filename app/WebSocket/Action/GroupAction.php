@@ -98,14 +98,14 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_application');
             $auth->pushAll($user_ids , 'refresh_group_member');
-            $message = sprintf('"%s" 加入了群聊' , $auth->user->nickname);
+            $message = sprintf('"%s" 加入了群聊' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username));
             // 发送群通知
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
                 'group_id'   => $group->id ,
                 'type'      => 'notification' ,
-                'message'   => sprintf($message , $auth->user->nickname) ,
-            ]);
+                'message'   => $message ,
+            ] , true);
             return self::success($id);
         } catch(Exception $e) {
             DB::rollBack();
@@ -198,14 +198,14 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_application');
             $auth->pushAll($user_ids , 'refresh_group_member');
-            $message = sprintf('"%s" 邀请了 "%s" 加入了群聊');
+            $message = sprintf('"%s" 邀请了 "%s" 加入了群聊' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username) , $log);
             // 发送群通知
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
                 'group_id'   => $group->id ,
                 'type'      => 'notification' ,
-                'message'   => sprintf($message , $auth->user->nickname , $log) ,
-            ]);
+                'message'   => $message ,
+            ] , true);
             return self::success($id);
         } catch(Exception $e) {
             DB::rollBack();
@@ -284,7 +284,9 @@ class GroupAction extends Action
                     case 'invite_into_group':
                         // 邀请进群
                         $invite_user = UserModel::findById($app->invite_user_id);
-                        $message = sprintf('"%s" 邀请 "%s" 加入了群聊' , $invite_user ? $invite_user->nickname : 'null' , $remark);
+                        $message = sprintf('"%s" 邀请 "%s" 加入了群聊' , $invite_user ?
+                            UserUtil::getNameFromNicknameAndUsername($invite_user->nickname , $invite_user->username) :
+                            'null' , $remark);
                         break;
                 }
                 // 发送群通知
@@ -293,7 +295,7 @@ class GroupAction extends Action
                     'group_id' => $app->group_id ,
                     'type' => 'notification' ,
                     'message' => $message ,
-                ]);
+                ] , true);
             } else {
                 // 拒绝
                 $auth->pushAll($user_ids , 'refresh_application');
@@ -337,7 +339,7 @@ class GroupAction extends Action
             {
                 GroupMemberModel::delByUserIdAndGroupId($v , $group->id);
                 $user = UserModel::findById($v);
-                $nickname = empty($user->nickname) ? config('app.nickname') : $user->nickname;
+                $nickname = UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username);
                 $message .= $nickname . ',';
             }
             $message = mb_substr($message , 0 , mb_strlen($message) - 1);
@@ -351,7 +353,7 @@ class GroupAction extends Action
                 'group_id'  => $group->id ,
                 'type'      => 'notification' ,
                 'message'   => $message
-            ]);
+            ] , true);
             foreach ($kick_user_ids as $v)
             {
                 // 通知被移除的成员他们已经被移除群聊
@@ -435,7 +437,7 @@ class GroupAction extends Action
                     'group_id'  => $group_id ,
                     'message'   => sprintf($message , $group_owner_name , $member_string) ,
                     'extra'     => '' ,
-                ]);
+                ] , true);
             }
             return self::success($group_id);
         } catch(Exception $e) {
@@ -607,7 +609,7 @@ class GroupAction extends Action
             'type'      => 'notification' ,
             'message'   => sprintf('"%s" 修改群名为 "%s"' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username) , $param['name']) ,
             'extra'     => '' ,
-        ]);
+        ] , true);
         return self::success();
     }
 
@@ -659,6 +661,39 @@ class GroupAction extends Action
         ]);
         // 刷新群会话
         $auth->push($auth->user->id , 'refresh_session');
+        return self::success();
+    }
+
+    public static function setAnnouncement(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id'      => 'required' ,
+            'announcement'  => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在' , 404);
+        }
+        if ($group->user_id != $auth->user->id) {
+            return self::error('您不是群主' , 403);
+        }
+        // 修改群公告
+        GroupModel::updateById($param['group_id'] , [
+            'announcement' => $param['announcement'] ,
+        ]);
+        $message = sprintf("@所有人\n%s" , $param['announcement']);
+        // 发送群消息通知
+        ChatUtil::groupSend($auth , [
+            'user_id' => $auth->user->id ,
+            'group_id' => $group->id ,
+            'type' => 'text' ,
+            'message' => $message ,
+            'extra' => '' ,
+        ] , true);
+        // 更新群信息
         return self::success();
     }
 

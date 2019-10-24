@@ -34,4 +34,5 @@ class Push extends Auth
         }
         return $this->success($res['data']);
     }
+
 }

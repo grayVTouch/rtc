@@ -177,7 +177,12 @@ class ChatUtil extends Util
         if (!$exist) {
             return self::error('您不在该群，禁止操作' , 403);
         }
+        $group_target_user = config('business.group_target_user');
         $param['extra'] = $param['extra'] ?? '';
+        $param['target_user']       = $param['target_user'] ?? '';
+        $param['target_User_ids']   = $param['target_user_ids'] ?? '';
+        // 如果用户没有指定推送的人，那么群推送
+        $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
@@ -196,10 +201,21 @@ class ChatUtil extends Util
                 SessionUtil::createOrUpdate($v , 'group' , $param['group_id']);
             }
             DB::commit();
-            $base->sendAll($user_ids , 'group_message' , $msg);
+            if ($push_all) {
+                $base->pushAll($user_ids , 'group_message' , $msg);
+            } else {
+                $base->sendAll($user_ids , 'group_message' , $msg);
+            }
             $base->pushAll($user_ids , 'refresh_session');
             $base->pushAll($user_ids , 'refresh_unread_count');
             $base->pushAll($user_ids , 'refresh_session_unread_count');
+            if ($param['target_user'] == 'designation') {
+                $target_user_ids = json_decode($param['target_user_ids'] , true);
+                if (!empty($target_user_ids)) {
+                    // 用户手动指定推送的用户
+                    $user_ids = array_intersect($target_user_ids , $user_ids);
+                }
+            }
             foreach ($user_ids as $v)
             {
                 if ($v == $param['user_id']) {

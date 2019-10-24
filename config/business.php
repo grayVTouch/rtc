@@ -61,6 +61,8 @@ return [
         'refresh_group_message' ,
         // 刷新用户信息（上下线通知）
         'refresh_user' ,
+        // 指定好友推送
+
     ] ,
 
     /**
@@ -219,7 +221,9 @@ return [
         // 私聊
         'private' ,
         // 群聊
-        'group'
+        'group' ,
+        // 群公告
+        'announcement' ,
     ] ,
 
     // 群验证
@@ -306,5 +310,21 @@ return [
         'week' ,
         // 每月清除私聊消息
         'month' ,
+    ] ,
+
+    // 会话处理状态，状态处理
+    'session_process_status' => [
+        // 加入
+        'join' ,
+        // 离开
+        'leave' ,
+    ] ,
+
+    // 群聊（非客服）-目标用户
+    'group_target_user' => [
+        // 程序自动分配
+        'auto' ,
+        // 用户指定推送
+        'designation' ,
     ] ,
 ];

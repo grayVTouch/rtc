@@ -234,5 +234,16 @@ class Group extends Auth
         return self::success($res['data']);
     }
 
+    // 修改群公告
+    public function setAnnouncement(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['announcement'] = $param['announcement'] ?? '';
+        $res = GroupAction::setAnnouncement($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 
 }

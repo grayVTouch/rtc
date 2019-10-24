@@ -130,4 +130,38 @@ class Redis
         $keys = $this->native('keys' , $key);
         return $this->native('del' , $keys);
     }
+
+    // 集合处理
+    public function setAll(string $name , array $data = [] , int $timeout = 0)
+    {
+        $key = $this->key($name);
+        if (empty($data)) {
+            return $this->native('sMembers' , $key);
+        }
+        $this->native('sAdd' , $key , $data);
+        if (!empty($timeout)) {
+            $this->native('expire' , $key , $timeout);
+        }
+    }
+
+    public function sAdd(string $name , $value)
+    {
+        $key = $this->key($name);
+        return $this->native('sAdd' , $key , $value);
+    }
+
+    // 删除
+    public function sRem(string $name , $value)
+    {
+        $key = $this->key($name);
+        return $this->native('sRem' , $key , $value);
+    }
+
+    // 检查是否是集合成员
+    public function sIsMember(string $name , $value)
+    {
+        $key = $this->key($name);
+        return $this->native('sismember' , $key , $value);
+    }
+
 }

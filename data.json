@@ -1,5 +1,5 @@
 {
-  "router": "/Chat/sendTextForAdvoise",
+  "router": "/Session/sessionProcess",
   "identifier": "test",
   "user_id": 3 ,
   "debug": "running" ,
@@ -7,9 +7,9 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "group_id": 4 ,
-    "message": "你好，客服，在不在？有事情问题！！" ,
-    "extra": ""
+    "type": "private" ,
+    "target_id": "1_2" ,
+    "status": "join"
   }
 }
 

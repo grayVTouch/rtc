@@ -174,12 +174,13 @@ create table if not exists `rtc_message_read_status` (
 drop table if exists `rtc_push`;
 create table if not exists `rtc_push` (
   id int unsigned not null auto_increment ,
-  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
-  push_type enum('single' , 'multiple') default 'single' comment '推送类型：single-推单人；multiple-推多人' ,
+  push_type varchar(255) default 'single' comment '推送类型：single-推单人；multiple-推多人' ,
   user_id int unsigned default 0 comment 'rtc_user.id，仅在 type = single 的时候有效' ,
-  role enum('admin' , 'user' , 'all') default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，仅在 type = multiple 的时候有效' ,
-  `type` varchar(255) default '' comment '推送类型' ,
-  `data` text comment '推送的数据' ,
+  role varchar(255) default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，仅在 type = multiple 的时候有效' ,
+  type varchar(255) default '' comment '推送类型：system-系统公告' ,
+  title varchar(500) comment '标题' ,
+  `desc` varchar(3000) default '' comment '描述' ,
+  `content` longtext comment '内容' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送表';
@@ -291,10 +292,11 @@ create table if not exists `rtc_timer_log` (
 -- 消息记录清除
 -- 相关搜索（好友+群组+聊天记录搜索）
 -- 会话删除（删除会话，删除该用户的聊天记录，仅当前用户的记录删除）
-
--- 私聊
+--  私聊
 -- 群聊（其中还有一个客服聊天，群聊的一种）
+
 -- 信息加密
+
 -- 系统公告
 
 

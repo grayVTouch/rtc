@@ -73,4 +73,11 @@ class Redis
      */
     protected static $onceForClearTmpGroupTimer = 'once_for_clear_tmp_group_timer';
 
+    /**
+     * 会话成员
+     *
+     * @var string
+     */
+    protected static $sessionMember = '%s_session_member_%s';
+
 }

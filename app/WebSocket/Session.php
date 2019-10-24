@@ -63,4 +63,16 @@ class Session extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 加入聊天室
+    public function sessionProcess(array $param)
+    {
+        $param['type'] = $param['type'] ?? '';
+        $param['target_id'] = $param['target_id'] ?? '';
+        $res = SessionAction::sessionProcess($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

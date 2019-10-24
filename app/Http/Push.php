@@ -64,7 +64,9 @@ class Push extends Auth
         $param['role'] = $param['role'] ?? '';
         $param['user_id'] = $param['user_id'] ?? '';
         $param['type'] = 'system';
-        $param['data'] = $param['data'] ?? '';
+        $param['title'] = $param['title'] ?? '';
+        $param['desc'] = $param['desc'] ?? '';
+        $param['content'] = $param['content'] ?? '';
         $res = PushAction::multiple($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
