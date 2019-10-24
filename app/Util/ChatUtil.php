@@ -298,9 +298,6 @@ class ChatUtil extends Util
                 if (empty($bind_waiter)) {
                     // 没有绑定客服的情况下
                     $allocate = UserUtilWebSocket::allocateWaiter($user->id , $group->id);
-
-                    print_r($allocate);
-
                     if ($allocate['code'] != 200) {
 //                        var_dump($allocate['data']);
                         // 没有分配到客服，保存到未读消息队列
