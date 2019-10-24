@@ -1,13 +1,15 @@
 {
-  "router": "/Session/delete",
+  "router": "/Chat/sendTextForAdvoise",
   "identifier": "test",
-  "user_id": 1 ,
+  "user_id": 3 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "id_list": "[10]"
+    "group_id": 4 ,
+    "message": "你好，客服，在不在？有事情问题！！" ,
+    "extra": ""
   }
 }
 

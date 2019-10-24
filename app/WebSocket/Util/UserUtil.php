@@ -80,7 +80,8 @@ class UserUtil extends Util
                 GroupMemberModel::u_insertGetId($waiter->id , $group->id);
             }
             $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
-            $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $group->id , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
+            // 客服自动加入消息通知
+            $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $group->id , 'text' , sprintf(config('business.message')['waiter_join'] , BaseUserUtil::getNameFromNicknameAndUsername($waiter->nickname , $waiter->username)));
             GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group->id , $user->id);
             $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
@@ -193,7 +194,7 @@ class UserUtil extends Util
                     PushUtil::multiple($waiter->identifier , $user_ids , 'refresh_session');
                 }
                 $user_ids = GroupMemberModel::getUserIdByGroupId($v['group_id']);
-                $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v['group_id'] , 'text' , sprintf(config('business.message')['waiter_join'] , $waiter->username));
+                $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v['group_id'] , 'text' , sprintf(config('business.message')['waiter_join'] , BaseUserUtil::getNameFromNicknameAndUsername($waiter->nickname , $waiter->username)));
                 GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v['group_id'] , $waiter->id);
                 $msg = GroupMessageModel::findById($group_message_id);
                 MessageUtil::handleGroupMessage($msg);
@@ -226,15 +227,9 @@ class UserUtil extends Util
             // 已经提醒过了，退出
             return ;
         }
-        $waiter_ids = GroupMemberModel:: getWaiterIdByGroupId($group_id);
-        if (empty($waiter_ids)) {
-            // 在该群组里面没有客服，使用系统客服
-            $admin = UserModel::systemUser($identifier);
-        } else {
-            $admin = UserModel::findById($waiter_ids[0]);
-        }
+        $system_user = UserModel::systemUser($identifier);
         // 插入新消息
-        $group_message_id = GroupMessageModel::u_insertGetId($admin->id , $group_id , 'text' , '系统通知：暂无客服在线，您可以留言，我们将会第一时间回复！');
+        $group_message_id = GroupMessageModel::u_insertGetId($system_user->id , $group_id , 'text' , '系统通知：暂无客服在线，您可以留言，我们将会第一时间回复！');
         // 初始化消息已读/未读
         GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group_id , $user_id);
         // 找到该条信息

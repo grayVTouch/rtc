@@ -389,6 +389,7 @@ class LoginAction extends Action
             ]);
             // 将系统用户加入该群
             $system_user = UserModel::systemUser($base->identifier);
+            GroupMemberModel::u_insertGetId($id , $group_id);
             GroupMemberModel::u_insertGetId($system_user->id , $group_id);
             DB::commit();
             return self::success();

@@ -191,4 +191,15 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 删除申请消息（单条 + 多条）
+    public function deleteApp()
+    {
+        $param['application_id'] = $param['application_id'] ?? '';
+        $res = UserAction::deleteApp($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

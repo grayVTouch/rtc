@@ -39,6 +39,10 @@ return [
         'unique_code' ,
         // 指令：刷新未读消息数量（总数量）
         'refresh_unread_count' ,
+        // 指令：刷新会话未读消息数量（私聊 + 群聊 + 公告）
+        'refresh_session_unread_count' ,
+        // 指令：刷新申请列表未读消息数量
+        'refresh_app_unread_count' ,
         // 指令：刷新申请列表
         'refresh_application' ,
         // 私聊信息

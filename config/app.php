@@ -35,7 +35,7 @@ return [
     // 单个客服最多接听的访客数量
     'number_of_receptions' => 10 ,
     // 客服最长等待时间 2min
-    'wait_duration' => 5 * 60 ,
+    'waiter_wait_max_duration' => 3 * 60 ,
     // 记录数限制
     'limit' => 20 ,
     // 网站路径

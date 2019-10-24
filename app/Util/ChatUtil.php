@@ -32,7 +32,7 @@ use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-use App\Websocket\Util\UserUtil as UserUtilWebSocket;
+use App\WebSocket\Util\UserUtil as UserUtilWebSocket;
 
 
 class ChatUtil extends Util
@@ -129,6 +129,7 @@ class ChatUtil extends Util
                 }
                 $base->pushAll($user_ids , 'refresh_session');
                 $base->pushAll($user_ids , 'refresh_unread_count');
+                $base->pushAll($user_ids , 'refresh_session_unread_count');
                 AppPushUtil::pushCheckForFriend($base->platform , $param['user_id'] , $param['friend_id'] , function() use($param , $msg){
                     $res = AppPushUtil::pushForPrivate($param['friend_id'] , $msg->message , '你收到了一条好友消息' , $msg);
                     if ($res['code'] != 200) {
@@ -198,6 +199,7 @@ class ChatUtil extends Util
             $base->sendAll($user_ids , 'group_message' , $msg);
             $base->pushAll($user_ids , 'refresh_session');
             $base->pushAll($user_ids , 'refresh_unread_count');
+            $base->pushAll($user_ids , 'refresh_session_unread_count');
             foreach ($user_ids as $v)
             {
                 if ($v == $param['user_id']) {
@@ -256,10 +258,10 @@ class ChatUtil extends Util
     public static function advoise(Base $base , array $param)
     {
         $validator = Validator::make($param , [
-            'group_id' => 'required' ,
-            'type' => 'required' ,
-            'user_id' => 'required' ,
-            'message' => 'required' ,
+            'group_id'  => 'required' ,
+            'type'      => 'required' ,
+            'user_id'   => 'required' ,
+            'message'   => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -300,8 +302,6 @@ class ChatUtil extends Util
 //                        var_dump($allocate['data']);
                         // 没有分配到客服，保存到未读消息队列
                         MessageRedis::saveUnhandleMsg($base->identifier , $user->id , $param);
-                        // 通知客户端没有客服
-                        UserUtilWebSocket::noWaiterTip($base->identifier , $user->id , $group->id);
                     }
                 }
                 // 初始化消息已读/未读
@@ -313,11 +313,12 @@ class ChatUtil extends Util
                 MessageUtil::handleGroupMessage($msg);
                 DB::commit();
                 $base->sendAll($user_ids , 'group_message' , $msg);
-                if (isset($msg_with_no_waiter)) {
-                    // 没有客服
-                    $base->pushAll($user_ids , 'group_message' , $msg_with_no_waiter);
+                if ($allocate['code'] != 200) {
+                    // 通知客户端没有客服
+                    UserUtilWebSocket::noWaiterTip($base->identifier , $user->id , $group->id);
                 }
-                $base->pushAll($user_ids , 'refresh_unread_message');
+                $base->pushAll($user_ids , 'refresh_unread_count');
+                $base->pushAll($user_ids , 'refresh_session_unread_count');
                 return self::success($msg);
             } catch(Exception $e) {
                 DB::rollBack();
@@ -341,7 +342,8 @@ class ChatUtil extends Util
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
             DB::commit();
             $base->sendAll($user_ids , 'group_message' , $msg);
-            $base->pushAll($user_ids , 'refresh_unread_message');
+            $base->pushAll($user_ids , 'refresh_unread_count');
+            $base->pushAll($user_ids , 'refresh_session_unread_count');
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();

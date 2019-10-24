@@ -273,6 +273,7 @@ class UserModel extends Model
     {
         $res = self::where([
                     ['identifier' , '=' , $identifier] ,
+                    ['role' , '=' , 'admin'] ,
                     ['is_system' , '=' , 1] ,
                 ])
                 ->first();

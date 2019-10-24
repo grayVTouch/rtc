@@ -319,4 +319,38 @@ class UserAction extends Action
         ]);
         return self::success();
     }
+
+    // 删除申请
+    public static function deleteApp(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'application_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $application_id = json_decode($param['application_id'] , true);
+        if (empty($application_id)) {
+            return self::error('请提供待删除的信息');
+        }
+        try {
+            DB::beginTransaction();
+            foreach ($application_id as $v)
+            {
+                // 检查是否是本人的 应用
+                ApplicationModel::delById($v);
+            }
+            DB::commit();
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    // 清空申请
+    public static function deleteAll()
+    {
+
+    }
 }

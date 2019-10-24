@@ -70,6 +70,8 @@ class GroupAction extends Action
             ]));
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
+            $auth->push($group->user_id , 'refresh_app_unread_count');
+
             AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
                 AppPushUtil::pushForAppGroup($param['user_id'] , $param['log'] , '申请进群');
             });
@@ -165,6 +167,7 @@ class GroupAction extends Action
                 ]));
                 $auth->push($group->user_id , 'refresh_application');
                 $auth->push($group->user_id , 'refresh_unread_count');
+                $auth->push($group->user_id , 'refresh_app_unread_count');
                 AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
                     AppPushUtil::pushForInviteGroup($param['user_id'] , $param['log'] , '邀请进群');
                 });
@@ -295,6 +298,7 @@ class GroupAction extends Action
                 // 拒绝
                 $auth->pushAll($user_ids , 'refresh_application');
                 $auth->pushAll($user_ids , 'refresh_unread_count');
+                $auth->pushAll($user_ids , 'refresh_app_unread_count');
             }
             return self::success();
         } catch(Exception $e) {
@@ -402,41 +406,36 @@ class GroupAction extends Action
                 'expire' ,
                 'anonymous' ,
             ]));
-            $message = '"%s" 邀请了 "%s"加入了群聊';
-            $member_string = '';
-            // 如果有群成员的话
-            foreach ($user_ids as $v)
-            {
-                $member = UserModel::findById($v);
-                if (empty($member)) {
-                    return self::error('无法创建群！邀请的成员中存在无效的用户' , 404);
-                }
-                GroupMemberModel::u_insertGetId($v , $group_id);
-                if ($v == $auth->user->id) {
-                    continue ;
-                }
-                $member_string .= empty($member->nickname) ?
-                        $member->username :
-                        $member->nickname;
-                $member_string .= ' ,';
-            }
+            DB::commit();
             if (!$single) {
+                // 如果群成员数量超过一个，那么推送建群通知
+                $message = '"%s" 邀请了 "%s"加入了群聊';
+                $member_string = '';
+                // 如果有群成员的话
+                foreach ($user_ids as $v)
+                {
+                    $member = UserModel::findById($v);
+                    if (empty($member)) {
+                        return self::error('无法创建群！邀请的成员中存在无效的用户' , 404);
+                    }
+                    GroupMemberModel::u_insertGetId($v , $group_id);
+                    if ($v == $auth->user->id) {
+                        continue ;
+                    }
+                    $member_string .= UserUtil::getNameFromNicknameAndUsername($member->nickname , $member->username);
+                    $member_string .= ' ,';
+                }
                 // 群成员数量不只一个人
                 // 发送邀请通知
-                $group_owner_name = empty($auth->user->nickname) ?
-                    $auth->user->username :
-                    $auth->user->nickname;
+                $group_owner_name = UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username);
                 $member_string = mb_substr($member_string , 0 , mb_strlen($member_string) - 2);
-                $group_message_id = GroupMessageModel::u_insertGetId($auth->user->id , $group_id , 'notification' , sprintf($message , $group_owner_name , $member_string) , json_encode($user_ids));
-                GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $group_id , $auth->user->id);
-                $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
-            }
-            DB::commit();
-            // 如果群成员数量超过一个，那么推送
-            if (!$single) {
-                $auth->pushAll($user_ids , 'refresh_group');
-                $auth->pushAll($user_ids , 'refresh_session');
-                $auth->pushAll($user_ids , 'refresh_unread_count');
+                ChatUtil::groupSend($auth , [
+                    'user_id'   => $auth->user->id ,
+                    'type'      => 'notification' ,
+                    'group_id'  => $group_id ,
+                    'message'   => sprintf($message , $group_owner_name , $member_string) ,
+                    'extra'     => '' ,
+                ]);
             }
             return self::success($group_id);
         } catch(Exception $e) {

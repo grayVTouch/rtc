@@ -185,8 +185,8 @@ class WebSocket
                 $push = [];
                 if (empty($_conn)) {
                     // 如果是客服，用户加入的群组
-                    $group = GroupMemberModel::getByUserId($user->id);
-                    foreach ($group as $v)
+                    $groups = GroupMemberModel::getByUserId($user->id);
+                    foreach ($groups as $v)
                     {
                         $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
                         $group_bind_waiter = (int) $group_bind_waiter;
@@ -200,7 +200,7 @@ class WebSocket
                         $msg = GroupMessageModel::findById($group_message_id);
                         MessageUtil::handleGroupMessage($msg);
                         $push[] = [
-                            'identifier'    => $v->group->identifier ,
+                            'identifier'    => $v->user->identifier ,
                             'user_ids'      => $user_ids ,
                             'type'          => 'group_message' ,
                             'data'          => $msg
@@ -431,14 +431,18 @@ class WebSocket
             });
             try {
                 DB::beginTransaction();
-                $group = GroupModel::serviceGroup();
-                $max_duration = 4 * 60;
-                $wait_duration = config('app.wait_duration');
+                $groups = GroupModel::serviceGroup();
+                $waiter_wait_max_duration = config('app.waiter_wait_max_duration');
                 $push = [];
-                foreach ($group as $v)
+                foreach ($groups as $v)
                 {
-                    $waiter_id = UserRedis::groupBindWaiter($v->identifier , $v->id);
+                    if (empty($user)) {
+                        // 如果没有找到用户信息，跳过不处理
+                        continue ;
+                    }
+                    $waiter_id = UserRedis::groupBindWaiter($v->user->identifier , $v->id);
                     if (empty($waiter_id)) {
+                        // 没有绑定任何客服
                         continue ;
                     }
                     $waiter = UserModel::findById($waiter_id);
@@ -446,12 +450,13 @@ class WebSocket
                     $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
                     if (!empty($last_message)) {
                         $create_time = strtotime($last_message->create_time);
-                        $duration = time() - $create_time;
-                        if ($duration >= $max_duration || $duration <= $wait_duration) {
+                        $free_duration = time() - $create_time;
+                        if ($free_duration < $waiter_wait_max_duration) {
+                            // 等待时间没有超过最长客服等待时间，跳过
                             continue ;
                         }
                     }
-                    UserRedis::delGroupBindWaiter($v->identifier , $v->id);
+                    UserRedis::delGroupBindWaiter($v->user->identifier , $v->id);
                     // 群通知：客服已经断开连接！
                     $user_ids = GroupMemberModel::getUserIdByGroupId($v->id);
                     $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
@@ -459,7 +464,7 @@ class WebSocket
                     $msg = GroupMessageModel::findById($group_message_id);
                     MessageUtil::handleGroupMessage($msg);
                     $push[] = [
-                        'identifier' => $v->identifier ,
+                        'identifier' => $v->user->identifier ,
                         'user_ids'    => $user_ids ,
                         'type'       => 'group_message' ,
                         'data'       => $msg

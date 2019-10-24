@@ -30,8 +30,9 @@ class MessageUtil extends Util
             GroupUtil::handle($group_message->group);
             if (isset($group_message->user)) {
                 if ($group_message->group->is_service == 1 && $group_message->user->role == 'admin') {
-                    $group_message->user->nickname = empty($group_message->user->nickname) ? $group_message->user->username : $group_message->user->nickname;
-                    $group_message->user->nickname = '客服 ' . $group_message->user->nickname;
+                    $name = TopUserUtil::getNameFromNicknameAndUsername($group_message->user->nickname , $group_message->user->username);
+                    $group_message->user->nickname = $name;
+                    $group_message->user->nickname = '客服 ' . $name;
                 }
             }
         }

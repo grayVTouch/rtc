@@ -58,7 +58,8 @@ class GroupModel extends Model
 
     public static function serviceGroup()
     {
-        $res = self::where('is_service' , 1)
+        $res = self::with(['user'])
+            ->where('is_service' , 1)
             ->get();
         self::multiple($res);
         return $res;
@@ -86,6 +87,11 @@ class GroupModel extends Model
         $res = convert_obj($res);
         self::multiple($res);
         return $res;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(UserModel::class , 'user_id' , 'id');
     }
 
 }

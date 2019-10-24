@@ -142,6 +142,7 @@ class Application
                     'identifier' => $v->identifier ,
                     'is_system' => 1 ,
                     'is_temp' => 0 ,
+                    'role' => 'admin' ,
                     'nickname' => $system_waiter_name ,
                     'username' => $system_waiter_name ,
                 ]);

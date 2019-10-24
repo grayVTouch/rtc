@@ -12,25 +12,6 @@ use App\WebSocket\Action\ChatAction;
 
 class Chat extends Auth
 {
-
-    /**
-     * 平台咨询-文本
-     *
-     * @param array $param
-     * @return mixed
-     */
-    public function advoiseForText(array $param)
-    {
-        $param['group_id']  = $param['group_id'] ?? '';
-        $param['message']   = $param['message'] ?? '';
-        $param['extra']   = $param['extra'] ?? '';
-        $res = ChatAction::advoise($this , 'text' , $param);
-        if ($res['code'] != 200) {
-            return $this->error($res['data'] , $res['code']);
-        }
-        return $this->success($res['data']);
-    }
-
     // 私聊消息发送：文本
     public function sendTextForPrivate(array $param)
     {
@@ -131,6 +112,60 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $res = ChatAction::groupSend($this , 'card' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    /**
+     * 平台咨询-文本
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function sendTextForAdvoise(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']   = $param['extra'] ?? '';
+        $res = ChatAction::advoise($this , 'text' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    /**
+     * 平台咨询-图片
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function sendImageForAdvoise(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']   = $param['extra'] ?? '';
+        $res = ChatAction::advoise($this , 'image' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    /**
+     * 平台咨询-语音
+     *
+     * @param array $param
+     * @return mixed
+     */
+    public function sendVoiceForAdvoise(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $res = ChatAction::advoise($this , 'voice' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

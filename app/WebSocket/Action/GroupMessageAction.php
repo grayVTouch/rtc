@@ -69,6 +69,7 @@ class GroupMessageAction extends Action
         // 通知用户刷新会话列表
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 
