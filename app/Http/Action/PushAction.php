@@ -64,7 +64,7 @@ class PushAction extends Action
         }
         $param['push_type'] = 'multiple';
         $param['role']      = in_array($param['role'] , config('business.push_role')) ? $param['role'] : 'all';
-        $param['user_id']   = $param['user_id'] ?? '';
+        $param['user_id']   = (int) ($param['user_id'] ?? '');
         try {
             DB::beginTransaction();
             if ($param['role'] == 'designation') {
@@ -85,6 +85,9 @@ class PushAction extends Action
                 'type' ,
                 'user_id' ,
                 'role' ,
+                'title' ,
+                'desc' ,
+                'content' ,
             ]));
             // 未读消息状态
 //            PushReadStatusModel::initByPushId($id , $user_ids);
@@ -92,12 +95,13 @@ class PushAction extends Action
             foreach ($user_ids as $v)
             {
                 // 创建 或 更新 会话
-                SessionUtil::createOrUpdate($param['user_id'] , 'announcement' , $param['user_id']);
+                SessionUtil::createOrUpdate($v , 'system' , $param['user_id']);
                 // 设置未读消息数量
                 PushReadStatusModel::u_insertGetId($v , $id , 0);
             }
             DB::commit();
-            PushUtil::single($auth->identifier , $v , $param['type'] , $push);
+            // 刷新会话列表
+            PushUtil::multiple($auth->identifier , $user_ids , 'refresh_session');
             return self::success($push);
         } catch(Exception $e) {
             DB::rollBack();
@@ -127,5 +131,11 @@ class PushAction extends Action
             $id = $res->id;
         }
         return self::success($id);
+    }
+
+    public static function system(Auth $auth , array $param)
+    {
+        $param['type'] = 'system';
+        return self::multiple($auth , $param);
     }
 }

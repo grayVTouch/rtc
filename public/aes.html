@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--<script src="aes.js"></script>-->
+<script src="crypto-js.js"></script>
+<script src="aes.js"></script>
+
+
+<script>
+    // 自定义键 和 iv
+    var key =  CryptoJS.enc.Hex.parse("fuck");
+    var iv = CryptoJS.enc.Hex.parse('1234567890123456');
+    var origin = 'hello boys and girls!!we will win the fight!!';
+    var option = {
+        iv: iv ,
+        mode: CryptoJS.mode.CBC ,
+        padding: CryptoJS.pad.Pkcs7
+    };
+    // Encrypt
+    var str = CryptoJS.AES.encrypt(origin , key , option);
+    var enc = str.toString();
+
+    console.log('加密后的字符串：' , enc);
+
+    // Decrypt
+    var bytes  = CryptoJS.AES.decrypt(enc, key , option);
+    var dec = bytes.toString(CryptoJS.enc.Utf8);
+
+    console.log('解密后的字符串' , dec); // 'my message'
+</script>
+</body>
+</html>

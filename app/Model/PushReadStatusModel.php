@@ -77,4 +77,15 @@ class PushReadStatusModel extends Model
         }
         return $res;
     }
+
+    public static function updateIsReadByUserIdAndPushId(int $user_id , int $push_id , int $is_read)
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['push_id' , '=' , $push_id] ,
+        ])->update([
+            'is_read' => $is_read
+        ]);
+    }
+
 }

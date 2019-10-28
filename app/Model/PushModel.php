@@ -44,4 +44,61 @@ class PushModel extends Model
             'data' => $data ,
         ]);
     }
+
+    // 未读消息推送数量
+    public static function unreadCountByUserIdAndType(int $user_id , string $type = '')
+    {
+        $where = [
+            ['prs.user_id' , '' , $user_id] ,
+            ['prs.is_read' , '=' , 1] ,
+        ];
+        if (!empty($type)) {
+            $where[] = ['p.type' , '=' , $type];
+        }
+        return (int) (self::from('push as p')
+            ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
+            ->where($where)
+            ->count());
+    }
+
+    // 最近一条推送消息
+    public static function recentByUserIdAndType(int $user_id , string $type = '')
+    {
+        $where = [
+            ['prs.user_id' , '=' , $user_id] ,
+        ];
+        if (!empty($type)) {
+            $where[] = ['p.type' , '=' , $type];
+        }
+        // sql 语句建议
+        $res = self::from('push as p')
+            ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
+            ->where($where)
+            ->orderBy('p.id' , 'desc')
+            ->first();
+        self::single($res);
+        return $res;
+    }
+
+    // 最近一条推送消息
+    public static function getByUserIdAndTypeAndLimitIdAndLimit(int $user_id , $type = '' , $limit_id = 0 , int $limit = 20)
+    {
+        $where = [
+            ['prs.user_id' , '=' , $user_id] ,
+        ];
+        if (!empty($type)) {
+            $where[] = ['p.type' , '=' , $type];
+        }
+        if (!empty($limit_id)) {
+            $where[] = ['p.id' , '<' , $limit_id];
+        }
+        $res = self::from('push as p')
+            ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
+            ->where($where)
+            ->orderBy('p.id' , 'desc')
+            ->limit($limit)
+            ->get();
+        self::single($res);
+        return $res;
+    }
 }

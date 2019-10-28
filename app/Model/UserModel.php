@@ -128,7 +128,7 @@ class UserModel extends Model
         return $res;
     }
 
-    public static function getIdByIdentifierAndRole(string $identifier , string $role = '')
+    public static function getIdByIdentifierAndRole(string $identifier , $role = '')
     {
         $where = [
             ['identifier' , '=' , $identifier] ,

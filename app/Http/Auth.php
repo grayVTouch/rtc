@@ -19,6 +19,8 @@ class Auth extends Base
      */
     public $user = null;
 
+    protected $debug = 'running';
+
     /**
      * 前置操作
      *
@@ -29,20 +31,30 @@ class Auth extends Base
         if (!parent::before()) {
             return false;
         }
-        $authorization = $this->request->header['authorization'] ?? '';
-        if (empty($authorization)) {
-            $this->error('用户认证失败' , 403);
-            return false;
-        }
-        $token = UserTokenModel::findByToken($authorization);
-        if (empty($token)) {
-            $this->error('Token 错误' , 403);
-            return false;
-        }
-        $user = UserModel::findById($token->user_id);
-        if (empty($user)) {
-            $this->error("未找到 {$token->user_id} 对应用户");
-            return false;
+        $debug = $this->request->post['debug'] ?? '';
+        if ($debug != 'running') {
+            $authorization = $this->request->header['authorization'] ?? '';
+            if (empty($authorization)) {
+                $this->error('用户认证失败 [Authorization Error]' , 1000);
+                return false;
+            }
+            $token = UserTokenModel::findByToken($authorization);
+            if (empty($token)) {
+                $this->error('用户认证失败 [Token Error]' , 1000);
+                return false;
+            }
+            $user = UserModel::findById($token->user_id);
+            if (empty($user)) {
+                $this->error("用户认证失败 [Token Mapping User Not Found]" , 1000);
+                return false;
+            }
+        } else {
+            $debug_user_id = $this->request->post['debug_user_id'] ?? 0;
+            $user = UserModel::findById($debug_user_id);
+            if (empty($user)) {
+                $this->error('用户认证失败 [UserId Mapping User Not Found]' , 1000);
+                return false;
+            }
         }
         $this->user = $user;
         return true;

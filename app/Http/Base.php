@@ -38,7 +38,7 @@ class Base
     {
         // 检查 identifier 是否正确！！
         if (empty(ProjectModel::findByIdentifier($this->identifier))) {
-            $this->error('identifier 不正确！！请先创建项目！' , 400);
+            $this->error('identifier 不正确！！请先创建项目！' , 1000);
             return false;
         }
         return true;

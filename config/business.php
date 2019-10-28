@@ -222,7 +222,7 @@ return [
         'private' ,
         // 群聊
         'group' ,
-        // 群公告
+        // 公告
         'announcement' ,
     ] ,
 

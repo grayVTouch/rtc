@@ -14,6 +14,7 @@ use App\Model\PushReadStatusModel;
 use App\WebSocket\Auth;
 use Core\Lib\Validator;
 use function core\array_unit;
+use Illuminate\Support\Facades\DB;
 
 class PushAction extends Action
 {
@@ -25,7 +26,7 @@ class PushAction extends Action
     }
 
     // 设置：读取状态
-    public static function readStatus(Auth $auth , array $param)
+    public static function updateIsRead(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'push_id'      => 'required' ,
@@ -34,17 +35,20 @@ class PushAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查是否已经存在
-        $param['user_id'] = $auth->user->id;
-        $res = PushReadStatusModel::findByUserIdAndPushId($auth->user->id , $param['push_id']);
-        if (empty($res)) {
-            $id = PushReadStatusModel::u_insertGetId($param['user_id'] , $param['push_id'] , $param['is_read']);
-        } else {
-            PushReadStatusModel::updateById($res->id , array_unit($param , [
-                'is_read'
-            ]));
-            $id = $res->id;
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['is_read'] , $bool_for_int)) {
+            return self::error('不支持的 is_read 值，受支持的值有 ' . implode(',' , $bool_for_int));
         }
-        return self::success($id);
+        PushReadStatusModel::updateIsReadByUserIdAndPushId($auth->user->id , $param['push_id'] , $param['is_read']);
+        // 刷新会话
+        $auth->push($auth->user->id , 'refresh_session');
+        return self::success();
+    }
+
+    public static function myPush(Auth $auth , array $param)
+    {
+        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
+        $res = PushModel::getByUserIdAndTypeAndLimitIdAndLimit($auth->user->id , $param['type'] , $param['limit_id'] , $limit);
+        return self::success($res);
     }
 }

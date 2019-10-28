@@ -62,12 +62,12 @@ class Push extends Auth
     {
         $param = $this->request->post;
         $param['role'] = $param['role'] ?? '';
+        // 仅在 role = designation 的时候有意义
         $param['user_id'] = $param['user_id'] ?? '';
-        $param['type'] = 'system';
         $param['title'] = $param['title'] ?? '';
         $param['desc'] = $param['desc'] ?? '';
         $param['content'] = $param['content'] ?? '';
-        $res = PushAction::multiple($this , $param);
+        $res = PushAction::system($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

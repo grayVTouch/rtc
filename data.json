@@ -1,5 +1,5 @@
 {
-  "router": "/Session/sessionProcess",
+  "router": "/Push/updateIsRead",
   "identifier": "test",
   "user_id": 3 ,
   "debug": "running" ,
@@ -7,9 +7,8 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "type": "private" ,
-    "target_id": "1_2" ,
-    "status": "join"
+    "push_id": 3 ,
+    "is_read": 1
   }
 }
 

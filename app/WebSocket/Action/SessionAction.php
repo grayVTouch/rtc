@@ -15,6 +15,7 @@ use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
+use App\Model\PushModel;
 use App\Model\SessionModel;
 use App\Model\UserModel;
 use App\Redis\SessionRedis;
@@ -43,10 +44,14 @@ class SessionAction extends Action
 //        $general_session = SessionModel::noTopGetByUserIdAndOffsetAndLimit($auth->user->id , $no_top_page['offset'] , $no_top_page['limit']);
         $top_session = [];
         $general_session = [];
+//        DB::enableQueryLog();
         $sessions = SessionModel::getByUserId($auth->user->id);
+//        $sql = DB::getQueryLog();
+//        print_r($sql);
         foreach ($sessions as $v)
         {
             if ($v->type == 'private') {
+                // 私聊
                 $other_id = ChatUtil::otherId($v->target_id , $auth->user->id);
                 $v->other = UserModel::findById($other_id);
                 UserUtil::handle($v->other , $auth->user->id);
@@ -64,24 +69,41 @@ class SessionAction extends Action
                 continue ;
             }
 
-            // 群聊
-            $v->group = GroupModel::findById($v->target_id);
-            GroupUtil::handle($v->group , $auth->user->id);
-            $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->target_id , 'none');
-            // 群处理
-            $v->recent_message = $recent_message;
-            // 群消息处理
-            MessageUtil::handleGroupMessage($v->recent_message);
-            if ($auth->user->role == 'user' && $v->group->is_service == 1) {
-                // 用户使用的平台
-                $v->group->name = '平台咨询';
+            if ($v->type == 'group') {
+                // 群聊
+                $v->group = GroupModel::findById($v->target_id);
+                GroupUtil::handle($v->group , $auth->user->id);
+                $recent_message = GroupMessageModel::recentMessage($auth->user->id , $v->target_id , 'none');
+                // 群处理
+                $v->recent_message = $recent_message;
+                // 群消息处理
+                MessageUtil::handleGroupMessage($v->recent_message);
+                if ($auth->user->role == 'user' && $v->group->is_service == 1) {
+                    // 用户使用的平台
+                    $v->group->name = '平台咨询';
+                }
+                $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
+                if ($v->top == 1) {
+                    $top_session[] = $v;
+                    continue ;
+                }
+                $general_session[] = $v;
             }
-            $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
-            if ($v->top == 1) {
-                $top_session[] = $v;
+
+            if ($v->type == 'announcement') {
+                // 公告
+                $v->recent = PushModel::recentByUserIdAndType($auth->user->id , 'system');
+                // 未读消息数量
+                $v->unread = PushModel::unreadCountByUserIdAndType($auth->user->id , 'system');
+                if ($v->top == 1) {
+                    $top_session[] = $v;
+                    continue ;
+                }
+                $general_session[] = $v;
                 continue ;
             }
-            $general_session[] = $v;
+
+            // .... 其他类型请另外再增加
         }
         $res = array_merge($top_session , $general_session);
         return self::success($res);

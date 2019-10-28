@@ -363,7 +363,8 @@ class WebSocket
                 // 执行前置操作
                 $next = call_user_func([$instance , 'before']);
                 if (!$next) {
-                    $this->httpResponse($response , '中间 before ');
+                    // todo 如果程序中没有针对中间件中断操作的返回，那么需要放开这边的注释，否则问题排查比较困难
+//                    $this->httpResponse($response , '中间 before ');
                     return ;
                 }
             }
