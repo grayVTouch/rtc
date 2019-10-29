@@ -7,54 +7,27 @@
  */
 
 
-require_once __DIR__ . '/plugin/extra/core/Lib/FacadeInterface.php';
-require_once __DIR__ . '/plugin/extra/core/Lib/Facade.php';
+$str = '你好吗nihao很好，非常耗；你好nihao你好吗';
 
-use Core\Lib\Facade;
+var_dump('源字符串：' . $str);
+$reg = '/([\x{4e00}-\x{9fa5}]+)/u';
+preg_match_all($reg , $str , $matches);
 
-class A {
-    public static $ins = [];
 
-    public static function set($k , $v)
-    {
-        self::$ins[$k] = $v;
-    }
-    public static function __callStatic($name, $arguments)
-    {
-        $ins = self::$ins[static::get()];
-        $ins->$name();
-    }
+print_r($matches);
+array_shift($matches);
+//print_r($matches);
+
+$matches = $matches[0];
+
+foreach ($matches as &$v)
+{
+    $v = "[翻译后的字符串：$v]";
 }
 
-class B extends A {
-    public function test()
-    {
-        echo 'b';
-    }
+$count = 0;
+$replace = preg_replace_callback($reg , function($v) use($matches , &$count){
+    return $matches[$count++];
+} , $str);
 
-    public static function get()
-    {
-        return 'b';
-    }
-}
-
-class C extends A {
-    public function test()
-    {
-        echo 'c';
-    }
-
-    public static function get()
-    {
-        return 'c';
-    }
-}
-
-$b = new B();
-$c = new C();
-
-A::set('b' , $b);
-A::set('c' , $c);
-
-$b->test();
-$c->test();
+var_dump($replace);

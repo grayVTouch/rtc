@@ -312,7 +312,7 @@ class GroupMessageAction extends Action
                 'friend_id' => $friend->id ,
                 'type' => 'message_set' ,
                 'message' => json_encode($message_id) ,
-                'extra' => '' ,
+                'extra' => 'group' ,
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
@@ -348,7 +348,7 @@ class GroupMessageAction extends Action
                 'group_id' => $group->id ,
                 'type' => 'message_set' ,
                 'message' => json_encode($message_id) ,
-                'extra' => '' ,
+                'extra' => 'group' ,
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
@@ -359,4 +359,17 @@ class GroupMessageAction extends Action
         }
     }
 
+    public static function getByIds(array $id_list = [])
+    {
+        $res = self::with(['user'])
+            ->whereIn('id' , $id_list)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
 }

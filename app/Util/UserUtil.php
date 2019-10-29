@@ -53,7 +53,6 @@ class UserUtil extends Util
                     $friend->alias);
             // 是否阅后即焚
             $user->burn = empty($friend) ? 0 : $friend->burn;
-
         }
     }
 

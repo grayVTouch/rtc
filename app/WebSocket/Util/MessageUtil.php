@@ -8,8 +8,11 @@
 
 namespace App\WebSocket\Util;
 
+use App\Model\GroupMessageModel;
+use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
+use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
@@ -20,7 +23,7 @@ class MessageUtil extends Util
     /**
      * @param \App\Model\GroupMessageModel|\StdClass $group_message
      */
-    public static function handleGroupMessage($group_message)
+    public static function handleGroupMessage($group_message , int $user_id = 0)
     {
         if (empty($group_message)) {
             return ;
@@ -38,6 +41,31 @@ class MessageUtil extends Util
         }
         if (isset($group_message->user)) {
             TopUserUtil::handle($group_message->user);
+        }
+        if ($group_message->type == 'message_set') {
+            // 合并转发的消息
+            $message_ids = json_decode($group_message->message , true);
+            switch ($group_message->extra)
+            {
+                case 'private':
+                    $messages = MessageModel::getByIds($message_ids);
+                    break;
+                case 'group':
+                    $messages = GroupMessageModel::getByIds($message_ids);
+                    break;
+            }
+            foreach ($messages as $v)
+            {
+                // 文件处理
+                TopUserUtil::handle($v->user);
+            }
+            $group_message->messages = $messages;
+        }
+        if ($group_message->type == 'card') {
+            // 名片消息
+            $user_for_card = UserModel::findById($group_message->message);
+            TopUserUtil::handle($user_for_card);
+            $group_message->user_for_card = $user_for_card;
         }
     }
 
@@ -59,6 +87,32 @@ class MessageUtil extends Util
         $msg->friend_is_read = MessageReadStatusModel::isRead($friend_id , $msg->id);
         if (isset($msg->user)) {
             TopUserUtil::handle($msg->user);
+        }
+        if ($msg->type == 'message_set') {
+            // 合并转发的消息
+            $message_ids = json_decode($msg->message , true);
+            switch ($msg->extra)
+            {
+                case 'private':
+                    $messages = MessageModel::getByIds($message_ids);
+                    break;
+                case 'group':
+                    $messages = GroupMessageModel::getByIds($message_ids);
+                    break;
+            }
+            foreach ($messages as $v)
+            {
+                // 用户处理
+                TopUserUtil::handle($v->user);
+            }
+            $msg->messages = $messages;
+        }
+        if ($msg->type == 'card') {
+            // 名片消息
+            $user_for_card = UserModel::findById($msg->message);
+            TopUserUtil::handle($user_for_card);
+            $msg->user_for_card = $user_for_card;
+
         }
     }
 

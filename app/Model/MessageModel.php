@@ -233,4 +233,18 @@ class MessageModel extends Model
         }
         return $res;
     }
+
+    public static function getByIds(array $id_list = [])
+    {
+        $res = self::with(['user'])
+            ->whereIn('id' , $id_list)
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
 }

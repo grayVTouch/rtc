@@ -333,14 +333,16 @@ class MessageAction extends Action
                 'friend_id' => $friend->id ,
                 'type' => 'message_set' ,
                 'message' => json_encode($message_id) ,
-                'extra' => '' ,
+                'extra' => 'private' ,
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
             }
             return self::success();
             // 转发到私聊群
-        } else if ($param['type'] == 'group') {
+        }
+
+        if ($param['type'] == 'group') {
             // 转发到群聊群
             // 转发到私聊群里面
             $group = GroupModel::findById($param['target_id']);
@@ -369,14 +371,14 @@ class MessageAction extends Action
                 'group_id' => $group->id ,
                 'type' => 'message_set' ,
                 'message' => json_encode($message_id) ,
-                'extra' => '' ,
+                'extra' => 'private' ,
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
             }
             return self::success();
-        } else {
-            // 待扩充
         }
+
+        return self::error('不支持的 type，当前受支持的 type 有 ' . implode(',' , $type_range));
     }
 }
