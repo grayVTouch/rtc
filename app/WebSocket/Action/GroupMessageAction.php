@@ -47,7 +47,7 @@ class GroupMessageAction extends Action
             return self::error('未找到群对应信息' , 404);
         }
         $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
-        $limit = empty($param['limit']) ? 0 : $param['limit'];
+        $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $res = GroupMessageModel::history($auth->user->id , $group->id , $limit_id , $limit);
         foreach ($res as $v)
         {
