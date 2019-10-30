@@ -223,4 +223,17 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    // 设置添加好友的方式
+    public function setJoinFriendMethod(array $param)
+    {
+        $param['join_friend_method_id'] = $param['join_friend_method_id'] ?? '';
+        $param['enable'] = $param['enable'] ?? '';
+        $res = UserAction::setJoinFriendMethod($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+
 }

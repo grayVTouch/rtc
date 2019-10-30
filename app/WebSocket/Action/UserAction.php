@@ -352,11 +352,34 @@ class UserAction extends Action
 
     public static function joinFriendMethod(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'application_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $res = JoinFriendMethodModel::getAll();
         foreach ($res as $v)
         {
             $v->enable = UserJoinFriendOptionModel::enable($auth->user->id , $v->id);
         }
         return self::success($res);
+    }
+
+    public static function setJoinFriendMethod(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'join_friend_method_id' => 'required' ,
+            'enable' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['enable'] , $bool_for_int)) {
+            return self::error('不支持的 enable 值，当前受支持的值有 ' . implode(',' , $bool_for_int) , 403);
+        }
+        JoinFriendMethodModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
+        return self::success();
     }
 }
