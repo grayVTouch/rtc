@@ -56,18 +56,18 @@ class SessionUtil extends Util
         }
         SessionModel::delById($session_id);
         if ($session->type == 'private') {
-            // 删除屏蔽的消息
-            DeleteMessageModel::delByTypeAndTargetId('private' , $session->target_id);
-            // 删除未读状态
-            MessageReadStatusModel::delByChatId($session->target_id);
-            // 删除私聊消息
-            MessageModel::delByChatId($session->target_id);
+            $mesages = MessageModel::getByChatId($session->target_id);
+            foreach ($mesages as $v)
+            {
+                MessageUtil::shield($session->user_id , $session->target_id , $v->id);
+            }
             return self::success();
         }
-        // 群聊
-        DeleteMessageModel::delByTypeAndTargetId('group' , $session->target_id);
-        GroupMessageReadStatusModel::delByGroupId($session->target_id);
-        GroupMessageModel::delByGroupId($session->target_id);
+        $mesages = GroupMessageModel::getByGroupId($session->target_id);
+        foreach ($mesages as $v)
+        {
+            GroupMessageUtil::shield($session->user_id , $session->target_id , $v->id);
+        }
         return self::success();
     }
 

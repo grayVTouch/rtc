@@ -77,11 +77,10 @@ class Session extends Auth
     }
 
     // 清空会话内当前产生的聊天记录
-    public function emptySessionHistory(array $param)
+    public function emptyPrivateHistory(array $param)
     {
-        $param['type']      = $param['type'] ?? '';
-        $param['target_id'] = $param['target_id'] ?? '';
-        $res = SessionAction::emptySessionHistory($this , $param);
+        $param['chat_id'] = $param['chat_id'] ?? '';
+        $res = SessionAction::emptyPrivateHistory($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

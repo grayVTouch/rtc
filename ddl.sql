@@ -25,7 +25,7 @@ create table if not exists `rtc_user` (
   nickname varchar(255) default '' comment '昵称' ,
   avatar varchar(500) default '' comment '头像' ,
   sex tinyint default 0 comment '0-保密 1-男 2-女' ,
-  birthday datetime default null comment '出生日期' ,
+  birthday date default null comment '出生日期' ,
   signature varchar(500) default '' comment '个性签名' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)

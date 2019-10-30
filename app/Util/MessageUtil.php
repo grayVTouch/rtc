@@ -24,4 +24,16 @@ class MessageUtil extends Util
         // 删除消息
         MessageModel::delById($message_id);
     }
+
+    // 屏蔽消息
+    public static function shield(int $user_id , string $chat_id , int $message_id)
+    {
+        $count = DeleteMessageModel::countByTypeAndTargetIdAndMessageId('private' , $chat_id , $message_id);
+        if ($count + 1 >= 2) {
+            // 计数超过两个，将该消息彻底删除
+            self::delete($message_id);
+            return ;
+        }
+        DeleteMessageModel::u_insertGetId('private' , $user_id , $message_id , $chat_id);
+    }
 }

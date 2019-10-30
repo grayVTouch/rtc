@@ -49,5 +49,13 @@ class DeleteMessageModel extends Model
         ])->delete();
     }
 
+    public static function delByTypeAndTargetIdAndMessageId(string $type , int $target_id , int $message_id)
+    {
+        return self::where([
+            ['type' , '=' , $type] ,
+            ['target_id' , '=' , $target_id] ,
+            ['message_id' , '=' , $message_id] ,
+        ])->delete();
+    }
 
 }

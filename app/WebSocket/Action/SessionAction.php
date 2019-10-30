@@ -224,28 +224,22 @@ class SessionAction extends Action
         return self::success();
     }
 
-    // 会话清理
-    public static function emptySessionHistory(Auth $auth , $param)
+    // 会话清理（彻底删除会话）
+    public static function emptyPrivateHistory(Auth $auth , $param)
     {
         $validator = Validator::make($param , [
-            'type'      => 'required' ,
-            'target_id' => 'required' ,
+            'chat_id' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $type_range = config('business.session_type');
-        if (!in_array($param['type'] , $type_range)) {
-            return self::error('不支持的会话类型' . implode(' , ' , $type_range));
+        $res = SessionUtil::emptyHistory('private' , $param['chat_id']);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
         }
-        switch ($param['type'])
-        {
-            case 'private':
-
-                break;
-            case 'group':
-                break;
-        }
+        // 推送
+        $user_ids = ChatUtil::userIds($param['chat_id']);
+        $auth->push($user_ids , 'refresh_session');
         return self::success();
     }
 }
