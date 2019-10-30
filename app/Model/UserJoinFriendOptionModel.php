@@ -20,7 +20,6 @@ class UserJoinFriendOptionModel extends Model
                 ['join_friend_method_id' , '=' , $join_friend_method_id] ,
             ])
             ->value('enable');
-        $res = empty($res) ? 1 : (int) $res;
-
+        return empty($res) ? 1 : (int) $res;
     }
 }

@@ -70,4 +70,27 @@ class SessionUtil extends Util
         GroupMessageModel::delByGroupId($session->target_id);
         return self::success();
     }
+
+    // 删除会话
+    public static function emptyHistory(string $type , $target_id)
+    {
+        $type_range = ['private' , 'group'];
+        if (!in_array($type , $type_range)) {
+            return self::error('' , 403);
+        }
+        if ($type == 'private') {
+            // 删除屏蔽的消息
+            DeleteMessageModel::delByTypeAndTargetId('private' , $target_id);
+            // 删除未读状态
+            MessageReadStatusModel::delByChatId($target_id);
+            // 删除私聊消息
+            MessageModel::delByChatId($target_id);
+            return self::success();
+        }
+        // 群聊
+        DeleteMessageModel::delByTypeAndTargetId('group' , $target_id);
+        GroupMessageReadStatusModel::delByGroupId($target_id);
+        GroupMessageModel::delByGroupId($target_id);
+        return self::success();
+    }
 }

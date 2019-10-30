@@ -223,4 +223,29 @@ class SessionAction extends Action
         }
         return self::success();
     }
+
+    // 会话清理
+    public static function emptySessionHistory(Auth $auth , $param)
+    {
+        $validator = Validator::make($param , [
+            'type'      => 'required' ,
+            'target_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $type_range = config('business.session_type');
+        if (!in_array($param['type'] , $type_range)) {
+            return self::error('不支持的会话类型' . implode(' , ' , $type_range));
+        }
+        switch ($param['type'])
+        {
+            case 'private':
+
+                break;
+            case 'group':
+                break;
+        }
+        return self::success();
+    }
 }
