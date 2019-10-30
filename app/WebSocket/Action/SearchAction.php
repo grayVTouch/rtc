@@ -176,6 +176,7 @@ class SearchAction extends Action
         {
             $v->type = 'group';
             $v->sort_time = $v->join_time;
+            GroupUtil::handle($v);
         }
         $friend = obj_to_array($friend);
         $group  = obj_to_array($group);

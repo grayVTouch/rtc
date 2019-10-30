@@ -38,7 +38,6 @@ class Push extends Auth
     // 我的推送
     public function myPush(array $param)
     {
-        $param['push_id']   = $param['push_id'] ?? '';
         $param['type']      = $param['type'] ?? '';
         $param['limit']     = $param['limit'] ?? '';
         $param['limit_id']  = $param['limit_id'] ?? '';
