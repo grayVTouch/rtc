@@ -239,7 +239,7 @@ class SessionAction extends Action
         }
         // 推送
         $user_ids = ChatUtil::userIds($param['chat_id']);
-        $auth->push($user_ids , 'refresh_session');
+        $auth->pushAll($user_ids , 'refresh_session');
         return self::success();
     }
 }
