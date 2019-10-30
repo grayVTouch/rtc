@@ -1,5 +1,5 @@
 {
-  "router": "/GroupMessage/mergeForward",
+  "router": "/Search/searchMyFriendAndGroup",
   "identifier": "test",
   "user_id": 3 ,
   "debug": "running" ,
@@ -7,8 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "type": "private" ,
-    "target_id": 4 ,
-    "message_id": "[36,37]"
+    "value": "nihao"
   }
 }

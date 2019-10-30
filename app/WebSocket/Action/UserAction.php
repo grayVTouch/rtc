@@ -14,7 +14,9 @@ use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
 use App\Model\FriendModel;
 use App\Model\GroupModel;
+use App\Model\JoinFriendMethodModel;
 use App\Model\SmsCodeModel;
+use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
@@ -346,5 +348,15 @@ class UserAction extends Action
     {
         ApplicationModel::delByUserId($auth->user->id);
         return self::success();
+    }
+
+    public static function joinFriendMethod(Auth $auth , array $param)
+    {
+        $res = JoinFriendMethodModel::getAll();
+        foreach ($res as $v)
+        {
+            $v->enable = UserJoinFriendOptionModel::enable($auth->user->id , $v->id);
+        }
+        return self::success($res);
     }
 }

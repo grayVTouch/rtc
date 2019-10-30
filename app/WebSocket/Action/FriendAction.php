@@ -10,8 +10,11 @@ namespace App\WebSocket\Action;
 
 
 use App\Model\ApplicationModel;
+use App\Model\BlacklistModel;
 use App\Model\FriendModel;
+use App\Model\JoinFriendMethodModel;
 use App\Model\MessageModel;
+use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
@@ -31,6 +34,7 @@ class FriendAction extends Action
     {
         $validator = Validator::make($param , [
             'friend_id' => 'required' ,
+            'join_friend_method_id' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -41,6 +45,16 @@ class FriendAction extends Action
         }
         if (FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
             return self::error('已经是好友！' , 403);
+        }
+        // todo 是否加入黑名单
+        if (BlacklistModel::blocked($friend->id , $auth->user->id)) {
+            return self::error('你已经被对方加入黑名单' , 403);
+        }
+        // 检查用户是否已经被加入黑名单
+        if (!UserJoinFriendOptionModel::enable($auth->user->id , $param['join_friend_method_id'])) {
+            // 如果未开启
+            $join_friend_method = JoinFriendMethodModel::findById($param['join_friend_method_id']);
+            return self::error("该用户已经关闭该 {$join_friend_method->name} 的添加方式" , 403);
         }
         $param['type']      = 'private';
         $param['op_type']   = 'app_friend';

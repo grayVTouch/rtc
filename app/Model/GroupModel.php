@@ -11,6 +11,7 @@ namespace App\Model;
 
 use function core\convert_obj;
 use function core\random;
+use Illuminate\Support\Facades\DB;
 
 class GroupModel extends Model
 {
@@ -92,6 +93,21 @@ class GroupModel extends Model
     public function user()
     {
         return $this->belongsTo(UserModel::class , 'user_id' , 'id');
+    }
+
+    public static function searchByUserIdWithName(int $user_id , $value)
+    {
+        $res = self::from('group_member as gm')
+            ->leftJoin('group as g' , 'g.id' , '=' , 'gm.group_id')
+            ->where([
+                ['g.name' , 'like' , "%{$value}%"] ,
+                ['gm.user_id' , '=' , $user_id] ,
+            ])
+            ->select('g.*', 'gm.create_time as join_time')
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
     }
 
 }

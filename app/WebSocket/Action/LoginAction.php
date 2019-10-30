@@ -11,8 +11,10 @@ namespace App\WebSocket\Action;
 use App\Lib\SMS\Zz253;
 use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
+use App\Model\JoinFriendMethodModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
+use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Model\UserTokenModel;
@@ -391,6 +393,18 @@ class LoginAction extends Action
             $system_user = UserModel::systemUser($base->identifier);
             GroupMemberModel::u_insertGetId($id , $group_id);
             GroupMemberModel::u_insertGetId($system_user->id , $group_id);
+
+            // 新增用户添加方式选项
+            $join_friend_method = JoinFriendMethodModel::getAll();
+            foreach ($join_friend_method as $v)
+            {
+                UserJoinFriendOptionModel::insertGetId([
+                    'join_friend_method_id' => $v->id ,
+                    'user_id' => $id ,
+                    'enable' => 1 ,
+                ]);
+            }
+
             DB::commit();
             return self::success();
         } catch(Exception $e) {

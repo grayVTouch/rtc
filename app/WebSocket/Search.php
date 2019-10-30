@@ -95,4 +95,15 @@ class Search extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 搜索用户好友和群
+    public function searchMyFriendAndGroup(array $param)
+    {
+        $param['value'] = $param['value'] ?? '';
+        $res = SearchAction::searchMyFriendAndGroup($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

@@ -188,9 +188,14 @@ class UserModel extends Model
         return $this->hasOne(UserOptionModel::class , 'user_id' , 'id');
     }
 
+    public function userJoinFriendOption()
+    {
+        return $this->hasOne(UserJoinFriendOptionModel::class , 'user_id' , 'id');
+    }
+
     public static function findById($id)
     {
-        $res = self::with(['userOption'])
+        $res = self::with(['userOption' , 'userJoinFriendOption'])
             ->find($id);
         if (empty($res)) {
             return ;
@@ -198,12 +203,13 @@ class UserModel extends Model
         $res = convert_obj($res);
         self::single($res);
         UserOptionModel::single($res->user_option);
+        UserJoinFriendOptionModel::single($res->user_join_friend_option);
         return $res;
     }
 
     public static function findByIdentifierAndPhone(string $identifier , string $phone)
     {
-        $res = self::with(['userOption'])
+        $res = self::with(['userOption' , 'userJoinFriendOption'])
             ->where([
                 ['identifier' , '=' , $identifier] ,
                 ['phone' , '=' , $phone] ,
@@ -220,7 +226,7 @@ class UserModel extends Model
 
     public static function findByIdentifierAndNickname(string $identifier , string $nickname)
     {
-        $res = self::with(['userOption'])
+        $res = self::with(['userOption' , 'userJoinFriendOption'])
             ->where([
                 ['identifier' , '=' , $identifier] ,
                 ['nickname' , '=' , $nickname] ,
@@ -238,7 +244,7 @@ class UserModel extends Model
     // 开启了定时清理私聊消息的用户
     public static function getWithEnableRegularClearForPrivate()
     {
-        $res = self::with(['userOption'])
+        $res = self::with(['userOption' , 'userJoinFriendOption'])
             ->from('user as u')
             ->join('user_option as uo' , 'u.id' , '=' , 'uo.user_id')
             ->where('uo.clear_timer_for_private' , '<>' , 'none')
@@ -255,7 +261,7 @@ class UserModel extends Model
     // 开启了定时清理群消息的用户
     public static function getWithEnableRegularClearForGroup()
     {
-        $res = self::with(['userOption'])
+        $res = self::with(['userOption' , 'userJoinFriendOption'])
             ->from('user as u')
             ->join('user_option as uo' , 'u.id' , '=' , 'uo.user_id')
             ->where('uo.clear_timer_for_group' , '<>' , 'none')

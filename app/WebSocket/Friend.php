@@ -17,6 +17,7 @@ class Friend extends Auth
     public function appJoinFriend(array $param)
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['join_friend_method_id'] = $param['join_friend_method_id'] ?? '';
         $param['remark'] = $param['remark'] ?? '';
         $res = FriendAction::appJoinFriend($this , $param);
         if ($res['code'] != 200) {

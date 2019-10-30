@@ -283,7 +283,25 @@ create table if not exists `rtc_timer_log` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '定时器执行日志';
 
+drop table if exists `rtc_join_friend_method`;
+create table if not exists `rtc_join_friend_method` (
+  id int unsigned not null auto_increment ,
+  name varchar(1000) default '' comment '' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '添加好友的方式';
 
+drop table if exists `rtc_user_join_friend_option`;
+create table if not exists `rtc_user_join_friend_option` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  join_friend_method_id int unsigned default 0 comment 'rtc_join_friend_friend_method.id' ,
+  enable tinyint default 1 comment '是否开启：0-关闭 1-开启' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户添加好友的选项';
+
+insert into `rtc_join_friend_method` (id , name) values (1 , '手机号码');
+insert into `rtc_join_friend_method` (id , name) values (2 , 'ID');
+insert into `rtc_join_friend_method` (id , name) values (3 , '我的二维码');
 
 
 -- 上下线通知

@@ -212,4 +212,15 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 添加好友方式
+    public function joinFriendMethod(array $param)
+    {
+        $res = UserAction::joinFriendMethod($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
 }

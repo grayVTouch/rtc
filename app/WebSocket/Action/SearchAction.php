@@ -22,6 +22,7 @@ use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use Core\Lib\Validator;
+use function core\obj_to_array;
 
 class SearchAction extends Action
 {
@@ -153,6 +154,38 @@ class SearchAction extends Action
             return self::error($validator->message());
         }
         $res = SearchUtil::searchGroupHistoryByUserIdAndGroupIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['group_id'] , $param['value'] , $param['limit_id'] , $param['limit']);
+        return self::success($res);
+    }
+
+    public static function searchMyFriendAndGroup(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'value' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $friend = FriendModel::searchByUserIdWithAliasAndNicknameAndUsername($auth->user->id , $param['value']);
+        $group = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
+        foreach ($friend as $v)
+        {
+            $v->type = 'private';
+            $v->sort_time = $v->create_time;
+        }
+        foreach ($group as $v)
+        {
+            $v->type = 'group';
+            $v->sort_time = $v->join_time;
+        }
+        $friend = obj_to_array($friend);
+        $group  = obj_to_array($group);
+        $res = array_merge($friend , $group);
+        usort($res , function ($a , $b){
+            if ($a['sort_time'] == $a['sort_time']) {
+                return 0;
+            }
+            return $a['sort_time'] > $b['sort_time'] ? 1 : -1;
+        });
         return self::success($res);
     }
 }

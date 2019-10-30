@@ -208,4 +208,28 @@ class FriendModel extends Model
         }
         return $res;
     }
+
+    // 搜索用户
+    public static function searchByUserIdWithAliasAndNicknameAndUsername(int $user_id , $value)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->from('friend as f')
+            ->leftJoin('user as u' , 'u.id' , '=' , 'f.friend_id')
+            ->where('f.user_id' , $user_id)
+            ->where(function($query) use($value){
+                $query->where('f.alias' , 'like' , "%{$value}%")
+                    ->orWhere('u.nickname' , 'like' , "%{$value}%")
+                    ->orWhere('u.username' , 'like' , "%{$value}%");
+            })
+            ->select('f.*')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
+    }
 }
