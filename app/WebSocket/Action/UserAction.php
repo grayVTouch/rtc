@@ -379,7 +379,7 @@ class UserAction extends Action
         if (!in_array($param['enable'] , $bool_for_int)) {
             return self::error('不支持的 enable 值，当前受支持的值有 ' . implode(',' , $bool_for_int) , 403);
         }
-        JoinFriendMethodModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
+        UserJoinFriendOptionModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
         return self::success();
     }
 }
