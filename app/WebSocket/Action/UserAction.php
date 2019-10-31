@@ -352,12 +352,6 @@ class UserAction extends Action
 
     public static function joinFriendMethod(Auth $auth , array $param)
     {
-        $validator = Validator::make($param , [
-            'application_id' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
         $res = JoinFriendMethodModel::getAll();
         foreach ($res as $v)
         {

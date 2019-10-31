@@ -15,12 +15,11 @@ class UserJoinFriendOptionModel extends Model
 
     public static function enable(int $user_id , int $join_friend_method_id) :int
     {
-        $res = self::where([
+        return (int) (self::where([
                 ['user_id' , '=' , $user_id] ,
                 ['join_friend_method_id' , '=' , $join_friend_method_id] ,
             ])
-            ->value('enable');
-        return empty($res) ? 1 : (int) $res;
+            ->value('enable'));
     }
 
     public static function updateByUserIdAndJoinFriendMethodIdAndEnable(int $user_id , int $join_friend_method_id , int $enable)
