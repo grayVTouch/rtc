@@ -136,6 +136,9 @@ class ChatUtil extends Util
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$param['chat_id']}] [sender: {$param['user_id']}; receiver: {$param['friend_id']}]");
                     }
                 });
+                AppPushUtil::pushCheckWithNewForFriend($param['user_id'] , $param['friend_id'] , function() use($param , $msg , $base){
+                    $base->push($param['friend_id'] , 'new');
+                });
             } else {
                 if ($push_all) {
                     // 用于消息转发
@@ -227,6 +230,9 @@ class ChatUtil extends Util
                     if ($res['code'] != 200) {
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                     }
+                });
+                AppPushUtil::pushCheckWithNewForGroup($param['user_id'] , $group->id , function() use($v , $param , $base){
+                    $base->push($v , 'new');
                 });
             }
             return self::success($msg);
@@ -347,6 +353,10 @@ class ChatUtil extends Util
                             ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                         }
                     });
+                    AppPushUtil::pushCheckWithNewForGroup($param['user_id'] , $group->id , function() use($v , $param , $base){
+                        $base->push($v , 'new');
+                    });
+
                 }
                 return self::success($msg);
             } catch(Exception $e) {
@@ -384,6 +394,9 @@ class ChatUtil extends Util
                     if ($res['code'] != 200) {
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                     }
+                });
+                AppPushUtil::pushCheckWithNewForGroup($param['user_id'] , $group->id , function() use($v , $param , $base){
+                    $base->push($v , 'new');
                 });
             }
             return self::success($msg);

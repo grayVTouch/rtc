@@ -61,8 +61,8 @@ return [
         'refresh_group_message' ,
         // 刷新用户信息（上下线通知）
         'refresh_user' ,
-        // 指定好友推送
-
+        // 新消息
+        'new' ,
     ] ,
 
     /**

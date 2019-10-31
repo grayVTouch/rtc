@@ -76,6 +76,9 @@ class GroupAction extends Action
             AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
                 AppPushUtil::pushForAppGroup($param['user_id'] , $param['log'] , '申请进群');
             });
+            AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($param , $auth){
+                $auth->push($param['user_id'] , 'new');
+            });
             return self::success($id);
         }
         // 未开启进群认证
@@ -171,6 +174,9 @@ class GroupAction extends Action
                 $auth->push($group->user_id , 'refresh_app_unread_count');
                 AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
                     AppPushUtil::pushForInviteGroup($param['user_id'] , $param['log'] , '邀请进群');
+                });
+                AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($param , $auth){
+                    $auth->push($param['user_id'] , 'new');
                 });
                 return self::success($id);
             }
@@ -363,6 +369,9 @@ class GroupAction extends Action
                 AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($v , $group){
                     AppPushUtil::push($v , sprintf('你被踢出了群 %s' , $group->name) , '退群通知');
                 });
+                AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($v , $auth){
+                    $auth->push($v , 'new');
+                });
             }
             return self::success();
         } catch(Exception $e) {
@@ -481,6 +490,9 @@ class GroupAction extends Action
                 }
                 AppPushUtil::pushCheckForUser($auth->platform , $v , function() use($v , $group){
                     AppPushUtil::push($v , '群组解散了群 ' . $group->name);
+                });
+                AppPushUtil::pushCheckWithNewForUser($v , function() use($v , $auth){
+                    $auth->push($v , 'new');
                 });
             }
             return self::success();

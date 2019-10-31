@@ -211,4 +211,97 @@ class AppPushUtil extends Util
         }
         call_user_func($callback);
     }
+
+    /**
+     * ********************
+     * 私聊-系统新消息推送检查
+     * ********************
+     */
+    public static function pushCheckWithNewForFriend(int $user_id , int $friend_id , callable $callback)
+    {
+        // 检查全局推送是否开启
+        $chat_id = ChatUtil::chatId($user_id , $friend_id);
+        $friend = UserModel::findById($friend_id);
+        if (empty($friend)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户不存在 [friend_id: {$friend_id}]");
+            return ;
+        }
+        $session_id = ChatUtil::sessionId('private' , $chat_id);
+        // 检查用户是否在和你的会话中
+        if (SessionRedis::existSessionMember($friend->identifier , $session_id , $friend->id)) {
+            return ;
+        }
+        if (empty($friend->user_option)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户信息不完整（请在 rtc_user_option 中为用户新增记录） [friend_id: {$friend_id}]");
+            return ;
+        }
+        if ($friend->user_option->private_notification == 0) {
+            // 用户关闭了私聊消息通知
+            return ;
+        }
+        // 开启了全局推送
+        $relation_for_friend = FriendModel::findByUserIdAndFriendId($friend_id , $user_id);
+        if (!empty($relation_for_friend)) {
+            if ($relation_for_friend->can_notice == 0) {
+                // 好友，且对方开启免打扰
+                return ;
+            }
+        }
+        call_user_func($callback);
+    }
+
+    /**
+     * ********************
+     * 群聊-系统新消息推送检查
+     * ********************
+     */
+    public static function pushCheckWithNewForGroup(int $user_id , int $group_id , callable $callback)
+    {
+        $user = UserModel::findById($user_id);
+        // 检查用户是否在绘画里面
+        $session_id = ChatUtil::sessionId('group' , $group_id);
+        if (SessionRedis::existSessionMember($user->identifier , $session_id , $user->id)) {
+            // 用户在房间里面，不做推送
+            return ;
+        }
+        if (empty($user->user_option)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户选项信息不完善（请在 rtc_user_option 中为用户新增记录） [user_id: {$user_id}]");
+            return ;
+        }
+        if ($user->user_option->group_notification == 0) {
+            return ;
+        }
+        // 开启了全局推送
+        $member = GroupMemberModel::findByUserIdAndGroupId($user_id , $group_id);
+        if (empty($member)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户不在群里面 [group_id: {$group_id}；user_id: {$user_id}]");
+            return ;
+        }
+        if ($member->can_notice == 0) {
+            // 群成员，且开启了消息免打扰
+            return ;
+        }
+        // 检查用户是否在会话里面
+        call_user_func($callback);
+    }
+
+    /**
+     * ********************
+     * 用户-系统新消息推送检查
+     * ********************
+     */
+    public static function pushCheckWithNewForUser(int $user_id , callable $callback)
+    {
+        // 检查全局推送是否开启
+        $user = UserModel::findById($user_id);
+        if (empty($user)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户不存在 [user_id: {$user_id}]");
+            return ;
+        }
+        if (empty($user->user_option)) {
+            ProgramErrorLogModel::u_insertGetId("Bug: 用户信息不完整（请在 rtc_user_option 中为用户新增记录） [user_id: {$user_id}]");
+            return ;
+        }
+        call_user_func($callback);
+    }
 }

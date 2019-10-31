@@ -303,6 +303,34 @@ insert into `rtc_join_friend_method` (id , name) values (1 , '手机号码');
 insert into `rtc_join_friend_method` (id , name) values (2 , 'ID');
 insert into `rtc_join_friend_method` (id , name) values (3 , '我的二维码');
 
+drop table if exists `rtc_article_type`;
+create table if not exists `rtc_article_type` (
+  id int unsigned not null auto_increment ,
+  name varchar(1000) default '' comment '分类名称' ,
+  p_id int unsigned default 0 comment '上级id' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '文章类型';
+
+drop table if exists `rtc_article`;
+create table if not exists `rtc_article` (
+  id int unsigned not null auto_increment ,
+  article_type_id int unsigned default 0 comment 'rtc_article_type.id' ,
+  title varchar(1000) default '' comment '标题' ,
+  author varchar(1000) default '' comment '作者' ,
+  content longtext comment '内容' ,
+  update_time datetime default current_timestamp ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '文章表';
+
+insert into `rtc_article_type` (id , name , p_id) values
+(1,'帮助中心' , 0) ,
+(2,'关于我们' , 0) ,
+(3,'使用协议' , 2) ,
+(4,'隐私条款' , 2);
+
+
 
 -- 上下线通知
 -- 写入状态通知

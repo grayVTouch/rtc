@@ -91,6 +91,9 @@ class FriendAction extends Action
                 AppPushUtil::pushCheckForUser($auth->platform , $param['friend_id'] , function() use($param){
                     AppPushUtil::pushForAppFriend($param['friend_id'] , $param['log'] , '申请成为好友');
                 });
+                AppPushUtil::pushCheckWithNewForUser($param['friend_id'] , function() use($param , $auth){
+                    $auth->push($param['friend_id'] , 'new');
+                });
             } else {
                 // 未开启好友认证（直接通过）
                 $user_ids = [$auth->user->id , $param['friend_id']];
