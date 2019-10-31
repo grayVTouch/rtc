@@ -191,7 +191,7 @@ class FriendAction extends Action
             FriendModel::delByUserIdAndFriendId($auth->user->id , $param['friend_id']);
             FriendModel::delByUserIdAndFriendId($param['friend_id'] , $auth->user->id);
             // 删除会话（删除解除好友关系的操作用户的相关会话）
-            SessionUtil::delByUserIdAndTypeAndTargetId($auth->user->id , 'type' , $chat_id);
+            SessionUtil::delByUserIdAndTypeAndTargetId($auth->user->id , 'private' , $chat_id);
             DB::commit();
             // 刷新好友列表
             $user_ids = [$auth->user->id , $param['friend_id']];
