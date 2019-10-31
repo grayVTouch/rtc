@@ -56,6 +56,28 @@ class GroupMessageAction extends Action
         return self::success($res);
     }
 
+    public static function lastest(Auth $auth , array $param)
+    {
+        // 获取群聊数据
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群对应信息' , 404);
+        }
+        $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
+        $res = GroupMessageModel::lastest($auth->user->id , $group->id , $limit_id);
+        foreach ($res as $v)
+        {
+            MessageUtil::handleGroupMessage($v);
+        }
+        return self::success($res);
+    }
+
     // 设置未读消息数量
     public static function resetUnread(Auth $auth , array $param)
     {

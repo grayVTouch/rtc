@@ -30,9 +30,22 @@ class GroupMessage extends Auth
     {
         $param['group_id'] = $param['group_id'] ?? '';
         $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
         $res = GroupMessageAction::history($this, $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'], $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 最新消息
+    public function lastest(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $res = GroupMessageAction::lastest($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
     }

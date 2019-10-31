@@ -102,6 +102,37 @@ class MessageModel extends Model
         return $res;
     }
 
+    public static function lastest(int $user_id , string $chat_id , int $limit_id = 0)
+    {
+        $where = [
+            ['chat_id' , '=' , $chat_id] ,
+        ];
+        if ($limit_id != '') {
+            $where[] = ['id' , '>' , $limit_id];
+        }
+        $res = self::with(['user'])
+            ->from('message as m')
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_m.id = rtc_dm.message_id')
+                    ->where([
+                        ['dm.type' , '=' , 'private'] ,
+                        ['dm.user_id' , '=' , $user_id] ,
+                    ]);
+            })
+            ->where($where)
+            ->orderBy('id' , 'desc')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
+
     // 最新一条数据
     public static function recentMessage(int $user_id , string $chat_id)
     {

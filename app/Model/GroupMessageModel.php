@@ -124,6 +124,38 @@ class GroupMessageModel extends Model
         return $res;
     }
 
+    public static function lastest(int $user_id , $group_id , int $limit_id = 0)
+    {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '>' , $limit_id];
+        }
+        $res = self::with(['group' , 'user'])
+            ->from('group_message as gm')
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('dm.id')
+                    ->from('delete_message as dm')
+                    ->whereRaw('rtc_gm.id = rtc_dm.message_id')
+                    ->where([
+                        ['dm.type' , '=' , 'group'] ,
+                        ['dm.user_id' , '=' , $user_id] ,
+                    ]);
+            })
+            ->where($where)
+            ->orderBy('id' , 'desc')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            GroupModel::single($v->group);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
+
     public static function u_insertGetId(int $user_id , int $group_id , string $type , string $message = '' , string $extra = '')
     {
         return self::insertGetId([

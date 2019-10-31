@@ -59,6 +59,35 @@ class MessageAction extends Action
         }
     }
 
+    //
+    public static function lastest(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $limit_id  = empty($param['limit_id']) ? 0 : $param['limit_id'];
+        $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
+        try {
+            DB::beginTransaction();
+            // 删除阅后即焚消息
+            $id_list = MessageModel::getBurnIdsWithFriendReadedByChatId($chat_id);
+            MessageUtil::delMessageByIds($id_list);
+            $res = MessageModel::lastest($auth->user->id , $chat_id , $limit_id);
+            foreach ($res as $v)
+            {
+                MessageUtil::handleMessage($v , $auth->user->id , $param['friend_id']);
+            }
+            DB::commit();
+            return self::success($res);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     public static function resetUnread(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
