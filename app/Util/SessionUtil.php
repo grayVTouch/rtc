@@ -77,7 +77,7 @@ class SessionUtil extends Util
         if (empty($session)) {
             return self::error('未找到用户会话信息' , 404);
         }
-        self::deleteById($session->id);
+        self::delById($session->id);
         return self::success();
     }
 
