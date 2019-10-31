@@ -19,6 +19,7 @@ use App\Model\UserModel;
 use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
 use App\Util\PushUtil;
+use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use function core\array_unit;
@@ -160,8 +161,8 @@ class FriendAction extends Action
                 $auth->pushAll($user_ids , 'refresh_friend');
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
-                    'user_id' => $auth->user->id ,
-                    'friend_id' => $param['friend_id'] ,
+                    'user_id' => $app->user_id ,
+                    'friend_id' => $app->relation_user_id ,
                     'message' => '你们已经成为好友，可以开始聊天了！' ,
                 ]);
             }
@@ -189,8 +190,8 @@ class FriendAction extends Action
             // 删除好友
             FriendModel::delByUserIdAndFriendId($auth->user->id , $param['friend_id']);
             FriendModel::delByUserIdAndFriendId($param['friend_id'] , $auth->user->id);
-            // 删除聊天记录
-            MessageModel::delByChatId($chat_id);
+            // 删除会话
+            SessionUtil::delete('private' , $chat_id);
             DB::commit();
             // 刷新好友列表
             $user_ids = [$auth->user->id , $param['friend_id']];
