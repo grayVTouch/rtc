@@ -18,6 +18,7 @@ use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\PushUtil;
+use App\Util\SessionUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
@@ -341,6 +342,8 @@ class GroupAction extends Action
                 $user = UserModel::findById($v);
                 $nickname = UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username);
                 $message .= $nickname . ',';
+                // 删除这个人关于该会话的相关消息
+                SessionUtil::delByUserIdAndTypeAndTargetId($v , 'group' , $group->id);
             }
             $message = mb_substr($message , 0 , mb_strlen($message) - 1);
             $message .= '" 被移除了群聊';

@@ -178,7 +178,7 @@ class SessionAction extends Action
             DB::beginTransaction();
             foreach ($id_list as $v)
             {
-                $res = SessionUtil::delete($v);
+                $res = SessionUtil::delById($v);
                 if ($res['code'] != 200) {
                     DB::rollBack();
                     return self::error($res['data'] , $res['code']);

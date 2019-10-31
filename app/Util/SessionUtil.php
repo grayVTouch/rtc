@@ -48,7 +48,7 @@ class SessionUtil extends Util
     }
 
     // 删除会话
-    public static function delete(int $session_id)
+    public static function delById(int $session_id)
     {
         $session = SessionModel::findById($session_id);
         if (empty($session)) {
@@ -68,6 +68,16 @@ class SessionUtil extends Util
         {
             GroupMessageUtil::shield($session->user_id , $session->target_id , $v->id);
         }
+        return self::success();
+    }
+
+    public static function delByUserIdAndTypeAndTargetId(int $user_id , string $type , $target_id)
+    {
+        $session = SessionModel::findByUserIdAndTypeAndTargetId($user_id , $type , $target_id);
+        if (empty($session)) {
+            return self::error('未找到用户会话信息' , 404);
+        }
+        self::deleteById($session->id);
         return self::success();
     }
 
