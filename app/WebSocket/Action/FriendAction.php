@@ -34,7 +34,6 @@ class FriendAction extends Action
     {
         $validator = Validator::make($param , [
             'friend_id' => 'required' ,
-            'join_friend_method_id' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -51,7 +50,7 @@ class FriendAction extends Action
             return self::error('你已经被对方加入黑名单' , 403);
         }
         // 检查用户是否已经被加入黑名单
-        if (!UserJoinFriendOptionModel::enable($auth->user->id , $param['join_friend_method_id'])) {
+        if (!empty($param['join_friend_method_id']) && !UserJoinFriendOptionModel::enable($auth->user->id , $param['join_friend_method_id'])) {
             // 如果未开启
             $join_friend_method = JoinFriendMethodModel::findById($param['join_friend_method_id']);
             return self::error("该用户已经关闭该 {$join_friend_method->name} 的添加方式" , 403);
