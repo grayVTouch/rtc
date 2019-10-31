@@ -58,7 +58,9 @@ class Article extends Auth
     // 帮助中心-列表
     public function listForHelpCenter(array $param)
     {
-        $res = ArticleAction::listForHelpCenter($this , $this->articleTypeIdForPrivacyPolicy , $param);
+        $param['page'] = $param['page'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $res = ArticleAction::listForHelpCenter($this , $this->articleTypeIdForHelpCenter , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

@@ -20,4 +20,11 @@ class ArticleModel extends Model
         self::single($res);
         return $res;
     }
+
+    public static function countByArticleTypeId(int $article_type_id)
+    {
+        return (int) (self::where('article_type_id' , $article_type_id)->count());
+    }
+
+//    public static function
 }
