@@ -181,11 +181,10 @@ class WebSocket
         $user = UserModel::findById($user_id);
         try {
             DB::beginTransaction();
-
+            $push = [];
             if (!empty($user)) {
                 if (empty($_conn)) {
                     // 客服下线后续处理
-                    $push = [];
                     if ($user->role == 'admin') {
                         // 如果是客服，自动退出客服群
                         $groups = GroupMemberModel::getByUserId($user->id);
