@@ -17,6 +17,7 @@ use App\Model\MessageReadStatusModel;
 use App\Model\ProgramErrorLogModel;
 use App\Model\TimerLogModel;
 use App\Model\SessionModel;
+use App\Redis\SessionRedis;
 use App\Redis\TimerRedis;
 use App\Util\ChatUtil;
 use App\Util\GroupMessageUtil;
@@ -174,56 +175,65 @@ class WebSocket
         $_conn = array_diff($conn , [$fd]);
         if (empty($_conn)) {
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
+
         }
         // 清除 Redis（删除的太快了）
         $user = UserModel::findById($user_id);
-        // 用户下线通知
-        if (!empty($user) && $user->role == 'admin') {
-            // 客服下线后续处理
-            try {
-                DB::beginTransaction();
-                $push = [];
+        try {
+            DB::beginTransaction();
+
+            if (!empty($user)) {
                 if (empty($_conn)) {
-                    // 如果是客服，用户加入的群组
-                    $groups = GroupMemberModel::getByUserId($user->id);
-                    foreach ($groups as $v)
-                    {
-                        $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
-                        $group_bind_waiter = (int) $group_bind_waiter;
-                        if ($group_bind_waiter != $user_id) {
-                            // 绑定的并非当前离线客服
-                            continue ;
+                    // 客服下线后续处理
+                    $push = [];
+                    if ($user->role == 'admin') {
+                        // 如果是客服，自动退出客服群
+                        $groups = GroupMemberModel::getByUserId($user->id);
+                        foreach ($groups as $v)
+                        {
+                            $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
+                            $group_bind_waiter = (int) $group_bind_waiter;
+                            if ($group_bind_waiter != $user_id) {
+                                // 绑定的并非当前离线客服
+                                continue ;
+                            }
+                            $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
+                            $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
+                            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
+                            $msg = GroupMessageModel::findById($group_message_id);
+                            MessageUtil::handleGroupMessage($msg);
+                            $push[] = [
+                                'identifier'    => $v->user->identifier ,
+                                'user_ids'      => $user_ids ,
+                                'type'          => 'group_message' ,
+                                'data'          => $msg
+                            ];
                         }
-                        $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
-                        $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
-                        GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
-                        $msg = GroupMessageModel::findById($group_message_id);
-                        MessageUtil::handleGroupMessage($msg);
-                        $push[] = [
-                            'identifier'    => $v->user->identifier ,
-                            'user_ids'      => $user_ids ,
-                            'type'          => 'group_message' ,
-                            'data'          => $msg
-                        ];
+                    }
+                    // 用户离线后自动退出会话
+                    $sessions = SessionModel::getByUserId($user->id);
+                    foreach ($sessions as $v)
+                    {
+                        SessionRedis::delSessionMember($user->identifier , $v->session_id , $user->id);
                     }
                 }
-                DB::commit();
-                foreach ($push as $v)
-                {
-                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
-                }
-            } catch(Exception $e) {
-                DB::rollBack();
-                if (config('app.debug')) {
-                    throw $e;
-                }
-                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
-                $log = json_encode($log);
-                ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
             }
+            DB::commit();
+            foreach ($push as $v)
+            {
+                PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
+            }
+            // 删除 Redis
+            $this->clearRedis($user_id , $fd);
+        } catch(Exception $e) {
+            DB::rollBack();
+            if (config('app.debug')) {
+                throw $e;
+            }
+            $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+            $log = json_encode($log);
+            ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
         }
-        // 删除 Redis
-        $this->clearRedis($user_id , $fd);
     }
 
     public function message(BaseWebSocket $server , $frame)
