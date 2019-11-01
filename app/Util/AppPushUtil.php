@@ -19,6 +19,8 @@ use App\Model\UserOptionModel;
 use App\Redis\SessionRedis;
 use Exception;
 
+// todo 需要使用异步任务的方式执行 app 推送
+// todo 否则，推送速度太慢
 
 class AppPushUtil extends Util
 {
