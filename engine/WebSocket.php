@@ -745,16 +745,17 @@ class WebSocket
                             }
                         }
                         ClearTimerLogModel::u_insertGetId($v->id , 'group');
-                        // todo 通知客户端同步删除本地数据库
                     }
                 }
                 DB::commit();
                 foreach ($user_for_clear_private as $v)
                 {
+                    // 通知客户端清除本地缓存
                     PushUtil::multiple($v->identifier , $v->id , 'empty_private_session_from_cache' , $v->chat_ids);
                 }
                 foreach ($user_for_clear_group as $v)
                 {
+                    // 通知客户端清除本地缓存
                     PushUtil::multiple($v->identifier , $v->id , 'empty_group_session_from_cache' , $v->group_ids);
                 }
                 TimerLogUtil::logCheck(function() use(&$timer_log_id){
