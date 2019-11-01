@@ -357,6 +357,8 @@ class GroupAction extends Action
             $group_member_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             $auth->pushAll($group_member_ids , 'refresh_group_member');
             $auth->pushAll($kick_user_ids , 'refresh_group');
+            $auth->pushAll($kick_user_ids , 'delete_group_from_cache');
+            // 通知被踢出群的那个人，删除本地
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
                 'group_id'  => $group->id ,
@@ -483,6 +485,8 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
             $auth->pushAll($user_ids , 'refresh_session');
+            // 解散群后，需要删除群内成员的本地聊天记录
+            $auth->pushAll($user_ids , 'empty_group_message' , [$param['group_id']]);
             foreach ($user_ids as $v)
             {
                 if ($v == $auth->user->id) {

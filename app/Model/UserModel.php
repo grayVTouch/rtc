@@ -265,6 +265,7 @@ class UserModel extends Model
             ->from('user as u')
             ->join('user_option as uo' , 'u.id' , '=' , 'uo.user_id')
             ->where('uo.clear_timer_for_group' , '<>' , 'none')
+            ->select('u.*')
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)

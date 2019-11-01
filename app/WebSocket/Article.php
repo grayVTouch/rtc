@@ -60,7 +60,7 @@ class Article extends Auth
     {
         $param['page'] = $param['page'] ?? '';
         $param['limit'] = $param['limit'] ?? '';
-        $res = ArticleAction::listForHelpCenter($this , $this->articleTypeIdForHelpCenter , $param);
+        $res = ArticleAction::listForArticle($this , $this->articleTypeIdForHelpCenter , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
@@ -68,4 +68,13 @@ class Article extends Auth
     }
 
     // 帮助中心-文章详情
+    public function detailForHelpCenter(array $param)
+    {
+        $param['id'] = $param['id'] ?? '';
+        $res = ArticleAction::detailForArticle($this , $this->articleTypeIdForHelpCenter , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

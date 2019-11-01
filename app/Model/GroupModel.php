@@ -81,12 +81,18 @@ class GroupModel extends Model
     public static function expiredGroup()
     {
         $datetime = date('Y-m-d H:i:s' , time());
-        $res = self::where([
-            ['type' , '=' , 2] ,
-            ['expire' , '<' , $datetime] ,
-        ])->get();
+        $res = self::with(['user'])
+            ->where([
+                ['type' , '=' , 2] ,
+                ['expire' , '<' , $datetime] ,
+            ])
+            ->get();
         $res = convert_obj($res);
-        self::multiple($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
         return $res;
     }
 

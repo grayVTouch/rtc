@@ -63,6 +63,14 @@ return [
         'refresh_user' ,
         // 新消息
         'new' ,
+        // 通知给定的用户删除应用本地数据中的给定群及相关信息（如果有的话）
+        'delete_group_from_cache' ,
+        // 通知给定的用户删除应用本地数据中的给定多条私聊消息记录（如果有的话）
+        'delete_private_message_from_cache' ,
+        // 通知给定的用户清空应用本地数据中的给定私聊会话记录
+        'empty_private_session_from_cache' ,
+        // 通知给定的用户清空应用本地数据中的给定私聊会话记录
+        'empty_group_session_from_cache' ,
     ] ,
 
     /**

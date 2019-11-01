@@ -592,10 +592,19 @@ class WebSocket
                 $expired_group = GroupModel::expiredGroup();
                 foreach ($expired_group as $v)
                 {
+                    $v->member_ids = GroupMemberModel::getUserIdByGroupId($v->id);
                     // 删除群
                     GroupUtil::delete($v->id);
                 }
                 DB::commit();
+                foreach ($expired_group as $v)
+                {
+                    if (empty($v->user)) {
+                        continue ;
+                    }
+                    // 通知群成员删除群相关信息
+                    PushUtil::multiple($v->user->identifier , $v['member_ids'] , 'delete_group_from_cache' , [$v->id]);
+                }
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });
@@ -672,9 +681,12 @@ class WebSocket
                         }
                         // 清空所有私聊记录
                         $friend_ids = FriendModel::getFriendIdByUserId($v->id);
+                        $v->friend_ids = $friend_ids;
+                        $v->chat_ids = [];
                         foreach ($friend_ids as $v1)
                         {
                             $chat_id = ChatUtil::chatId($v->id , $v1);
+                            $user_for_clear_private->chat_ids[] = $chat_id;
                             $messages = MessageModel::getByChatId($chat_id);
                             foreach ($messages as $v2)
                             {
@@ -691,6 +703,7 @@ class WebSocket
                         }
                         ClearTimerLogModel::u_insertGetId($v->id , 'private');
                     }
+                    // todo 通知客户端删除本地数据库中的数据
                 }
 
                 if ($time == $time_point_for_clear_group_message_timer) {
@@ -711,8 +724,11 @@ class WebSocket
                         }
                         // 清空所有私聊记录
                         $groups = GroupMemberModel::getByUserId($v->id);
+                        $v->groups = $groups;
+                        $v->group_ids = [];
                         foreach ($groups as $v1)
                         {
+                            $v->group_ids[] = $v1->id;
                             $group_messages = GroupMessageModel::getByGroupId($v1->group_id);
                             $member_count = GroupMemberModel::countByGroupId($v1->group_id);
                             foreach ($group_messages as $v2)
@@ -729,9 +745,18 @@ class WebSocket
                             }
                         }
                         ClearTimerLogModel::u_insertGetId($v->id , 'group');
+                        // todo 通知客户端同步删除本地数据库
                     }
                 }
                 DB::commit();
+                foreach ($user_for_clear_private as $v)
+                {
+                    PushUtil::multiple($v->identifier , $v->id , 'empty_private_session_from_cache' , $v->chat_ids);
+                }
+                foreach ($user_for_clear_group as $v)
+                {
+                    PushUtil::multiple($v->identifier , $v->id , 'empty_group_session_from_cache' , $v->group_ids);
+                }
                 TimerLogUtil::logCheck(function() use(&$timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });

@@ -1,5 +1,5 @@
 {
-  "router": "/User/setJoinFriendMethod",
+  "router": "/Message/readedForBurn",
   "identifier": "test",
   "user_id": 3 ,
   "debug": "running" ,
@@ -7,7 +7,6 @@
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "join_friend_method_id": 1 ,
-    "enable": 1
+    "message_id": 35
   }
 }

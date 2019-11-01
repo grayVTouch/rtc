@@ -146,7 +146,7 @@ class MessageAction extends Action
         }
     }
 
-    public static function readed(Auth $auth , array $param)
+    public static function readedForBurn(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'message_id' => 'required' ,
@@ -154,11 +154,21 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = MessageReadStatusModel::updateReadStatusByUserIdAndMessageId($auth->user->id , $param['message_id'] , 1);
-        if ($res > 0) {
-            return self::success();
+        $message = MessageModel::findById($param['message_id']);
+        if ($message->flag != 'burn') {
+            return self::error('并非阅后即焚消息' , 403);
         }
-        return self::error('操作失败');
+        $user_ids = ChatUtil::userIds($message->chat_id);
+        if (!in_array($auth->user->id , $user_ids)) {
+            return self::error('你无法更改他人的消息读取状态' , 403);
+        }
+        $res = MessageReadStatusModel::updateReadStatusByUserIdAndMessageId($auth->user->id , $param['message_id'] , 1);
+        if ($res <= 0) {
+            return self::error('操作失败');
+        }
+        // 推送给该条消息的双方，将本地数据库的消息删除
+        $auth->pushAll($user_ids , 'delete_private_message_from_cache' , [$param['message_id']]);
+        return self::success();
     }
 
     // 消息撤回
@@ -409,5 +419,23 @@ class MessageAction extends Action
         }
 
         return self::error('不支持的 type，当前受支持的 type 有 ' . implode(',' , $type_range));
+    }
+
+    public static function sync(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'id_list' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $id_list = json_decode($param['id_list'] , true);
+        $res = MessageModel::getByIds($id_list);
+        foreach ($res as $v)
+        {
+            $other_id = ChatUtil::otherId($v->chat_id , $auth->user->id);
+            MessageUtil::handleMessage($v , $auth->user->id , $other_id);
+        }
+        return self::success($res);
     }
 }

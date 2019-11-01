@@ -381,17 +381,20 @@ class GroupMessageAction extends Action
         }
     }
 
-    public static function getByIds(array $id_list = [])
+    public static function sync(Auth $auth , array $param)
     {
-        $res = self::with(['user'])
-            ->whereIn('id' , $id_list)
-            ->get();
-        $res = convert_obj($res);
+        $validator = Validator::make($param , [
+            'id_list' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $id_list = json_decode($param['id_list'] , true);
+        $res = GroupMessageModel::getByIds($id_list);
         foreach ($res as $v)
         {
-            self::single($v);
-            UserModel::single($v->user);
+            MessageUtil::handleGroupMessage($v);
         }
-        return $res;
+        return self::success($res);
     }
 }

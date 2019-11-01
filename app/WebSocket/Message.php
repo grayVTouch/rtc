@@ -92,10 +92,10 @@ class Message extends Auth
     }
 
     // 设置单挑消息已读未读
-    public function readed(array $param)
+    public function readedForBurn(array $param)
     {
         $param['message_id'] = $param['message_id'] ?? '';
-        $res = MessageAction::readed($this , $param);
+        $res = MessageAction::readedForBurn($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
@@ -133,6 +133,17 @@ class Message extends Auth
         $param['target_id'] = $param['target_id'] ?? '';
         $param['message_id'] = $param['message_id'] ?? '';
         $res = MessageAction::mergeForward($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 私聊消息-同步（用于同步app本地数据库和线上数据库）
+    public function sync(array $param)
+    {
+        $param['id_list'] = $param['id_list'] ?? '';
+        $res = MessageAction::sync($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
