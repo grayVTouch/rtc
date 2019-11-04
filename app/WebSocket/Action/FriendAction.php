@@ -210,7 +210,7 @@ class FriendAction extends Action
     // 好友列表
     public static function myFriend(Auth $auth , array $param)
     {
-        $res = FriendModel::getByUserId($auth->user->id);
+        $res = FriendModel::getByUserIdNotInBlacklist($auth->user->id);
         foreach ($res as $v)
         {
             UserUtil::handle($v->user);

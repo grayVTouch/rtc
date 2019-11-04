@@ -99,6 +99,29 @@ class FriendModel extends Model
         return $res;
     }
 
+    // 获取不在黑名单列表的好友列表
+    public static function getByUserIdNotInBlacklist(int $user_id)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->from('friend as f')
+            ->where('f.user_id' , $user_id)
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('b.id')
+                    ->from('blacklist as b')
+                    ->where('b.user_id' , $user_id)
+                    ->whereRaw('rtc_b.block_user_id = f.friend_id');
+            })
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            UserModel::single($v->friend);
+        }
+        return $res;
+    }
+
     public static function updateByUserIdAndFriendId(int $user_id , int $friend_id , array $param)
     {
         return self::where([
