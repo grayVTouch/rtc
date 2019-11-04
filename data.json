@@ -1,12 +1,16 @@
 {
-  "router": "/Message/readedForBurn",
+  "router": "/Chat/sendCardForPrivate",
   "identifier": "test",
-  "user_id": 3 ,
+  "user_id": 14 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "message_id": 35
+    "friend_id": 12 ,
+    "message": 11 ,
+    "extra": "",
+    "target_user": "" ,
+    "target_user_ids": "[1,2]"
   }
 }

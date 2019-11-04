@@ -246,4 +246,7 @@ class Group extends Auth
         return self::success($res['data']);
     }
 
+    // 群禁言
+
+
 }

@@ -670,6 +670,8 @@ class WebSocket
             };
 
             // 获取已经开启定时清理的用户记录
+            $user_for_clear_private = [];
+            $user_for_clear_group = [];
             try {
                 DB::beginTransaction();
                 if ($time >= $time_point_for_clear_private_message_timer) {
