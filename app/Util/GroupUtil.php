@@ -52,9 +52,11 @@ class GroupUtil extends Util
                         $user->nickname :
                         $myself->alias;
                 }
-
             }
+            // 是否置顶
+            $group->top = empty($myself) ? 0 : $myself->top;
         }
+
     }
 
     // 删除群（执行该方法请始终使用事务的方式执行）

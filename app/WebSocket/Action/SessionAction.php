@@ -119,23 +119,43 @@ class SessionAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $exist = SessionModel::exist($auth->user->id , $param['type'] , $param['target_id']);
-        if ($exist) {
-            // 更改类型
-            SessionModel::updateByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
-        } else {
-            $param['user_id'] = $auth->user->id;
-            $id = SessionModel::insertGetId(array_unit($param , [
-                'user_id' ,
-                'type' ,
-                'target_id' ,
-                'top' ,
-            ]));
-            // var_dump($id);
+        try {
+            DB::beginTransaction();
+            $exist = SessionModel::exist($auth->user->id , $param['type'] , $param['target_id']);
+            if ($exist) {
+                // 更改类型
+                SessionModel::updateByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
+            } else {
+                $param['user_id'] = $auth->user->id;
+                $id = SessionModel::insertGetId(array_unit($param , [
+                    'user_id' ,
+                    'type' ,
+                    'target_id' ,
+                    'top' ,
+                ]));
+            }
+            switch ($param['type'])
+            {
+                case 'private':
+                    $other_id = ChatUtil::otherId($param['target_id'] , $auth->user->id);
+                    FriendModel::updateByUserIdAndFriendId($auth->user->id , $other_id , [
+                        'top' => $param['top']
+                    ]);
+                    break;
+                case 'group':
+                    GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['target_id'] , [
+                        'top' => $param['top']
+                    ]);
+                    break;
+            }
+            DB::commit();
+            // 刷新会话
+            $auth->push($auth->user->id , 'refresh_session');
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-        // 刷新会话
-        $auth->push($auth->user->id , 'refresh_session');
-        return self::success();
     }
 
     public static function createOrUpdate(Auth $auth , array $param)

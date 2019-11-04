@@ -81,6 +81,7 @@ create table if not exists `rtc_group_member` (
   alias varchar(500) default '' comment '我在群里面的别名' ,
   can_notice tinyint default 1 comment '消息免打扰？0-否 1-是' ,
   banned tinyint default 0 comment '成员自身无法设置，仅群主可设置！是否禁言？0-否 1-是' ,
+  top tinyint default 0 comment '置顶？：0-否 1-是' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群成员';
