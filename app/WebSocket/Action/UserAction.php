@@ -192,6 +192,8 @@ class UserAction extends Action
                 BlacklistModel::u_insertGetId($auth->user->id , $user->id);
                 break;
         }
+        // 刷新好友列表
+        $auth->push($auth->user->id , 'refresh_friend');
         return self::success();
     }
 
