@@ -718,5 +718,55 @@ class GroupAction extends Action
         return self::success();
     }
 
+    public static function banned(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id'  => 'required' ,
+            'user_ids'   => 'required' ,
+            'banned'   => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查提供的值是否正确
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['banned'] , $bool_for_int)) {
+            return self::error('不支持的 banned 值，当前受支持的值有 ' . implode(' , ' , $bool_for_int));
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在' , 404);
+        }
+        if ($group->user_id != $auth->user->id) {
+            return self::error('您不是群主' , 403);
+        }
+        $user_ids = json_decode($param['user_ids'] , true);
+        if (empty($user_ids)) {
+            return self::error('请提供要禁言的群成员');
+        }
+        foreach ($user_ids as $v)
+        {
+            if (!GroupMemberModel::exist($v , $group->id)) {
+                return self::error('包含非群成员用户' , 403);
+            }
+            if ($v == $auth->user->id) {
+                return self::error('不能将自身设置禁言' , 403);
+            }
+        }
+        try {
+            DB::beginTransaction();
+            foreach ($user_ids as $v)
+            {
+                GroupMemberModel::updateByUserIdAndGroupId($v , $group->id , [
+                    'banned' => $param['banned']
+                ]);
+            }
+            DB::commit();
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 
 }

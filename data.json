@@ -1,16 +1,14 @@
 {
-  "router": "/Chat/sendCardForPrivate",
+  "router": "/Group/groupMember",
   "identifier": "test",
-  "user_id": 14 ,
+  "user_id": 3 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "friend_id": 12 ,
-    "message": 11 ,
-    "extra": "",
-    "target_user": "" ,
-    "target_user_ids": "[1,2]"
+    "user_ids": "[4]" ,
+    "group_id": 3 ,
+    "banned": 1
   }
 }

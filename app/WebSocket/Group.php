@@ -247,6 +247,16 @@ class Group extends Auth
     }
 
     // 群禁言
-
+    public function banned(array $param)
+    {
+        $param['user_ids']   = $param['user_ids'] ?? '';
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['banned']  = $param['banned'] ?? '';
+        $res = GroupAction::banned($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 
 }
