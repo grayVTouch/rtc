@@ -176,9 +176,13 @@ class ChatUtil extends Util
             return self::error('群不存在！' , 404);
         }
         // 检查是否时好友
-        $exist = GroupMemberModel::exist($param['user_id'] , $param['group_id']);
-        if (!$exist) {
+        $member = GroupMemberModel::findByUserIdAndGroupId($param['user_id'] , $param['group_id']);
+        if (empty($member)) {
             return self::error('您不在该群，禁止操作' , 403);
+        }
+        if ($member->banned == 1) {
+            // 被设置禁言
+            return self::error('您已经被管理员设置为禁言');
         }
         $group_target_user = config('business.group_target_user');
         $param['extra'] = $param['extra'] ?? '';
