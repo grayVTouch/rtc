@@ -103,6 +103,7 @@ create table if not exists `rtc_friend` (
   burn tinyint default 0 comment '阅后即焚：0-否 1-是' ,
   alias varchar(255) default '' comment '别名（好友备注）' ,
   can_notice tinyint default 1 comment '消息免打扰：0-否 1-是' ,
+  top tinyint default 0 comment '置顶？：0-否 1-是' ,
   background varchar(1000) default '' comment '聊天背景' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)

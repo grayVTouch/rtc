@@ -104,11 +104,9 @@ class ChatUtil extends Util
                     'message_id' => $id ,
                     'target_id' => $param['chat_id'] ,
                 ]);
-            } else {
-                SessionUtil::createOrUpdate($param['friend_id'] , 'private' , $param['chat_id']);
             }
             $msg = MessageModel::findById($id);
-            SessionUtil::createOrUpdate($param['user_id'] , 'private' , $param['chat_id']);
+            SessionUtil::createOrUpdate($param['user_id'] , 'private' , $param['chat_id'] , $relation->top);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
             DB::commit();
             if (!$blocked) {

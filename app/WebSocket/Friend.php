@@ -92,4 +92,16 @@ class Friend extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 设置好友备注
+    public function canNotice(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['can_notice']     = $param['can_notice'] ?? '';
+        $res = FriendAction::canNotice($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

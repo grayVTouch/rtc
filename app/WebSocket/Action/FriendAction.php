@@ -258,6 +258,26 @@ class FriendAction extends Action
         FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
             'alias' ,
         ]));
+//        $auth->push();
+        return self::success();
+    }
+
+    // 好友备注
+    public static function canNotice(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+            'can_notice'      => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
+            return self::error('你们并非好友，无权限操作' , 403);
+        }
+        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
+            'can_notice' ,
+        ]));
         return self::success();
     }
 }

@@ -58,6 +58,10 @@ class UserUtil extends Util
                     1);
             // 是否阅后即焚
             $user->burn = empty($friend) ? 0 : $friend->burn;
+            // 检查是否置顶
+            $user->top = empty($friend) ? 0 : $friend->top;
+            // 是否免打扰
+            $user->can_notice = empty($friend) ? 1 :$friend->can_notice;
         }
     }
 
