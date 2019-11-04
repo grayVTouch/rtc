@@ -45,7 +45,6 @@ class Session extends Auth
     {
         $param['type']      = $param['type'] ?? '';
         $param['target_id'] = $param['target_id'] ?? '';
-        $param['top']       = $param['top'] ?? '';
         $res = SessionAction::createOrUpdate($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

@@ -60,12 +60,16 @@ class SessionAction extends Action
                 // 私聊消息处理
                 $v->recent_message = $recent_message;
                 $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
+                $friend = FriendModel::findByUserIdAndFriendId($auth->user->id , $other_id);
+                $v->top = empty($friend) ? 0 : $friend->top;
+                $v->can_notice = empty($friend) ? 1 : $friend->can_notice;
                 if ($v->top == 1) {
                     // 置顶群聊
                     $top_session[] = $v;
                     continue ;
                 }
                 $general_session[] = $v;
+
                 continue ;
             }
 
@@ -83,6 +87,9 @@ class SessionAction extends Action
                     $v->group->name = '平台咨询';
                 }
                 $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
+                $member = GroupMemberModel::findByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $v->top = empty($member) ? 0 : $member->top;
+                $v->can_notice = empty($member) ? 1 : $member->can_notice;
                 if ($v->top == 1) {
                     $top_session[] = $v;
                     continue ;
@@ -168,8 +175,7 @@ class SessionAction extends Action
             return self::error($validator->message());
         }
         $param['user_id'] = $auth->user->id;
-        $param['top'] = $param['top'] == '' ? 0 : $param['top'];
-        $res = SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
+        $res = SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id']);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }
