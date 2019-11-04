@@ -51,6 +51,11 @@ class UserUtil extends Util
                 (empty($friend->alias) ?
                     $user->nickname :
                     $friend->alias);
+            $user->remarked = empty($friend) ?
+                0 :
+                (empty($friend->alias) ?
+                    0 :
+                    1);
             // 是否阅后即焚
             $user->burn = empty($friend) ? 0 : $friend->burn;
         }
