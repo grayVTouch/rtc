@@ -109,7 +109,7 @@ class FriendModel extends Model
                 $query->select('b.id')
                     ->from('blacklist as b')
                     ->where('b.user_id' , $user_id)
-                    ->whereRaw('rtc_b.block_user_id = f.friend_id');
+                    ->whereRaw('rtc_b.block_user_id = rtc_f.friend_id');
             })
             ->get();
         $res = convert_obj($res);
