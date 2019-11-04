@@ -164,7 +164,6 @@ class WebSocket
 
     public function close(Server $server , int $fd , int $reacter_id)
     {
-        var_dump(date('Y-m-d H:i:s') . ' 存在客户端下线');
         $this->isOpen = false;
         $identifier = MiscRedis::fdMappingIdentifier($fd);
         if (empty($identifier)) {
@@ -173,9 +172,12 @@ class WebSocket
         $user_id = UserRedis::fdMappingUserId($identifier , $fd);
         $conn = UserRedis::userIdMappingFd($identifier , $user_id);
         $_conn = array_diff($conn , [$fd]);
+
         if (empty($_conn)) {
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
-
+            var_dump(date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（还有其他客户端活跃）');
+        } else {
+            var_dump(date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有对应客户端下线）');
         }
         // 清除 Redis（删除的太快了）
         $user = UserModel::findById($user_id);
