@@ -340,6 +340,7 @@ class UserAction extends Action
             return self::error('包含他人的申请信息，禁止操作' , 403);
         }
         ApplicationModel::delByIds($id_list);
+        $auth->push($auth->user->id , 'refresh_application');
         return self::success();
     }
 
