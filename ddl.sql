@@ -195,6 +195,7 @@ create table if not exists `rtc_push_read_status` (
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   push_id int unsigned default 0 comment 'rtc_push.id' ,
   is_read tinyint default 0 comment '是否读取: y-已读 n-未读' ,
+  `type` varchar(255) default '' comment '推送类型，缓存字段 rtc_push.type' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送消息-读取状态';

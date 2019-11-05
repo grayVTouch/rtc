@@ -194,6 +194,7 @@ class UserAction extends Action
         }
         // 刷新好友列表
         $auth->push($auth->user->id , 'refresh_friend');
+        $auth->push($auth->user->id , 'refresh_blacklist');
         return self::success();
     }
 

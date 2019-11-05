@@ -51,4 +51,20 @@ class PushAction extends Action
         $res = PushModel::getByUserIdAndTypeAndLimitIdAndLimit($auth->user->id , $param['type'] , $param['limit_id'] , $limit);
         return self::success($res);
     }
+
+    public static function resetUnread(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'type' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $push_type = config('business.push_type');
+        if (!in_array($param['type'] , $push_type)) {
+            return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $push_type));
+        }
+        PushReadStatusModel::updateIsReadByUserIdAndType($auth->user->id , $param['type'] , 1);
+        return self::success();
+    }
 }

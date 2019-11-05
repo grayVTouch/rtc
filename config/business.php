@@ -73,6 +73,8 @@ return [
         'empty_private_session_from_cache' ,
         // 通知给定的用户清空应用本地数据中的给定私聊会话记录
         'empty_group_session_from_cache' ,
+        // 刷新黑名单列表
+        'refresh_blacklist' ,
     ] ,
 
     /**
@@ -336,5 +338,11 @@ return [
         'auto' ,
         // 用户指定推送
         'designation' ,
+    ] ,
+
+    // 推送类型
+    'push_type' => [
+        // 系统公告
+        'system'
     ] ,
 ];

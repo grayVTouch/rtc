@@ -13,7 +13,7 @@ use App\WebSocket\Action\PushAction;
 
 class Push extends Auth
 {
-    // 更新推送消息读取状态
+    // 更新单条推送读取状态
     public function updateIsRead(array $param)
     {
         $param['push_id'] = $param['push_id'] ?? '';
@@ -42,6 +42,17 @@ class Push extends Auth
         $param['limit']     = $param['limit'] ?? '';
         $param['limit_id']  = $param['limit_id'] ?? '';
         $res = PushAction::myPush($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 重置某类型推送的读取状态
+    public function resetUnread(array $param)
+    {
+        $param['type'] = $param['push_id'] ?? '';
+        $res = PushAction::resetUnread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
