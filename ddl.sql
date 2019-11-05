@@ -82,6 +82,7 @@ create table if not exists `rtc_group_member` (
   can_notice tinyint default 1 comment '消息免打扰？0-否 1-是' ,
   banned tinyint default 0 comment '成员自身无法设置，仅群主可设置！是否禁言？0-否 1-是' ,
   top tinyint default 0 comment '置顶？：0-否 1-是' ,
+  background varchar(500) default '' comment '背景图片' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群成员';
@@ -241,7 +242,6 @@ create table if not exists `rtc_session` (
   type varchar(255) default '' comment '类型：private-私聊 group-群聊' ,
   target_id varchar(255) default '' comment 'type=private，则 target_id=chat_id；type=group，target_id=group_id' ,
   session_id varchar(255) default '' comment '会话id，生成规则 type=private，session_id=md5("private_" + chat_id); type=group,session_id=md5("group_" + group_id)' ,
-  top tinyint default 0 comment '置顶？0-否 1-是' ,
   update_time datetime default current_timestamp on update current_timestamp ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)

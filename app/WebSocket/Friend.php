@@ -93,7 +93,7 @@ class Friend extends Auth
         return self::success($res['data']);
     }
 
-    // 设置好友备注
+    // 消息免打扰
     public function canNotice(array $param)
     {
         $param['friend_id'] = $param['friend_id'] ?? '';

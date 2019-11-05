@@ -190,7 +190,7 @@ class UserModel extends Model
 
     public function userJoinFriendOption()
     {
-        return $this->hasOne(UserJoinFriendOptionModel::class , 'user_id' , 'id');
+        return $this->hasMany(UserJoinFriendOptionModel::class , 'user_id' , 'id');
     }
 
     public static function findById($id)
@@ -203,7 +203,7 @@ class UserModel extends Model
         $res = convert_obj($res);
         self::single($res);
         UserOptionModel::single($res->user_option);
-        UserJoinFriendOptionModel::single($res->user_join_friend_option);
+        UserJoinFriendOptionModel::multiple($res->user_join_friend_option);
         return $res;
     }
 

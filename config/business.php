@@ -59,8 +59,10 @@ return [
         'refresh_private_message' ,
         // 指令：更新单条群聊消息
         'refresh_group_message' ,
-        // 刷新用户信息（上下线通知）
-        'refresh_user' ,
+        // 推送：用户上线
+        'online' ,
+        // 推送：下线
+        'offline' ,
         // 新消息
         'new' ,
         // 通知给定的用户删除应用本地数据中的给定群及相关信息（如果有的话）

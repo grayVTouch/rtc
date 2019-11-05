@@ -239,6 +239,7 @@ class FriendAction extends Action
         FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
             'burn' ,
         ]));
+        $auth->push($auth->user->id , 'refresh_session');
         return self::success();
     }
 
@@ -258,7 +259,8 @@ class FriendAction extends Action
         FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
             'alias' ,
         ]));
-//        $auth->push();
+        $auth->push($auth->user->id , 'refresh_friend');
+        $auth->push($auth->user->id , 'refresh_session');
         return self::success();
     }
 

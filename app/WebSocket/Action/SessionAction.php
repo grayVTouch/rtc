@@ -38,16 +38,9 @@ class SessionAction extends Action
 
     public static function session(Auth $auth , array $param)
     {
-//        $top_session = SessionModel::topSessionByUserId($auth->user->id);
-//        $no_top_total  = SessionModel::noTopCountByUserId($auth->user->id);
-//        $no_top_page   = PageUtil::deal($no_top_total , $param['page'] , $param['limit']);
-//        $general_session = SessionModel::noTopGetByUserIdAndOffsetAndLimit($auth->user->id , $no_top_page['offset'] , $no_top_page['limit']);
         $top_session = [];
         $general_session = [];
-//        DB::enableQueryLog();
         $sessions = SessionModel::getByUserId($auth->user->id);
-//        $sql = DB::getQueryLog();
-//        print_r($sql);
         foreach ($sessions as $v)
         {
             if ($v->type == 'private') {
@@ -60,9 +53,8 @@ class SessionAction extends Action
                 // 私聊消息处理
                 $v->recent_message = $recent_message;
                 $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
-                $friend = FriendModel::findByUserIdAndFriendId($auth->user->id , $other_id);
-                $v->top = empty($friend) ? 0 : $friend->top;
-                $v->can_notice = empty($friend) ? 1 : $friend->can_notice;
+                $v->top = empty($v->other) ? 0 : $v->other->top;
+                $v->can_notice = empty($v->other) ? 1 : $v->other->can_notice;
                 if ($v->top == 1) {
                     // 置顶群聊
                     $top_session[] = $v;
@@ -87,9 +79,8 @@ class SessionAction extends Action
                     $v->group->name = '平台咨询';
                 }
                 $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
-                $member = GroupMemberModel::findByUserIdAndGroupId($auth->user->id , $v->target_id);
-                $v->top = empty($member) ? 0 : $member->top;
-                $v->can_notice = empty($member) ? 1 : $member->can_notice;
+                $v->top = empty($v->group) ? 0 : $v->group->top;
+                $v->can_notice = empty($v->group) ? 1 : $v->group->can_notice;
                 if ($v->top == 1) {
                     $top_session[] = $v;
                     continue ;

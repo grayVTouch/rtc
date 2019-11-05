@@ -55,6 +55,7 @@ class GroupUtil extends Util
             }
             // 是否置顶
             $group->top = empty($myself) ? 0 : $myself->top;
+            $group->can_notice = empty($myself) ? 1 : $myself->can_notice;
         }
 
     }
