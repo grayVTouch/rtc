@@ -38,11 +38,12 @@ class PushReadStatusModel extends Model
         return $res;
     }
 
-    public static function u_insertGetId(int $user_id , int $push_id , int $is_read = 0)
+    public static function u_insertGetId(int $user_id , int $push_id , $type = '' , int $is_read = 0)
     {
         return self::insertGetId([
             'user_id' => $user_id ,
             'push_id' => $push_id ,
+            'type'    => $type ,
             'is_read' => $is_read
         ]);
     }

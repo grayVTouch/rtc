@@ -94,10 +94,12 @@ class PushAction extends Action
             $push = PushModel::findById($id);
             foreach ($user_ids as $v)
             {
-                // 创建 或 更新 会话
-                SessionUtil::createOrUpdate($v , 'system' , $param['user_id']);
+                if ($param['type'] == 'system') {
+                    // 创建 或 更新 会话
+                    SessionUtil::createOrUpdate($v , $param['type'] , $param['user_id']);
+                }
                 // 设置未读消息数量
-                PushReadStatusModel::u_insertGetId($v , $id , 0);
+                PushReadStatusModel::u_insertGetId($v , $id , $param['type'] , 0);
             }
             DB::commit();
             // 刷新会话列表
