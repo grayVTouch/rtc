@@ -171,7 +171,7 @@ class WebSocket
         }
         $user_id = UserRedis::fdMappingUserId($identifier , $fd);
         $conn = UserRedis::userIdMappingFd($identifier , $user_id);
-        $_conn = array_diff($conn , [$fd]);
+        $_conn = is_array($conn) ? array_diff($conn , [$fd]) : [];
 
         if (empty($_conn)) {
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
