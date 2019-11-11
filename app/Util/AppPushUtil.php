@@ -25,7 +25,7 @@ use Exception;
 class AppPushUtil extends Util
 {
     public static $module = 'chat';
-    
+
     // 私聊|顶栏推送|单人
     public static function pushForPrivate(int $user_id , string $content , string $title = '' , $data = [])
     {
@@ -34,7 +34,26 @@ class AppPushUtil extends Util
             'type' => 'private' ,
             'data' => $data ,
         ];
-        return AppPush::push($user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+    }
+
+    /**
+     *
+     * app 推送采用异步任务的方式进行调用
+     *
+     * @param $callback
+     * @param mixed ...$param
+     * @return mixed
+     */
+    public static function taskPush($callback , ...$param)
+    {
+        return PushUtil::deliveryTask(json_encode([
+            'type' => 'app_push' ,
+            'data' => [
+                'callback'  => $callback ,
+                'param'     => $param
+            ]
+        ]));
     }
 
     // 群聊|顶栏推送|单人
@@ -45,7 +64,7 @@ class AppPushUtil extends Util
             'type' => 'group' ,
             'data' => $data ,
         ];
-        return AppPush::push($user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
     // 群聊|顶栏推送|多人
@@ -56,7 +75,7 @@ class AppPushUtil extends Util
             'type' => 'group' ,
             'data' => $data ,
         ];
-        return AppPush::pushAll($user_ids , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title , $extra);
     }
 
     // 邀请进群|顶栏推送|单人
@@ -67,7 +86,7 @@ class AppPushUtil extends Util
             'type' => 'invite_into_group' ,
             'data' => $data ,
         ];
-        return AppPush::push($user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
     // 个人申请进群|顶栏推送|单人
@@ -78,7 +97,7 @@ class AppPushUtil extends Util
             'type' => 'app_group' ,
             'data' => $data ,
         ];
-        return AppPush::push($user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
     // 申请成为好友|顶栏推送|单人
@@ -89,19 +108,19 @@ class AppPushUtil extends Util
             'type' => 'app_friend' ,
             'data' => $data ,
         ];
-        return AppPush::push($user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
     // 普通通知信息|顶栏推送|单人
     public static function push(int $user_id , string $content , string $title = '')
     {
-        return AppPush::push($user_id , $content , $title);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title);
     }
 
     // 普通通知信息|顶栏推送|单人
     public static function pushAll(array $user_ids , string $content , string $title = '')
     {
-        return AppPush::pushAll($user_ids , $content , $title);
+        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title);
     }
 
     /**

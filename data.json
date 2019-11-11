@@ -1,14 +1,16 @@
 {
-  "router": "/Group/groupMember",
-  "identifier": "test",
+  "router": "/Chat/sendCardForGroup",
+  "identifier": "abcdefg",
   "user_id": 3 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
   "platform": "pc",
   "data": {
-    "user_ids": "[4]" ,
     "group_id": 3 ,
-    "banned": 1
+    "mesage": 1 ,
+    "extra": "" ,
+    "target_user": "" ,
+    "target_user_ids": "[1,2]"
   }
 }

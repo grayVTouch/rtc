@@ -15,6 +15,7 @@ use App\Model\FriendModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\ProgramErrorLogModel;
+use App\Model\TaskLogModel;
 use App\Model\TimerLogModel;
 use App\Model\SessionModel;
 use App\Redis\SessionRedis;
@@ -134,6 +135,8 @@ class WebSocket
         $this->websocket->on('task' , [$this , 'task']);
         $this->websocket->on('message' , [$this , 'message']);
         $this->websocket->on('request' , [$this , 'request']);
+        $this->websocket->on('finish' , [$this , 'taskFinish']);
+
         // 开始运行程序
         $this->websocket->start();
     }
@@ -423,9 +426,37 @@ class WebSocket
         ]));
     }
 
-    public function task(BaseWebSocket $server , $data)
+    public function task(BaseWebSocket $server , $task_id , $from_id , $data)
     {
+        try {
+            $data = json_decode($data);
+            if (empty($data)) {
+                // 如果没有任何数据
+                TaskLogModel::u_insertGetId('' , '原始数据为空');
+                return ;
+            }
+            switch ($data['type'])
+            {
+                case 'app_push':
+                    // app 极光推送
+                    $callback   = $data['data']['callback'];
+                    $param      = $data['data']['param'];
+                    call_user_func_array($callback , $param);
+                    break;
+            }
+        } catch(Exception $e) {
+            $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+            $log = json_encode($log);
+            if (config('app.debug')) {
+                throw $e;
+            }
+            ProgramErrorLogModel::u_insertGetId('WebSocket 任务执行异常' , $log , 'Task');
+        }
+    }
 
+    public function taskFinish(BaseWebSocket $server , $data)
+    {
+        // 异步任务结束
     }
 
     /**
@@ -854,6 +885,12 @@ class WebSocket
     public function exist(int $fd)
     {
         return $this->websocket->exist($fd);
+    }
+
+    // 投递异步任务
+    public function deliveryTask(string $data = null)
+    {
+        return $this->websocket->task($data);
     }
 
     public function run()

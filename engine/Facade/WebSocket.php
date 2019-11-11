@@ -16,6 +16,7 @@ use Core\Lib\Facade;
  * @method static push(int $fd , string $data = '')
  * @method static exist(int $fd)
  * @method static clearRedis(int $user_id , int $fd = null)
+ * @method static deliveryTask(string $data = null)
  *
  */
 

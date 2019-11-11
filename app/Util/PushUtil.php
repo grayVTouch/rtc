@@ -67,4 +67,10 @@ class PushUtil
         }
         return $res;
     }
+
+    // 投递任务
+    public static function deliveryTask($data)
+    {
+        return WebSocket::deliveryTask($data);
+    }
 }

@@ -334,6 +334,15 @@ insert into `rtc_article_type` (id , name , p_id) values
 (3,'使用协议' , 2) ,
 (4,'隐私条款' , 2);
 
+drop table if exists `rtc_task_log`;
+create table if not exists `rtc_task_log` (
+  id int unsigned not null auto_increment ,
+  `data` varchar(1000) default '' comment '任务数据' ,
+  `desc` varchar(1000) default '' comment '任务描述' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '任务执行日志';
+
 
 
 -- 上下线通知
