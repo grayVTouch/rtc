@@ -444,6 +444,7 @@ class WebSocket
                     call_user_func_array($callback , $param);
                     break;
             }
+            TaskLogModel::u_insertGetId(json_encode($data) , '异步任务执行成功');
         } catch(Exception $e) {
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
