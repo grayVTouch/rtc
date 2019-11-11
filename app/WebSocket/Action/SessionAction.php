@@ -119,19 +119,8 @@ class SessionAction extends Action
         }
         try {
             DB::beginTransaction();
-            $exist = SessionModel::exist($auth->user->id , $param['type'] , $param['target_id']);
-            if ($exist) {
-                // 更改类型
-                SessionModel::updateByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id'] , $param['top']);
-            } else {
-                $param['user_id'] = $auth->user->id;
-                $id = SessionModel::insertGetId(array_unit($param , [
-                    'user_id' ,
-                    'type' ,
-                    'target_id' ,
-                    'top' ,
-                ]));
-            }
+            // 新增会话
+            SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id']);
             switch ($param['type'])
             {
                 case 'private':

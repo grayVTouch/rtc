@@ -25,18 +25,6 @@ class SessionModel extends Model
             ])->count()) > 0;
     }
 
-    // 更新用户信息
-    public static function updateByUserIdAndTypeAndTargetId(int $user_id , string $type , string $target_id , int $top)
-    {
-        return self::where([
-            ['user_id' , '=' , $user_id] ,
-            ['type' , '=' , $type] ,
-            ['target_id' , '=' , $target_id] ,
-        ])->update([
-            'top' => $top
-        ]);
-    }
-
     public static function findByUserIdAndTypeAndTargetIdAndTop(int $user_id , string $type , string $target_id , int $top)
     {
         $res = self::where([
