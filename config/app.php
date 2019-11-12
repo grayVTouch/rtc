@@ -82,4 +82,7 @@ return [
     // 系统服务员名称
     'system_waiter_name' => '系统客服' ,
 
+    // 客服咨询会话名称
+    'customer_channel_name' => '官方客服' ,
+
 ];

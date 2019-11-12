@@ -384,6 +384,8 @@ class LoginAction extends Action
             // 创建平台咨询的群（用户注册后自动创建官方客服群）
             $group_id = GroupModel::insertGetId([
                 'user_id' => $id ,
+                // 群名称
+                'name' => config('app.customer_channel_name') ,
                 // 是否是临时群
                 'is_temp' => 0 ,
                 // 是否是客服群
