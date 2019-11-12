@@ -69,6 +69,16 @@ class Friend extends Auth
         return self::success($res['data']);
     }
 
+    // 好友列表-带有客服
+    public function myFriendWithCustomer(array $param)
+    {
+        $res = FriendAction::myFriendWithCustomer($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
     // 设置阅后即焚
     public function burn(array $param)
     {

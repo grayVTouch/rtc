@@ -12,6 +12,7 @@ namespace App\WebSocket\Action;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
 use App\Model\FriendModel;
+use App\Model\GroupModel;
 use App\Model\JoinFriendMethodModel;
 use App\Model\MessageModel;
 use App\Model\UserJoinFriendOptionModel;
@@ -216,6 +217,21 @@ class FriendAction extends Action
             UserUtil::handle($v->user);
             UserUtil::handle($v->friend);
         }
+        return self::success($res);
+    }
+
+    // 好友列表
+    public static function myFriendWithCustomer(Auth $auth , array $param)
+    {
+        $friend = FriendModel::getByUserIdNotInBlacklist($auth->user->id);
+        foreach ($friend as $v)
+        {
+            UserUtil::handle($v->user);
+            UserUtil::handle($v->friend);
+        }
+        // 客服群
+        $customer = GroupModel::customer($auth->user->id);
+        $res['friend'] = $friend;
         return self::success($res);
     }
 

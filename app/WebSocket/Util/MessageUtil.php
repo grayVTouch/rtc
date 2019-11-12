@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Util;
 
+use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageModel;
@@ -41,6 +42,15 @@ class MessageUtil extends Util
         }
         if (isset($group_message->user)) {
             TopUserUtil::handle($group_message->user);
+            $member = GroupMemberModel::findByUserIdAndGroupId($group_message->user_id , $group_message->group_id);
+            if (!empty($member)) {
+                // 特殊：群昵称
+                $group_message->user->nickname = empty($member) ?
+                    $group_message->user->nickname :
+                    (empty($member->alias) ?
+                        $group_message->user->nickname :
+                        $group_message->user->nickname);
+            }
         }
         if ($group_message->type == 'message_set') {
             // 合并转发的消息
