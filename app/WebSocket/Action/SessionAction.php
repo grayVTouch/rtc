@@ -191,6 +191,7 @@ class SessionAction extends Action
                 }
             }
             DB::commit();
+            $auth->push($auth->user->id , 'refresh_session');
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
@@ -250,7 +251,7 @@ class SessionAction extends Action
     }
 
     // 设置会话背景
-    public static function setSessionBackgroud(Auth $auth , array $param)
+    public static function setSessionBackground(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'type'          => 'required' ,

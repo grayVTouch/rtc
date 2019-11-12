@@ -1,16 +1,14 @@
 {
-  "router": "/Chat/sendCardForGroup",
-  "identifier": "abcdefg",
+  "router": "/Session/setSessionBackground",
+  "identifier": "test",
   "user_id": 3 ,
   "debug": "running" ,
   "token": "" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
-  "platform": "pc",
+  "platform": "app",
   "data": {
-    "group_id": 3 ,
-    "mesage": 1 ,
-    "extra": "" ,
-    "target_user": "" ,
-    "target_user_ids": "[1,2]"
+    "type": "private" ,
+    "target_id": "3_4" ,
+    "background": "http://test.com/a.jpg"
   }
 }

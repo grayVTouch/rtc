@@ -87,12 +87,12 @@ class Session extends Auth
     }
 
     // 设置会话背景
-    public function setSessionBackgroud(array $param)
+    public function setSessionBackground(array $param)
     {
         $param['type']      = $param['type'] ?? '';
         $param['target_id'] = $param['target_id'] ?? '';
         $param['background'] = $param['background'] ?? '';
-        $res = SessionAction::setSessionBackgroud($this , $param);
+        $res = SessionAction::setSessionBackground($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
