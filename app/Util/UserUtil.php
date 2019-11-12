@@ -62,6 +62,8 @@ class UserUtil extends Util
             $user->top = empty($friend) ? 0 : $friend->top;
             // 是否免打扰
             $user->can_notice = empty($friend) ? 1 :$friend->can_notice;
+            // 聊天背景
+            $user->background = empty($friend) ? '' : $friend->background;
 
         }
     }
