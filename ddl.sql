@@ -337,7 +337,7 @@ insert into `rtc_article_type` (id , name , p_id) values
 drop table if exists `rtc_task_log`;
 create table if not exists `rtc_task_log` (
   id int unsigned not null auto_increment ,
-  `data` varchar(1000) default '' comment '任务数据' ,
+  `data` mediumtext comment '任务数据' ,
   `desc` varchar(1000) default '' comment '任务描述' ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
