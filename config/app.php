@@ -23,7 +23,7 @@ return [
     // 静态文件根目录
     'document_root' => '/myself/command/rtc/public' ,
     // 调试模式
-    'debug' => true ,
+    'debug' => false ,
     // 是否记录错误日志
     'enable_error_log' => true ,
     // 是否记录定时器执行日志
