@@ -17,7 +17,7 @@ return [
     // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
     'reuse_port' => true ,
     // 任务进程的数量
-    'task_worker' => 0 ,
+    'task_worker' => 1 ,
     // worker 进程的数量
     'worker' => 1 ,
     // 静态文件根目录
@@ -59,7 +59,7 @@ return [
     'group_name' => '群聊' ,
     // 默认个人
     // 是否开启app推送（使用了极光推送等平台）
-    'enable_app_push' => false ,
+    'enable_app_push' => true ,
     // 默认的昵称
     'nickname' => '未设置昵称' ,
     // 默认页数

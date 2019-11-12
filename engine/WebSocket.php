@@ -429,10 +429,10 @@ class WebSocket
     public function task(BaseWebSocket $server , $task_id , $from_id , $data)
     {
         try {
-            $data = json_decode($data);
+            $data = json_decode($data , true);
             if (empty($data)) {
                 // 如果没有任何数据
-                TaskLogModel::u_insertGetId('' , '原始数据为空');
+                TaskLogModel::u_insertGetId('' , '异步任务执行失败，原因：原始数据为空');
                 return ;
             }
             switch ($data['type'])

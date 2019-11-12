@@ -34,6 +34,7 @@ class AppPushUtil extends Util
             'type' => 'private' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
@@ -64,6 +65,7 @@ class AppPushUtil extends Util
             'type' => 'group' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
@@ -75,6 +77,7 @@ class AppPushUtil extends Util
             'type' => 'group' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title , $extra);
     }
 
@@ -86,6 +89,7 @@ class AppPushUtil extends Util
             'type' => 'invite_into_group' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
@@ -97,6 +101,7 @@ class AppPushUtil extends Util
             'type' => 'app_group' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
@@ -108,6 +113,7 @@ class AppPushUtil extends Util
             'type' => 'app_friend' ,
             'data' => $data ,
         ];
+        $extra = json_encode($extra);
         return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 

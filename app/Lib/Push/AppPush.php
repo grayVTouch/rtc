@@ -59,7 +59,7 @@ class AppPush {
     public static function pushAll(array $user_ids , $content , string $title = '' , $extra = null)
     {
         $data = [];
-        $data['users'] = self::json($user_ids);
+        $data['users'] = json_encode($user_ids);
         $data['content'] = $content;
         $data['title'] = $title;
         $data['extra'] = $extra;
@@ -82,7 +82,7 @@ class AppPush {
     // 静默推送/多人推送
     public static function pushAllWithQuiet(array $user_ids , $content , $extra) {
         $data = [];
-        $data['users']      = self::json($user_ids);
+        $data['users']      = json_encode($user_ids);
         $data['content']    = $content;
         $data['extra']      = $extra;
         $res = self::curl('/message' , $data);
@@ -147,13 +147,6 @@ class AppPush {
         ];
     }
 
-    // 转换成 json
-    private static function json($data)
-    {
-        // 这个根据远程接口要求不同，需要做一些变化
-        return json_encode($data , 320);
-    }
-
     // 推送
     private static function curl(string $path = '/sync' , array $data = []) {
         if (empty($data)) {
@@ -162,6 +155,11 @@ class AppPush {
         $data['token'] = self::$token;
         $path = rtrim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
+
+        print_r([
+            'data' => $data
+        ]);
+
         return Http::post($url , [
             'data' => $data ,
         ]);
