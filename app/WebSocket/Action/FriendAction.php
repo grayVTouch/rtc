@@ -12,6 +12,7 @@ namespace App\WebSocket\Action;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
 use App\Model\FriendModel;
+use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
 use App\Model\JoinFriendMethodModel;
 use App\Model\MessageModel;
@@ -230,8 +231,11 @@ class FriendAction extends Action
             UserUtil::handle($v->friend);
         }
         // 客服群
-        $customer = GroupModel::customer($auth->user->id);
-        $res['friend'] = $friend;
+        $customer = GroupMemberModel::customer($auth->user->id);
+        $res = [
+            'friend'    => $friend ,
+            'customer'  => $customer ,
+        ];
         return self::success($res);
     }
 

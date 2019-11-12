@@ -116,5 +116,4 @@ class GroupModel extends Model
         return $res;
     }
 
-
 }

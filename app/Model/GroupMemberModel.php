@@ -242,4 +242,23 @@ class GroupMemberModel extends Model
         ])->update($param);
     }
 
+    // 客服群
+    public static function customer(int $user_id)
+    {
+        $res = self::with(['group' , 'user'])
+            ->from('group_member as gm')
+            ->leftJoin('group as g' , 'gm.group_id' , '=' , 'g.id')
+            ->where([
+                ['gm.user_id' , '=' , $user_id] ,
+                ['g.is_service' , '=' , 1] ,
+            ])
+            ->first();
+        if (empty($res)) {
+            return ;
+        }
+        self::single($res);
+        UserModel::single($res->user);
+        GroupModel::single($res->group);
+        return $res;
+    }
 }
