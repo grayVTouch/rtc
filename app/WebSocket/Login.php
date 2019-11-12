@@ -124,4 +124,15 @@ class Login extends Base
         }
         return $this->success($res['data']);
     }
+
+    // 随机昵称列表
+    public function nickname(array $param)
+    {
+        $param['limit'] = $param['limit'] ?? '';
+        $res = LoginAction::nickname($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

@@ -231,7 +231,7 @@ class SessionAction extends Action
     }
 
     // 会话清理（彻底删除会话）
-    public static function emptyPrivateHistory(Auth $auth , $param)
+    public static function emptyPrivateHistory(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
             'chat_id' => 'required' ,
@@ -246,6 +246,38 @@ class SessionAction extends Action
         // 推送
         $user_ids = ChatUtil::userIds($param['chat_id']);
         $auth->pushAll($user_ids , 'refresh_session');
+        return self::success();
+    }
+
+    // 设置会话背景
+    public static function setSessionBackgroud(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'type'          => 'required' ,
+            'target_id'     => 'required' ,
+            'background'    => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $chat_type = config('business.chat_type');
+        if (!in_array($param['type'] , $chat_type)) {
+            return self::error('不支持的类型，当前受支持的类型有' . implode(' , ' , $chat_type));
+        }
+        switch ($param['type'])
+        {
+            case 'private':
+                $friend_id = ChatUtil::otherId($param['target_id'] , $auth->user->id);
+                FriendModel::updateByUserIdAndFriendId($auth->user->id , $friend_id , [
+                    'background' => $param['background']
+                ]);
+                break;
+            case 'group':
+                GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['target_id'] , [
+                    'background' => $param['background']
+                ]);
+                break;
+        }
         return self::success();
     }
 }

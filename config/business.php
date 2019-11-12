@@ -345,4 +345,12 @@ return [
         // 系统公告
         'system'
     ] ,
+
+    // 聊天的会话类型
+    'chat_type' => [
+        // 私聊
+        'private' ,
+        // 群聊
+        'group' ,
+    ] ,
 ];

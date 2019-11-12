@@ -457,4 +457,15 @@ class LoginAction extends Action
         return self::success($param['code']);
     }
 
+    // 昵称
+    public static function nickname(Base $base , array $param)
+    {
+        $limit = empty($param['limit']) ? 20 : $param['limit'];
+        $res = [];
+        for ($i = 1; $i <= $limit; ++$i)
+        {
+            $res[] = random(11 , 'letter' , true);
+        }
+        return self::success($res);
+    }
 }

@@ -343,7 +343,7 @@ create table if not exists `rtc_task_log` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '任务执行日志';
 
-
+drop table if exists `rtc_combination_word`;
 
 -- 上下线通知
 -- 写入状态通知
