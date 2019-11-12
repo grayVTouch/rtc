@@ -256,7 +256,7 @@ class SessionAction extends Action
         $validator = Validator::make($param , [
             'type'          => 'required' ,
             'target_id'     => 'required' ,
-            'background'    => 'required' ,
+//            'background'    => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
