@@ -69,6 +69,7 @@ create table if not exists `rtc_group` (
   `type` tinyint default 1 comment '群类型：1-永久群 2-时效群' ,
   `anonymous` tinyint default 0 comment '匿名聊天：0-否 1-是' ,
   `expire` datetime default null comment '当 type = 2时，该字段有效，表示群的过期时间' ,
+  banned tinyint default 0 comment '全体禁言，仅群主可设置！是否禁言？0-否 1-是' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群';
@@ -357,6 +358,8 @@ drop table if exists `rtc_combination_word`;
 -- 信息加密
 
 -- 系统公告
+
+alter table `rtc_group` add banned tinyint default 0 comment '全体禁言，仅群主可设置！是否禁言？0-否 1-是';
 
 
 

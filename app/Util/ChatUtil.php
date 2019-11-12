@@ -173,6 +173,10 @@ class ChatUtil extends Util
         if (empty($group)) {
             return self::error('群不存在！' , 404);
         }
+        // 检查群是否设置了全体禁言
+        if ($group->banned == 1) {
+            return self::error('群主已开启禁言' , 403);
+        }
         // 检查是否时好友
         $member = GroupMemberModel::findByUserIdAndGroupId($param['user_id'] , $param['group_id']);
         if (empty($member)) {

@@ -769,4 +769,31 @@ class GroupAction extends Action
         }
     }
 
+    public static function allbanned(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id'  => 'required' ,
+            'banned'   => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查提供的值是否正确
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['banned'] , $bool_for_int)) {
+            return self::error('不支持的 banned 值，当前受支持的值有 ' . implode(' , ' , $bool_for_int));
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在' , 404);
+        }
+        if ($group->user_id != $auth->user->id) {
+            return self::error('您不是群主' , 403);
+        }
+        GroupModel::updateById($group->id , [
+            'banned' => $param['banned']
+        ]);
+        return self::success();
+    }
+
 }
