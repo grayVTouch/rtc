@@ -49,7 +49,7 @@ class MessageUtil extends Util
                     $group_message->user->nickname :
                     (empty($member->alias) ?
                         $group_message->user->nickname :
-                        $group_message->user->nickname);
+                        $member->alias);
             }
         }
         if ($group_message->type == 'message_set') {
