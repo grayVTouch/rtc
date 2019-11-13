@@ -798,4 +798,11 @@ class GroupAction extends Action
         return self::success();
     }
 
+    public static function customer(Auth $auth , array $param)
+    {
+        $customer = GroupMemberModel::customer($auth->user->id);
+        GroupUtil::handle($customer);
+        return self::success($customer);
+    }
+
 }

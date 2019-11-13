@@ -20,6 +20,7 @@ use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
+use App\Util\GroupUtil;
 use App\Util\PushUtil;
 use App\Util\SessionUtil;
 use App\Util\UserUtil;
@@ -232,6 +233,7 @@ class FriendAction extends Action
         }
         // 客服群
         $customer = GroupMemberModel::customer($auth->user->id);
+        GroupUtil::handle($customer);
         $res = [
             'friend'    => $friend ,
             'customer'  => $customer ,

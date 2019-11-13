@@ -271,5 +271,13 @@ class Group extends Auth
         return self::success($res['data']);
     }
 
-
+    // 客服群
+    public function customer(array $param)
+    {
+        $res = GroupAction::customer($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }
