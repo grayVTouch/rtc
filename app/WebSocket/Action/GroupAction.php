@@ -476,6 +476,10 @@ class GroupAction extends Action
         if ($group->user_id != $auth->user->id) {
             return self::error('您不是群主，无权限解散群' , 403);
         }
+        // 检查是否是客服群
+        if ($group->is_service == 1) {
+            return self::error('您不能解散系统内置客服群' , 403);
+        }
         try {
             DB::beginTransaction();
             // 获取群成员
