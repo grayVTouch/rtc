@@ -46,10 +46,11 @@ class UserUtil extends Util
             // 好友名称
 //            $alias = FriendModel::alias($relation_user_id , $user->id);
             // 处理后的名称
+            $nickname = UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username);
             $user->nickname = empty($friend) ?
-                $user->nickname :
+                $nickname :
                 (empty($friend->alias) ?
-                    $user->nickname :
+                    $nickname :
                     $friend->alias);
             $user->remarked = empty($friend) ?
                 0 :

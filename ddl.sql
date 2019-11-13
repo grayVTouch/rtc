@@ -356,7 +356,6 @@ drop table if exists `rtc_combination_word`;
 -- 群聊（其中还有一个客服聊天，群聊的一种）
 
 -- 信息加密
-
 -- 系统公告
 
 alter table `rtc_group` add banned tinyint default 0 comment '全体禁言，仅群主可设置！是否禁言？0-否 1-是';
