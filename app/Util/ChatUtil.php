@@ -82,7 +82,7 @@ class ChatUtil extends Util
         $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['friend_id']);
         $param['extra'] = $param['extra'] ?? '';
         // 这边做基本的认证
-        $blocked = BlacklistModel::blocked($param['user_id'] , $param['user_id']);
+        $blocked = BlacklistModel::blocked($param['friend_id'] , $param['user_id']);
         $param['blocked'] = (int) $blocked;
         try {
             DB::beginTransaction();
