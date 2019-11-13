@@ -150,5 +150,16 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
+    // 私聊消息-同步（用于同步app本地数据库和线上数据库）
+    public function syncForSingle(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $res = MessageAction::syncForSingle($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 
 }

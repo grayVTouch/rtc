@@ -438,4 +438,20 @@ class MessageAction extends Action
         }
         return self::success($res);
     }
+
+    public static function syncForSingle(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'message_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = MessageModel::findById($param['message_id']);
+        if (!empty($res)) {
+            $other_id = ChatUtil::otherId($res->chat_id , $auth->user->id);
+            MessageUtil::handleMessage($res , $auth->user->id , $other_id);
+        }
+        return self::success($res);
+    }
 }
