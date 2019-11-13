@@ -155,11 +155,6 @@ class AppPush {
         $data['token'] = self::$token;
         $path = rtrim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
-
-        print_r([
-            'data' => $data
-        ]);
-
         return Http::post($url , [
             'data' => $data ,
         ]);
