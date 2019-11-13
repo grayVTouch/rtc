@@ -103,6 +103,15 @@ class SessionAction extends Action
 
             // .... 其他类型请另外再增加
         }
+        usort($general_session , function($a , $b){
+            if (!isset($a->recent_message) || !isset($b->recent_message)) {
+                return 0;
+            }
+            if ($a->recent_message->create_time == $b->recent_message->create_time) {
+                return 0;
+            }
+            return $a->recent_message->create_time > $b->recent_message->create_time ? -1 : 1;
+        });
         $res = array_merge($top_session , $general_session);
         return self::success($res);
     }
