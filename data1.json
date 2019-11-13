@@ -1,0 +1,35 @@
+{
+  "module": "module" ,
+  "type": "private" ,
+  "data": {
+    "id": 1,
+    "user_id": 1,
+    "chat_id": "1_2",
+    "type": "text",
+    "message": "hello boys and girls",
+    "flag": "normal",
+    "create_time": "2019-09-20 16:13:50",
+    "user": {
+      "id": 1,
+      "identifier": "abcdefg",
+      "username": "",
+      "password": "",
+      "phone": "13375086826",
+      "area_code": "86",
+      "full_phone": "8613375086826",
+      "role": "user",
+      "unique_code": "f5LH7a065713qxrhf3P8v237lZ16tiZ78HUK6X5y6sBWa51g94M467599BQm6u5271s7Tfr4hL0JgoVU15cdJPD4MZ54A2x55C53O6wEg9n1j9uthqXtCk779870Ent4Sqs7on8WtvelBx41DB5Hmjh04Y16Zrx3s5Sr16T80FwFZP25a6L3x7zo2prFe1cLgDy90XdP498Jlcw5nua982Gx90o410L83q344CJ23677y4h84255v2SY2i8KttM",
+      "is_temp": 0,
+      "p_id": 0,
+      "invite_code": "a72cc9ced95adcfd4e9aac6f5f6bda14",
+      "nickname": "running",
+      "avatar": "http://192.168.145.128/static/image/avatar.png",
+      "sex": 0,
+      "birthday": null,
+      "signature": "",
+      "create_time": "2019-09-19 15:01:22"
+    },
+    "self_is_read": 1,
+    "friend_is_read": 0
+  }
+}

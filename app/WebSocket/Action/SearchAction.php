@@ -171,6 +171,8 @@ class SearchAction extends Action
         {
             $v->type = 'private';
             $v->sort_time = $v->create_time;
+            UserUtil::handle($v->user);
+            UserUtil::handle($v->friend);
         }
         foreach ($group as $v)
         {
