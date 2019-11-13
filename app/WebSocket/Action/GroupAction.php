@@ -339,6 +339,9 @@ class GroupAction extends Action
         if (in_array($group->user_id , $kick_user_ids)) {
             return self::error('群主不能T自己！' , 403);
         }
+        if ($group->is_service == 1) {
+            return self::error('您不能解散系统内置客服群' , 403);
+        }
         try {
             DB::beginTransaction();
             $message = '"';
