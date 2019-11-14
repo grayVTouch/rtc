@@ -63,7 +63,7 @@ class AppPush {
         $data['content'] = $content;
         $data['title'] = $title;
 //        $data['extra'] = $extra;
-        $data['extra'] = json_encode(['name' => 'running'] , 320);
+        $data['extra'] = json_encode([1 => 1] , 320);
 //        $data['extra'] = $extra;
 //        $data['extra'] = ['name' => 'running'];
         $res = self::curl('/push' , $data);
