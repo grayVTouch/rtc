@@ -62,7 +62,8 @@ class AppPush {
         $data['users'] = json_encode($user_ids);
         $data['content'] = $content;
         $data['title'] = $title;
-        $data['extra'] = $extra;
+//        $data['extra'] = $extra;
+        $data['extra'] = [1 => 1];
         $res = self::curl('/push' , $data);
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
