@@ -156,6 +156,9 @@ class Http {
         $option['proxy_type']   = $option['proxy_type'] ?? self::$default['proxy_type'];
         $option['proxy']        = $option['proxy'] ?? self::$default['proxy'];
         $option['proxy_port']   = $option['proxy_port'] ?? self::$default['proxy_port'];
+
+        print_r($option);
+
         // curl 配置项
         $curl_option = [
             CURLOPT_RETURNTRANSFER => true ,
