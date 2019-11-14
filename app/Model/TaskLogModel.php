@@ -13,9 +13,10 @@ class TaskLogModel extends Model
 {
     protected $table = 'task_log';
 
-    public static function u_insertGetId($data = '' , $desc = '')
+    public static function u_insertGetId($result = '' , $data = '' , $desc = '')
     {
         return self::insertGetId([
+            'result' => $result ,
             'data' => $data ,
             'desc' => $desc
         ]);

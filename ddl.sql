@@ -339,6 +339,7 @@ drop table if exists `rtc_task_log`;
 create table if not exists `rtc_task_log` (
   id int unsigned not null auto_increment ,
   `data` mediumtext comment '任务数据' ,
+  `result` mediumtext comment '执行结果' ,
   `desc` varchar(1000) default '' comment '任务描述' ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)

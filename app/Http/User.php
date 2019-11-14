@@ -29,5 +29,4 @@ class User extends Auth
 
     // 联系人（包含好友 和 群组）
 
-
 }

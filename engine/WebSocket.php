@@ -432,7 +432,7 @@ class WebSocket
             $data = json_decode($data , true);
             if (empty($data)) {
                 // 如果没有任何数据
-                TaskLogModel::u_insertGetId('' , '异步任务执行失败，原因：原始数据为空');
+                TaskLogModel::u_insertGetId('异步任务执行失败，原因：原始数据为空');
                 return ;
             }
             switch ($data['type'])
@@ -441,10 +441,10 @@ class WebSocket
                     // app 极光推送
                     $callback   = $data['data']['callback'];
                     $param      = $data['data']['param'];
-                    call_user_func_array($callback , $param);
+                    $res = call_user_func_array($callback , $param);
+                    TaskLogModel::u_insertGetId(json_encode($res) , json_encode($data) , '任务成功运行');
                     break;
             }
-            TaskLogModel::u_insertGetId(json_encode($data) , '异步任务执行成功');
         } catch(Exception $e) {
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
