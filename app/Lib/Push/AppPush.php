@@ -155,6 +155,12 @@ class AppPush {
         $data['token'] = self::$token;
         $path = rtrim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
+
+        var_dump('极光推送数据：' . $url . '调试开始------------');
+        print_r([
+            'data' => $data ,
+        ]);
+        var_dump('极光推送数据....调试结束-----------');
         return Http::post($url , [
             'data' => $data ,
         ]);
