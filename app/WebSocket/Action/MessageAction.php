@@ -157,6 +157,9 @@ class MessageAction extends Action
             return self::error($validator->message());
         }
         $message = MessageModel::findById($param['message_id']);
+        if (empty($message)) {
+            return self::error('未找到消息id对应的记录' , 404);
+        }
         if ($message->flag != 'burn') {
             return self::error('并非阅后即焚消息' , 403);
         }
