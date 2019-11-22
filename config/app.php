@@ -21,7 +21,7 @@ return [
     // worker 进程的数量
     'worker' => 1 ,
     // 静态文件根目录
-    'document_root' => '/myself/command/rtc/public' ,
+    'document_root' => realpath(__DIR__ . '/../public') ,
     // 调试模式
     'debug' => true ,
     // 是否记录错误日志
