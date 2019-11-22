@@ -41,6 +41,7 @@ create table if not exists `rtc_user_option` (
   friend_auth tinyint default 1 comment '申请我为好友验证：0-关闭 1-开启' ,
   clear_timer_for_private varchar(255) default 'none' comment '自动清理私聊记录时长: none-关闭 day-天 week-周 month-月' ,
   clear_timer_for_group varchar(255) default 'none' comment '自动清理群聊记录时长: none-关闭 day-天 week-周 month-月' ,
+  `banned` tinyint(4) DEFAULT '0' COMMENT '全局禁言（仅可后台设置）：0-否 1-是',
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户设置表';
