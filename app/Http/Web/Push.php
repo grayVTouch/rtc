@@ -61,8 +61,8 @@ class Push extends Auth
     public function system()
     {
         $param = $this->request->post;
+        $param['push_type'] = $param['push_type'] ?? '';
         $param['role'] = $param['role'] ?? '';
-        // 仅在 role = designation 的时候有意义
         $param['user_id'] = $param['user_id'] ?? '';
         $param['title'] = $param['title'] ?? '';
         $param['desc'] = $param['desc'] ?? '';

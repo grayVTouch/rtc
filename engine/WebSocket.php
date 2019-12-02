@@ -358,15 +358,15 @@ class WebSocket
                 $this->httpResponse($response , '' , 200);
                 return ;
             }
-            $router = $this->parseRouter($request->server['request_uri']);
+            $router = $this->parseHttpRouter($request->server['request_uri']);
             if (empty($router)) {
                 $this->httpResponse($response , '请求的地址不正确' , 400);
                 return ;
             }
             $param = $request->post;
             $param['identifier'] = $param['identifier'] ?? '';
-            $namespace = 'App\Http\\';
-            $class = sprintf('%s%s' , $namespace , $router['class']);
+            $namespace = 'App\Http';
+            $class = sprintf('%s\%s\%s' , $namespace , $router['module'] , $router['class']);
             if (!class_exists($class)) {
                 throw new Exception(" Class {$class} Not Found");
             }
@@ -873,6 +873,24 @@ class WebSocket
         return [
             'class'     => $res[0] ,
             'method'    => $res[1] ,
+        ];
+    }
+
+    // 解析客户端路由
+    protected function parseHttpRouter(string $router = '')
+    {
+        if (empty($router)) {
+            $router = 'Index/Index/index';
+        }
+        $router = ltrim($router , '/');
+        $res = explode('/' , $router);
+        if (count($res) != 3) {
+            return false;
+        }
+        return [
+            'module'    => $res[0] ,
+            'class'     => $res[1] ,
+            'method'    => $res[2] ,
         ];
     }
 

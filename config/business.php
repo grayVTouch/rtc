@@ -7,12 +7,14 @@
  */
 
 return [
-    // 角色
+    // 用户角色
     'role' => [
-        // '管理员（工作人员）'
+        // 普通管理员
         'admin' ,
-        // '普通用户'
+        // 普通用户
         'user' ,
+        // 超级管理员
+        'super_admin' ,
     ] ,
 
     // 预定义动作
@@ -75,20 +77,6 @@ return [
         'empty_group_session_from_cache' ,
         // 刷新黑名单列表
         'refresh_blacklist' ,
-    ] ,
-
-    /**
-     * 群推类型
-     */
-    'push_role' => [
-        // 后台用户
-        'admin' ,
-        // 前台用户
-        'user',
-        // 所有用户
-        'all' ,
-        // 指定用户
-        'designation'
     ] ,
 
     // 消息
@@ -341,9 +329,28 @@ return [
     ] ,
 
     // 推送类型
-    'push_type' => [
+    'push_type_for_push' => [
         // 系统公告
         'system'
+    ] ,
+
+    // 群推类型
+    'push_type_for_user' => [
+        // 系统公告
+        'single' ,
+        'multiple' ,
+    ] ,
+
+    // 推送的目标用户
+    'role_for_push' => [
+        // 全体用户
+        'all' ,
+        // 工作人员
+        'admin' ,
+        // 平台用户
+        'user' ,
+        // 指定用户
+        'desiganation' ,
     ] ,
 
     // 聊天的会话类型
@@ -353,4 +360,6 @@ return [
         // 群聊
         'group' ,
     ] ,
+
+
 ];

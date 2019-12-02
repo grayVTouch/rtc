@@ -46,7 +46,10 @@ class LoginAction extends Action
                 'role' => '不支持的角色类型，当前支持的有：' . implode(',' , $role_range) ,
             ]);
         }
-        // 检查 identfier 是否存在
+        // 检查 identifier 是否存在
+        if ($param['']) {
+
+        }
         $project = ProjectModel::findByIdentifier($param['identifier']);
         if (empty($project)) {
             return self::error([

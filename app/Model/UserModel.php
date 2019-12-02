@@ -146,6 +146,22 @@ class UserModel extends Model
         return $id_list;
     }
 
+    public static function getByRole($role = '')
+    {
+        $where = [];
+        if (!empty($role)) {
+            $where[] = ['role' , '=' , $role];
+        }
+        $res = self::where($where)
+            ->get();
+        $id_list = [];
+        foreach ($res as $v)
+        {
+            $id_list[] = $v->id;
+        }
+        return $id_list;
+    }
+
     // 查询用户
     public static function findByIdentifierAndUsernameAndPassword(string $identifier , string $username = '' , string $password = '')
     {

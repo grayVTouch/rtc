@@ -20,7 +20,7 @@ use function core\array_unit;
 class SessionUtil extends Util
 {
     // 创建 或 更新会话
-    public static function createOrUpdate(int $user_id , string $type , $target_id)
+    public static function createOrUpdate(int $user_id , string $type , $target_id = 0)
     {
         // 检查 type 是否正确
         $type_range = config('business.session_type');

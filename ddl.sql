@@ -16,7 +16,7 @@ create table if not exists `rtc_user` (
   phone varchar(255) default '' comment '手机号码' ,
   area_code varchar(255) default '' comment '区号' ,
   full_phone varchar(255) default '' comment '完整的手机号码: 区号 + 手机号码' ,
-  role enum('admin' , 'user') default 'user' comment 'admin-后台用户 user-平台用户' ,
+  role varchar(255) default 'user' comment 'admin-后台用户 user-平台用户 super_admin-超级管理员' ,
   unique_code varchar(255) default '' comment '唯一码，同一项目不允许重复！我们系统的唯一标识符' ,
   is_temp tinyint default 0 comment '是否是临时用户: 0-否 1-是' ,
   is_system tinyint default 0 comment '是否是系统用户: 0-否 1-是' ,
@@ -181,8 +181,8 @@ drop table if exists `rtc_push`;
 create table if not exists `rtc_push` (
   id int unsigned not null auto_increment ,
   push_type varchar(255) default 'single' comment '推送类型：single-推单人；multiple-推多人' ,
-  user_id int unsigned default 0 comment 'rtc_user.id，仅在 type = single 的时候有效' ,
-  role varchar(255) default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，仅在 type = multiple 的时候有效' ,
+  user_id varchar(500) default '' comment 'rtc_user.id 可以是纯数字 或 json 字符串；仅在 type = single | desiganation 的时候有效' ,
+  role varchar(255) default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，desiganation-指定用户 仅在 type = multiple 的时候有效' ,
   type varchar(255) default '' comment '推送类型：system-系统公告' ,
   title varchar(500) comment '标题' ,
   `desc` varchar(3000) default '' comment '描述' ,
@@ -314,6 +314,8 @@ create table if not exists `rtc_article_type` (
   id int unsigned not null auto_increment ,
   name varchar(1000) default '' comment '分类名称' ,
   p_id int unsigned default 0 comment '上级id' ,
+  enable tinyint default 1 comment '启用？0-否 1-是' ,
+  weight smallint default 0 comment '权重' ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '文章类型';
@@ -323,8 +325,11 @@ create table if not exists `rtc_article` (
   id int unsigned not null auto_increment ,
   article_type_id int unsigned default 0 comment 'rtc_article_type.id' ,
   title varchar(1000) default '' comment '标题' ,
+  thumb varchar(1000) default '' comment '封面' ,
   author varchar(1000) default '' comment '作者' ,
   content longtext comment '内容' ,
+  enable tinyint default 1 comment '启用？0-否 1-是' ,
+  weight smallint default 0 comment '权重' ,
   update_time datetime default current_timestamp ,
   create_time datetime default current_timestamp ,
   primary key `id` (`id`)
@@ -361,6 +366,13 @@ drop table if exists `rtc_combination_word`;
 -- 系统公告
 
 alter table `rtc_group` add banned tinyint default 0 comment '全体禁言，仅群主可设置！是否禁言？0-否 1-是';
+
+alter table `rtc_article_type` add enable tinyint default 1 comment '启用？0-否 1-是';
+alter table `rtc_article_type` add weight smallint default 0 comment '权重';
+
+alter table `rtc_article` add enable tinyint default 1 comment '启用？0-否 1-是';
+alter table `rtc_article` add weight smallint default 0 comment '权重';
+alter table `rtc_article` add thumb varchar(1000) default '' comment '封面';
 
 
 

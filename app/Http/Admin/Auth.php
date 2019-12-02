@@ -6,7 +6,7 @@
  * Time: 23:57
  */
 
-namespace App\Http;
+namespace App\Http\Admin;
 
 
 use App\Model\UserTokenModel;
@@ -33,26 +33,21 @@ class Auth extends Base
         }
         $debug = $this->request->post['debug'] ?? '';
         if ($debug != 'running') {
-            $authorization = $this->request->header['authorization'] ?? '';
-            if (empty($authorization)) {
-                $this->error('用户认证失败 [Authorization Error]' , 1000);
+            $unique_code = $this->request->post['unique_code'] ?? '';
+            if (empty($unique_code)) {
+                $this->error('unique_code is required' , -1000);
                 return false;
             }
-            $token = UserTokenModel::findByToken($authorization);
-            if (empty($token)) {
-                $this->error('用户认证失败 [Token Error]' , 1000);
-                return false;
-            }
-            $user = UserModel::findById($token->user_id);
+            $user = UserModel::findByUniqueCode($unique_code);
             if (empty($user)) {
-                $this->error("用户认证失败 [Token Mapping User Not Found]" , 1000);
+                $this->error('用户认证失败 [Unique Code Error]' , -1000);
                 return false;
             }
         } else {
             $debug_user_id = $this->request->post['debug_user_id'] ?? 0;
             $user = UserModel::findById($debug_user_id);
             if (empty($user)) {
-                $this->error('用户认证失败 [UserId Mapping User Not Found]' , 1000);
+                $this->error('用户认证失败 [DebugUserId Mapping User Not Found]' , -1000);
                 return false;
             }
         }

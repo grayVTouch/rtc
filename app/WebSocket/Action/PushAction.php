@@ -60,7 +60,7 @@ class PushAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $push_type = config('business.push_type');
+        $push_type = config('business.push_type_for_push');
         if (!in_array($param['type'] , $push_type)) {
             return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $push_type));
         }

@@ -49,7 +49,7 @@ class PushReadStatusModel extends Model
     }
 
     // 初始化
-    public static function initByPushId(int $push_id , array $user_id = [])
+    public static function initByPushIdAndUserIds(int $push_id , array $user_id = [])
     {
         foreach ($user_id as $v)
         {
