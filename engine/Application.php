@@ -14,6 +14,7 @@ use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use Core\Lib\Hash;
 use function core\obj_to_array;
+use function core\random;
 use Exception;
 
 use Core\Lib\Redis;
@@ -135,13 +136,23 @@ class Application
             $project = ProjectModel::all();
             foreach ($project as $v)
             {
+                $users = UserModel::getByIdentifier($v->identifier);
+                foreach ($users as $v1)
+                {
+                    if (empty($v1->aes_key)) {
+                        $aes_key = random(16 , 'mixed' , true);
+                        UserModel::updateById($v1->id , [
+                            'aes_key' => $aes_key
+                        ]);
+                    }
+                }
                 // 检查系统用户是否存在
                 $system_user = UserModel::systemUser($v->identifier);
                 if (!empty($system_user)) {
                     // 跑一遍用户列表，没有的统统成为好友关系
                     // 这是为了兼容测试阶段生成的用户
-                    $users = UserModel::getByIdentifierAndRole($v->identifier , 'user');
-                    foreach ($users as $v1)
+                    $users_for_user = UserModel::getByIdentifierAndRole($v->identifier , 'user');
+                    foreach ($users_for_user as $v1)
                     {
                         $friend = FriendModel::findByUserIdAndFriendId($v1->id , $system_user->id);
                         if (empty($friend)) {
@@ -154,9 +165,15 @@ class Application
                 $waiter_username = config('app.waiter_username');
                 $waiter_password = config('app.waiter_password');
                 $waiter_password = Hash::make($waiter_password);
+                $area_code = config('app.waiter_area_code');
+                $phone = config('app.waiter_phone');
+                $full_phone = sprintf('%s%s' , $area_code , $phone);
                 // 系统用户不存在，新增系统用户
                 $id = UserModel::insertGetId([
                     'identifier' => $v->identifier ,
+                    'area_code' => $area_code ,
+                    'phone'    => $phone ,
+                    'full_phone' => $full_phone ,
                     'username' => $waiter_username ,
                     'password' => $waiter_password ,
                     'is_system' => 1 ,

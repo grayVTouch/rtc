@@ -76,6 +76,10 @@ class ChatUtil extends Util
         if (empty($relation)) {
 //            return self::error('你们还不是好友，禁止操作' , 403);
         }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户' , 404);
+        }
         // 该条消息是否是阅后即焚的消息
         $param['flag'] = empty($relation) ? 'normal' :
             ($relation->burn == 1 ? 'burn' : 'normal');
@@ -84,6 +88,12 @@ class ChatUtil extends Util
         // 这边做基本的认证
         $blocked = BlacklistModel::blocked($param['friend_id'] , $param['user_id']);
         $param['blocked'] = (int) $blocked;
+        $param['old'] = 0;
+        if (config('app.enable_encrypt')) {
+            $param['old'] = 0;
+            $param['aes_key'] = $user->aes_key;
+            $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
+        }
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [
@@ -94,6 +104,8 @@ class ChatUtil extends Util
                 'flag' ,
                 'extra' ,
                 'blocked' ,
+                'aes_key' ,
+                'old' ,
             ]));
             MessageReadStatusModel::initByMessageId($id , $param['chat_id'] , $param['user_id'] , $param['friend_id']);
             if ($blocked) {
@@ -107,6 +119,7 @@ class ChatUtil extends Util
             }
             $msg = MessageModel::findById($id);
             SessionUtil::createOrUpdate($param['user_id'] , 'private' , $param['chat_id']);
+            SessionUtil::createOrUpdate($param['friend_id'] , 'private' , $param['chat_id']);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['friend_id']);
             DB::commit();
             if (!$blocked) {
@@ -177,7 +190,6 @@ class ChatUtil extends Util
         if ($group->banned == 1) {
             return self::error('群主已开启禁言' , 403);
         }
-        // 检查是否时好友
         $member = GroupMemberModel::findByUserIdAndGroupId($param['user_id'] , $param['group_id']);
         if (empty($member)) {
             return self::error('您不在该群，禁止操作' , 403);
@@ -186,12 +198,21 @@ class ChatUtil extends Util
             // 被设置禁言
             return self::error('您已经被管理员设置为禁言');
         }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户' , 404);
+        }
         $group_target_user = config('business.group_target_user');
         $param['extra'] = $param['extra'] ?? '';
         $param['target_user']       = $param['target_user'] ?? '';
         $param['target_User_ids']   = $param['target_user_ids'] ?? '';
         // 如果用户没有指定推送的人，那么群推送
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
+        if (config('app.enable_encrypt')) {
+            $param['old'] = 0;
+            $param['aes_key'] = $user->key;
+            $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
+        }
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [

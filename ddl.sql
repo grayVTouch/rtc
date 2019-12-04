@@ -30,6 +30,7 @@ create table if not exists `rtc_user` (
   signature varchar(500) default '' comment '个性签名' ,
   enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用' ,
   is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是' ,
+  aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户表';
@@ -142,6 +143,8 @@ create table if not exists `rtc_message` (
   extra text comment '额外数据' ,
   flag varchar(255) default 'normal' comment '消息标志：burn-阅后即焚消息；normal-正常消息' ,
   blocked tinyint default 0 comment '0-正常消息 1-黑名单消息' ,
+  old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
+  aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '私聊消息';
@@ -154,6 +157,8 @@ create table if not exists `rtc_group_message` (
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
   message text comment '消息' ,
   extra text comment '额外数据' ,
+  old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
+  aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';
@@ -378,6 +383,11 @@ alter table `rtc_user` add enable_destroy_password tinyint default 1 comment '�
 alter table `rtc_user` add is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是';
 alter table `rtc_user` add destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话';
 alter table `rtc_user` add is_init_password tinyint default 0 comment '是否初始化了登录密码？0-否 1-是';
+alter table `rtc_message` add old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是';
+alter table `rtc_group_message` add old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是';
+alter table `rtc_user` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
+alter table `rtc_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
+alter table `rtc_group_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
 
 
 

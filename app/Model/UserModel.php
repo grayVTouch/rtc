@@ -313,4 +313,15 @@ class UserModel extends Model
         ]);
     }
 
+    // 获取用户
+    public static function getByIdentifier(string $identifier)
+    {
+        $res = self::where([
+                ['identifier' , '=' , $identifier] ,
+            ])
+            ->get();
+        self::multiple($res);
+        return $res;
+    }
+
 }

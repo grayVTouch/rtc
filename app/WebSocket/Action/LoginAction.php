@@ -180,20 +180,22 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查短信验证码
-        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
-        if (empty($sms_code)) {
-            return self::error('请先发送短信验证码');
-        }
-        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
-            return self::error('请先发送短信验证码');
-        }
-        if ($sms_code->code != $param['sms_code']) {
-            return self::error('短信验证码不正确');
-        }
         $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
         if (empty($user)) {
             return self::error('手机号未注册');
+        }
+        if ($user->is_system != 1) {
+            // 检查短信验证码
+            $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
+            if (empty($sms_code)) {
+                return self::error('请先发送短信验证码');
+            }
+            if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
+                return self::error('请先发送短信验证码');
+            }
+            if ($sms_code->code != $param['sms_code']) {
+                return self::error('短信验证码不正确');
+            }
         }
         // 登录成功
         $param['identifier'] = $user->identifier;
@@ -212,7 +214,7 @@ class LoginAction extends Action
             }
             if ($user->role == 'admin') {
                 // 工作人员登陆后，消费未读消息
-                UserUtil::consumeUnhandleMsg($user);
+//                UserUtil::consumeUnhandleMsg($user);
             }
             // 短信验证码标记为已经使用
             SmsCodeModel::updateById($sms_code->id , [
@@ -363,6 +365,7 @@ class LoginAction extends Action
         $param['unique_code'] = MiscUtil::uniqueCode();
         $param['full_phone'] = sprintf('%s%s' , $param['area_code'] , $param['phone']);
         $param['identifier'] = $base->identifier;
+        $param['aes_key'] = random(16 , 'mixed' , true);
         try {
             DB::beginTransaction();
             $id = UserModel::insertGetId(array_unit($param , [
@@ -374,6 +377,7 @@ class LoginAction extends Action
                 'full_phone' ,
                 'identifier' ,
                 'nickname' ,
+                'aes_key' ,
             ]));
             UserOptionModel::insertGetId([
                 'user_id' => $id ,

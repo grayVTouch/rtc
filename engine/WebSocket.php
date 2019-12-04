@@ -287,10 +287,6 @@ class WebSocket
                     'extra' => '' ,
                 ] ,
             ];
-
-            // 数据
-//            print_r($data);
-
             $data['router']     = $data['router'] ?? '';
             $data['identifier']      = $data['identifier'] ?? '';
             $data['debug']      = $data['debug'] ?? '';
@@ -299,7 +295,6 @@ class WebSocket
             $data['platform']   = $data['platform'] ?? '';
             $data['request']   = $data['request'] ?? '';
             $data['data']       = $data['data'] ?? [];
-//            print_r();
             $router = $this->parseRouter($data['router']);
             if (!$router) {
                 $this->websocket->disconnect($frame->fd, 400, "未找到对应路由：{$data['router']}");
