@@ -1,10 +1,12 @@
 <?php
 
-namespace Z253;
+namespace App\Lib\SMS\SMSLib;
 
 header("Content-type:text/html; charset=UTF-8");
 
 /* *
+ * 国际短信
+ *
  * 类名：ChuanglanSmsApi
  * 功能：创蓝接口请求类
  * 详细：构造创蓝短信接口请求，获取远程HTTP数据
@@ -31,9 +33,9 @@ class ChuanglanSmsApi {
 	//拉取上行短信状态的接口
 	const API_PULL_REPORT_URL='http://intapi.253.com/pull/report?';
 
-	const API_ACCOUNT='I631166_I0211011';//Get SMS Account  from  https://zz.253.com/site/login.html 
+	const API_ACCOUNT='I621031_I0211011';//Get SMS Account  from  https://zz.253.com/site/login.html
 
-	const API_PASSWORD='GnLyM4iRCSad92';//Get SMS Password  from https://zz.253.com/site/login.html
+	const API_PASSWORD='0VyZTvXQ1F4bad';//Get SMS Password  from https://zz.253.com/site/login.html
 	/**
 	 * 发送短信
 	 *
