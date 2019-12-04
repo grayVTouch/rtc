@@ -16,6 +16,7 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
+use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\UserRedis;
@@ -155,7 +156,7 @@ class UserUtil extends Util
                 GroupUtil::delete($v->group_id);
                 continue ;
             }
-            // 删除用户发布的言论
+            // 删除用户发布的群消息
             $group_messages = GroupMessageModel::getByGroupIdAndUserId($v->group_id , $user_id);
             foreach ($group_messages as $v2)
             {
@@ -166,6 +167,8 @@ class UserUtil extends Util
         }
         // 删除用户选项
         UserOptionModel::delByUserId($user_id);
+        // 删除用户添加方式
+        UserJoinFriendOptionModel::delByUserId($user_id);
         // 删除用户
         UserModel::delById($user_id);
         WebSocket::clearRedis($user_id);

@@ -114,4 +114,14 @@ class Friend extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 客服（好友）
+    public function waiter(array $param)
+    {
+        $res = FriendAction::waiter($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

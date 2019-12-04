@@ -31,4 +31,9 @@ class UserJoinFriendOptionModel extends Model
             'enable' => $enable
         ]);
     }
+
+    public static function delByUserId(int $user_id)
+    {
+
+    }
 }

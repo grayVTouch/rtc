@@ -26,9 +26,11 @@ use App\Util\PageUtil;
 use App\WebSocket\Auth;
 use App\Util\UserUtil;
 use function core\array_unit;
+use Core\Lib\Hash;
 use Core\Lib\Validator;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use function WebSocket\ws_config;
 
 
 class UserAction extends Action
@@ -379,5 +381,132 @@ class UserAction extends Action
         }
         UserJoinFriendOptionModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
         return self::success();
+    }
+
+    public static function initDestroyPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'destroy_password' => 'required' ,
+            'confirm_destroy_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_destroy_password == 1) {
+            return self::error('你已经初始化过销毁密码，禁止再次操作' , 403);
+        }
+        if ($param['destroy_password'] != $param['confirm_destroy_password']) {
+            return self::error('两次输入的密码不一致');
+        }
+        $destroy_password = Hash::make($param['destroy_password']);
+        UserModel::updateById($auth->user->id , [
+            'destroy_password' => $destroy_password ,
+            'is_init_destroy_password' => 1 ,
+        ]);
+        return self::success();
+    }
+
+    public static function initPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'password' => 'required' ,
+            'confirm_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_password == 1) {
+            return self::error('你已经初始化过登录密码，禁止再次操作' , 403);
+        }
+        if ($param['password'] != $param['confirm_password']) {
+            return self::error('两次输入的密码不一致');
+        }
+        $password = Hash::make($param['password']);
+        UserModel::updateById($auth->user->id , [
+            'password' => $password ,
+            'is_init_password' => 1 ,
+        ]);
+        return self::success();
+    }
+
+
+    public static function setDestroyPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'origin_destroy_password' => 'required' ,
+            'destroy_password' => 'required' ,
+            'confirm_destroy_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_destroy_password != 1) {
+            return self::error('您尚未初始化销毁密码，请先初始化后再操作' , 403);
+        }
+        if (!Hash::check($param['origin_destroy_password'] , $auth->user->destroy_password)) {
+            return self::error('旧销毁密码有误，请重新输入');
+        }
+        if ($param['destroy_password'] != $param['confirm_destroy_password']) {
+            return self::error('两次输入的销毁密码不一致');
+        }
+        $destroy_password = Hash::make($param['destroy_password']);
+        UserModel::updateById($auth->user->id , [
+            'destroy_password' => $destroy_password ,
+        ]);
+        return self::success();
+    }
+
+    public static function setPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'origin_password' => 'required' ,
+            'password' => 'required' ,
+            'confirm_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_password != 1) {
+            return self::error('您尚未初始化登录密码，请先初始化后再操作' , 403);
+        }
+        if (!Hash::check($param['origin_password'] , $auth->user->password)) {
+            return self::error('旧登录密码有误，请重新输入');
+        }
+        if ($param['password'] != $param['confirm_password']) {
+            return self::error('两次输入的登录密码不一致');
+        }
+        $password = Hash::make($param['password']);
+        UserModel::updateById($auth->user->id , [
+            'password' => $password ,
+        ]);
+        return self::success();
+    }
+
+    public static function setEnableDestroyPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'enable_destroy_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $bool_for_int = config('business.bool_for_int');
+        if (!in_array($param['enable_destroy_password'] , $bool_for_int)) {
+            return self::error('enable_destroy_password 的值超出受支持的范围，当前支持的值有：' . implode(',' , $bool_for_int));
+        }
+        UserModel::updateById($auth->user->id , array_unit($param , [
+            'enable_destroy_password'
+        ]));
+        return self::success();
+    }
+
+    // 销毁用户
+    public static function destroy(Auth $auth , $param)
+    {
+
     }
 }

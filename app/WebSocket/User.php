@@ -224,5 +224,75 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    // 初始化销毁密码
+    public function initDestroyPassword(array $param)
+    {
+        $param['destroy_password'] = $param['destroy_password'] ?? '';
+        $param['confirm_destroy_password'] = $param['confirm_destroy_password'] ?? '';
+        $res = UserAction::initDestroyPassword($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 初始化登录密码
+    public function initPassword(array $param)
+    {
+        $param['password'] = $param['password'] ?? '';
+        $param['confirm_password'] = $param['confirm_password'] ?? '';
+        $res = UserAction::initPassword($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 修改销毁密码
+    public function setDestroyPassword(array $param)
+    {
+        $param['origin_destroy_password'] = $param['origin_destroy_password'] ?? '';
+        $param['destroy_password'] = $param['destroy_password'] ?? '';
+        $param['confirm_destroy_password'] = $param['confirm_destroy_password'] ?? '';
+        $res = UserAction::setDestroyPassword($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 修改登录密码
+    public function setPassword(array $param)
+    {
+        $param['origin_password'] = $param['origin_password'] ?? '';
+        $param['password'] = $param['password'] ?? '';
+        $param['confirm_password'] = $param['confirm_password'] ?? '';
+        $res = UserAction::setPassword($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 启用或禁用销毁密码
+    public function setEnableDestroyPassword(array $param)
+    {
+        $param['enable_destroy_password'] = $param['enable_destroy_password'] ?? '';
+        $res = UserAction::setEnableDestroyPassword($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 销毁账号
+    public function destroy(array $param)
+    {
+        $res = UserAction::destroy($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 
 }

@@ -8,9 +8,12 @@
 
 namespace Engine;
 
+use App\Model\FriendModel;
 use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
+use Core\Lib\Hash;
+use function core\obj_to_array;
 use Exception;
 
 use Core\Lib\Redis;
@@ -135,16 +138,32 @@ class Application
                 // 检查系统用户是否存在
                 $system_user = UserModel::systemUser($v->identifier);
                 if (!empty($system_user)) {
+                    // 跑一遍用户列表，没有的统统成为好友关系
+                    // 这是为了兼容测试阶段生成的用户
+                    $users = UserModel::getByIdentifierAndRole($v->identifier , 'user');
+                    foreach ($users as $v1)
+                    {
+                        $friend = FriendModel::findByUserIdAndFriendId($v1->id , $system_user->id);
+                        if (empty($friend)) {
+                            FriendModel::u_insertGetId($v1->id , $system_user->id);
+                            FriendModel::u_insertGetId($system_user->id , $v1->id);
+                        }
+                    }
                     continue ;
                 }
+                $waiter_username = config('app.waiter_username');
+                $waiter_password = config('app.waiter_password');
+                $waiter_password = Hash::make($waiter_password);
                 // 系统用户不存在，新增系统用户
                 $id = UserModel::insertGetId([
                     'identifier' => $v->identifier ,
+                    'username' => $waiter_username ,
+                    'password' => $waiter_password ,
                     'is_system' => 1 ,
                     'is_temp' => 0 ,
                     'role' => 'admin' ,
                     'nickname' => $system_waiter_name ,
-                    'username' => $system_waiter_name ,
+                    'is_init_password' => 1 ,
                 ]);
                 UserOptionModel::insertGetId([
                     'user_id' => $id

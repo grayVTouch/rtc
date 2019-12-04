@@ -304,4 +304,10 @@ class FriendAction extends Action
         ]));
         return self::success();
     }
+
+    public static function waiter(Auth $auth , array $param)
+    {
+        $waiter = FriendModel::waiter($auth->user->id);
+        return self::success($waiter);
+    }
 }

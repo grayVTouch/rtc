@@ -12,7 +12,8 @@ create table if not exists `rtc_user` (
   id int unsigned not null auto_increment ,
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   username varchar(255) default '' comment '用户名' ,
-  password varchar(255) default '' comment '密码' ,
+  password varchar(255) default '' comment '登录密码' ,
+  destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话' ,
   phone varchar(255) default '' comment '手机号码' ,
   area_code varchar(255) default '' comment '区号' ,
   full_phone varchar(255) default '' comment '完整的手机号码: 区号 + 手机号码' ,
@@ -27,6 +28,8 @@ create table if not exists `rtc_user` (
   sex tinyint default 0 comment '0-保密 1-男 2-女' ,
   birthday date default null comment '出生日期' ,
   signature varchar(500) default '' comment '个性签名' ,
+  enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用' ,
+  is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户表';
@@ -373,6 +376,13 @@ alter table `rtc_article_type` add weight smallint default 0 comment '权重';
 alter table `rtc_article` add enable tinyint default 1 comment '启用？0-否 1-是';
 alter table `rtc_article` add weight smallint default 0 comment '权重';
 alter table `rtc_article` add thumb varchar(1000) default '' comment '封面';
+
+
+alter table `rtc_user` add enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用';
+alter table `rtc_user` add is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是';
+alter table `rtc_user` add destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话';
+alter table `rtc_user` add is_init_password tinyint default 0 comment '是否初始化了登录密码？0-否 1-是';
+
 
 
 

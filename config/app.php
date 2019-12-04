@@ -85,4 +85,8 @@ return [
     // 客服咨询会话名称
     'customer_channel_name' => '官方客服' ,
 
+    // 客服账号
+    'waiter_username' => 'waiter' ,
+    // 客服密码
+    'waiter_password' => '123456' ,
 ];

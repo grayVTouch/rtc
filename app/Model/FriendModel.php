@@ -255,4 +255,25 @@ class FriendModel extends Model
         }
         return $res;
     }
+
+    // 客服
+    public static function waiter(int $user_id)
+    {
+        $res = self::with(['user' , 'friend'])
+            ->from('friend as f')
+            ->leftJoin('user as u' , 'u.id' , '=' , 'f.friend_id')
+            ->where([
+                ['f.user_id' , '=' , $user_id] ,
+                ['u.is_system' , '=' , 1] ,
+            ])
+            ->select('f.*')
+            ->first();
+        if (empty($res)) {
+            return ;
+        }
+        self::single($res);
+        UserModel::single($res->user);
+        UserModel::single($res->friend);
+        return $res;
+    }
 }
