@@ -287,6 +287,10 @@ class WebSocket
                     'extra' => '' ,
                 ] ,
             ];
+
+            // 数据
+            print_r($data);
+
             $data['router']     = $data['router'] ?? '';
             $data['identifier']      = $data['identifier'] ?? '';
             $data['debug']      = $data['debug'] ?? '';
