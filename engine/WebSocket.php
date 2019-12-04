@@ -289,7 +289,7 @@ class WebSocket
             ];
 
             // 数据
-            print_r($data);
+//            print_r($data);
 
             $data['router']     = $data['router'] ?? '';
             $data['identifier']      = $data['identifier'] ?? '';
