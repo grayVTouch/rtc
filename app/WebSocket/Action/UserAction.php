@@ -507,6 +507,22 @@ class UserAction extends Action
     // 销毁用户
     public static function destroy(Auth $auth , $param)
     {
-
+        if ($auth->user->is_init_destroy_password == 1) {
+            // 已经初始化密码
+            if ($auth->user->enable_destroy_password == 1) {
+                // 启用了销毁密码
+                $validator = Validator::make($param , [
+                    'destroy_password' => 'required' ,
+                ]);
+                if ($validator->fails()) {
+                    return self::error($validator->message());
+                }
+                if (!Hash::make($param['destroy_password'] , $auth->user->destroy_password)) {
+                    return self::error('销毁密码错误' , 403);
+                }
+            }
+        }
+        UserUtil::delete($auth->user->id);
+        return self::success();
     }
 }

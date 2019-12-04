@@ -99,4 +99,9 @@ class PushReadStatusModel extends Model
         ]);
     }
 
+    public static function delByUserId(int $user_id)
+    {
+        return self::where('user_id' , $user_id)
+            ->delete();
+    }
 }

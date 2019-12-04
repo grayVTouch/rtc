@@ -16,6 +16,8 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
+use App\Model\PushReadStatusModel;
+use App\Model\SessionModel;
 use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
@@ -132,6 +134,9 @@ class UserUtil extends Util
         {
             // 删除私聊消息
             $chat_id    = ChatUtil::chatId($user_id , $v);
+            // 删除私聊会话列表
+            SessionModel::delByTypeAndTargetId('private' , $chat_id);
+
             $messages   = MessageModel::getByChatId($chat_id);
             foreach ($messages as $v2)
             {
@@ -151,6 +156,9 @@ class UserUtil extends Util
         $groups = GroupMemberModel::getByUserId($user_id);
         foreach ($groups as $v)
         {
+            // 删除群聊会话列表
+            SessionModel::delByTypeAndTargetId('group' , $v->group_id);
+
             if ($v->group->user_id == $user_id) {
                 // 删除用户创建的群
                 GroupUtil::delete($v->group_id);
@@ -165,12 +173,21 @@ class UserUtil extends Util
             // 删除用户加入的群
             GroupMemberModel::delByUserIdAndGroupId($user_id , $v->group_id);
         }
+        // 删除相关通知会话
+        $push_type_for_push = config('business.push_type_for_push');
+        foreach ($push_type_for_push as $v)
+        {
+            SessionModel::delByUserIdAndType($user_id , $v);
+        }
+        // 删除推送消息
+        PushReadStatusModel::delByUserId($user_id);
         // 删除用户选项
         UserOptionModel::delByUserId($user_id);
         // 删除用户添加方式
         UserJoinFriendOptionModel::delByUserId($user_id);
         // 删除用户
         UserModel::delById($user_id);
+        // 用户下线
         WebSocket::clearRedis($user_id);
     }
 

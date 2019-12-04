@@ -369,16 +369,12 @@ drop table if exists `rtc_combination_word`;
 -- 系统公告
 
 alter table `rtc_group` add banned tinyint default 0 comment '全体禁言，仅群主可设置！是否禁言？0-否 1-是';
-
 alter table `rtc_article_type` add enable tinyint default 1 comment '启用？0-否 1-是';
 alter table `rtc_article_type` add weight smallint default 0 comment '权重';
-
 alter table `rtc_article` add enable tinyint default 1 comment '启用？0-否 1-是';
 alter table `rtc_article` add weight smallint default 0 comment '权重';
 alter table `rtc_article` add thumb varchar(1000) default '' comment '封面';
-
-
-alter table `rtc_user` add enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用';
+alter table `rtc_user` add enable_destroy_password tinyint default 1 comment '启用销毁密码?：0-禁用 1-启用';
 alter table `rtc_user` add is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是';
 alter table `rtc_user` add destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话';
 alter table `rtc_user` add is_init_password tinyint default 0 comment '是否初始化了登录密码？0-否 1-是';

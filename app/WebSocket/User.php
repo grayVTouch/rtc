@@ -288,6 +288,7 @@ class User extends Auth
     // 销毁账号
     public function destroy(array $param)
     {
+        $param['destroy_password'] = $param['destroy_password'] ?? '';
         $res = UserAction::destroy($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);

@@ -130,4 +130,13 @@ class SessionModel extends Model
                 ->whereIn('id' , $id_list)
                 ->count()) >= 1;
     }
+
+    public static function delByUserIdAndType(int $user_id , string $type)
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['type' , '=' , $type] ,
+        ])->delete();
+    }
+
 }
