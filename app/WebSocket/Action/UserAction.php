@@ -533,4 +533,23 @@ class UserAction extends Action
         $share_register_link = sprintf('%s?invite_code=%s' , $share_register_link , $auth->user->invite_code);
         return self::success($share_register_link);
     }
+
+    //
+    public static function updateKey(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'key' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查 key 长度
+        if (strlen($param['key']) != 16) {
+            return self::error('key 的长度强制要求为 16 位单字节字符');
+        }
+        UserModel::updateById($auth->user->id , [
+            'aes_key' => $param['key']
+        ]);
+        return self::success();
+    }
 }

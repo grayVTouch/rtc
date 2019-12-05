@@ -88,12 +88,8 @@ class ChatUtil extends Util
         // 这边做基本的认证
         $blocked = BlacklistModel::blocked($param['friend_id'] , $param['user_id']);
         $param['blocked'] = (int) $blocked;
-        $param['old'] = 1;
-        if (config('app.enable_encrypt')) {
-            $param['old'] = 0;
-            $param['aes_key'] = $user->aes_key;
-            $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
-        }
+        $param['old'] = empty($param['old']) ? 0 : $param['old'];
+        $param['aes_key'] = $user->aes_key;
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [
@@ -142,7 +138,8 @@ class ChatUtil extends Util
                 $base->pushAll($user_ids , 'refresh_unread_count');
                 $base->pushAll($user_ids , 'refresh_session_unread_count');
                 AppPushUtil::pushCheckForFriend($base->platform , $param['user_id'] , $param['friend_id'] , function() use($param , $msg){
-                    $res = AppPushUtil::pushForPrivate($param['friend_id'] , $msg->message , '你收到了一条好友消息' , $msg);
+                    $message = $param['old'] == 1 ? $msg->message : AesUtil::decrypt($msg->message , $param['aes_key'] , config('app.aes_vi'));
+                    $res = AppPushUtil::pushForPrivate($param['friend_id'] , $message , '你收到了一条好友消息' , $msg);
                     if ($res['code'] != 200) {
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$param['chat_id']}] [sender: {$param['user_id']}; receiver: {$param['friend_id']}]");
                     }
@@ -208,12 +205,9 @@ class ChatUtil extends Util
         $param['target_User_ids']   = $param['target_user_ids'] ?? '';
         // 如果用户没有指定推送的人，那么群推送
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
-        $param['old'] = 1;
-        if (config('app.enable_encrypt')) {
-            $param['old'] = 0;
-            $param['aes_key'] = $user->key;
-            $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
-        }
+        $param['old'] = empty($param['old']) ? 0 : $param['old'];
+        $param['aes_key'] = $user->key;
+        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
@@ -256,7 +250,8 @@ class ChatUtil extends Util
                     continue ;
                 }
                 AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
-                    $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                    $message = $param['old'] == 1 ? $msg->message : AesUtil::decrypt($msg->message , $param['aes_key'] , config('app.aes_vi'));
+                    $res = AppPushUtil::pushForGroup($v , $message , '你收到了一条群消息' , $msg);
                     if ($res['code'] != 200) {
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                     }

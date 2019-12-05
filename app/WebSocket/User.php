@@ -305,4 +305,15 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 更改用户的密钥
+    public function updateKey(array $param)
+    {
+        $param['key'] = $param['key'] ?? '';
+        $res = UserAction::updateKey($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }
