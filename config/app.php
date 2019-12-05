@@ -117,4 +117,7 @@ return [
     // 然后允许字母/数字混合
 //    'aes_vi' => '1234567890123456' ,
     'aes_vi' => 'ards423j32k4h423' ,
+
+    // 分享注册下载链接
+    'share_register_link' => 'http://websocket.gca.cool:10001/share/register.html' ,
 ];

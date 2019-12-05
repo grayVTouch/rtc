@@ -6,9 +6,9 @@
  * Time: 23:57
  */
 
-namespace App\Http;
+namespace App\Http\Web;
 
-use App\Http\Action\LoginAction;
+use App\Http\Web\Action\LoginAction;
 
 class Login extends Base
 {
@@ -29,7 +29,6 @@ class Login extends Base
         return $this->success($res['data']);
     }
 
-    // 远程登录
     public function remoteLogin()
     {
         $param = $this->request->post;
@@ -41,13 +40,42 @@ class Login extends Base
         return $this->success($res['data']);
     }
 
-    // 登录
     public function login()
     {
         $param = $this->request->post;
         $param['username'] = $param['username'] ?? '';
         $param['password'] = $param['password'] ?? '';
         $res = LoginAction::login($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    public function registerForShare()
+    {
+        $param = $this->request->post;
+        $param['role'] = $param['role'] ?? '';
+        $param['area_code'] = $param['area_code'] ?? '';
+        $param['phone'] = $param['phone'] ?? '';
+        $param['nickname'] = $param['nickname'] ?? '';
+        $param['sms_code'] = $param['sms_code'] ?? '';
+        $param['invite_code'] = $param['invite_code'] ?? '';
+        $res = LoginAction::registerForShare($this , $param);
+//        $res = LoginAction::test();
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 注册短信验证码
+    public function smsCodeForRegister()
+    {
+        $param = $this->request->post;
+        $param['area_code'] = $param['area_code'] ?? '';
+        $param['phone'] = $param['phone'] ?? '';
+        $res = LoginAction::smsCode($this , 1 , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

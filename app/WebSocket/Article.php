@@ -13,17 +13,20 @@ use App\WebSocket\Action\ArticleAction;
 
 class Article extends Auth
 {
-    // 关于我们
-    protected $articleTypeIdForAboutUs = 2;
-
     // 帮助中心
     protected $articleTypeIdForHelpCenter = 1;
+
+    // 关于我们
+    protected $articleTypeIdForAboutUs = 2;
 
     // 使用协议
     protected $articleTypeIdForProtocol = 3;
 
     // 隐私条款
     protected $articleTypeIdForPrivacyPolicy = 4;
+
+    // 加密技术
+    protected $articleTypeIdForEncryption = 5;
 
     // 关于我们
     public function aboutUs(array $param)
@@ -72,6 +75,16 @@ class Article extends Auth
     {
         $param['id'] = $param['id'] ?? '';
         $res = ArticleAction::detailForArticle($this , $this->articleTypeIdForHelpCenter , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 帮助中心-文章详情
+    public function encrypt(array $param)
+    {
+        $res = ArticleAction::firstByArticleTypeId($this , $this->articleTypeIdForEncryption , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

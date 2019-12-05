@@ -505,7 +505,7 @@ class UserAction extends Action
     }
 
     // 销毁用户
-    public static function destroy(Auth $auth , $param)
+    public static function destroy(Auth $auth , array $param)
     {
         if ($auth->user->is_init_destroy_password == 1) {
             // 已经初始化密码
@@ -524,5 +524,13 @@ class UserAction extends Action
         }
         UserUtil::delete($auth->user->id);
         return self::success();
+    }
+
+    // 分享注册二维码
+    public static function shareRegisterQRCode(Auth $auth , array $param)
+    {
+        $share_register_link = config('app.share_register_link');
+        $share_register_link = sprintf('%s?invite_code=%s' , $share_register_link , $auth->user->invite_code);
+        return self::success($share_register_link);
     }
 }

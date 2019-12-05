@@ -296,4 +296,13 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    // 分享注册二维码数据
+    public function shareRegisterQRCode(array $param)
+    {
+        $res = UserAction::shareRegisterQRCode($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

@@ -6,7 +6,7 @@
  * Time: 16:45
  */
 
-namespace App\Http;
+namespace App\Http\Web;
 
 use App\Redis\MiscRedis;
 use App\Util\PushUtil;
@@ -51,7 +51,7 @@ class Base
     }
 
     // 响应：成功时
-    public function success($data = '' , $code = 200)
+    public function success($data = '' , $code = 0)
     {
         return self::response($data , $code);
     }
@@ -63,7 +63,7 @@ class Base
     }
 
     // 响应：自定义
-    public function response($data = '' , int $code = 200)
+    public function response($data = '' , int $code = 0)
     {
         // 设置响应头
         $this->response->header('Content-Type' , 'application/json');

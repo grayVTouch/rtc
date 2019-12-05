@@ -6,11 +6,11 @@
  * Time: 9:50
  */
 
-namespace App\Http\Action;
+namespace App\Http\Web\Action;
 
 class Action
 {
-    public static function success($data = '' , $code = 200)
+    public static function success($data = '' , $code = 0)
     {
         return compact('data' , 'code');
     }
