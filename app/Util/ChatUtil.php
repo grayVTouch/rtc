@@ -221,6 +221,8 @@ class ChatUtil extends Util
                 'message' ,
                 'type' ,
                 'extra' ,
+                'aes_key' ,
+                'old' ,
             ]));
             GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $param['user_id']);
             $msg = GroupMessageModel::findById($group_message_id);

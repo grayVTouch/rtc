@@ -388,6 +388,7 @@ alter table `rtc_group_message` add old tinyint default 1 comment '旧消息（�
 alter table `rtc_user` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
 alter table `rtc_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
 alter table `rtc_group_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
+alter table `rtc_task_log` add `result` mediumtext comment '执行结果';
 
 
 
