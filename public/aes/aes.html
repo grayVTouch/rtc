@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--<script src="aes.js"></script>-->
+<script src="crypto-js.js"></script>
+<script src="aes.js"></script>
+
+
+<script>
+    // 自定义键 和 iv
+    //为了避免补位，直接用16位的秘钥
+    // 必须是 16 位密钥
+    var key =  CryptoJS.enc.Utf8.parse("abcdefgh12345678");
+    // var key =  'fuck';
+    console.log(key);
+    // var iv = CryptoJS.enc.Hex.parse('1234567890123456');
+    // var iv = CryptoJS.enc.Utf8.parse('1234567890123456');
+    var iv = CryptoJS.enc.Utf8.parse('abcd12345fdskdk2');
+    var origin = 'hello boys and girls!!we will win the fight!!';
+    var option = {
+        iv: iv ,
+        mode: CryptoJS.mode.CBC ,
+        padding: CryptoJS.pad.Pkcs7
+    };
+
+    // Encrypt
+    var str = CryptoJS.AES.encrypt(origin , key , option);
+    var enc = str.toString();
+
+    console.log('实际使用的 key：' + str.key , '实际使用的 iv: '  + str.iv , 'salt: ' + str.salt);
+    console.log('加密后的字符串：' , enc);
+
+
+    // enc = 'JsxcMPYXGVTjO4x3Ad+rHg==';
+    enc = 'srJCddLmpwpAkMLuXvOfYLCVxSc7poeW4O0ts4JBCFD5xHTIqc2p3qMgeIg1HM1B';
+    // Decrypt
+    var bytes  = CryptoJS.AES.decrypt(enc, key , option);
+
+    // console.log('解密后的字符串，直接解密方式：' , CryptoJS.enc.Utf8.parse(enc).toString());
+    var dec = bytes.toString(CryptoJS.enc.Utf8);
+
+    console.log('解密后的字符串' , dec); // 'my message
+</script>
+</body>
+</html>
