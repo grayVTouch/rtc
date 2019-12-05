@@ -88,7 +88,7 @@ class ChatUtil extends Util
         // 这边做基本的认证
         $blocked = BlacklistModel::blocked($param['friend_id'] , $param['user_id']);
         $param['blocked'] = (int) $blocked;
-        $param['old'] = 0;
+        $param['old'] = 1;
         if (config('app.enable_encrypt')) {
             $param['old'] = 0;
             $param['aes_key'] = $user->aes_key;
@@ -208,6 +208,7 @@ class ChatUtil extends Util
         $param['target_User_ids']   = $param['target_user_ids'] ?? '';
         // 如果用户没有指定推送的人，那么群推送
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
+        $param['old'] = 1;
         if (config('app.enable_encrypt')) {
             $param['old'] = 0;
             $param['aes_key'] = $user->key;
