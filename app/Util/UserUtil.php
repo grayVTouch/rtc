@@ -41,7 +41,7 @@ class UserUtil extends Util
         $user->online = UserRedis::isOnline($user->identifier , $user->id) ? 1 : 0;
         // 用户最近一次在线时间
         $user_recent_online_timestamp = UserRedis::userRecentOnlineTimestamp($user->identifier , $user->id);
-        $user->user_recent_online_timestamp = empty($user_recent_online_timestamp) ? null : $user->user_recent_online_timestamp;
+        $user->user_recent_online_timestamp = empty($user_recent_online_timestamp) ? null : $user_recent_online_timestamp;
         if (!empty($relation_user_id)) {
             $friend = FriendModel::findByUserIdAndFriendId($relation_user_id , $user->id);
             // 黑名单
