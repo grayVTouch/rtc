@@ -316,4 +316,14 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 清空聊天记录
+    public function emptyMessage(array $param)
+    {
+        $res = UserAction::emptyMessage($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

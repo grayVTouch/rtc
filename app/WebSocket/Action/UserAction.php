@@ -15,6 +15,7 @@ use App\Model\BlacklistModel;
 use App\Model\FriendModel;
 use App\Model\GroupModel;
 use App\Model\JoinFriendMethodModel;
+use App\Model\SessionModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
@@ -23,6 +24,7 @@ use App\Redis\UserRedis;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
 use App\Util\PageUtil;
+use App\Util\SessionUtil;
 use App\WebSocket\Auth;
 use App\Util\UserUtil;
 use function core\array_unit;
@@ -551,5 +553,27 @@ class UserAction extends Action
             'aes_key' => $param['key']
         ]);
         return self::success();
+    }
+
+    public static function emptyMessage(Auth $auth , array $param)
+    {
+        try {
+            DB::beginTransaction();
+            // 获取用户的会话列表
+            $sessions = SessionModel::getByUserId($auth->user->id);
+            foreach ($sessions as $v)
+            {
+                $res = SessionUtil::delById($v->id);
+                if ($res['code'] != 200) {
+                    DB::rollBack();
+                    return self::error($res['data'] , $res['code']);
+                }
+            }
+            DB::commit();
+            return self::success();
+        } catch(Exception $e){
+            DB::rollBack();
+            throw $e;
+        }
     }
 }
