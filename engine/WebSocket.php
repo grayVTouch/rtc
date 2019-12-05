@@ -177,6 +177,11 @@ class WebSocket
         $_conn = is_array($conn) ? array_diff($conn , [$fd]) : [];
 
         if (empty($_conn)) {
+            // 所有客户端均已经下线
+            if (!empty($user_id)) {
+                // 记录当前用户最近一次下线时间
+                UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
+            }
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
             var_dump(date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（还有其他客户端活跃）');
         } else {
@@ -847,6 +852,7 @@ class WebSocket
             UserRedis::delFdByUserId($user->identifier , $user_id , $v);
             UserRedis::delFdMappingUserId($user->identifier , $v);
             MiscRedis::delfdMappingIdentifier($v);
+            UserRedis::delFdMappingPlatform($user->identifier , $v);
         }
         if (!UserRedis::isOnline($user->identifier , $user->id)) {
             // 确定当前已经处于完全离线状态，那么删除掉该用户绑定的相关信息

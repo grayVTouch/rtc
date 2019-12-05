@@ -56,6 +56,7 @@ create table if not exists `rtc_user_token` (
   user_id int unsigned default 0 comment 'rtc_user.user_id' ,
   token varchar(255) default '' comment 'token' ,
   expire datetime default current_timestamp comment '过期时间' ,
+  platform varchar(255) default '' comment '平台：pc|mobile|app 等' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户 token 表';
@@ -389,7 +390,13 @@ alter table `rtc_user` add aes_key varchar(255) default '' comment 'aes 加密�
 alter table `rtc_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
 alter table `rtc_group_message` add aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符';
 alter table `rtc_task_log` add `result` mediumtext comment '执行结果';
+alter table `rtc_user_token` add platform varchar(255) default '' comment '平台：pc|mobile|app 等';
 
 
+-- todo 每个平台仅允许一个设备登录，如果多个设备登录，当前登录用户允许登录；然后其他客户端都要被踢下线
+-- todo 这就需要保存客户端对应的平台；然后用户登录的时候计算当前用户在某平台上的客户端数量
+-- todo 超过数量旧踢下线
+-- todo 用户离线时间，需要在用户离线的时候设置离线时间，然后获取用户在线/离线状态的时候，提供在线离线状态，
+-- todo 如果离线，那么请使用离线时间来格式化展示该用户具体离线多长时间
 
 

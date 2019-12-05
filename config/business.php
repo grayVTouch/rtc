@@ -77,6 +77,8 @@ return [
         'empty_group_session_from_cache' ,
         // 刷新黑名单列表
         'refresh_blacklist' ,
+        // 被迫下线通知
+        'forced_offline' ,
     ] ,
 
     // 消息
@@ -359,6 +361,11 @@ return [
         'private' ,
         // 群聊
         'group' ,
+    ] ,
+
+    // 同一平台仅允许单一设备登录，支持该功能的平台范围
+    'single_device_for_platform' => [
+        'app' ,
     ] ,
 
 

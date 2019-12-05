@@ -29,4 +29,12 @@ class UserTokenModel extends Model
             'expire' => $expire
         ]);
     }
+
+    public static function delByUserIdAndPlatform(int $user_id , string $platform = '')
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['platform' , '=' , $platform] ,
+        ])->delete();
+    }
 }

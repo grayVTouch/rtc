@@ -189,4 +189,40 @@ class UserRedis extends Redis
         $name = sprintf(self::$noWaiterForGroup , $identifier , $group_id);
         return RedisFacade::del($name);
     }
+
+    // fd 映射的 platform
+    public static function fdMappingPlatform(string $identifier , int $fd , string $platform = '')
+    {
+        $name = sprintf(self::$fdMappingPlatform , $identifier , $fd);
+        if (empty($platform)) {
+            // 获取
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $platform);
+    }
+
+    // 删除 fd 的映射关系
+    public static function delFdMappingPlatform(string $identifier , int $fd)
+    {
+        $name = sprintf(self::$fdMappingPlatform , $identifier , $fd);
+        return RedisFacade::del($name);
+    }
+
+    // fd 映射的 platform
+    public static function userRecentOnlineTimestamp(string $identifier , int $user_id , string $timestamp = '')
+    {
+        $name = sprintf(self::$userRecentOnlineTimestamp , $identifier , $user_id);
+        if (empty($timestamp)) {
+            // 获取
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $timestamp);
+    }
+
+    // 删除 fd 的映射关系
+    public static function delUserRecentOnlineTimestamp(string $identifier , int $user_id)
+    {
+        $name = sprintf(self::$userRecentOnlineTimestamp , $identifier , $user_id);
+        return RedisFacade::del($name);
+    }
 }

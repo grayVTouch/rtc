@@ -204,6 +204,16 @@ class LoginAction extends Action
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
         try {
             DB::beginTransaction();
+            // 先检查当前登录平台是否是非 pc 浏览器
+            // 如果时非 pc 浏览器，那么将其他有效的 token 删除
+            // 或让其等价于 无效
+            // 这是为了保证 同一平台仅 允许 单个设备登录
+            $single_device_for_platform = config('business.single_device_for_platform');
+            if (in_array($base->platform , $single_device_for_platform)) {
+                // 删除掉其他 token
+                UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
+            }
+            UserRedis::fdMappingPlatform($base->fd , $base->platform);
             UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire']);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
@@ -221,6 +231,19 @@ class LoginAction extends Action
                 'used' => 1
             ]);
             DB::commit();
+            if (in_array($base->platform , $single_device_for_platform)) {
+                // 通知其他客户端你已经被迫下线
+                $client_ids = UserRedis::userIdMappingFd($base->identifier , $user->id);
+                foreach ($client_ids as $v)
+                {
+                    // 检查平台
+                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
+                    if (in_array($platform , $single_device_for_platform)) {
+                        // 通知对方下线
+                        $base->push($v , 'forced_offline');
+                    }
+                }
+            }
             // 推送一条未读消息数量
             return self::success([
                 'user_id'   => $param['user_id'] ,

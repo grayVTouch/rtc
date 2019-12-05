@@ -80,4 +80,18 @@ class Redis
      */
     protected static $sessionMember = '%s_session_member_%s';
 
+    /**
+     * 客户端连接所绑定的平台
+     *
+     * @var string
+     */
+    protected static $fdMappingPlatform = '%_fd_mapping_platform_%s';
+
+    /**
+     * 用户最近一次下线时间
+     *
+     * @var string
+     */
+    protected static $userRecentOnlineTimestamp = '%s_user_recent_online_timestamp_%s';
+
 }
