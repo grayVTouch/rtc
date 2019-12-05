@@ -570,6 +570,7 @@ class UserAction extends Action
                 }
             }
             DB::commit();
+            $auth->push($auth->user->id , 'refresh_session');
             return self::success();
         } catch(Exception $e){
             DB::rollBack();
