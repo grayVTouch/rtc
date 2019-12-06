@@ -309,9 +309,9 @@ class UserAction extends Action
             return self::error($validator->message());
         }
         // 检查是否是好友
-        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
-            return self::error('你们还不是好友' , 403);
-        }
+//        if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
+//            return self::error('你们还不是好友' , 403);
+//        }
         // 检查用户是否开启了输入状态
         if ($auth->user->user_option->write_status == 0) {
             return self::error('您尚未开启输入状态展示，禁止操作' , 403);
