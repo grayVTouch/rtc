@@ -200,7 +200,7 @@ class ChatUtil extends Util
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
         $param['old'] = empty($param['old']) ? 0 : $param['old'];
         $param['aes_key'] = $user->key;
-        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
+//        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
