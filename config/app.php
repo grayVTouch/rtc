@@ -100,7 +100,7 @@ return [
     // 如果开启加密，那么将会使用
     // AES-128-CBC 的加密方式
     // 对聊天消息进行加密
-    'enable_encrypt' => false ,
+    'enable_encrypt' => true ,
 
     // aes 加密 vi （加密向量）
     // 要求固定容量：128bit

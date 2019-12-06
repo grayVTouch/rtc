@@ -227,6 +227,7 @@ class GroupMessageAction extends Action
                     'type' => $v->type ,
                     'message' => $v->message ,
                     'extra' => $v->extra ,
+                    'old' => $v->old ,
                 ] , true);
                 if ($forward['code'] != 200) {
                     $res['error'][] = [
@@ -333,12 +334,19 @@ class GroupMessageAction extends Action
                 }
                 $msgs[] = $msg;
             }
+            $message = json_encode($message_id);
+            $old = 1;
+            if (config('app.enable_encrypt')) {
+                $old = 0;
+                $message =  AesUtil::encrypt($message , $auth->user->aes_key , config('app.aes_vi'));
+            }
             $res = ChatUtil::send($auth , [
                 'user_id' => $auth->user->id ,
                 'friend_id' => $friend->id ,
                 'type' => 'message_set' ,
-                'message' => json_encode($message_id) ,
+                'message' => $message ,
                 'extra' => 'group' ,
+                'old'   => $old ,
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
@@ -369,12 +377,19 @@ class GroupMessageAction extends Action
                 }
                 $msgs[] = $msg;
             }
+            $message = json_encode($message_id);
+            $old = 1;
+            if (config('app.enable_encrypt')) {
+                $old = 0;
+                $message =  AesUtil::encrypt($message , $auth->user->aes_key , config('app.aes_vi'));
+            }
             $res = ChatUtil::groupSend($auth , [
                 'user_id' => $auth->user->id ,
                 'group_id' => $group->id ,
                 'type' => 'message_set' ,
-                'message' => json_encode($message_id) ,
+                'message' => $message ,
                 'extra' => 'group' ,
+                'old'   => $old
             ] , true);
             if ($res['code'] != 200) {
                 return self::error('合并转发失败：' . $res['data'] , $res['code']);
