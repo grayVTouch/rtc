@@ -213,7 +213,7 @@ class LoginAction extends Action
                 // 删除掉其他 token
                 UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
             }
-            UserRedis::fdMappingPlatform($base->fd , $base->platform);
+            UserRedis::fdMappingPlatform($base->identifier , $base->fd , $base->platform);
             UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire']);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
