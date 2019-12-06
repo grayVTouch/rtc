@@ -17,6 +17,7 @@ use App\Model\GroupModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\UserModel;
+use App\Util\AesUtil;
 use App\Util\ChatUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
@@ -199,9 +200,12 @@ class MessageAction extends Action
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
         $other_id = ChatUtil::otherId($res->chat_id , $res->user_id);
+        $message = sprintf('"%s" 撤回了消息' , $res->user->nickname);
         MessageModel::updateById($param['message_id'] , [
             'type' => 'withdraw' ,
-            'message' => sprintf('"%s" 撤回了消息' , $res->user->nickname) ,
+            'message' => $res->old == 1 ?
+                $message :
+                AesUtil::encrypt($message , $res->aes_key , config('app.aes_vi')) ,
         ]);
         $res = MessageModel::findById($param['message_id']);
         MessageUtil::handleMessage($res , $res->user_id , $other_id);

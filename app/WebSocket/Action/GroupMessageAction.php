@@ -15,6 +15,7 @@ use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\UserModel;
+use App\Util\AesUtil;
 use App\Util\ChatUtil;
 use App\Util\MiscUtil;
 use App\WebSocket\Auth;
@@ -158,9 +159,12 @@ class GroupMessageAction extends Action
         if ($withdraw_duration < time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
         }
+        $message = sprintf('"%s" 撤回了消息' , $res->user->nickname);
         GroupMessageModel::updateById($param['group_message_id'] , [
             'type' => 'withdraw' ,
-            'message' => sprintf('"%s" 撤回了消息' , $res->user->nickname) ,
+            'message' => $res->old == 1 ?
+                $message :
+                AesUtil::encrypt($message , $res->aes_key , config('app.aes_vi')) ,
         ]);
         $res = GroupMessageModel::findById($param['group_message_id']);
         MessageUtil::handleGroupMessage($res);
