@@ -227,9 +227,11 @@ class LoginAction extends Action
 //                UserUtil::consumeUnhandleMsg($user);
             }
             // 短信验证码标记为已经使用
-            SmsCodeModel::updateById($sms_code->id , [
-                'used' => 1
-            ]);
+            if ($user->is_system != 1) {
+                SmsCodeModel::updateById($sms_code->id , [
+                    'used' => 1
+                ]);
+            }
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
