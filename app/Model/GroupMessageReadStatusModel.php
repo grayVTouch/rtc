@@ -49,11 +49,13 @@ class GroupMessageReadStatusModel extends Model
 
     public static function updateStatusByUserIdAndGroupIdExcludeVoice(int $user_id , int $group_id , int $is_read = 1)
     {
-        return self::where([
-                ['group_id' , '=' , $group_id] ,
-                ['user_id' , '=' , $user_id] ,
+        return self::from('group_message_read_status as gmrs')
+            ->leftJoin('group_message as gm' , 'gmrs.message_id' , '=' , 'gm.id')
+            ->where([
+                ['gmrs.group_id' , '=' , $group_id] ,
+                ['gmrs.user_id' , '=' , $user_id] ,
             ])
-            ->whereNotIn('type' , ['voice'])
+            ->whereNotIn('gm.type' , ['voice'])
             ->update([
                 'is_read' => $is_read
             ]);

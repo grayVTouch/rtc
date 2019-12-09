@@ -205,7 +205,7 @@ class ChatUtil extends Util
         $param['aes_key'] = $user->aes_key;
 //        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
         $e_time = microtime(true);
-        var_dump("发送群消息花费时间（第一阶段）：" . $e_time - $s_time);
+        var_dump("发送群消息花费时间（第一阶段）：" . ($e_time - $s_time));
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
@@ -226,6 +226,8 @@ class ChatUtil extends Util
                 SessionUtil::createOrUpdate($v , 'group' , $param['group_id']);
             }
             DB::commit();
+            $e_time = microtime(true);
+            var_dump("发送群消息花费时间（第二阶段）：" . ($e_time - $s_time));
             if ($push_all) {
                 $base->pushAll($user_ids , 'group_message' , $msg);
             } else {
@@ -241,6 +243,7 @@ class ChatUtil extends Util
                     $user_ids = array_intersect($target_user_ids , $user_ids);
                 }
             }
+
             foreach ($user_ids as $v)
             {
                 if ($v == $param['user_id']) {
@@ -258,6 +261,8 @@ class ChatUtil extends Util
                     $base->push($v , 'new');
                 });
             }
+            $e_time = microtime(true);
+            var_dump("发送群消息花费时间（第三阶段）：" . ($e_time - $s_time));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
