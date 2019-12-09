@@ -269,6 +269,11 @@ class UserAction extends Action
         if (UserUtil::isSamePhoneWithAreaCode($param['area_code'] , $param['phone'] , $auth->user->area_code , $auth->user->phone)) {
             return self::error('新旧手机号码一致，请检查手机号码' , 403);
         }
+        // 检查当前提供的手机号码是否已经被注册
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($auth->identifier , $param['area_code'] , $param['phone']);
+        if (!empty($user)) {
+            return self::error('该手机号码已经被绑定，请重新输入' , 403);
+        }
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($auth->identifier , $param['area_code'] , $param['phone'] , 4);
         if (empty($sms_code)) {

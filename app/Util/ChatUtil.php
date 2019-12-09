@@ -250,6 +250,7 @@ class ChatUtil extends Util
                     // 跳过发送消息的人
                     continue ;
                 }
+                $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
                 AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
                     $message = $param['old'] == 1 ? $msg->message : AesUtil::decrypt($msg->message , $param['aes_key'] , config('app.aes_vi'));
                     $res = AppPushUtil::pushForGroup($v , $message , '你收到了一条群消息' , $msg);
@@ -261,6 +262,7 @@ class ChatUtil extends Util
                     $base->push($v , 'new');
                 });
             }
+            $msg->is_read = GroupMessageReadStatusModel::isRead($param['user_id'] , $msg->id);
             $e_time = microtime(true);
             var_dump("发送群消息花费时间（第三阶段）：" . ($e_time - $s_time));
             return self::success($msg);

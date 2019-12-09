@@ -183,4 +183,10 @@ class Login extends Base
         }
         return $this->success($res['data']);
     }
+
+    // 忘记密码
+    public function updatePassword()
+    {
+
+    }
 }
