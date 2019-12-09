@@ -282,7 +282,7 @@ class LoginAction extends Action
         if ($res['code'] != 200) {
             return self::error($res['data']);
         }
-        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
         if (empty($user)) {
             return self::error('手机号未注册');
         }
@@ -551,7 +551,7 @@ class LoginAction extends Action
             return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));
         }
         // 检查手机号码是否被使用过
-        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
         if (!empty($user)) {
             return self::error('该手机号码已经注册，请直接登录');
         }
