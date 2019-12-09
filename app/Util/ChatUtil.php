@@ -122,11 +122,21 @@ class ChatUtil extends Util
             if (!$blocked) {
                 $user_ids = [$param['user_id'] , $param['friend_id']];
                 if ($push_all) {
-                    // 用于消息转发
-                    $base->pushAll($user_ids , 'private_message' , $msg);
+                    foreach ($user_ids as $v)
+                    {
+                        // 用于消息转发
+                        $msg->self_is_read = $v == $param['user_id'] ? 1 : 0;
+                        $msg->other_is_read = $msg->self_is_read == 1 ? 0 : 1;
+                        $base->push($v , 'private_message' , $msg);
+                    }
                 } else {
-                    // 用于正常聊天
-                    $base->sendAll($user_ids , 'private_message' , $msg);
+                    foreach ($user_ids as $v)
+                    {
+                        // 用于消息转发
+                        $msg->self_is_read = $v == $param['user_id'] ? 1 : 0;
+                        $msg->other_is_read = $msg->self_is_read == 1 ? 0 : 1;
+                        $base->send($v , 'private_message' , $msg);
+                    }
                 }
                 $base->pushAll($user_ids , 'refresh_session');
                 $base->pushAll($user_ids , 'refresh_unread_count');
@@ -143,8 +153,13 @@ class ChatUtil extends Util
                 });
             } else {
                 if ($push_all) {
+                    $msg->self_is_read = 1;
+                    $msg->other_is_read = 0;
                     // 用于消息转发
                     $base->push($param['user_id'] , 'private_message' , $msg);
+                } else {
+                    $msg->self_is_read = 1;
+                    $msg->other_is_read = 0;
                 }
             }
             return self::success($msg);

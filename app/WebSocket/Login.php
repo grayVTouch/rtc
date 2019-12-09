@@ -185,8 +185,16 @@ class Login extends Base
     }
 
     // 忘记密码
-    public function updatePassword()
+    public function updatePassword(array $param)
     {
-
+        $param['area_code'] = $param['area_code'] ?? '';
+        $param['phone'] = $param['phone'] ?? '';
+        $param['password'] = $param['password'] ?? '';
+        $param['confirm_password'] = $param['confirm_password'] ?? '';
+        $res = LoginAction::smsCode($this , 4 , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
     }
 }

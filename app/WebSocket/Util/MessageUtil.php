@@ -87,14 +87,14 @@ class MessageUtil extends Util
      * @param int $friend_id
      * @return null
      */
-    public static function handleMessage($msg , int $user_id = 0 , int $friend_id = 0)
+    public static function handleMessage($msg , int $user_id = 0 , int $other_id = 0)
     {
         if (empty($msg)) {
             return ;
         }
         $msg->session_id = ChatUtil::sessionId('private' , $msg->chat_id);
         $msg->self_is_read = MessageReadStatusModel::isRead($user_id , $msg->id);
-        $msg->friend_is_read = MessageReadStatusModel::isRead($friend_id , $msg->id);
+        $msg->other_is_read = MessageReadStatusModel::isRead($other_id , $msg->id);
         if (isset($msg->user)) {
             TopUserUtil::handle($msg->user);
         }
@@ -122,7 +122,6 @@ class MessageUtil extends Util
             $user_for_card = UserModel::findById($msg->message);
             TopUserUtil::handle($user_for_card);
             $msg->user_for_card = $user_for_card;
-
         }
     }
 
