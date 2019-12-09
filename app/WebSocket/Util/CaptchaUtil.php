@@ -49,7 +49,7 @@ class CaptchaUtil extends Util
     public static function check($verify_code , $key)
     {
         $key = base64_decode($key);
-        $key = json_decode($key);
+        $key = json_decode($key , true);
         $datetime = date('Y-m-d H:i:s');
         if ($datetime > $key['expire']) {
             return self::error('图形验证码已过期');
