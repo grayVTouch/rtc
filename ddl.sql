@@ -31,6 +31,7 @@ create table if not exists `rtc_user` (
   enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用' ,
   is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是' ,
   aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
+  is_test tinyint default 0 comment '是否是测试账号：0-否 1-是' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户表';
