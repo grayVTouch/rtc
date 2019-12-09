@@ -54,6 +54,8 @@ class CaptchaUtil extends Util
         if ($datetime > $key['expire']) {
             return self::error('图形验证码已过期');
         }
+        $key['verify_code'] = strtolower($key['verify_code']);
+        $verify_code = strtolower($verify_code);
         if ($key['verify_code'] != $verify_code) {
             return self::error('图形验证码错误');
         }
