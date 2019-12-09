@@ -99,7 +99,6 @@ class Login extends Base
     public function registerUseUsername(array $param)
     {
         $param['role'] = $param['role'] ?? '';
-        $param['area_code'] = $param['area_code'] ?? '';
         $param['username'] = $param['username'] ?? '';
         $param['password'] = $param['password'] ?? '';
         $param['confirm_password'] = $param['confirm_password'] ?? '';

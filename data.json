@@ -1,14 +1,16 @@
 {
-  "router": "/Session/setSessionBackground",
-  "identifier": "test",
-  "user_id": 3 ,
-  "debug": "running" ,
-  "token": "" ,
+  "router": "/Login/registerUseUsername",
+  "identifier": "abcdefg",
   "request": "abcdefghijklmnopqrstuvwxyz",
-  "platform": "app",
+  "platform": "pc",
   "data": {
-    "type": "private" ,
-    "target_id": "3_4" ,
-    "background": "http://test.com/a.jpg"
+    "role": "user" ,
+    "username": "test" ,
+    "password": "123456" ,
+    "confirm_password": "123456" ,
+    "nickname": "test_by_running" ,
+    "invite_code": "" ,
+    "verify_code": "mt2f" ,
+    "verify_code_key": "eyJleHBpcmUiOiIyMDE5LTEyLTA5IDE1OjE0OjA5IiwidmVyaWZ5X2NvZGUiOiJNVDJGIn0="
   }
 }
