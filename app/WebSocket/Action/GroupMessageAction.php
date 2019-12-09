@@ -117,6 +117,9 @@ class GroupMessageAction extends Action
         if ($res <= 0) {
             return self::error('操作失败');
         }
+        $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 

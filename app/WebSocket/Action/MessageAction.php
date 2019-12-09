@@ -172,6 +172,9 @@ class MessageAction extends Action
         }
         // 推送给该条消息的双方，将本地数据库的消息删除
         $auth->pushAll($user_ids , 'delete_private_message_from_cache' , [$param['message_id']]);
+        $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 
@@ -199,6 +202,9 @@ class MessageAction extends Action
         $sender = ChatUtil::otherId($message->chat_id , $message->user_id);
         // 推送给该条消息的双方，将本地数据库的消息删除
         $auth->push($sender , 'readed_for_private' , [$param['message_id']]);
+        $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 
