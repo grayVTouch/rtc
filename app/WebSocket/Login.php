@@ -96,7 +96,7 @@ class Login extends Base
         return $this->success($res['data']);
     }
 
-    public function registerUsePhoneV2(array $param)
+    public function registerUseUsername(array $param)
     {
         $param['role'] = $param['role'] ?? '';
         $param['area_code'] = $param['area_code'] ?? '';

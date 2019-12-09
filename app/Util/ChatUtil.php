@@ -159,6 +159,7 @@ class ChatUtil extends Util
      */
     public static function groupSend(Base $base , array $param , bool $push_all = false)
     {
+        $s_time = microtime(true);
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
             'type' => 'required' ,
@@ -203,6 +204,8 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $user->aes_key;
 //        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
+        $e_time = microtime(true);
+        var_dump("发送群消息花费时间（第一阶段）：" . $e_time - $s_time);
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
