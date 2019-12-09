@@ -21,6 +21,7 @@ use App\Model\UserOptionModel;
 use App\Model\UserTokenModel;
 use App\Redis\UserRedis;
 use App\Util\MiscUtil;
+use App\WebSocket\Util\CaptchaUtil;
 use App\WebSocket\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Hash;
@@ -176,9 +177,16 @@ class LoginAction extends Action
             'area_code'    => 'required' ,
             'phone'    => 'required' ,
             'sms_code'    => 'required' ,
+            'verify_code'    => 'required' ,
+            'verify_code_key'    => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
+        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
         }
         $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
         if (empty($user)) {
@@ -214,7 +222,7 @@ class LoginAction extends Action
                 UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
             }
             UserRedis::fdMappingPlatform($base->identifier , $base->fd , $base->platform);
-            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire']);
+            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);
@@ -231,6 +239,84 @@ class LoginAction extends Action
                 SmsCodeModel::updateById($sms_code->id , [
                     'used' => 1
                 ]);
+            }
+            DB::commit();
+            if (in_array($base->platform , $single_device_for_platform)) {
+                // 通知其他客户端你已经被迫下线
+                $client_ids = UserRedis::userIdMappingFd($base->identifier , $user->id);
+                foreach ($client_ids as $v)
+                {
+                    // 检查平台
+                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
+                    if (in_array($platform , $single_device_for_platform)) {
+                        // 通知对方下线
+                        $base->push($v , 'forced_offline');
+                    }
+                }
+            }
+            // 推送一条未读消息数量
+            return self::success([
+                'user_id'   => $param['user_id'] ,
+                'token'     => $param['token']
+            ]);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function loginUseUsernameV1(Base $base , array $param)
+    {
+        // 未启用旅客模式
+        $validator = Validator::make($param , [
+            'username'    => 'required' ,
+            'password'    => 'required' ,
+            'verify_code'    => 'required' ,
+            'verify_code_key'    => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        if (empty($user)) {
+            return self::error('手机号未注册');
+        }
+        if (!Hash::check($param['password'] , $user->password)) {
+            return self::error('密码错误');
+        }
+        // 登录成功
+        $param['identifier'] = $user->identifier;
+        $param['user_id'] = $user->id;
+        $param['token']  = MiscUtil::token();
+        $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
+        try {
+            DB::beginTransaction();
+            // 先检查当前登录平台是否是非 pc 浏览器
+            // 如果时非 pc 浏览器，那么将其他有效的 token 删除
+            // 或让其等价于 无效
+            // 这是为了保证 同一平台仅 允许 单个设备登录
+            $single_device_for_platform = config('business.single_device_for_platform');
+            if (in_array($base->platform , $single_device_for_platform)) {
+                // 删除掉其他 token
+                UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
+            }
+            UserRedis::fdMappingPlatform($base->identifier , $base->fd , $base->platform);
+            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
+            // 上线通知
+            $online = UserRedis::isOnline($base->identifier , $user->id);
+            BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);
+            if (!$online) {
+                // 之前如果不在线，现在上线，那么推送更新
+                BaseUserUtil::onlineStatusChange($base->identifier , $param['user_id'] , 'online');
+            }
+            if ($user->role == 'admin') {
+                // 工作人员登陆后，消费未读消息
+//                UserUtil::consumeUnhandleMsg($user);
             }
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
@@ -350,11 +436,18 @@ class LoginAction extends Action
             'role'      => 'required' ,
             'area_code' => 'required' ,
             'phone'     => 'required' ,
-            'nickname'  => 'required' ,
             'sms_code'  => 'required' ,
+            'nickname'  => 'required' ,
+            'verify_code'  => 'required' ,
+            'verify_code_key'  => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
+        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
         }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
@@ -434,6 +527,90 @@ class LoginAction extends Action
         }
     }
 
+    public static function registerUseUsername(Base $base , array $param)
+    {
+        $validator = Validator::make($param , [
+            'role'      => 'required' ,
+            'username'     => 'required' ,
+            'password'     => 'required' ,
+            'confirm_password' => 'required' ,
+            'nickname'  => 'required' ,
+            'verify_code'  => 'required' ,
+            'verify_code_key'  => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
+        $role_range = config('business.role');
+        if (!in_array($param['role'] , $role_range)) {
+            return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));
+        }
+        // 检查手机号码是否被使用过
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        if (!empty($user)) {
+            return self::error('该手机号码已经注册，请直接登录');
+        }
+        if (!empty($param['invite_code'])) {
+            $referrer = UserModel::findByIdentifierAndInviteCode($base->identifier , $param['invite_code']);
+            if (empty($referrer)) {
+                return self::error('邀请码错误，未找到该邀请码对应的用户');
+            }
+            $param['p_id'] = $referrer->id;
+        } else {
+            $param['p_id'] = 0;
+        }
+        $param['invite_code_copy'] = $param['invite_code'];
+        $param['invite_code'] = md5($param['phone']);
+        $param['unique_code'] = MiscUtil::uniqueCode();
+        $param['identifier'] = $base->identifier;
+        $param['aes_key'] = random(16 , 'mixed' , true);
+        $param['password'] = Hash::make($param['password']);
+        try {
+            DB::beginTransaction();
+            $id = UserModel::insertGetId(array_unit($param , [
+                'area_code' ,
+                'phone' ,
+                'p_id' ,
+                'invite_code' ,
+                'unique_code' ,
+                'full_phone' ,
+                'identifier' ,
+                'nickname' ,
+                'aes_key' ,
+                'username' ,
+                'password' ,
+            ]));
+            UserOptionModel::insertGetId([
+                'user_id' => $id ,
+            ]);
+            // 自动添加客服为好友（这边默认每个项目仅会有一个客服）
+            $system_user = UserModel::systemUser($base->identifier);
+            FriendModel::u_insertGetId($id , $system_user->id);
+            FriendModel::u_insertGetId($system_user->id , $id);
+            // 新增用户添加方式选项
+            $join_friend_method = JoinFriendMethodModel::getAll();
+            foreach ($join_friend_method as $v)
+            {
+                UserJoinFriendOptionModel::insertGetId([
+                    'join_friend_method_id' => $v->id ,
+                    'user_id' => $id ,
+                    'enable' => 1 ,
+                ]);
+            }
+
+            DB::commit();
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     // 注册短信验证码
     public static function smsCode(Base $base , $type , array $param)
     {
@@ -486,5 +663,14 @@ class LoginAction extends Action
             $res[] = random(11 , 'letter' , true);
         }
         return self::success($res);
+    }
+
+    public static function captcha(Base $base , array $param)
+    {
+        $res = CaptchaUtil::make();
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
+        return self::success($res['data']);
     }
 }

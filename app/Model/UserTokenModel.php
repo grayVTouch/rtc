@@ -21,12 +21,13 @@ class UserTokenModel extends Model
         return $res;
     }
 
-    public static function u_insertGetId(int $user_id , string $token , string $expire)
+    public static function u_insertGetId(int $user_id , string $token , string $expire , string $platform)
     {
         return self::insertGetId([
             'user_id' => $user_id ,
             'token' => $token ,
-            'expire' => $expire
+            'expire' => $expire ,
+            'platform' => $platform ,
         ]);
     }
 

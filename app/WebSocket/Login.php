@@ -26,7 +26,22 @@ class Login extends Base
     {
         $param['username'] = $param['username'] ?? '';
         $param['password'] = $param['password'] ?? '';
+        $param['verify_code'] = $param['verify_code'] ?? '';
+        $param['verify_code_key'] = $param['verify_code_key'] ?? '';
         $res = LoginAction::loginUseUsername($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    public function loginUseUsernameV1(array $param)
+    {
+        $param['username'] = $param['username'] ?? '';
+        $param['password'] = $param['password'] ?? '';
+        $param['verify_code'] = $param['verify_code'] ?? '';
+        $param['verify_code_key'] = $param['verify_code_key'] ?? '';
+        $res = LoginAction::loginUseUsernameV1($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
@@ -38,6 +53,8 @@ class Login extends Base
         $param['area_code'] = $param['area_code'] ?? '';
         $param['phone'] = $param['phone'] ?? '';
         $param['sms_code'] = $param['sms_code'] ?? '';
+        $param['verify_code'] = $param['verify_code'] ?? '';
+        $param['verify_code_key'] = $param['verify_code_key'] ?? '';
         $res = LoginAction::loginUsePhone($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -70,12 +87,34 @@ class Login extends Base
         $param['nickname'] = $param['nickname'] ?? '';
         $param['sms_code'] = $param['sms_code'] ?? '';
         $param['invite_code'] = $param['invite_code'] ?? '';
+        $param['verify_code'] = $param['verify_code'] ?? '';
+        $param['verify_code_key'] = $param['verify_code_key'] ?? '';
         $res = LoginAction::registerUsePhoneV1($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
     }
+
+    public function registerUsePhoneV2(array $param)
+    {
+        $param['role'] = $param['role'] ?? '';
+        $param['area_code'] = $param['area_code'] ?? '';
+        $param['username'] = $param['username'] ?? '';
+        $param['password'] = $param['password'] ?? '';
+        $param['confirm_password'] = $param['confirm_password'] ?? '';
+        $param['nickname'] = $param['nickname'] ?? '';
+        $param['invite_code'] = $param['invite_code'] ?? '';
+        $param['verify_code'] = $param['verify_code'] ?? '';
+        $param['verify_code_key'] = $param['verify_code_key'] ?? '';
+        $res = LoginAction::registerUseUsername($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+
 
     // 注册短信验证码
     public function smsCodeForRegister(array $param)
@@ -130,6 +169,16 @@ class Login extends Base
     {
         $param['limit'] = $param['limit'] ?? '';
         $res = LoginAction::nickname($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 图形验证码
+    public function captcha(array $param)
+    {
+        $res = LoginAction::captcha($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

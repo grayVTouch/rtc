@@ -56,6 +56,8 @@ class Base
 
         // 自定义的一些代码
         require_once __DIR__ . '/Common/currency.php';
+        // 加载图形验证码插件
+        require_once __DIR__ . '/../../plugin/captcha/vendor/autoload.php';
 
         return true;
     }
