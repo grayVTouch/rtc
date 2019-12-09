@@ -673,4 +673,46 @@ class LoginAction extends Action
         }
         return self::success($res['data']);
     }
+
+    // 忘记密码
+    public static function forgetPassword(Base $base , array $param)
+    {
+        $validator = Validator::make($param , [
+            'area_code'     => 'required' ,
+            'phone'         => 'required' ,
+            'password'     => 'required' ,
+            'confirm_password' => 'required' ,
+            'verify_code'  => 'required' ,
+            'verify_code_key'  => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
+        // 检查短信验证码
+        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);
+        if (empty($sms_code)) {
+            return self::error('请先发送短信验证码');
+        }
+        if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
+            return self::error('验证码已经过期');
+        }
+        if ($sms_code->code != $param['sms_code']) {
+            return self::error('短信验证码不正确');
+        }
+        // 检查手机号码是否被使用过
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        if (!empty($user)) {
+            return self::error('账号不存在');
+        }
+        $password = Hash::make($param['password']);
+        UserModel::updateById($user->id , [
+            'password' => $password
+        ]);
+        return self::success();
+    }
 }
