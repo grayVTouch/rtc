@@ -98,7 +98,7 @@ class MessageAction extends Action
             return self::error($validator->message());
         }
         $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
-        MessageReadStatusModel::updateReadStatusByUserIdAndChatIdExcludeBurn($auth->user->id , $chat_id , 1);
+        MessageReadStatusModel::updateReadStatusByUserIdAndChatIdExcludeBurnAndVoice($auth->user->id , $chat_id , 1);
         // 通知用户刷新会话列表
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
@@ -172,6 +172,33 @@ class MessageAction extends Action
         }
         // 推送给该条消息的双方，将本地数据库的消息删除
         $auth->pushAll($user_ids , 'delete_private_message_from_cache' , [$param['message_id']]);
+        return self::success();
+    }
+
+    // 设置单条消息为已读
+    public static function readed(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'message_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $message = MessageModel::findById($param['message_id']);
+        if (empty($message)) {
+            return self::error('未找到消息id对应的记录' , 404);
+        }
+        $user_ids = ChatUtil::userIds($message->chat_id);
+        if (!in_array($auth->user->id , $user_ids)) {
+            return self::error('你无法更改他人的消息读取状态' , 403);
+        }
+        $res = MessageReadStatusModel::updateReadStatusByUserIdAndMessageId($auth->user->id , $param['message_id'] , 1);
+        if ($res <= 0) {
+            return self::error('操作失败');
+        }
+        $sender = ChatUtil::otherId($message->chat_id , $message->user_id);
+        // 推送给该条消息的双方，将本地数据库的消息删除
+        $auth->push($sender , 'readed_for_private' , [$param['message_id']]);
         return self::success();
     }
 

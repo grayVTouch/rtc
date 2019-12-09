@@ -131,7 +131,7 @@ class MessageReadStatusModel extends Model
      * 更新消息读取状态
      *
      */
-    public static function updateReadStatusByUserIdAndChatIdExcludeBurn(int $user_id , string $chat_id , int $is_read)
+    public static function updateReadStatusByUserIdAndChatIdExcludeBurnAndVoice(int $user_id , string $chat_id , int $is_read)
     {
         self::from('message_read_status as mrs')
             ->leftJoin('message as m' , 'mrs.message_id' , '=' , 'm.id')
@@ -141,6 +141,7 @@ class MessageReadStatusModel extends Model
                 // 非阅后即焚
                 ['m.flag' , '<>' , 'burn'] ,
             ])
+            ->whereNotIn('m.type' , ['voice'])
             ->update([
                 'mrs.is_read' => $is_read
             ]);

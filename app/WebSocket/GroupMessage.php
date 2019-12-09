@@ -25,6 +25,17 @@ class GroupMessage extends Auth
         return $this->success($res['data']);
     }
 
+    // 设置单条消息已读/未读（所有类型消息）
+    public function readed(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $res = GroupMessageAction::readed($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     //  群：历史消息记录
     public function history(array $param)
     {

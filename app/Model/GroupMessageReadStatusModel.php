@@ -47,15 +47,27 @@ class GroupMessageReadStatusModel extends Model
             ->count();
     }
 
-    public static function updateStatusByUserIdAndGroupId(int $user_id , int $group_id , int $is_read = 1)
+    public static function updateStatusByUserIdAndGroupIdExcludeVoice(int $user_id , int $group_id , int $is_read = 1)
     {
         return self::where([
                 ['group_id' , '=' , $group_id] ,
                 ['user_id' , '=' , $user_id] ,
             ])
+            ->whereNotIn('type' , ['voice'])
             ->update([
                 'is_read' => $is_read
             ]);
+    }
+
+    // 设置单挑消息已读/未读
+    public static function setIsReadByUserIdAndGroupMessageId(int $user_id , int $group_message_id , int $is_read = 0)
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['group_message_id' , '=' , $group_message_id] ,
+        ])->update([
+            'is_read' => $is_read
+        ]);
     }
 
     public static function u_insertGetId(int $user_id , int $group_id , int $group_message_id , int $is_read = 0)

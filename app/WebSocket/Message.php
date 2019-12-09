@@ -91,7 +91,7 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
-    // 设置单挑消息已读未读
+    // 设置阅后即焚消息已读未读
     public function readedForBurn(array $param)
     {
         $param['message_id'] = $param['message_id'] ?? '';
@@ -101,6 +101,18 @@ class Message extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 设置单条消息已读/未读（所有类型消息）
+    public function readed(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $res = MessageAction::readed($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 
     // 消息撤回
     public function withdraw(array $param)
