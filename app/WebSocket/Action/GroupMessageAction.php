@@ -52,7 +52,7 @@ class GroupMessageAction extends Action
         $res = GroupMessageModel::history($auth->user->id , $group->id , $limit_id , $limit);
         foreach ($res as $v)
         {
-            MessageUtil::handleGroupMessage($v);
+            MessageUtil::handleGroupMessage($v , $auth->user->id);
         }
         return self::success($res);
     }
@@ -74,7 +74,7 @@ class GroupMessageAction extends Action
         $res = GroupMessageModel::lastest($auth->user->id , $group->id , $limit_id);
         foreach ($res as $v)
         {
-            MessageUtil::handleGroupMessage($v);
+            MessageUtil::handleGroupMessage($v , $auth->user->id);
         }
         return self::success($res);
     }

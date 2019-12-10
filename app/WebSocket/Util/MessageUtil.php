@@ -27,14 +27,14 @@ class MessageUtil extends Util
     public static function handleGroupMessage($group_message , int $user_id = 0)
     {
         if (empty($group_message)) {
-            return ;
+            return;
         }
-        $group_message->session_id = ChatUtil::sessionId('group' , $group_message->group_id);
+        $group_message->session_id = ChatUtil::sessionId('group', $group_message->group_id);
         if (isset($group_message->group)) {
             GroupUtil::handle($group_message->group);
             if (isset($group_message->user)) {
                 if ($group_message->group->is_service == 1 && $group_message->user->role == 'admin') {
-                    $name = TopUserUtil::getNameFromNicknameAndUsername($group_message->user->nickname , $group_message->user->username);
+                    $name = TopUserUtil::getNameFromNicknameAndUsername($group_message->user->nickname, $group_message->user->username);
                     $group_message->user->nickname = $name;
                     $group_message->user->nickname = '客服 ' . $name;
                 }
@@ -42,7 +42,7 @@ class MessageUtil extends Util
         }
         if (isset($group_message->user)) {
             TopUserUtil::handle($group_message->user);
-            $member = GroupMemberModel::findByUserIdAndGroupId($group_message->user_id , $group_message->group_id);
+            $member = GroupMemberModel::findByUserIdAndGroupId($group_message->user_id, $group_message->group_id);
             if (!empty($member)) {
                 // 特殊：群昵称
                 $group_message->user->nickname = empty($member) ?
@@ -54,9 +54,8 @@ class MessageUtil extends Util
         }
         if ($group_message->type == 'message_set') {
             // 合并转发的消息
-            $message_ids = json_decode($group_message->message , true);
-            switch ($group_message->extra)
-            {
+            $message_ids = json_decode($group_message->message, true);
+            switch ($group_message->extra) {
                 case 'private':
                     $messages = MessageModel::getByIds($message_ids);
                     break;
@@ -64,8 +63,7 @@ class MessageUtil extends Util
                     $messages = GroupMessageModel::getByIds($message_ids);
                     break;
             }
-            foreach ($messages as $v)
-            {
+            foreach ($messages as $v) {
                 // 文件处理
                 TopUserUtil::handle($v->user);
             }
@@ -76,6 +74,10 @@ class MessageUtil extends Util
             $user_for_card = UserModel::findById($group_message->message);
             TopUserUtil::handle($user_for_card);
             $group_message->user_for_card = $user_for_card;
+        }
+
+        if (!empty($user_id)) {
+            $group_message->is_read = GroupMessageReadStatusModel::isRead($user_id , $group_message->id);
         }
     }
 
