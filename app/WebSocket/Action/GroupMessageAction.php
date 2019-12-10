@@ -109,10 +109,6 @@ class GroupMessageAction extends Action
         if (empty($message)) {
             return self::error('未找到消息id对应的记录' , 404);
         }
-        $user_ids = ChatUtil::userIds($message->chat_id);
-        if (!in_array($auth->user->id , $user_ids)) {
-            return self::error('你无法更改他人的消息读取状态' , 403);
-        }
         $res = GroupMessageReadStatusModel::setIsReadByUserIdAndGroupMessageId($auth->user->id , $param['group_message_id'] , 1);
         if ($res <= 0) {
             return self::error('操作失败');
