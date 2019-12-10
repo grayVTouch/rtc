@@ -143,13 +143,13 @@ class PushAction extends Action
                 'desc' ,
                 'content' ,
             ]));
-            print_r($user_ids);
-            var_dump($param['type']);
             foreach ($user_ids as $v)
             {
+                var_dump("do it!!");
                 switch ($param['type'])
                 {
                     case 'system':
+                        var_dump('user_id: ' . $v . '; type: ' . $param['type']);
                         // 创建会话
                         SessionUtil::createOrUpdate($v , 'system');
                         break;
