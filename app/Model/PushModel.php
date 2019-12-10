@@ -96,9 +96,10 @@ class PushModel extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where($where)
             ->orderBy('p.id' , 'desc')
+            ->select('p.*')
             ->limit($limit)
             ->get();
-        self::single($res);
+        self::multiple($res);
         return $res;
     }
 }
