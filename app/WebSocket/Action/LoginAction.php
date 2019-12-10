@@ -694,7 +694,7 @@ class LoginAction extends Action
             return self::error($res['data']);
         }
         // 检查短信验证码
-        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);
+        $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 5);
         if (empty($sms_code)) {
             return self::error('请先发送短信验证码');
         }
