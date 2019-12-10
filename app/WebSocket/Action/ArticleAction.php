@@ -29,7 +29,9 @@ class ArticleAction extends Action
         $limit  = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $total  = ArticleModel::countByArticleTypeId($article_type_id);
         $page   = PageUtil::deal($total , $page , $limit);
-        $res   = ArticleModel::list(null , null , $page['offset'] , $page['limit']);
+        $res = ArticleModel::list([
+            'article_type_id' => $article_type_id
+        ] , null , $page['offset'] , $page['limit']);
         $res   = PageUtil::data($page , $res);
         return self::success($res);
     }

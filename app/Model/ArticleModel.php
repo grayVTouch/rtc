@@ -50,6 +50,9 @@ class ArticleModel extends Model
         if ($filter['id'] != '') {
             $where[] = ['id' , '=' , $filter['id']];
         }
+        if ($filter['article_type_id'] != '') {
+            $where[] = ['article_type_id' , '=' , $filter['article_type_id']];
+        }
         $res = self::with(['articleType'])
             ->where($where)
             ->orderBy($order['field'] , $order['value'])
