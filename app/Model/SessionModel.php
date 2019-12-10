@@ -58,6 +58,17 @@ class SessionModel extends Model
         return $res;
     }
 
+    public static function findByUserIdAndType(int $user_id , string $type)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['type' , '=' , $type] ,
+            ])
+            ->first();
+        self::single($res);
+        return $res;
+    }
+
     // 获取置顶会话
     public static function topSessionByUserId(int $user_id)
     {

@@ -28,7 +28,12 @@ class SessionUtil extends Util
             return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $type_range));
         }
         $session_id = ChatUtil::sessionId($type , $target_id);
-        $session = SessionModel::findByUserIdAndTypeAndTargetId($user_id , $type , $target_id);
+        if ($type == 'system') {
+            $session = SessionModel::findByUserIdAndType($user_id , $type);
+        } else {
+            $session = SessionModel::findByUserIdAndTypeAndTargetId($user_id , $type , $target_id);
+        }
+
         // 检查会话是否存在
         if (empty($session)) {
             $id = SessionModel::insertGetId([
