@@ -143,6 +143,8 @@ class PushAction extends Action
                 'desc' ,
                 'content' ,
             ]));
+            print_r($user_ids);
+            var_dump($param['type']);
             foreach ($user_ids as $v)
             {
                 switch ($param['type'])
