@@ -45,6 +45,7 @@ class GroupMessageModel extends Model
         if (empty($res)) {
             return ;
         }
+        $res = convert_obj($res);
         self::single($res);
         GroupModel::single($res->group);
         UserModel::single($res->user);
