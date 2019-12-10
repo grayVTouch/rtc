@@ -34,7 +34,6 @@ class SessionUtil extends Util
             $session_id = ChatUtil::sessionId($type , $target_id);
             $session = SessionModel::findByUserIdAndTypeAndTargetId($user_id , $type , $target_id);
         }
-        var_dump("创建会话：" . $type . '; user_id: ' . $user_id . '; session not exists ? :' . empty($session));
         // 检查会话是否存在
         if (empty($session)) {
             $id = SessionModel::insertGetId([

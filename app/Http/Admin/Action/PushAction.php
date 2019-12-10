@@ -145,13 +145,15 @@ class PushAction extends Action
             ]));
             foreach ($user_ids as $v)
             {
-                var_dump("do it!!");
                 switch ($param['type'])
                 {
                     case 'system':
-                        var_dump('user_id: ' . $v . '; type: ' . $param['type']);
                         // 创建会话
-                        SessionUtil::createOrUpdate($v , 'system');
+                        $res = SessionUtil::createOrUpdate($v , 'system');
+                        if ($res['code'] != 200) {
+                            DB::rollBack();
+                            return self::error($res['data'] , 500);
+                        }
                         break;
                 }
                 // 设置未读消息数量

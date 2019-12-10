@@ -226,7 +226,7 @@ return [
         // 群聊
         'group' ,
         // 公告
-        'announcement' ,
+        'system' ,
     ] ,
 
     // 群验证
