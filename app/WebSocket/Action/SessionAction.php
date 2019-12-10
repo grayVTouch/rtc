@@ -88,7 +88,7 @@ class SessionAction extends Action
                 $general_session[] = $v;
             }
 
-            if ($v->type == 'announcement') {
+            if ($v->type == 'system') {
                 // 公告
                 $v->recent = PushModel::recentByUserIdAndType($auth->user->id , 'system');
                 // 未读消息数量
