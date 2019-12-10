@@ -66,10 +66,12 @@ class SessionUtil extends Util
             }
             return self::success();
         }
-        $mesages = GroupMessageModel::getByGroupId($session->target_id);
-        foreach ($mesages as $v)
-        {
-            GroupMessageUtil::shield($session->user_id , $session->target_id , $v->id);
+        if ($session->type == 'group') {
+            $mesages = GroupMessageModel::getByGroupId($session->target_id);
+            foreach ($mesages as $v)
+            {
+                GroupMessageUtil::shield($session->user_id , $session->target_id , $v->id);
+            }
         }
         return self::success();
     }
