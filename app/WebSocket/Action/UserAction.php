@@ -568,6 +568,9 @@ class UserAction extends Action
             $sessions = SessionModel::getByUserId($auth->user->id);
             foreach ($sessions as $v)
             {
+                if ($v->type == 'system') {
+                    continue ;
+                }
                 $res = SessionUtil::delById($v->id);
                 if ($res['code'] != 200) {
                     DB::rollBack();
