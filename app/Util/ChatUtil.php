@@ -244,9 +244,17 @@ class ChatUtil extends Util
             $e_time = microtime(true);
 //            var_dump("发送群消息花费时间（第二阶段）：" . ($e_time - $s_time));
             if ($push_all) {
-                $base->pushAll($user_ids , 'group_message' , $msg);
+                foreach ($user_ids as $v)
+                {
+                    $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
+                    $base->push($v , 'group_message' , $msg);
+                }
             } else {
-                $base->sendAll($user_ids , 'group_message' , $msg);
+                foreach ($user_ids as $v)
+                {
+                    $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
+                    $base->send($v , 'group_message' , $msg);
+                }
             }
             $base->pushAll($user_ids , 'refresh_session');
             $base->pushAll($user_ids , 'refresh_unread_count');
