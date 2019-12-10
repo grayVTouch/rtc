@@ -27,12 +27,14 @@ class SessionUtil extends Util
         if (!in_array($type , $type_range)) {
             return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $type_range));
         }
-        $session_id = ChatUtil::sessionId($type , $target_id);
+        $session_id = '';
         if ($type == 'system') {
             $session = SessionModel::findByUserIdAndType($user_id , $type);
         } else {
+            $session_id = ChatUtil::sessionId($type , $target_id);
             $session = SessionModel::findByUserIdAndTypeAndTargetId($user_id , $type , $target_id);
         }
+        var_dump("创建会话：" . $type . '; user_id: ' . $user_id . '; session not exists ? :' . empty($session));
         // 检查会话是否存在
         if (empty($session)) {
             $id = SessionModel::insertGetId([
