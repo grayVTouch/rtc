@@ -248,10 +248,15 @@ class LoginAction extends Action
                 {
                     // 检查平台
                     $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
-                    if (in_array($platform , $single_device_for_platform)) {
-                        // 通知对方下线
-                        $base->push($v , 'forced_offline');
+                    if (!in_array($platform , $single_device_for_platform)) {
+                        continue ;
                     }
+                    if ($v == $base->fd) {
+                        // 跳过当前用户
+                        continue ;
+                    }
+                    // 通知对方下线
+                    $base->push($v , 'forced_offline');
                 }
             }
             // 推送一条未读消息数量
@@ -284,7 +289,7 @@ class LoginAction extends Action
         }
         $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
         if (empty($user)) {
-            return self::error('手机号未注册');
+            return self::error('用户名未注册');
         }
         if (!Hash::check($param['password'] , $user->password)) {
             return self::error('密码错误');
@@ -326,10 +331,15 @@ class LoginAction extends Action
                 {
                     // 检查平台
                     $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
-                    if (in_array($platform , $single_device_for_platform)) {
-                        // 通知对方下线
-                        $base->push($v , 'forced_offline');
+                    if (!in_array($platform , $single_device_for_platform)) {
+                        continue ;
                     }
+                    if ($v == $base->fd) {
+                        // 跳过当前用户
+                        continue ;
+                    }
+                    // 通知对方下线
+                    $base->push($v , 'forced_offline');
                 }
             }
             // 推送一条未读消息数量
@@ -553,7 +563,7 @@ class LoginAction extends Action
         // 检查手机号码是否被使用过
         $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
         if (!empty($user)) {
-            return self::error('该手机号码已经注册，请直接登录');
+            return self::error('该用户名已经被注册，请直接登录');
         }
         if (!empty($param['invite_code'])) {
             $referrer = UserModel::findByIdentifierAndInviteCode($base->identifier , $param['invite_code']);
@@ -565,7 +575,7 @@ class LoginAction extends Action
             $param['p_id'] = 0;
         }
         $param['invite_code_copy'] = $param['invite_code'];
-        $param['invite_code'] = md5($param['phone']);
+        $param['invite_code'] = md5($param['username']);
         $param['unique_code'] = MiscUtil::uniqueCode();
         $param['identifier'] = $base->identifier;
         $param['aes_key'] = random(16 , 'mixed' , true);
@@ -574,7 +584,6 @@ class LoginAction extends Action
             DB::beginTransaction();
             $id = UserModel::insertGetId(array_unit($param , [
                 'area_code' ,
-                'phone' ,
                 'p_id' ,
                 'invite_code' ,
                 'unique_code' ,
