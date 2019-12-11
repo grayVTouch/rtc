@@ -161,10 +161,18 @@ class MessageReadStatusModel extends Model
     // 已读/未读消息数量
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
-        return (int) (self::where([
-            ['user_id' , '=' , $user_id] ,
-            ['is_read' , '=' , $is_read] ,
-        ])->count());
+        $count = self::whereNotExists(function($query){
+                $query->select('id')
+                    ->from('delete_message')
+                    ->where('type' , 'private')
+                    ->whereRaw('rtc_message_read_status.message_id = rtc_delete_message.message_id');
+            })
+            ->where([
+                ['user_id' , '=' , $user_id] ,
+                ['is_read' , '=' , $is_read] ,
+            ])
+            ->count();
+        return (int) $count;
     }
 
     // 删除读取状态
