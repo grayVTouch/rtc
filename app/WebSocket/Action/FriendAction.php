@@ -203,6 +203,8 @@ class FriendAction extends Action
             $user_ids = [$auth->user->id , $param['friend_id']];
             $auth->pushAll($user_ids , 'refresh_friend');
             $auth->pushAll($user_ids , 'refresh_session');
+            $auth->pushAll($user_ids , 'refresh_unread_count');
+            $auth->pushAll($user_ids , 'refresh_session_unread_count');
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
@@ -262,6 +264,8 @@ class FriendAction extends Action
             'burn' ,
         ]));
         $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 

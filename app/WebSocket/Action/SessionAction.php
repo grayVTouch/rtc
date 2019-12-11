@@ -201,6 +201,8 @@ class SessionAction extends Action
             }
             DB::commit();
             $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();

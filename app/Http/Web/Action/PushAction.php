@@ -135,6 +135,8 @@ class PushAction extends Action
             DB::commit();
             // 刷新会话列表
             PushUtil::multiple($auth->identifier , $user_ids , 'refresh_session');
+            PushUtil::multiple($auth->identifier , $user_ids , 'refresh_unread_count');
+            PushUtil::multiple($auth->identifier , $user_ids , 'refresh_session_unread_count');
             return self::success($push);
         } catch(Exception $e) {
             DB::rollBack();

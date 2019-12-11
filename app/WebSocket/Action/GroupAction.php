@@ -492,6 +492,8 @@ class GroupAction extends Action
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
             $auth->pushAll($user_ids , 'refresh_session');
+            $auth->pushAll($user_ids , 'refresh_unread_count');
+            $auth->pushAll($user_ids , 'refresh_session_unread_count');
             // 解散群后，需要删除群内成员的本地聊天记录
             $auth->pushAll($user_ids , 'empty_group_message' , [$param['group_id']]);
             foreach ($user_ids as $v)
@@ -500,7 +502,7 @@ class GroupAction extends Action
                     continue ;
                 }
                 AppPushUtil::pushCheckForUser($auth->platform , $v , function() use($v , $group){
-                    AppPushUtil::push($v , '群组解散了群 ' . $group->name);
+                    AppPushUtil::push($v , '群主解散了群 ' . $group->name);
                 });
                 AppPushUtil::pushCheckWithNewForUser($v , function() use($v , $auth){
                     $auth->push($v , 'new');

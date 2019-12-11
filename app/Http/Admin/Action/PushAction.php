@@ -169,6 +169,9 @@ class PushAction extends Action
             {
                 $user = UserModel::findById($v);
                 PushUtil::single($user->identifier , $v , 'refresh_session');
+                PushUtil::single($user->identifier , $v , 'refresh_unread_count');
+                PushUtil::single($user->identifier , $v , 'refresh_session_unread_count');
+
             }
             return self::success();
         } catch(Exception $e) {

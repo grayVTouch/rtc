@@ -89,6 +89,8 @@ class UserUtil extends Util
             PushUtil::multiple($user->identifier , $user_ids , 'group_message' , $msg);
             // 推送：刷新列表
             PushUtil::multiple($user->identifier , $user_ids , 'refresh_session');
+            PushUtil::multiple($user->identifier , $user_ids , 'refresh_unread_count');
+            PushUtil::multiple($user->identifier , $user_ids , 'refresh_session_unread_count');
             // 自动分配客服成功
             return self::success($waiter->id);
         } catch(Exception $e) {
