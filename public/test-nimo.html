@@ -20,7 +20,7 @@
 <textarea id="json">
 {
   "router": "/Friend/delFriend",
-  "identifier": "test",
+  "identifier": "nimo",
   "user_id": 4 ,
   "debug": "running" ,
   "request": "abcdefghijklmnopqrstuvwxyz",
@@ -41,8 +41,8 @@
     var json = G('#json');
     var res = G('#res');
     var parseRes = G('#parse_res');
-    // var ws = new WebSocket('ws://47.88.223.82:10001');
-    var ws = new WebSocket('ws://websocket.gca.cool:10001');
+    var ws = new WebSocket('ws://47.88.223.82:10001');
+    // var ws = new WebSocket('ws://websocket.gca.cool:10001');
     ws.onopen = () => {
         console.log('ws open');
     };

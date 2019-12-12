@@ -1,0 +1,17 @@
+{
+  "router": "/Chat/sendTextForGroup",
+  "identifier": "nimo",
+  "user_id": 600027 ,
+  "debug": "running" ,
+  "token": "" ,
+  "request": "abcdefghijklmnopqrstuvwxyz",
+  "platform": "pc",
+  "data": {
+    "group_id": 43 ,
+    "message": "hello boys and girls" ,
+    "extra": "" ,
+    "target_user": "" ,
+    "target_user_ids": "[1,2]",
+    "old": 1
+  }
+}

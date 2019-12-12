@@ -39,4 +39,6 @@ class GroupMessageUtil extends Util
         }
         DeleteMessageModel::u_insertGetId('group' , $user_id , $group_message_id , $group_id);
     }
+
+    // 创建 redis
 }

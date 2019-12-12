@@ -27,8 +27,10 @@ use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
 use function core\array_unit;
+use function core\convert_obj;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
+use Engine\Facade\WebSocket;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -170,6 +172,59 @@ class ChatUtil extends Util
     }
 
     /**
+     * 群聊消息发送异步任务
+     */
+    public static function groupSendAsyncTask($identifier , $platform ,  $target_user , $target_user_ids , $msg , $exlude){
+        // 获取群成员，过滤掉自身
+        $msg = convert_obj($msg);
+        $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
+        $self_is_read = 0;
+        $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
+        foreach ($user_ids as $v)
+        {
+            if ($v == $msg->user_id) {
+                // 跳过自身
+                continue ;
+            }
+            // 消息已读未读
+            GroupMessageReadStatusModel::u_insertGetId($v , $msg->group_id , $msg->id , $self_is_read);
+            SessionUtil::createOrUpdate($v , 'group' , $msg->group_id);
+            $msg->is_read = $self_is_read;
+            // 消息推送
+            $push_callback = [PushUtil::class , 'single'];
+            call_user_func($push_callback , $identifier , $v , 'group_message' , $msg , $exlude);
+            // 检查是否是指定推送用户的推送
+            if ($target_user == 'designation') {
+                if (in_array($v , $target_user_ids)) {
+                    AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $identifier){
+                        PushUtil::single($identifier , $v , 'new');
+                    });
+                }
+            } else {
+                AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $identifier){
+                    PushUtil::single($identifier , $v , 'new');
+                });
+            }
+            PushUtil::single($identifier , $v , 'refresh_session');
+            PushUtil::single($identifier , $v , 'refresh_unread_count');
+            PushUtil::single($identifier , $v , 'refresh_session_unread_count');
+        }
+        // 极光推送
+        $user_ids = $target_user == 'designation' ? array_intersect($target_user_ids , $user_ids) : $user_ids;
+        foreach ($user_ids as $v)
+        {
+            // app 推送，如果存在于 推送列表中
+            AppPushUtil::pushCheckForGroup($platform , $v , $msg->group_id , function() use($v , $msg){
+                $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
+                $res = AppPushUtil::pushForGroup($v , $message , '你收到了一条群消息' , $msg , false);
+                if ($res['code'] != 200) {
+                    ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$v}]");
+                }
+            });
+        }
+    }
+
+    /**
      * 群聊消息发送
      */
     public static function groupSend(Base $base , array $param , bool $push_all = false)
@@ -218,9 +273,6 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] ?? '';
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $user->aes_key;
-//        $param['message'] = AesUtil::encrypt($param['message'] , $user->aes_key , config('app.aes_vi'));
-        $e_time = microtime(true);
-//        var_dump("发送群消息花费时间（第一阶段）：" . ($e_time - $s_time));
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
@@ -232,62 +284,38 @@ class ChatUtil extends Util
                 'aes_key' ,
                 'old' ,
             ]));
-            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $param['group_id'] , $param['user_id']);
+            $self_is_read = 1;
+            GroupMessageReadStatusModel::u_insertGetId($param['user_id'] , $param['group_id'] , $group_message_id , $self_is_read);
             $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
-            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-            foreach ($user_ids as $v)
-            {
-                SessionUtil::createOrUpdate($v , 'group' , $param['group_id']);
-            }
+            SessionUtil::createOrUpdate($param['user_id'] , 'group' , $param['group_id']);
             DB::commit();
-            $e_time = microtime(true);
-//            var_dump("发送群消息花费时间（第二阶段）：" . ($e_time - $s_time));
-            if ($push_all) {
-                foreach ($user_ids as $v)
-                {
-                    $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
-                    $base->push($v , 'group_message' , $msg);
-                }
-            } else {
-                foreach ($user_ids as $v)
-                {
-                    $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
-                    $base->send($v , 'group_message' , $msg);
-                }
-            }
-            $base->pushAll($user_ids , 'refresh_session');
-            $base->pushAll($user_ids , 'refresh_unread_count');
-            $base->pushAll($user_ids , 'refresh_session_unread_count');
-            if ($param['target_user'] == 'designation') {
-                $target_user_ids = json_decode($param['target_user_ids'] , true);
-                if (!empty($target_user_ids)) {
-                    // 用户手动指定推送的用户
-                    $user_ids = array_intersect($target_user_ids , $user_ids);
-                }
-            }
-
-            foreach ($user_ids as $v)
-            {
-                if ($v == $param['user_id']) {
-                    // 跳过发送消息的人
-                    continue ;
-                }
-                $msg->is_read = GroupMessageReadStatusModel::isRead($v , $msg->id);
-                AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
-                    $message = $param['old'] == 1 ? $msg->message : AesUtil::decrypt($msg->message , $param['aes_key'] , config('app.aes_vi'));
-                    $res = AppPushUtil::pushForGroup($v , $message , '你收到了一条群消息' , $msg);
-                    if ($res['code'] != 200) {
-                        ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
-                    }
-                });
-                AppPushUtil::pushCheckWithNewForGroup($param['user_id'] , $group->id , function() use($v , $param , $base){
-                    $base->push($v , 'new');
-                });
-            }
-            $msg->is_read = GroupMessageReadStatusModel::isRead($param['user_id'] , $msg->id);
-            $e_time = microtime(true);
-//            var_dump("发送群消息花费时间（第三阶段）：" . ($e_time - $s_time));
+            /**
+             * 投递异步任务
+             */
+            WebSocket::deliveryTask(json_encode([
+                'type' => 'callback' ,
+                'data' => [
+                    'callback' => [self::class , 'groupSendAsyncTask'] ,
+                    'param' => [
+//                        [
+//                            'identifier' => $base->identifier ,
+//                            'platform' => $base->platform ,
+//                            'target_user' => $param['target_user'] ,
+//                            'target_user_ids' => $param['target_user_ids'] ,
+//                            'message' => $msg ,
+//                            'exclude_client' => $push_all ? [] : [$base->fd]
+//                        ] ,
+                        $base->identifier ,
+                        $base->platform ,
+                        $param['target_user'] ,
+                        $param['target_user_ids'] ,
+                        $msg ,
+                        $push_all ? [] : [$base->fd]
+                    ]
+                ] ,
+            ]));
+            $msg->is_read = $self_is_read;
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();

@@ -369,5 +369,11 @@ return [
         'app' ,
     ] ,
 
-
+    // 任务投递的类型
+    'task_type' => [
+        // app 推送
+        'app_push' ,
+        // 消息发送相关
+        'chat' ,
+    ] ,
 ];

@@ -49,7 +49,7 @@ class AppPushUtil extends Util
     public static function taskPush($callback , ...$param)
     {
         return PushUtil::deliveryTask(json_encode([
-            'type' => 'app_push' ,
+            'type' => 'callback' ,
             'data' => [
                 'callback'  => $callback ,
                 'param'     => $param
@@ -58,7 +58,7 @@ class AppPushUtil extends Util
     }
 
     // 群聊|顶栏推送|单人
-    public static function pushForGroup(int $user_id , string $content , string $title = '' , $data = [])
+    public static function pushForGroup(int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
     {
         $extra = [
             'module' => self::$module ,
@@ -66,7 +66,10 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        if ($async) {
+            return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        }
+        return AppPush::push($user_id , $content , $title , $extra);
     }
 
     // 群聊|顶栏推送|多人

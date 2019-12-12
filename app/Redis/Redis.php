@@ -94,4 +94,33 @@ class Redis
      */
     protected static $userRecentOnlineTimestamp = '%s_user_recent_online_timestamp_%s';
 
+    /**
+     * 私聊消息已读|未读
+     *
+     * @var string
+     */
+    protected static $messageReadstatus = '%s_message_read_status_%s_%s';
+
+    /**
+     * 群聊消息已读|未读
+     *
+     * @var string
+     */
+    protected static $groupMessageReadStatus = '%_group_message_read_status_%s_%s';
+
+
+    /**
+     * 私聊未读消息数量
+     *
+     * @var string
+     */
+    protected static $unreadForPrivate = '%s_unread_for_private_%s_%s';
+
+    /**
+     * 群聊未读消息数量
+     *
+     * @var string
+     */
+    protected static $unreadForGroup = '%s_unread_for_group_%s_%s';
+
 }

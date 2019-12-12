@@ -441,7 +441,7 @@ class WebSocket
             }
             switch ($data['type'])
             {
-                case 'app_push':
+                case 'callback':
                     // app 极光推送
                     $callback   = $data['data']['callback'];
                     $param      = $data['data']['param'];

@@ -84,6 +84,7 @@ class GroupMessageReadStatusModel extends Model
 
     public static function initByGroupMessageId(int $group_message_id , int $group_id , int $user_id)
     {
+        // 这条语句耗时仅 花费 5ms
         $user_ids = GroupMemberModel::getUserIdByGroupId($group_id);
         foreach ($user_ids as $v)
         {

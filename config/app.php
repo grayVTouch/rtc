@@ -91,10 +91,10 @@ return [
     'waiter_password' => '123456' ,
 
     // 默认客服手机号码 区号
-    'waiter_area_code' => '86' ,
+    'waiter_area_code' => '00' ,
 
     // 默认客服手机号码【13 位数字的手机号码，请固定 15 位数字】
-    'waiter_phone' => '123456789012345' ,
+    'waiter_phone' => '00000000000' ,
 
     // 是否开启消息加密
     // 如果开启加密，那么将会使用
@@ -120,4 +120,7 @@ return [
 
     // 分享注册下载链接
     'share_register_link' => 'http://websocket.gca.cool:10001/share/register.html' ,
+
+    // 系统初始化标志
+    'initialized' => __DIR__ . '/../initialized.lock' ,
 ];

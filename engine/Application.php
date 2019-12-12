@@ -12,6 +12,8 @@ use App\Model\FriendModel;
 use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
+use function core\array_unit;
+use Core\Lib\File;
 use Core\Lib\Hash;
 use function core\obj_to_array;
 use function core\random;
@@ -125,72 +127,139 @@ class Application
     }
 
     /**
+     * ********************
      * 系统初始化
+     * ********************
      */
     public function initialize()
     {
+//        // 初始化系统标志
+//        $initialized = config('app.initialized');
+//        if (File::isFile($initialized)) {
+//            // 已经初始化过系统，跳过
+//            return ;
+//        }
         try {
             DB::beginTransaction();
-            $system_waiter_name = config('app.system_waiter_name');
+            // 系统客服
+            $system_user_data = [
+                'username' => config('app.waiter_username') ,
+                'password' => config('app.waiter_password') ,
+                'area_code' => config('app.waiter_area_code') ,
+                'phone' => config('app.waiter_phone') ,
+                'nickname' => config('app.system_waiter_name') ,
+                // 系统用户
+                'is_system' => 1 ,
+                // 测试用户
+                'is_test' => 0 ,
+                // 是否初始过密码
+                'is_init_password' => 1 ,
+                // 是否初始化密码
+                'is_temp' => 0 ,
+                // 角色
+                'role' => 'admin' ,
+            ];
+            $system_user_data['password'] = Hash::make($system_user_data['password']);
+            $system_user_data['full_phone'] = sprintf('%s%s' , $system_user_data['area_code'] , $system_user_data['phone']);
             // 为每个项目创建系统用户
             $project = ProjectModel::all();
             foreach ($project as $v)
             {
+                /**
+                 * 产生系统客服
+                 * 并且和每个现有用户自动成为好友关系
+                 */
+                $system_user = UserModel::systemUser($v->identifier);
+                if (empty($system_user)) {
+                    // 如果系统客服不存在，那么创建一个系统客服
+                    // 系统用户不存在，新增系统用户
+                    $copy_system_user_data = $system_user_data;
+                    $copy_system_user_data['identifier'] = $v->identifier;
+                    $id = UserModel::insertGetId(array_unit($copy_system_user_data , [
+                        'identifier' ,
+                        'username' ,
+                        'password' ,
+                        'area_code' ,
+                        'phone' ,
+                        'full_phone' ,
+                        'is_system' ,
+                        'is_temp' ,
+                        'is_test' ,
+                        'role' ,
+                        'is_init_password' ,
+                    ]));
+                    UserOptionModel::insertGetId([
+                        'user_id' => $id
+                    ]);
+                    $system_user = UserModel::findById($id);
+                }
+
+                /**
+                 * aes 加密解密相关数据补全
+                 */
                 $users = UserModel::getByIdentifier($v->identifier);
+
+                /**
+                 * 初始化相关操作
+                 */
                 foreach ($users as $v1)
                 {
                     if (empty($v1->aes_key)) {
+                        // 初始化aes加密解密
                         $aes_key = random(16 , 'mixed' , true);
                         UserModel::updateById($v1->id , [
                             'aes_key' => $aes_key
                         ]);
                     }
-                }
-                // 检查系统用户是否存在
-                $system_user = UserModel::systemUser($v->identifier);
-                if (!empty($system_user)) {
-                    // 跑一遍用户列表，没有的统统成为好友关系
-                    // 这是为了兼容测试阶段生成的用户
-                    $users_for_user = UserModel::getByIdentifierAndRole($v->identifier , 'user');
-                    foreach ($users_for_user as $v1)
-                    {
+                    if ($v1->role == 'user') {
+                        // 初始化普通用户的客服关系
                         $friend = FriendModel::findByUserIdAndFriendId($v1->id , $system_user->id);
                         if (empty($friend)) {
                             FriendModel::u_insertGetId($v1->id , $system_user->id);
                             FriendModel::u_insertGetId($system_user->id , $v1->id);
                         }
                     }
-                    continue ;
                 }
-                $waiter_username = config('app.waiter_username');
-                $waiter_password = config('app.waiter_password');
-                $waiter_password = Hash::make($waiter_password);
-                $area_code = config('app.waiter_area_code');
-                $phone = config('app.waiter_phone');
-                $full_phone = sprintf('%s%s' , $area_code , $phone);
-                // 系统用户不存在，新增系统用户
-                $id = UserModel::insertGetId([
-                    'identifier' => $v->identifier ,
-                    'area_code' => $area_code ,
-                    'phone'    => $phone ,
-                    'full_phone' => $full_phone ,
-                    'username' => $waiter_username ,
-                    'password' => $waiter_password ,
-                    'is_system' => 1 ,
-                    'is_temp' => 0 ,
-                    'role' => 'admin' ,
-                    'nickname' => $system_waiter_name ,
-                    'is_init_password' => 1 ,
-                ]);
-                UserOptionModel::insertGetId([
-                    'user_id' => $id
-                ]);
+
+                /**
+                 * 相关热数据缓存
+                 * 私聊消息已读|未读
+                 * 群聊消息已读|未读
+                 * 私聊消息数量
+                 * 群聊消息数量
+                 *
+                 * 后续消息更新都是对 redis|mysql 的同步更新
+                 * 关键就是 启动 swoole 的时候缓存这些常用数据
+                 * 关闭 swoole 的时候销毁这些数据
+                 * 运行期间，如果数据发生变更
+                 * 那么 redis|mysql 上的数据需要同步更新
+                 */
+
             }
             DB::commit();
+            // 创建安装标志
+//            File::cFile($initialized);
         } catch(Exception $e) {
             DB::rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * 数据预缓存
+     *
+     * 预加载相关数据有
+     *
+     * rtc_message_read_status
+     * rtc_group_message_read_status
+     * rtc_friend
+     * rtc_user
+     *
+     * by cxl
+     */
+    public function dataPreLoad()
+    {
+
     }
 
     /**

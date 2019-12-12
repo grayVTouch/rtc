@@ -541,12 +541,12 @@ class GroupAction extends Action
         $member = GroupMemberModel::getByGroupId($group->id);
         foreach ($member as $v)
         {
-            UserUtil::handle($v->user , $auth->user->id);
+//            UserUtil::handle($v->user , $auth->user->id);
             GroupUtil::handle($v->group , $auth->user->id);
-            $v->origin_alias = $v->alias;
-            $v->alias = empty($v->alias) ?
-                $v->user->nickname :
-                $v->alias;
+//            $v->origin_alias = $v->alias;
+//            $v->alias = empty($v->alias) ?
+//                $v->user->nickname :
+//                $v->alias;
         }
         return self::success($member);
     }

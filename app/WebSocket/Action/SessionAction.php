@@ -61,7 +61,6 @@ class SessionAction extends Action
                     continue ;
                 }
                 $general_session[] = $v;
-
                 continue ;
             }
 
