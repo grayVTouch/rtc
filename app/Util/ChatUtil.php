@@ -315,6 +315,9 @@ class ChatUtil extends Util
                     ]
                 ] ,
             ]));
+            $base->push($param['user_id'] , 'refresh_session');
+            $base->push($param['user_id'] , 'refresh_unread_count');
+            $base->push($param['user_id'] , 'refresh_session_unread_count');
             $msg->is_read = $self_is_read;
             return self::success($msg);
         } catch(Exception $e) {
