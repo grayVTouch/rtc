@@ -650,12 +650,11 @@ class WebSocket
                         continue ;
                     }
                     // 通知群成员删除群相关信息
-                    PushUtil::multiple($v->user->identifier , $v['member_ids'] , 'delete_group_from_cache' , [$v->id]);
+                    PushUtil::multiple($v->user->identifier , $v->member_ids , 'delete_group_from_cache' , [$v->id]);
                 }
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });
-
             } catch(Exception $e) {
                 DB::rollBack();
                 TimerLogUtil::logCheck(function() use($timer_log_id){
