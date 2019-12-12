@@ -267,7 +267,7 @@ class ChatUtil extends Util
         $group_target_user = config('business.group_target_user');
         $param['extra'] = $param['extra'] ?? '';
         $param['target_user']       = $param['target_user'] ?? '';
-        $param['target_User_ids']   = $param['target_user_ids'] ?? '';
+        $param['target_user_ids']   = $param['target_user_ids'] ?? '';
         // 如果用户没有指定推送的人，那么群推送
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
         $param['old'] = $param['old'] ?? '';
