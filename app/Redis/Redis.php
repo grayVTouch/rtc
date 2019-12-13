@@ -15,12 +15,18 @@ class Redis
     /**
      * user_id 映射的 fd
      *
+     * @param string $identifier
+     * @param int $fd
+     *
      * @var string
      */
     protected static $userIdMappingFd = '%s_user_id_mapping_fd_%s';
 
     /**
      * 接待数量
+     *
+     * @param string $identifier
+     * @param int $user_id
      *
      * @var string
      */
@@ -30,6 +36,9 @@ class Redis
     /**
      *  fd 映射的 user_id
      *
+     * @param string $identifier
+     * @param int $fd
+     *
      * @var string
      */
     protected static $fdMappingUserId = '%s_fd_mapping_user_id_%s';
@@ -38,20 +47,28 @@ class Redis
     /**
      *  fd 映射的 identifier
      *
+     * @param int $fd
+     *
      * @var string
      */
     protected static $fdMappingIdentifier = 'fd_mapping_identifier_%s';
 
 
     /**
-     *  未处理的消息
+     * 未处理的消息
+     *
+     * @param string $identifier
+     * @param string $identifier
      *
      * @var hash
      */
     protected static $unhandleMsg = '%s_unhandle_msg_%s';
 
     /**
-     *  群组+服务员（活跃）
+     * 群组+服务员（活跃）
+     *
+     * @param string $identifier
+     * @param int $group_id
      *
      * @var string
      */
@@ -59,7 +76,10 @@ class Redis
 
 
     /**
-     *  群-no_waiter 提醒
+     * 群-no_waiter 提醒
+     *
+     * @param string $identifier
+     * @param int $group_id
      *
      * @var string
      */
@@ -67,7 +87,7 @@ class Redis
 
 
     /**
-     *  清理临时群定时器
+     * 清理临时群定时器
      *
      * @var string
      */
@@ -76,12 +96,18 @@ class Redis
     /**
      * 会话成员
      *
+     * @param string $identifier
+     * @param string $session_id (ChatUtil::sessionId 生成的 session_id)
+     *
      * @var string
      */
     protected static $sessionMember = '%s_session_member_%s';
 
     /**
      * 客户端连接所绑定的平台
+     *
+     * @param string $identifier
+     * @param int $fd
      *
      * @var string
      */
@@ -97,12 +123,20 @@ class Redis
     /**
      * 私聊消息已读|未读
      *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $message_id
+     *
      * @var string
      */
-    protected static $messageReadstatus = '%s_message_read_status_%s_%s';
+    protected static $messageReadStatus = '%s_message_read_status_%s_%s';
 
     /**
      * 群聊消息已读|未读
+     *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $group_message_id
      *
      * @var string
      */
@@ -112,6 +146,10 @@ class Redis
     /**
      * 私聊未读消息数量
      *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $other_id
+     *
      * @var string
      */
     protected static $unreadForPrivate = '%s_unread_for_private_%s_%s';
@@ -119,8 +157,32 @@ class Redis
     /**
      * 群聊未读消息数量
      *
+     * @param string $identifier
+     * @param int    $user_id
+     * @param int    $group_id
+     *
      * @var string
      */
     protected static $unreadForGroup = '%s_unread_for_group_%s_%s';
+
+    /**
+     * rtc_user 表信息缓存
+     *
+     * @param string $identifier
+     * @param int $user_id
+     *
+     * @var string
+     */
+    protected static $user = '%s_user_%s';
+
+    /**
+     * rtc_user_option 表缓存信息
+     *
+     * @param string $identifier
+     * @param int $user_id
+     *
+     * @var string
+     */
+    protected static $userOption = '%s_user_option_%s';
 
 }

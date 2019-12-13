@@ -49,4 +49,38 @@ class MessageRedis extends Redis
         RedisFacade::hashAll($name , $remaining , config('app.timeout'));
         return $result;
     }
+
+    public static function messageReadStatus(string $identifier , int $user_id , int $message_id , $is_read = null)
+    {
+        $name = sprintf(self::$messageReadStatus , $identifier , $user_id , $message_id);
+        if (is_null($is_read)) {
+            // 仅获取数据
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $is_read);
+    }
+
+    public static function unreadForPrivate(string $identifier , int $user_id , int $other_id , $unread = null)
+    {
+        $name = sprintf(self::$unreadForPrivate , $identifier , $user_id , $other_id);
+        if (is_null($unread)) {
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $unread);
+    }
+
+    public static function incrUnreadForPrivate(string $identifier , int $user_id , int $other_id , int $step = 1)
+    {
+        $unread = (int) self::unreadForPrivate($identifier , $user_id , $other_id);
+        $unread += $step;
+        return self::unreadForPrivate($identifier , $user_id , $other_id , $unread);
+    }
+
+    public static function decrUnreadForPrivate(string $identifier , int $user_id , int $other_id , int $step = 1)
+    {
+        $unread = (int) self::unreadForPrivate($identifier , $user_id , $other_id);
+        $unread -= $step;
+        $unread = min(0 , $unread);
+        return self::unreadForPrivate($identifier , $user_id , $other_id , $unread);
+    }
 }

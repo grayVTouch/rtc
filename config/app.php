@@ -123,4 +123,7 @@ return [
 
     // 系统初始化标志
     'initialized' => __DIR__ . '/../initialized.lock' ,
+
+    // redis 缓存过期时间，单位：s
+    'cache_duration' => 8 * 3600 ,
 ];

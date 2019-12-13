@@ -286,6 +286,8 @@ class ChatUtil extends Util
             ]));
             $self_is_read = 1;
             GroupMessageReadStatusModel::u_insertGetId($param['user_id'] , $param['group_id'] , $group_message_id , $self_is_read);
+            // 将消息读取状态设置到 redis 中
+
             $msg = GroupMessageModel::findById($group_message_id);
             MessageUtil::handleGroupMessage($msg);
             SessionUtil::createOrUpdate($param['user_id'] , 'group' , $param['group_id']);
@@ -293,6 +295,7 @@ class ChatUtil extends Util
             /**
              * 投递异步任务
              */
+
             WebSocket::deliveryTask(json_encode([
                 'type' => 'callback' ,
                 'data' => [
