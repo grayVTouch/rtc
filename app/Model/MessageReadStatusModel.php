@@ -175,6 +175,23 @@ class MessageReadStatusModel extends Model
         return (int) $count;
     }
 
+    public static function countByUserIdAndChatIdAndIsRead(int $user_id , string $chat_id , int $is_read)
+    {
+        $count = self::whereNotExists(function($query){
+            $query->select('id')
+                ->from('delete_message')
+                ->where('type' , 'private')
+                ->whereRaw('rtc_message_read_status.message_id = rtc_delete_message.message_id');
+        })
+            ->where([
+                ['user_id' , '=' , $user_id] ,
+                ['chat_id' , '=' , $chat_id] ,
+                ['is_read' , '=' , $is_read] ,
+            ])
+            ->count();
+        return (int) $count;
+    }
+
     // 删除读取状态
     public static function delByMessageIds(array $message_ids)
     {

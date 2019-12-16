@@ -37,14 +37,21 @@ class GroupMessageReadStatusModel extends Model
     }
 
     // 未读消息数量
-    public static function countByUserIdAndGroupId(int $user_id , int $group_id , int $is_read)
+    public static function countByUserIdAndGroupIdAndIsRead(int $user_id , int $group_id , int $is_read)
     {
-        return self::where([
-                ['group_id' , '=' , $group_id] ,
-                ['user_id' , '=' , $user_id] ,
-                ['is_read' , '=' , $is_read] ,
-            ])
-            ->count();
+        $count = self::whereNotExists(function($query){
+                    $query->select('id')
+                        ->from('delete_message')
+                        ->where('type' , 'group')
+                        ->whereRaw('rtc_group_message_read_status.group_message_id = rtc_delete_message.message_id');
+                })
+                ->where([
+                    ['group_id' , '=' , $group_id] ,
+                    ['user_id' , '=' , $user_id] ,
+                    ['is_read' , '=' , $is_read] ,
+                ])
+                ->count();
+        return (int) $count;
     }
 
     public static function updateStatusByUserIdAndGroupIdExcludeVoice(int $user_id , int $group_id , int $is_read = 1)
@@ -108,11 +115,11 @@ class GroupMessageReadStatusModel extends Model
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
         $count = self::whereNotExists(function($query){
-            $query->select('id')
-                ->from('delete_message')
-                ->where('type' , 'group')
-                ->whereRaw('rtc_group_message_read_status.group_message_id = rtc_delete_message.message_id');
-        })
+                $query->select('id')
+                    ->from('delete_message')
+                    ->where('type' , 'group')
+                    ->whereRaw('rtc_group_message_read_status.group_message_id = rtc_delete_message.message_id');
+            })
             ->where([
                 ['user_id' , '=' , $user_id] ,
                 ['is_read' , '=' , $is_read] ,
