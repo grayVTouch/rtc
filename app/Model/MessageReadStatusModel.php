@@ -161,7 +161,8 @@ class MessageReadStatusModel extends Model
     // 已读/未读消息数量
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
-        $count = self::whereNotExists(function($query){
+        $count = self::from('message_read_status')
+            ->whereNotExists(function($query){
                 $query->select('id')
                     ->from('delete_message')
                     ->where('type' , 'private')
@@ -177,7 +178,8 @@ class MessageReadStatusModel extends Model
 
     public static function countByUserIdAndChatIdAndIsRead(int $user_id , string $chat_id , int $is_read)
     {
-        $count = self::whereNotExists(function($query){
+        $count = self::from('message_read_status')
+            ->whereNotExists(function($query){
                 $query->select('id')
                     ->from('delete_message')
                     ->where('type' , 'private')

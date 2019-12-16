@@ -39,7 +39,8 @@ class GroupMessageReadStatusModel extends Model
     // 未读消息数量
     public static function countByUserIdAndGroupIdAndIsRead(int $user_id , int $group_id , int $is_read)
     {
-        $count = self::whereNotExists(function($query){
+        $count = self::from('group_message_read_status')
+                ->whereNotExists(function($query){
                     $query->select('id')
                         ->from('delete_message')
                         ->where('type' , 'group')
@@ -114,7 +115,8 @@ class GroupMessageReadStatusModel extends Model
 
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
-        $count = self::whereNotExists(function($query){
+        $count = self::from('group_message_read_status')
+            ->whereNotExists(function($query){
                 $query->select('id')
                     ->from('delete_message')
                     ->where('type' , 'group')
