@@ -53,7 +53,7 @@ class SessionAction extends Action
                 MessageUtil::handleMessage($recent_message , $v->user_id , $other_id);
                 // 私聊消息处理
                 $v->recent_message = $recent_message;
-                $v->unread = MessageReadStatusModel::countByUserIdAndChatIdAndIsRead($v->target_id , $v->user_id , 0);
+                $v->unread = MessageReadStatusModel::countByUserIdAndChatIdAndIsRead($v->user_id , $v->target_id , 0);
                 $v->top = empty($v->other) ? 0 : $v->other->top;
                 $v->can_notice = empty($v->other) ? 1 : $v->other->can_notice;
                 if ($v->top == 1) {

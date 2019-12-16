@@ -178,11 +178,11 @@ class MessageReadStatusModel extends Model
     public static function countByUserIdAndChatIdAndIsRead(int $user_id , string $chat_id , int $is_read)
     {
         $count = self::whereNotExists(function($query){
-            $query->select('id')
-                ->from('delete_message')
-                ->where('type' , 'private')
-                ->whereRaw('rtc_message_read_status.message_id = rtc_delete_message.message_id');
-        })
+                $query->select('id')
+                    ->from('delete_message')
+                    ->where('type' , 'private')
+                    ->whereRaw('rtc_message_read_status.message_id = rtc_delete_message.message_id');
+            })
             ->where([
                 ['user_id' , '=' , $user_id] ,
                 ['chat_id' , '=' , $chat_id] ,
