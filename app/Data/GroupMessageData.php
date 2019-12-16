@@ -1,4 +1,7 @@
 <?php
+
+namespace App\Data;
+
 /**
  * Created by PhpStorm.
  * User: grayVTouch

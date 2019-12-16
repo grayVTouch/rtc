@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Cache;
+
 use App\Model\UserOptionModel;
 use App\Redis\UserOptionRedis;
 
@@ -12,21 +14,21 @@ use App\Redis\UserOptionRedis;
 
 class UserOptionCache
 {
-    public static function findByUserId(string $identifier , int $user_id)
+    public static function findByIdentifierAndUserId(string $identifier , int $user_id)
     {
-        $user = UserOptionRedis::user($identifier , $user_id);
-        if (!empty($user)) {
-            return json_decode($user);
+        $res = UserOptionRedis::userOption($identifier , $user_id);
+        if (!empty($res)) {
+            return json_decode($res);
         }
-        $user = UserOptionModel::findByUserId($user_id);
-        UserOptionRedis::user($identifier , $user_id , json_encode($user));
-        return $user;
+        $res = UserOptionModel::findByUserId($user_id);
+        UserOptionRedis::userOption($identifier , $user_id , json_encode($res));
+        return $res;
     }
 
     public static function updateById(string $identifier , $user_id , array $data = [])
     {
         UserOptionModel::updateById($user_id , $data);
-        UserOptionRedis::delUser($identifier , $user_id);
+        UserOptionRedis::delUserOption($identifier , $user_id);
     }
 
     public static function updateByIds(string $identifier , array $user_id = [] , array $data = [])

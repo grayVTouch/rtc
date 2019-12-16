@@ -193,7 +193,7 @@ class UserAction extends Action
                 if (BlacklistModel::exist($auth->user->id , $user->id)) {
                     return self::error('已经在黑名单列表' , 403);
                 }
-                BlacklistModel::u_insertGetId($auth->user->id , $user->id);
+                BlacklistModel::u_insertGetId($auth->identifier , $auth->user->id , $user->id);
                 break;
         }
         // 刷新好友列表

@@ -251,7 +251,7 @@ class GroupMessageAction extends Action
             {
                 $forward = ChatUtil::send($auth , [
                     'user_id' => $auth->user->id ,
-                    'friend_id' => $friend->id ,
+                    'other_id' => $friend->id ,
                     'type' => $v->type ,
                     'message' => $v->message ,
                     'extra' => $v->extra ,
@@ -370,7 +370,7 @@ class GroupMessageAction extends Action
             }
             $res = ChatUtil::send($auth , [
                 'user_id' => $auth->user->id ,
-                'friend_id' => $friend->id ,
+                'other_id' => $friend->id ,
                 'type' => 'message_set' ,
                 'message' => $message ,
                 'extra' => 'group' ,

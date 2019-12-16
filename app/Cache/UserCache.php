@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Cache;
+
 use App\Model\UserModel;
 use App\Redis\UserRedis;
 
@@ -12,26 +14,26 @@ use App\Redis\UserRedis;
 
 class UserCache
 {
-    public static function findById(string $identifier , int $user_id)
+    public static function findByIdentifierAndId(string $identifier , int $id)
     {
-        $user = UserRedis::user($identifier , $user_id);
-        if (!empty($user)) {
-            return json_decode($user);
+        $cache = UserRedis::user($identifier , $id);
+        if (!empty($cache)) {
+            return $cache;
         }
-        $user = UserModel::findById($user_id);
-        UserRedis::user($identifier , $user_id , json_encode($user));
-        return $user;
+        $cache = UserModel::findByIdWithV1($id);
+        UserRedis::user($identifier , $id , $cache);
+        return $cache;
     }
 
-    public static function updateById(string $identifier , $user_id , array $data = [])
+    public static function updateById(string $identifier , $id , array $data = [])
     {
-        UserModel::updateById($user_id , $data);
-        UserRedis::delUser($identifier , $user_id);
+        UserModel::updateById($id , $data);
+        UserRedis::delUser($identifier , $id);
     }
 
-    public static function updateByIds(string $identifier , array $user_id = [] , array $data = [])
+    public static function updateByIds(string $identifier , array $ids = [] , array $data = [])
     {
-        foreach ($user_id as $v)
+        foreach ($ids as $v)
         {
             self::updateById($identifier , $v , $data);
         }

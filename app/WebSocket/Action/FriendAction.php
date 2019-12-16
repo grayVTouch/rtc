@@ -64,14 +64,15 @@ class FriendAction extends Action
         $param['user_id']   = $param['friend_id'];
         $param['relation_user_id'] = $auth->user->id;
         $param['log'] = sprintf('"%s" 申请添加好友' , $auth->user->nickname);
+        $param['identifier'] = $auth->identifier;
         try {
             DB::beginTransaction();
             if ($friend->user_option->friend_auth == 0) {
                 // 自动同意
                 $param['status'] = 'auto_approve';
                 // 未开启好友验证
-                FriendModel::u_insertGetId($auth->user->id , $param['friend_id']);
-                FriendModel::u_insertGetId($param['friend_id'] , $auth->user->id);
+                FriendModel::u_insertGetId($auth->identifier , $auth->user->id , $param['friend_id']);
+                FriendModel::u_insertGetId($auth->identifier , $param['friend_id'] , $auth->user->id);
             } else {
                 $param['status'] = 'wait';
             }
@@ -83,6 +84,7 @@ class FriendAction extends Action
                 'status' ,
                 'remark' ,
                 'log' ,
+                'identifier' ,
             ]));
             DB::commit();
             if ($friend->user_option->friend_auth == 1) {
@@ -105,7 +107,7 @@ class FriendAction extends Action
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
                     'user_id' => $auth->user->id ,
-                    'friend_id' => $param['friend_id'] ,
+                    'other_id' => $param['friend_id'] ,
                     'message' => '你们已经成为好友，可以开始聊天了！' ,
                 ]);
             }
@@ -156,8 +158,8 @@ class FriendAction extends Action
             ]);
             if ($param['status'] == 'approve') {
                 // 同意
-                FriendModel::u_insertGetId($app->user_id , $app->relation_user_id);
-                FriendModel::u_insertGetId($app->relation_user_id , $app->user_id);
+                FriendModel::u_insertGetId($auth->identifier , $app->user_id , $app->relation_user_id);
+                FriendModel::u_insertGetId($auth->identifier , $app->relation_user_id , $app->user_id);
             }
             DB::commit();
             $auth->push($app->user_id , 'refresh_application');
@@ -168,7 +170,7 @@ class FriendAction extends Action
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
                     'user_id' => $app->user_id ,
-                    'friend_id' => $app->relation_user_id ,
+                    'other_id' => $app->relation_user_id ,
                     'message' => '你们已经成为好友，可以开始聊天了！' ,
                 ]);
             }

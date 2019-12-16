@@ -8,6 +8,7 @@
 
 namespace App\Model;
 
+use function core\convert_obj;
 use Illuminate\Support\Facades\DB;
 
 class MessageReadStatusModel extends Model
@@ -16,16 +17,17 @@ class MessageReadStatusModel extends Model
     public $timestamps = false;
 
     // 初始化消息
-    public static function initByMessageId(int $message_id , string $chat_id , int $sender , int $receiver)
+    public static function initByMessageId(string $identifier , int $message_id , string $chat_id , int $sender , int $receiver)
     {
 
-        self::u_insertGetId($sender , $chat_id , $message_id , 1);
-        self::u_insertGetId($receiver , $chat_id ,  $message_id , 0);
+        self::u_insertGetId($identifier , $sender , $chat_id , $message_id , 1);
+        self::u_insertGetId($identifier , $receiver , $chat_id ,  $message_id , 0);
     }
 
-    public static function u_insertGetId(int $user_id , string $chat_id , int $message_id , int $is_read)
+    public static function u_insertGetId(string $identifier , int $user_id , string $chat_id , int $message_id , int $is_read)
     {
         return self::insertGetId([
+            'identifier' => $identifier ,
             'user_id' => $user_id ,
             'chat_id' => $chat_id ,
             'message_id' => $message_id ,
@@ -192,5 +194,17 @@ class MessageReadStatusModel extends Model
     {
         return self::where('chat_id' , $chat_id)
             ->delete();
+    }
+
+    public static function findByUserIdAndMessageId(int $user_id , int $message_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['message_id' , '=' , $message_id] ,
+            ])
+            ->first();
+        $res = convert_obj($res);
+        self::single($res);
+        return $res;
     }
 }

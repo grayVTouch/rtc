@@ -19,15 +19,12 @@ use App\Model\UserOptionModel;
 use App\Redis\SessionRedis;
 use Exception;
 
-// todo 需要使用异步任务的方式执行 app 推送
-// todo 否则，推送速度太慢
-
 class AppPushUtil extends Util
 {
     public static $module = 'chat';
 
     // 私聊|顶栏推送|单人
-    public static function pushForPrivate(int $user_id , string $content , string $title = '' , $data = [])
+    public static function pushForPrivate(int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
     {
         $extra = [
             'module' => self::$module ,
@@ -35,7 +32,10 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        if ($async) {
+            return self::push($user_id , $content , $title , $extra);
+        }
+        return AppPush::push($user_id , $content , $title , $extra);
     }
 
     /**
@@ -67,7 +67,7 @@ class AppPushUtil extends Util
         ];
         $extra = json_encode($extra);
         if ($async) {
-            return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+            return self::push($user_id , $content , $title , $extra);
         }
         return AppPush::push($user_id , $content , $title , $extra);
     }
@@ -121,22 +121,22 @@ class AppPushUtil extends Util
     }
 
     // 普通通知信息|顶栏推送|单人
-    public static function push(int $user_id , string $content , string $title = '')
+    public static function push(int $user_id , string $content , string $title = '' , $extra = null)
     {
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title);
+        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
     }
 
     // 普通通知信息|顶栏推送|单人
-    public static function pushAll(array $user_ids , string $content , string $title = '')
+    public static function pushAll(array $user_ids , string $content , string $title = '' , $extra = null)
     {
-        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title);
+        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title , $extra);
     }
 
     /**
      * 私聊-推送检查
      * @throws \Exception
      */
-    public static function pushCheckForFriend(string $platform , int $user_id , int $friend_id , callable $callback)
+    public static function pushCheckForOther(string $platform , int $user_id , int $friend_id , callable $callback)
     {
         if (!config('app.enable_app_push')) {
             return ;

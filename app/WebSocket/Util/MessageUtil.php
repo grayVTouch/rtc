@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Util;
 
+use App\Data\MessageReadStatusData;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
@@ -95,8 +96,8 @@ class MessageUtil extends Util
             return ;
         }
         $msg->session_id = ChatUtil::sessionId('private' , $msg->chat_id);
-        $msg->self_is_read = MessageReadStatusModel::isRead($user_id , $msg->id);
-        $msg->other_is_read = MessageReadStatusModel::isRead($other_id , $msg->id);
+        $msg->self_is_read = MessageReadStatusData ::isRead($msg->identifier , $user_id , $msg->id);
+        $msg->other_is_read = MessageReadStatusData::isRead($msg->identifier , $other_id , $msg->id);
         if (isset($msg->user)) {
             TopUserUtil::handle($msg->user);
         }

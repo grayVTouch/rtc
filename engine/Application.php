@@ -215,8 +215,8 @@ class Application
                         // 初始化普通用户的客服关系
                         $friend = FriendModel::findByUserIdAndFriendId($v1->id , $system_user->id);
                         if (empty($friend)) {
-                            FriendModel::u_insertGetId($v1->id , $system_user->id);
-                            FriendModel::u_insertGetId($system_user->id , $v1->id);
+                            FriendModel::u_insertGetId($v->identifier , $v1->id , $system_user->id);
+                            FriendModel::u_insertGetId($v->identifier , $system_user->id , $v1->id);
                         }
                     }
                 }
@@ -246,18 +246,9 @@ class Application
     }
 
     /**
-     * 数据预缓存
-     *
      * 预加载相关数据有
-     *
-     * rtc_message_read_status
-     * rtc_group_message_read_status
-     * rtc_friend
-     * rtc_user
-     *
-     * by cxl
      */
-    public function dataPreLoad()
+    public function dataPreload()
     {
 
     }
@@ -274,6 +265,7 @@ class Application
         $this->clearRedis();
         $this->initLog();
         $this->initialize();
+        $this->dataPreload();
         // 这个务必在最后执行！！
         // 因为 WebSocket 实例一旦创建成功
         // 那么实际上

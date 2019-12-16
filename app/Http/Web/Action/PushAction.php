@@ -126,7 +126,7 @@ class PushAction extends Action
                 {
                     case 'system':
                         // 创建会话
-                        SessionUtil::createOrUpdate($v , 'system');
+                        SessionUtil::createOrUpdate($auth->identifier , $v , 'system');
                         break;
                 }
                 // 设置未读消息数量

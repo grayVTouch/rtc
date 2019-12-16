@@ -57,9 +57,10 @@ class FriendModel extends Model
      * @param int $friend_id
      * @return mixed
      */
-    public static function u_insertGetId(int $user_id , int $friend_id): int
+    public static function u_insertGetId(string $identifier , int $user_id , int $friend_id): int
     {
         return self::insertGetId([
+            'identifier' => $identifier ,
             'user_id'   => $user_id ,
             'friend_id' => $friend_id
         ]);

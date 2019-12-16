@@ -9,6 +9,7 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
 use Illuminate\Support\Facades\DB;
 
 class GroupMessageReadStatusModel extends Model
@@ -72,9 +73,10 @@ class GroupMessageReadStatusModel extends Model
         ]);
     }
 
-    public static function u_insertGetId(int $user_id , int $group_id , int $group_message_id , int $is_read = 0)
+    public static function u_insertGetId(string $identifier , int $user_id , int $group_id , int $group_message_id , int $is_read = 0)
     {
         return self::insertGetId([
+            'identifier' => $identifier ,
             'user_id' => $user_id ,
             'group_id' => $group_id ,
             'group_message_id' => $group_message_id ,
@@ -108,11 +110,11 @@ class GroupMessageReadStatusModel extends Model
     public static function countByUserIdAndIsRead(int $user_id , int $is_read)
     {
         $count = self::whereNotExists(function($query){
-            $query->select('id')
-                ->from('delete_message')
-                ->where('type' , 'group')
-                ->whereRaw('rtc_group_message_read_status.group_message_id = rtc_delete_message.message_id');
-        })
+                $query->select('id')
+                    ->from('delete_message')
+                    ->where('type' , 'group')
+                    ->whereRaw('rtc_group_message_read_status.group_message_id = rtc_delete_message.message_id');
+            })
             ->where([
                 ['user_id' , '=' , $user_id] ,
                 ['is_read' , '=' , $is_read] ,
@@ -126,4 +128,14 @@ class GroupMessageReadStatusModel extends Model
         return self::where('group_message_id' , $group_message_id)->delete();
     }
 
+    public static function findByUserIdAndGroupMessageId(int $user_id , int $group_message_id)
+    {
+        $res = self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['group_message_id' , '=' , $group_message_id] ,
+        ])->first();
+        $res = convert_obj($res);
+        self::single($res);
+        return $res;
+    }
 }

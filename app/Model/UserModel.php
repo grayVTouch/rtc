@@ -223,6 +223,17 @@ class UserModel extends Model
         return $res;
     }
 
+    public static function findByIdWithV1($id)
+    {
+        $res = self::find($id);
+        if (empty($res)) {
+            return ;
+        }
+        $res = convert_obj($res);
+        self::single($res);
+        return $res;
+    }
+
     public static function findByIdentifierAndPhone(string $identifier , string $phone)
     {
         $res = self::with(['userOption' , 'userJoinFriendOption'])

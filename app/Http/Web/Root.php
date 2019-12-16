@@ -67,7 +67,7 @@ class Root extends Base
             foreach ($user_ids as $v)
             {
                 // 加入群
-                GroupMemberModel::u_insertGetId($v , $group_id);
+                GroupMemberModel::u_insertGetId('nimo' , $v , $group_id);
             }
             return $this->success('创建成功');
         } catch(Exception $e) {

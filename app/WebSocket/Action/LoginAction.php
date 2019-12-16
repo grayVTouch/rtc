@@ -68,7 +68,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserTokenModel::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+        UserTokenModel::u_insertGetId($base->identifier , $param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
@@ -137,7 +137,7 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        UserTokenModel::u_insertGetId($param['identifier'] , $param['user_id'] , $param['token'] , $param['expire']);
+        UserTokenModel::u_insertGetId($base->identifier , $param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
 
         // 绑定 user_id <=> fd
 //        var_dump('当前登录的客户端链接 fd：' . $base->fd);
@@ -206,7 +206,7 @@ class LoginAction extends Action
             }
         }
         // 登录成功
-        $param['identifier'] = $user->identifier;
+        $param['identifier'] = $base->identifier;
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
@@ -222,7 +222,7 @@ class LoginAction extends Action
                 UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
             }
             UserRedis::fdMappingPlatform($base->identifier , $base->fd , $base->platform);
-            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
+            UserTokenModel::u_insertGetId($base->identifier , $param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);
@@ -295,7 +295,7 @@ class LoginAction extends Action
             return self::error('密码错误');
         }
         // 登录成功
-        $param['identifier'] = $user->identifier;
+        $param['identifier'] = $base->identifier;
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
@@ -311,7 +311,7 @@ class LoginAction extends Action
                 UserTokenModel::delByUserIdAndPlatform($user->id , $base->platform);
             }
             UserRedis::fdMappingPlatform($base->identifier , $base->fd , $base->platform);
-            UserTokenModel::u_insertGetId($param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
+            UserTokenModel::u_insertGetId($base->identifier , $param['user_id'] , $param['token'] , $param['expire'] , $base->platform);
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             BaseUserUtil::mapping($base->identifier , $user->id , $base->fd);
@@ -516,8 +516,8 @@ class LoginAction extends Action
             ]);
             // 自动添加客服为好友（这边默认每个项目仅会有一个客服）
             $system_user = UserModel::systemUser($base->identifier);
-            FriendModel::u_insertGetId($id , $system_user->id);
-            FriendModel::u_insertGetId($system_user->id , $id);
+            FriendModel::u_insertGetId($base->identifier , $id , $system_user->id);
+            FriendModel::u_insertGetId($base->identifier , $system_user->id , $id);
             // 新增用户添加方式选项
             $join_friend_method = JoinFriendMethodModel::getAll();
             foreach ($join_friend_method as $v)
@@ -599,8 +599,8 @@ class LoginAction extends Action
             ]);
             // 自动添加客服为好友（这边默认每个项目仅会有一个客服）
             $system_user = UserModel::systemUser($base->identifier);
-            FriendModel::u_insertGetId($id , $system_user->id);
-            FriendModel::u_insertGetId($system_user->id , $id);
+            FriendModel::u_insertGetId($base->identifier , $id , $system_user->id);
+            FriendModel::u_insertGetId($base->identifier , $system_user->id , $id);
             // 新增用户添加方式选项
             $join_friend_method = JoinFriendMethodModel::getAll();
             foreach ($join_friend_method as $v)

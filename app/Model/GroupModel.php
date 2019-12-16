@@ -116,4 +116,11 @@ class GroupModel extends Model
         return $res;
     }
 
+    public static function findById(int $id)
+    {
+        $res = self::find($id);
+        $res = convert_obj($res);
+        return $res;
+    }
+
 }

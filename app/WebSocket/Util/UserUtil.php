@@ -77,7 +77,7 @@ class UserUtil extends Util
             UserRedis::delNoWaiterForGroup($user->identifier , $group->id);
             if (empty(GroupMemberModel::findByUserIdAndGroupId($waiter->id , $group->id))) {
                 // 不在群内，加入到聊天室
-                GroupMemberModel::u_insertGetId($waiter->id , $group->id);
+                GroupMemberModel::u_insertGetId($waiter->identifier , $waiter->id , $group->id);
             }
             $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             // 客服自动加入消息通知
@@ -190,7 +190,7 @@ class UserUtil extends Util
             foreach ($group_msg as $v)
             {
                 if (empty(GroupMemberModel::findByUserIdAndGroupId($waiter->id , $v['group_id']))) {
-                    GroupMemberModel::u_insertGetId($waiter->id , $v['group_id']);
+                    GroupMemberModel::u_insertGetId($waiter->identifier , $waiter->id , $v['group_id']);
                     $user_ids = GroupMemberModel::getUserIdByGroupId($v['group_id']);
                     PushUtil::multiple($waiter->identifier , $user_ids , 'refresh_session');
                 }

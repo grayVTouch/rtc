@@ -231,9 +231,10 @@ class UserRedis extends Redis
     {
         $name = sprintf(self::$user , $identifier , $user_id);
         if (empty($value)) {
-            return RedisFacade::string($name);
+            $res = self::string($name);
+            return json_decode($res);
         }
-        return RedisFacade::string($name , $value , config('app.cache_duration'));
+        return self::string($name , json_encode($value));
     }
 
     public static function delUser(string $identifier , int $user_id)

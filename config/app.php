@@ -17,7 +17,7 @@ return [
     // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
     'reuse_port' => true ,
     // 任务进程的数量
-    'task_worker' => 1 ,
+    'task_worker' => 2 ,
     // worker 进程的数量
     'worker' => 1 ,
     // 静态文件根目录

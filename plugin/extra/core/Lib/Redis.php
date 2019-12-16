@@ -51,10 +51,10 @@ class Redis
     }
 
     // 获取/设置字符串
-    public function string(string $name , string $value = '' , int $timeout = 0)
+    public function string(string $name , string $value = null , int $timeout = 0)
     {
         $key = $this->key($name);
-        if (empty($value)) {
+        if (is_null($value)) {
             return $this->native('get' , $key);
         }
         $this->native('set' , $key , $value);
@@ -64,10 +64,10 @@ class Redis
     }
 
     // 获取/设置字符串
-    public function hash(string $name , string $key , string $value = '' , int $timeout = 0)
+    public function hash(string $name , string $key , string $value = null , int $timeout = 0)
     {
         $name = $this->key($name);
-        if (empty($value)) {
+        if (is_null($value)) {
             return $this->native('hGet' , $name , $key);
         }
         $this->native('hSet' , $name , $key , $value);

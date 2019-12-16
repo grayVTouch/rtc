@@ -1,5 +1,7 @@
 # rtc
 
+[API 接口地址](https://apizza.net/pro/#/project/60bdbb56abdf4a8cd847183801dcbef1/browse)
+
 ## 数据结构
 
 #### 私聊 发送方提供的数据结构

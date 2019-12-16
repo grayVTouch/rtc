@@ -9,6 +9,8 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
+
 class UserJoinFriendOptionModel extends Model
 {
     protected $table = 'user_join_friend_option';
@@ -32,8 +34,26 @@ class UserJoinFriendOptionModel extends Model
         ]);
     }
 
-    public static function delByUserId(int $user_id)
+    public static function updateByUserId(int $user_id , array $data = [])
     {
+        return self::where('user_id' , $user_id)
+            ->update($data);
+    }
 
+    public static function updateByUserIdAndJoinFriendMethodId(int $user_id , int $join_friend_method_id , array $data = [])
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['join_friend_method_id' , '=' , $join_friend_method_id] ,
+        ])->update($data);
+    }
+
+    public static function getByUserId(int $user_id)
+    {
+        $res = self::where('user_id' , $user_id)
+            ->get();
+        $res = convert_obj($res);
+        self::single($res);
+        return $res;
     }
 }

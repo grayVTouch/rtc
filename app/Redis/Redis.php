@@ -7,6 +7,8 @@
  */
 namespace App\Redis;
 
+use Engine\Facade\Redis as RedisFacade;
+
 class Redis
 {
     // 项目标识符
@@ -184,5 +186,71 @@ class Redis
      * @var string
      */
     protected static $userOption = '%s_user_option_%s';
+
+    /**
+     * rtc_user_join_friend_option 表缓存信息
+     *
+     * @param string $identifier
+     * @param int $user_id
+     *
+     * @var string
+     */
+    protected static $userJoinFriendOption = '%s_user_join_friend_option_%s';
+
+    /**
+     * rtc_join_friend_method 表缓存信息
+     *
+     * @param string $identifier
+     * @param int $join_friend_method_id
+     *
+     * @var string
+     */
+    protected static $joinFriendMethod = '%s_join_friend_method_%s';
+
+    /**
+     * rtc_group 表缓存
+     *
+     * @param string $identifier
+     * @param string $group_id
+     *
+     * @var string
+     */
+    protected static $group = '%s_group_%s';
+
+    /**
+     * rtc_group_member 表缓存
+     *
+     * @param string $identifier
+     * @param int $group_id
+     * @param int $user_id
+     */
+    protected static $groupMember = '%s_group_member_%s_%s';
+
+    /**
+     * rtc_friend 表缓存
+     *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $friend_id
+     */
+    protected static $friend = '%s_friend_%s_%s';
+
+
+    // 字符串类型设置
+    public static function string(string $name , $val = null)
+    {
+        if (is_null($val)) {
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $val , config('app.cache_duration'));
+    }
+
+    public static function del(string $name)
+    {
+        return RedisFacade::del($name);
+    }
+
+
+
 
 }

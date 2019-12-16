@@ -15,9 +15,10 @@ class BlacklistModel extends Model
 {
     protected $table = 'blacklist';
 
-    public static function u_insertGetId(int $user_id , int $block_user_id)
+    public static function u_insertGetId(string $identifier , int $user_id , int $block_user_id)
     {
         return self::insertGetId([
+            'identifier'       => $identifier ,
             'user_id'       => $user_id ,
             'block_user_id' => $block_user_id
         ]);

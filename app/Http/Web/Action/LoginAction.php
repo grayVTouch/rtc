@@ -280,12 +280,12 @@ class LoginAction extends Action
             SmsCodeModel::updateById($sms_code->id , [
                 'used' => 1
             ]);
-            FriendModel::u_insertGetId($id , $param['p_id']);
-            FriendModel::u_insertGetId($param['p_id'] , $id);
+            FriendModel::u_insertGetId($base->identifier , $id , $param['p_id']);
+            FriendModel::u_insertGetId($base->identifier , $param['p_id'] , $id);
             // 自动添加客服为好友（这边默认每个项目仅会有一个客服）
             $system_user = UserModel::systemUser($base->identifier);
-            FriendModel::u_insertGetId($id , $system_user->id);
-            FriendModel::u_insertGetId($system_user->id , $id);
+            FriendModel::u_insertGetId($base->identifier , $id , $system_user->id);
+            FriendModel::u_insertGetId($base->identifier , $system_user->id , $id);
             // 新增用户添加方式选项
             $join_friend_method = JoinFriendMethodModel::getAll();
             foreach ($join_friend_method as $v)

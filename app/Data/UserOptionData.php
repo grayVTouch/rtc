@@ -1,4 +1,9 @@
 <?php
+
+namespace App\Data;
+
+use App\Cache\UserOptionCache;
+
 /**
  * Created by PhpStorm.
  * User: grayVTouch
@@ -8,5 +13,9 @@
 
 class UserOptionData
 {
-
+    public static function findByIdentifierAndUserId(string $identifier , int $user_id)
+    {
+        $res = UserOptionCache::findByIdentifierAndUserId($identifier , $user_id);
+        return $res;
+    }
 }

@@ -40,6 +40,7 @@ drop table if exists `rtc_user_option`;
 create table if not exists `rtc_user_option` (
   id int unsigned not null auto_increment ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   private_notification tinyint default 1 comment '私聊通知：0-不允许 1-允许' ,
   group_notification tinyint default 1 comment '群聊通知：0-不允许 1-允许' ,
   write_status tinyint default 1 comment '输入状态开关：0-关闭 1-开启' ,
@@ -54,6 +55,7 @@ create table if not exists `rtc_user_option` (
 drop table if exists `rtc_user_token`;
 create table if not exists `rtc_user_token` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.user_id' ,
   token varchar(255) default '' comment 'token' ,
   expire datetime default current_timestamp comment '过期时间' ,
@@ -65,6 +67,7 @@ create table if not exists `rtc_user_token` (
 drop table if exists `rtc_group`;
 create table if not exists `rtc_group` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment '群主：rtc_user.id' ,
   name varchar(255) default '' comment '群名' ,
   image varchar(500) default '' comment '群图片' ,
@@ -84,6 +87,7 @@ create table if not exists `rtc_group` (
 drop table if exists `rtc_group_member`;
 create table if not exists `rtc_group_member` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   group_id int unsigned default 0 comment 'rtc_group.id' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   alias varchar(500) default '' comment '我在群里面的别名' ,
@@ -98,6 +102,7 @@ create table if not exists `rtc_group_member` (
 drop table if exists `rtc_friend_group`;
 create table if not exists `rtc_friend_group` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   name varchar(255) default '' comment '分组名称' ,
   create_time datetime default current_timestamp comment '创建时间' ,
@@ -107,6 +112,7 @@ create table if not exists `rtc_friend_group` (
 drop table if exists `rtc_friend`;
 create table if not exists `rtc_friend` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment '我的id: rtc_user.id' ,
   friend_id int unsigned default 0 comment '好友id：rtc_user.id' ,
   friend_group_id int unsigned default 0 comment 'rtc_friend_group.id' ,
@@ -116,12 +122,14 @@ create table if not exists `rtc_friend` (
   top tinyint default 0 comment '置顶？：0-否 1-是' ,
   background varchar(1000) default '' comment '聊天背景' ,
   create_time datetime default current_timestamp comment '创建时间' ,
-  primary key `id` (`id`)
+  primary key `id` (`id`) ,
+  key `user_id|friend_id` (`user_id` , `friend_id`) ,
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '我的好友';
 
 drop table if exists `rtc_application`;
 create table if not exists `rtc_application` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   type varchar(255) default '' comment '类型：private-私聊；group-群聊' ,
   op_type varchar(255) default '' comment '操作类型：app_friend-申请成为好友；app_group-申请进群；invite_into_group-邀请好友进群；...其他待扩充' ,
   user_id int unsigned default 0 comment '受理方: rtc_user.id' ,
@@ -138,6 +146,7 @@ create table if not exists `rtc_application` (
 drop table if exists `rtc_message`;
 create table if not exists `rtc_message` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   chat_id varchar(255) default '' comment '会话id，生成规则：minUserId_maxUserId' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
@@ -154,6 +163,7 @@ create table if not exists `rtc_message` (
 drop table if exists `rtc_group_message`;
 create table if not exists `rtc_group_message` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment '群主：rtc_user.id' ,
   group_id int unsigned default 0 comment 'rtc_group.id' ,
   type varchar(255) default 'text' comment '消息类型：text-文本消息 image-图片...等，待扩展' ,
@@ -168,17 +178,20 @@ create table if not exists `rtc_group_message` (
 drop table if exists `rtc_group_message_read_status`;
 create table if not exists `rtc_group_message_read_status` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   group_id int unsigned default 0 comment 'rtc_group.id' ,
   group_message_id int unsigned default 0 comment 'rtc_group_message.id' ,
   is_read tinyint default 0 comment '是否读取: y-已读 n-未读' ,
   create_time datetime default current_timestamp comment '创建时间' ,
-  primary key `id` (`id`)
+  primary key `id` (`id`) ,
+  key `user_id|group_message_id` (`user_id` , `group_message_id`) ,
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息-读取状态';
 
 drop table if exists `rtc_message_read_status`;
 create table if not exists `rtc_message_read_status` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   chat_id varchar(255) default '' comment '私聊会话id' ,
   message_id int unsigned default 0 comment 'rtc_message.id' ,
@@ -190,6 +203,7 @@ create table if not exists `rtc_message_read_status` (
 drop table if exists `rtc_push`;
 create table if not exists `rtc_push` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   push_type varchar(255) default 'single' comment '推送类型：single-推单人；multiple-推多人' ,
   user_id varchar(500) default '' comment 'rtc_user.id 可以是纯数字 或 json 字符串；仅在 type = single | desiganation 的时候有效' ,
   role varchar(255) default 'all' comment '接收方角色: admin-工作人员 user-平台用户 all-全部，desiganation-指定用户 仅在 type = multiple 的时候有效' ,
@@ -204,6 +218,7 @@ create table if not exists `rtc_push` (
 drop table if exists `rtc_push_read_status`;
 create table if not exists `rtc_push_read_status` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   push_id int unsigned default 0 comment 'rtc_push.id' ,
   is_read tinyint default 0 comment '是否读取: y-已读 n-未读' ,
@@ -216,6 +231,7 @@ create table if not exists `rtc_push_read_status` (
 drop table if exists `rtc_blacklist`;
 create table if not exists `rtc_blacklist` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   block_user_id int unsigned default 0 comment '屏蔽的用户Id: rtc_user.id' ,
   create_time datetime default current_timestamp comment '创建时间' ,
@@ -225,6 +241,7 @@ create table if not exists `rtc_blacklist` (
 drop table if exists `rtc_delete_message`;
 create table if not exists `rtc_delete_message` (
   id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   type varchar(255) default '' comment 'private-私聊 group-群聊' ,
   message_id int unsigned default 0 comment 'rtc_message.id or rtc_group_message.id' ,
@@ -232,6 +249,28 @@ create table if not exists `rtc_delete_message` (
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户删除的聊天记录';
+
+drop table if exists `rtc_delete_message_for_private`;
+create table if not exists `rtc_delete_message_for_private` (
+  id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  chat_id int unsigned default 0 comment '根据 user_id and other_id 根据一定规则生成的字符串' ,
+  message_id int unsigned default 0 comment 'rtc_message.id' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户删除的私聊聊天记录';
+
+drop table if exists `rtc_delete_message_for_group`;
+create table if not exists `rtc_delete_message_for_group` (
+  id int unsigned not null auto_increment ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  group_id int unsigned default 0 comment 'rtc_group.id' ,
+  group_message_id int unsigned default 0 comment 'rtc_group_message.id' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户删除的群聊聊天记录';
 
 
 drop table if exists `rtc_sms_code`;
@@ -262,14 +301,6 @@ create table if not exists `rtc_session` (
 
 -- 群消息免打扰
 drop table if exists `rtc_group_notice`;
-create table if not exists `rtc_group_notice` (
-  id int unsigned not null auto_increment ,
-  user_id int unsigned default 0 comment 'rtc_user.id' ,
-  group_id int unsigned default 0 comment 'rtc_group.id' ,
-  can_notice tinyint default 1 comment '消息免打扰？0-否 1-是' ,
-  create_time datetime default current_timestamp ,
-  primary key `id` (`id`)
-) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群消息免打扰';
 
 drop table if exists `rtc_program_error_log`;
 create table if not exists `rtc_program_error_log` (
@@ -309,6 +340,7 @@ create table if not exists `rtc_join_friend_method` (
 drop table if exists `rtc_user_join_friend_option`;
 create table if not exists `rtc_user_join_friend_option` (
   id int unsigned not null auto_increment ,
+  identifier varchar(500) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   join_friend_method_id int unsigned default 0 comment 'rtc_join_friend_friend_method.id' ,
   enable tinyint default 1 comment '是否开启：0-关闭 1-开启' ,
@@ -322,6 +354,7 @@ insert into `rtc_join_friend_method` (id , name) values (3 , '我的二维码');
 drop table if exists `rtc_article_type`;
 create table if not exists `rtc_article_type` (
   id int unsigned not null auto_increment ,
+  identifier varchar(500) default '' comment 'rtc_project.identifier' ,
   name varchar(1000) default '' comment '分类名称' ,
   p_id int unsigned default 0 comment '上级id' ,
   enable tinyint default 1 comment '启用？0-否 1-是' ,
@@ -333,6 +366,7 @@ create table if not exists `rtc_article_type` (
 drop table if exists `rtc_article`;
 create table if not exists `rtc_article` (
   id int unsigned not null auto_increment ,
+  identifier varchar(500) default '' comment 'rtc_project.identifier' ,
   article_type_id int unsigned default 0 comment 'rtc_article_type.id' ,
   title varchar(1000) default '' comment '标题' ,
   thumb varchar(1000) default '' comment '封面' ,
@@ -393,5 +427,25 @@ alter table `rtc_group_message` add aes_key varchar(255) default '' comment 'aes
 alter table `rtc_task_log` add `result` mediumtext comment '执行结果';
 alter table `rtc_user_token` add platform varchar(255) default '' comment '平台：pc|mobile|app 等';
 
+
+-- 新增项目标识符 nimo 带新增的字段（建议是清除数据库然后重新建表）
+alter table `rtc_user_option` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_user_join_friend_option` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_group` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_group_member` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_message` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_group_message` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_message_read_status` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_group_message_read_status` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_blacklist` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_session` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_push` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_push_read_status` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_user_token` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_article` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_article_type` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_friend_group` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_application` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_friend` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 
 

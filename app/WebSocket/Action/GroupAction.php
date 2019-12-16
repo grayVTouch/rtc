@@ -9,6 +9,7 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\GroupData;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
@@ -16,6 +17,7 @@ use App\Model\GroupMemberModel;
 use App\Model\UserModel;
 use App\Util\AppPushUtil;
 use App\Util\ChatUtil;
+use App\Util\GroupMemberUtil;
 use App\Util\GroupUtil;
 use App\Util\PushUtil;
 use App\Util\SessionUtil;
@@ -56,6 +58,7 @@ class GroupAction extends Action
         $param['user_id']   = $group->user_id;
         $param['relation_user_id'] = json_encode([$auth->user->id]);
         $param['log']    = sprintf('"%s" 申请进群' , $auth->user->nickname);
+        $param['identifier'] = $auth->identifier;
         if ($group->auth == 1) {
             // 开启了进群认证
             $param['status']    = 'wait';
@@ -68,6 +71,7 @@ class GroupAction extends Action
                 'status' ,
                 'remark' ,
                 'log' ,
+                'identifier' ,
             ]));
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
@@ -94,9 +98,10 @@ class GroupAction extends Action
                 'status' ,
                 'remark' ,
                 'log' ,
+                'identifier' ,
             ]));
             // 未开启进群认证
-            GroupMemberModel::u_insertGetId($auth->user->id , $group->id);
+            GroupMemberModel::u_insertGetId($auth->identifier , $auth->user->id , $group->id);
             $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             DB::commit();
             $auth->pushAll($user_ids , 'refresh_group');
@@ -154,6 +159,7 @@ class GroupAction extends Action
         $param['log']       = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $log);
         $param['user_id']   = $group->user_id;
         $param['invite_user_id'] = $auth->user->id;
+        $param['identifier'] = $auth->identifier;
         if ($auth->user->id != $group->user_id) {
             // 非群组
             if ($group->auth == 1) {
@@ -168,6 +174,7 @@ class GroupAction extends Action
                     'status' ,
                     'remark' ,
                     'log' ,
+                    'identifier' ,
                 ]));
                 $auth->push($group->user_id , 'refresh_application');
                 $auth->push($group->user_id , 'refresh_unread_count');
@@ -194,11 +201,12 @@ class GroupAction extends Action
                 'status' ,
                 'remark' ,
                 'log' ,
+                'identifier' ,
             ]));
             // 未开启进群认证 or 群组操作
             foreach ($relation_user_id as $v)
             {
-                GroupMemberModel::u_insertGetId($v , $group->id);
+                GroupMemberModel::u_insertGetId($auth->identifier , $v , $group->id);
             }
             $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             DB::commit();
@@ -265,7 +273,7 @@ class GroupAction extends Action
                 $remark = '';
                 foreach ($relation_user_id as $v)
                 {
-                    GroupMemberModel::u_insertGetId($v , $app->group_id);
+                    GroupMemberModel::u_insertGetId($auth->identifier , $v , $app->group_id);
                     $user = UserModel::findById($v);
                     if (empty($user)) {
                         DB::rollBack();
@@ -416,6 +424,7 @@ class GroupAction extends Action
         $single   = empty($user_ids) ? true : false;
         $user_ids[] = $auth->user->id;
         $param['anonymous'] = empty($param['anonymous']) ? 0 : $param['anonymous'];
+        $param['identifier'] = $auth->identifier;
         try {
             DB::beginTransaction();
             $group_id = GroupModel::insertGetId(array_unit($param , [
@@ -424,6 +433,7 @@ class GroupAction extends Action
                 'type' ,
                 'expire' ,
                 'anonymous' ,
+                'identifier' ,
             ]));
             DB::commit();
             if (!$single) {
@@ -437,7 +447,7 @@ class GroupAction extends Action
                     if (empty($member)) {
                         return self::error('无法创建群！邀请的成员中存在无效的用户' , 404);
                     }
-                    GroupMemberModel::u_insertGetId($v , $group_id);
+                    GroupMemberModel::u_insertGetId($auth->identifier , $v , $group_id);
                     if ($v == $auth->user->id) {
                         continue ;
                     }
@@ -534,13 +544,14 @@ class GroupAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $group = GroupModel::findById($param['group_id']);
+        $group = GroupData::findByIdentifierAndId($auth->identifier , $param['group_id']);
         if (empty($group)) {
             return self::error('未找到群' , 404);
         }
-        $member = GroupMemberModel::getByGroupId($group->id);
-        foreach ($member as $v)
+        $members = GroupMemberModel::getByGroupIdV1($group->id);
+        foreach ($members as $v)
         {
+            GroupMemberUtil::handle($v);
             UserUtil::handle($v->user , $auth->user->id);
             GroupUtil::handle($v->group , $auth->user->id);
             $v->origin_alias = $v->alias;
@@ -548,7 +559,7 @@ class GroupAction extends Action
                 $v->user->nickname :
                 $v->alias;
         }
-        return self::success($member);
+        return self::success($members);
     }
 
     public static function groupInfo(Auth $auth , array $param)

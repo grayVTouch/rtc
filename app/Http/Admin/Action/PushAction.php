@@ -149,7 +149,7 @@ class PushAction extends Action
                 {
                     case 'system':
                         // 创建会话
-                        $res = SessionUtil::createOrUpdate($v , 'system');
+                        $res = SessionUtil::createOrUpdate($auth->identifier , $v , 'system');
                         if ($res['code'] != 200) {
                             DB::rollBack();
                             return self::error($res['data'] , 500);

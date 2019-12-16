@@ -128,7 +128,7 @@ class SessionAction extends Action
         try {
             DB::beginTransaction();
             // 新增会话
-            SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id']);
+            SessionUtil::createOrUpdate($auth->identifier , $auth->user->id , $param['type'] , $param['target_id']);
             switch ($param['type'])
             {
                 case 'private':
@@ -163,7 +163,7 @@ class SessionAction extends Action
             return self::error($validator->message());
         }
         $param['user_id'] = $auth->user->id;
-        $res = SessionUtil::createOrUpdate($auth->user->id , $param['type'] , $param['target_id']);
+        $res = SessionUtil::createOrUpdate($auth->identifier , $auth->user->id , $param['type'] , $param['target_id']);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);
         }
