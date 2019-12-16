@@ -124,6 +124,7 @@ class GroupMessageReadStatusModel extends Model
                 ['user_id' , '=' , $user_id] ,
                 ['is_read' , '=' , $is_read] ,
             ])
+            ->select('f')
             ->count();
         return (int) $count;
     }
