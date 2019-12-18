@@ -101,32 +101,29 @@ class ChatUtil extends Util
         $param['aes_key'] = $user->aes_key;
         $param['identifier'] = $base->identifier;
         try {
-//            DB::beginTransaction();
-//            $id = MessageModel::insertGetId(array_unit($param , [
-//                'user_id' ,
-//                'chat_id' ,
-//                'message' ,
-//                'type' ,
-//                'flag' ,
-//                'extra' ,
-//                'blocked' ,
-//                'aes_key' ,
-//                'old' ,
-//                'identifier' ,
-//            ]));
-//            // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
-//            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
-//            if ($blocked) {
-//                // 接收方把发送方拉黑了
-//                DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
-//            }
-//            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'private' , $param['chat_id']);
-//            DB::commit();
-//            $msg = MessageModel::findById($id);
-//            $msg = MessageModel::findById(2386);
-//            MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
-            $msg = json_decode('{"id":2386,"user_id":600029,"chat_id":"600027_600029","type":"text","message":"hello boys and girls1","extra":"","flag":"normal","blocked":0,"create_time":"2019-12-18 17:10:11","old":1,"aes_key":"u27GQ5uX4kfPGlB8","identifier":"nimo","user":{"id":600029,"identifier":"nimo","username":"","password":"","phone":"17605919933","area_code":"86","full_phone":"8617605919933","role":"user","unique_code":"pKG57jv3B1S4LL62592b16X6QpQ83m4Q3GE3n00BGz8Xs002rax5702502f1O71JT65X797kXh2v768hj58nO9nL7E9G51v9hgcrzH82Y1d94v3Z5E48XlvE269VRp35Q2Qv81N6573Vp8uoWZ89WD6atzj67iB44y8810r4I253P0o943H0b1090x9wB489113sN08h6g5v049zk4HbJI0vU64125308RN9202eP0v7i208QvN9q08eslzZ6A3","is_temp":0,"p_id":0,"invite_code":"39f157a1bdb3359a002533e122cf3248","nickname":"yyuu","avatar":"","sex":0,"birthday":null,"signature":"","create_time":"2019-12-06 17:53:49","is_system":0,"enable_destroy_password":1,"is_init_destroy_password":0,"destroy_password":"","is_init_password":0,"aes_key":"u27GQ5uX4kfPGlB8","is_test":0,"online":0,"user_recent_online_timestamp":null},"session_id":"71bc3f059ec6734e8104b30dc5004d21","self_is_read":0,"other_is_read":1}');
-
+            DB::beginTransaction();
+            $id = MessageModel::insertGetId(array_unit($param , [
+                'user_id' ,
+                'chat_id' ,
+                'message' ,
+                'type' ,
+                'flag' ,
+                'extra' ,
+                'blocked' ,
+                'aes_key' ,
+                'old' ,
+                'identifier' ,
+            ]));
+            // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
+            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
+            if ($blocked) {
+                // 接收方把发送方拉黑了
+                DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
+            }
+            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'private' , $param['chat_id']);
+            DB::commit();
+            $msg = MessageModel::findById($id);
+            MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
             /**
              * 投递到异步任务
              */
