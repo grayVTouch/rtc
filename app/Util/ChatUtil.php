@@ -124,7 +124,6 @@ class ChatUtil extends Util
             DB::commit();
             $msg = MessageModel::findById($id);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
-            $s_time1 = microtime(true);
             /**
              * 投递到异步任务
              */
@@ -138,8 +137,6 @@ class ChatUtil extends Util
                     ] ,
                 ]
             ]));
-            $e_time1 = microtime(true);
-            var_dump("私聊投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
             if ($push_all) {
                 // 诸如一些服务端以某用户身份推送的消息（必须该方法要求发送消息必须有发送方）
                 // 这种情况下就要求所有相关用户都能接收到消息
@@ -340,7 +337,6 @@ class ChatUtil extends Util
             MessageUtil::handleGroupMessage($msg);
             // 群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
-            $s_time1 = microtime(true);
             /**
              * 投递异步任务
              */
@@ -357,8 +353,6 @@ class ChatUtil extends Util
                     ]
                 ] ,
             ]));
-            $e_time1 = microtime(true);
-            var_dump("群聊投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
             $msg->is_read = $self_is_read;
             if ($push_all) {
                 $base->push($msg->user_id , 'group_message' , $msg);
