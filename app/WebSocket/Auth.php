@@ -52,7 +52,7 @@ class Auth extends Base
                 return false;
             }
         }
-        var_dump("user_id: " . $this->user->id . ' 正在调用 api');
+//        var_dump("user_id: " . $this->user->id . ' 正在调用 api');
         UserUtil::handle($this->user);
         // 建立映射
         UserRedis::fdMappingUserId($this->identifier , $this->fd , $this->user->id);
