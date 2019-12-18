@@ -76,7 +76,7 @@ class PushModel extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where($where)
             ->orderBy('p.id' , 'desc')
-            ->select('p.*,prs.create_time')
+            ->select('p.*' , 'prs.create_time')
             ->orderBy('prs.id' , 'desc')
             ->first();
         self::single($res);
@@ -99,7 +99,7 @@ class PushModel extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where($where)
             ->orderBy('prs.id' , 'desc')
-            ->select('p.*,p.create_time')
+            ->select('p.*' , 'p.create_time')
             ->limit($limit)
             ->get();
         self::multiple($res);
