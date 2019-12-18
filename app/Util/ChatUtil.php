@@ -139,7 +139,7 @@ class ChatUtil extends Util
                 ]
             ]));
             $e_time1 = microtime(true);
-            var_dump("投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
+            var_dump("私聊投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
             if ($push_all) {
                 // 诸如一些服务端以某用户身份推送的消息（必须该方法要求发送消息必须有发送方）
                 // 这种情况下就要求所有相关用户都能接收到消息
@@ -217,7 +217,7 @@ class ChatUtil extends Util
         // 获取群成员，过滤掉自身
         $msg = convert_obj($msg);
         $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
-//        $s_time = microtime(true);
+        $s_time = microtime(true);
         foreach ($user_ids as $v)
         {
             if ($v == $msg->user_id) {
@@ -250,8 +250,8 @@ class ChatUtil extends Util
 //            $e_time1 = microtime(true);
 //            var_dump("单次循环花费多少时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
         }
-//        $e_time = microtime(true);
-//        var_dump("循环耗费多少时间：" . bcmul($e_time  - $s_time , 1 , 3));
+        $e_time = microtime(true);
+        var_dump("群聊异步任务执行完毕耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
 
     }
 
@@ -275,6 +275,7 @@ class ChatUtil extends Util
      */
     public static function groupSend(Base $base , array $param , bool $push_all = false)
     {
+        $s_time = microtime(true);
         $validator = Validator::make($param , [
             'group_id' => 'required' ,
             'type' => 'required' ,
@@ -339,6 +340,7 @@ class ChatUtil extends Util
             MessageUtil::handleGroupMessage($msg);
             // 群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
+            $s_time1 = microtime(true);
             /**
              * 投递异步任务
              */
@@ -355,6 +357,8 @@ class ChatUtil extends Util
                     ]
                 ] ,
             ]));
+            $e_time1 = microtime(true);
+            var_dump("群聊投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
             $msg->is_read = $self_is_read;
             if ($push_all) {
                 $base->push($msg->user_id , 'group_message' , $msg);
@@ -364,6 +368,8 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_session');
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
+            $e_time = microtime(true);
+            var_dump("群聊消息发送耗费时间：" . bcmul($e_time , $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
