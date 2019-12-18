@@ -21,7 +21,7 @@ class GroupMessageReadStatusData extends Data
 
     public static function insertGetId(string $identifier , int $user_id , int $group_message_id , int $group_id , $is_read = 1)
     {
-        $id = GroupMessageReadStatusModel::u_insertGetId($identifier , $user_id , $group_message_id , $group_id , $is_read);
+        $id = GroupMessageReadStatusModel::u_insertGetId($identifier , $user_id , $group_id , $group_message_id ,  $is_read);
         GroupMessageReadStatusCache::delByIdentifierAndUserIdAndGroupMessageId($identifier , $user_id , $group_message_id);
         return $id;
     }
