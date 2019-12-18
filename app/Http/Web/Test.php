@@ -73,8 +73,8 @@ class Test extends Base1
         $this->response->header('Access-Control-Allow-Methods' , 'GET,POST,PUT,PATCH,DELETE');
         $this->response->header('Access-Control-Allow-Credentials' , 'false');
         $this->response->header('Access-Control-Allow-Headers' , 'Authorization,Content-Type,X-Request-With,Ajax-Request');
-
         $this->response->status(200);
-        return $this->response->end($response);
+        // $response
+        return $this->response->end('abcdefg');
     }
 }
