@@ -567,10 +567,8 @@ class GroupAction extends Action
                 }
             }
             $v->origin_alias = $v->alias;
-            var_dump($v->alias);
-            var_dump($v->user->nickname);
             $v->alias = empty($v->alias) ?
-                $v->user->nickname :
+                UserUtil::getNameFromNicknameAndUsername($v->user->nickname , $v->user->username) :
                 $v->alias;
         }
         return self::success($members);
