@@ -1,0 +1,26 @@
+# 缓存原则
+
+不缓存列表数据，仅缓存单条数据。
+
+# 已经缓存的表
+
+1. rtc_user
+2. rtc_user_option
+3. rtc_user_join_friend_option
+4. rtc_group
+5. rtc_friend
+6. rtc_group_member
+
+
+# 以下这两个东西需要好好处理
+
+6. rtc_message_read_status
+7. rtc_group_message_read_status
+
+私聊 单条消息已读|未读 尚未设置（阅后即焚消息已读未读需要设置）
+群聊 单条消息已读|未读 尚未设置
+
+以上处理完，就结束了。
+
+- 消息删除不用理会
+- 消息状态变更需要理会

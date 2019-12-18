@@ -9,6 +9,8 @@
 namespace App\Util;
 
 
+use App\Model\DeleteMessageForGroupModel;
+use App\Model\DeleteMessageForPrivateModel;
 use App\Model\DeleteMessageModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
@@ -63,7 +65,7 @@ class SessionUtil extends Util
             $mesages = MessageModel::getByChatId($session->target_id);
             foreach ($mesages as $v)
             {
-                MessageUtil::shield($session->user_id , $session->target_id , $v->id);
+                MessageUtil::shield($session->identifier , $session->user_id , $session->target_id , $v->id);
             }
             return self::success();
         }
@@ -71,7 +73,7 @@ class SessionUtil extends Util
             $mesages = GroupMessageModel::getByGroupId($session->target_id);
             foreach ($mesages as $v)
             {
-                GroupMessageUtil::shield($session->user_id , $session->target_id , $v->id);
+                GroupMessageUtil::shield($session->identifier , $session->user_id , $session->target_id , $v->id);
             }
         }
         return self::success();
@@ -96,7 +98,7 @@ class SessionUtil extends Util
         }
         if ($type == 'private') {
             // 删除屏蔽的消息
-            DeleteMessageModel::delByTypeAndTargetId('private' , $target_id);
+            DeleteMessageForPrivateModel::delByChatId($target_id);
             // 删除未读状态
             MessageReadStatusModel::delByChatId($target_id);
             // 删除私聊消息
@@ -104,7 +106,7 @@ class SessionUtil extends Util
             return self::success();
         }
         // 群聊
-        DeleteMessageModel::delByTypeAndTargetId('group' , $target_id);
+        DeleteMessageForGroupModel::delByGroupId($target_id);
         GroupMessageReadStatusModel::delByGroupId($target_id);
         GroupMessageModel::delByGroupId($target_id);
         return self::success();

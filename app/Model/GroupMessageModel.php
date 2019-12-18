@@ -72,12 +72,11 @@ class GroupMessageModel extends Model
             ->leftJoin('user as u' , 'gm.user_id' , '=' , 'u.id')
             ->where($where)
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_dm.message_id = rtc_gm.id')
+                $query->select('id')
+                    ->from('delete_message_for_group')
+                    ->whereRaw('rtc_delete_message_for_group.group_message_id = rtc_gm.id')
                     ->where([
-                        ['dm.user_id' , '=' , $user_id] ,
-                        ['dm.type' , '=' , 'group'] ,
+                        ['user_id' , '=' , $user_id] ,
                     ]);
             })
             ->orderBy('gm.id' , 'desc')
@@ -101,14 +100,12 @@ class GroupMessageModel extends Model
             $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['group' , 'user'])
-            ->from('group_message as gm')
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_gm.id = rtc_dm.message_id')
+                $query->select('id')
+                    ->from('delete_message_for_group')
+                    ->whereRaw('rtc_group_message.id = rtc_delete_message_for_group.group_message_id')
                     ->where([
-                        ['dm.type' , '=' , 'group'] ,
-                        ['dm.user_id' , '=' , $user_id] ,
+                        ['user_id' , '=' , $user_id] ,
                     ]);
             })
             ->where($where)
@@ -134,14 +131,12 @@ class GroupMessageModel extends Model
             $where[] = ['id' , '>' , $limit_id];
         }
         $res = self::with(['group' , 'user'])
-            ->from('group_message as gm')
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_gm.id = rtc_dm.message_id')
+                $query->select('id')
+                    ->from('delete_message_for_group')
+                    ->whereRaw('rtc_group_message.id = rtc_delete_message_for_group.group_message_id')
                     ->where([
-                        ['dm.type' , '=' , 'group'] ,
-                        ['dm.user_id' , '=' , $user_id] ,
+                        ['user_id' , '=' , $user_id] ,
                     ]);
             })
             ->where($where)

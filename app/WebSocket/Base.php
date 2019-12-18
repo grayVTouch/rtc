@@ -59,6 +59,10 @@ class Base
         // 加载图形验证码插件
         require_once __DIR__ . '/../../plugin/captcha/vendor/autoload.php';
 
+        // 加载极验验证
+        require_once __DIR__ . '/../../plugin/gt3/lib/class.geetestlib.php';
+        require_once __DIR__ . '/../../plugin/gt3/config/config.php';
+
         return true;
     }
 

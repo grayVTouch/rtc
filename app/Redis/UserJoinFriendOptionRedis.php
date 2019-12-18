@@ -8,22 +8,21 @@
 
 namespace App\Redis;
 
-use Engine\Facade\Redis as RedisFacade;
-
 class UserJoinFriendOptionRedis extends Redis
 {
-    public static function userJoinFriendOption(string $identifier , int $user_id , string $value = null)
+    public static function userJoinFriendOptionByIdentifierAndUserIdAndJoinFriendMethodIdAndValue(string $identifier , int $user_id , int $join_friend_method_id , string $value = null)
     {
-        $name = sprintf(self::$userJoinFriendOption , $identifier , $user_id);
+        $name = sprintf(self::$userJoinFriendOption , $identifier , $user_id , $join_friend_method_id);
         if (empty($value)) {
-            return RedisFacade::string($name);
+            $res = self::string($name);
+            return json_decode($res);
         }
-        return RedisFacade::string($name , $value , config('app.cache_duration'));
+        return self::string($name , json_encode($value));
     }
 
-    public static function delUserJoinFriendOption(string $identifier , int $user_id)
+    public static function delByIdentifierAndUserId(string $identifier , int $user_id , int $join_friend_method_id)
     {
-        $name = sprintf(self::$userJoinFriendOption , $identifier , $user_id);
-        return RedisFacade::del($name);
+        $name = sprintf(self::$userJoinFriendOption , $identifier , $user_id , $join_friend_method_id);
+        return self::del($name);
     }
 }

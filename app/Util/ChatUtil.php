@@ -27,6 +27,7 @@ use App\Model\ProgramErrorLogModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\MessageRedis;
+use App\Redis\QueueRedis;
 use App\Redis\UserRedis;
 use App\WebSocket\Base;
 use App\WebSocket\Util\MessageUtil;
@@ -113,7 +114,7 @@ class ChatUtil extends Util
                 'identifier' ,
             ]));
             // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
-            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['other_id'] , $param['chat_id'] , 1);
+            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
             if ($blocked) {
                 // 接收方把发送方拉黑了
                 DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
@@ -139,6 +140,8 @@ class ChatUtil extends Util
                 // 诸如一些服务端以某用户身份推送的消息（必须该方法要求发送消息必须有发送方）
                 // 这种情况下就要求所有相关用户都能接收到消息
                 $base->push($msg->user_id , 'private_message' , $msg);
+            } else {
+                $base->send($msg->user_id , 'private_message' , $msg);
             }
             $base->push($msg->user_id , 'refresh_session');
             $base->push($msg->user_id , 'refresh_unread_count');
@@ -148,6 +151,22 @@ class ChatUtil extends Util
             DB::rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * 私聊 app 推送，异步队列执行程序
+     */
+    public static function queueTaskForPrivate($platform , $other_id , $msg)
+    {
+        $msg = convert_obj($msg);
+        // todo app 推送要额外的事件队列处理
+        AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id){
+            $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
+            $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , $msg , false);
+            if ($res['code'] != 200) {
+                ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
+            }
+        });
     }
 
     /**
@@ -162,89 +181,87 @@ class ChatUtil extends Util
         }
         $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
         SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
-        $msg->self_is_read  = MessageReadStatusData::isRead($msg->identifier , $other_id , $msg->id);
-        $msg->other_is_read = MessageReadStatusData::isRead($msg->identifier , $msg->user_id , $msg->id);;
+        $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
+        $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $msg->user_id , $msg->id);;
         PushUtil::single($msg->identifier , $other_id , 'private_message' , $msg);
         PushUtil::single($msg->identifier , $other_id , 'refresh_session');
         PushUtil::single($msg->identifier , $other_id , 'refresh_unread_count');
         PushUtil::single($msg->identifier , $other_id , 'refresh_session_unread_count');
-        // todo app 推送要额外的事件队列处理
-//        AppPushUtil::pushCheckForOther($platform , $msg->user_id , $other_id , function() use($msg , $other_id){
-//            $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
-//            $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , $msg , false);
-//            if ($res['code'] != 200) {
-//                ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
-//            }
-//        });
         // 系统内推送
-        AppPushUtil::pushCheckWithNewForFriend($msg->user_id , $other_id , function() use($msg , $other_id){
+        AppPushUtil::pushCheckWithNewForOther($msg->identifier , $msg->user_id , $other_id , function() use($msg , $other_id){
             PushUtil::single($msg->identifier , $other_id , 'new');
         });
+        // 将 app 推送添加到队列中
+        QueueRedis::push(json_encode([
+            'callback' => [self::class , 'queueTaskForPrivate'] ,
+            'param' => [
+                $platform ,
+                $other_id ,
+                $msg
+            ] ,
+        ]));
     }
 
 
     /**
      * 群聊消息发送异步任务（接收方 + 发送方其他其他客户端）
      */
-    public static function groupSendForAsyncTask(array $user_ids , $msg)
+    public static function groupSendForAsyncTask($platform , array $user_ids , string $target_user , $target_user_ids , $msg)
     {
         // 获取群成员，过滤掉自身
         $msg = convert_obj($msg);
-//        $s_time1 = microtime(true);
+        $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
+//        $s_time = microtime(true);
         foreach ($user_ids as $v)
         {
-//            $s_time = microtime(true);
             if ($v == $msg->user_id) {
-                // 跳过自身
                 continue ;
             }
+//            $s_time1 = microtime(true);
             // 消息已读未读
             SessionUtil::createOrUpdate($msg->identifier , $v , 'group' , $msg->group_id);
-            $msg->is_read = GroupMessageReadStatusData::isRead($msg->identifier , $v , $msg->id);
+            $msg->is_read = GroupMessageReadStatusData::isReadByIdentifierAndUserIdAndGroupMessageId($msg->identifier , $v , $msg->id);
             PushUtil::single($msg->identifier , $v , 'group_message' , $msg);
             PushUtil::single($msg->identifier , $v , 'refresh_session');
             PushUtil::single($msg->identifier , $v , 'refresh_unread_count');
             PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
-//            $e_time = microtime(true);
-//            var_dump("单次循环处理时间：" . bcmul($e_time - $s_time , 1 , 3));
+            // 添加到异步队列的速度正常来说应该是没有任何影响的
+            // 系统内推送
+            if ($target_user != 'designation' || in_array($v , $target_user_ids)) {
+                AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg){
+                    PushUtil::single($msg->identifier , $v , 'new');
+                });
+                // app 推送添加到异步消息队列
+                QueueRedis::push(json_encode([
+                    'callback' => [self::class , 'queueForGroup'] ,
+                    'param' => [
+                        $platform ,
+                        $v ,
+                        $msg
+                    ]
+                ]));
+            }
+//            $e_time1 = microtime(true);
+//            var_dump("单次循环花费多少时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
         }
-//        $e_time1 = microtime(true);
-//        var_dump("ws 推送 " . (count($user_ids) - 1 ). " 人耗时：" . bcmul($e_time1 - $s_time1 , 1 , 3));
+//        $e_time = microtime(true);
+//        var_dump("循环耗费多少时间：" . bcmul($e_time  - $s_time , 1 , 3));
+
     }
 
     /**
-     * app 异步推送
-     *
-     * todo 推送这个要另外做一个推送队列
+     * 群聊队列事件
      */
-    public static function appPushForAsyncTask(string $platform , array $user_ids , string $target_user , $target_user_ids , $msg)
+    public static function queueForGroup(string $platform , int $user_id , $msg)
     {
         $msg = convert_obj($msg);
-        $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
-        // 极光推送
-        $user_ids = $target_user == 'designation' ? array_intersect($target_user_ids , $user_ids) : $user_ids;
-        var_dump("app 推送人数：" . count($user_ids));
-        $s_time1 = microtime(true);
-        foreach ($user_ids as $v)
-        {
-            $s_time = microtime(true);
-            // app 推送
-            AppPushUtil::pushCheckForGroup($platform , $v , $msg->group_id , function() use($v , $msg){
-                $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
-                $res = AppPushUtil::pushForGroup($v , $message , '你收到了一条群消息' , $msg , false);
-                if ($res['code'] != 200) {
-                    ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$v}]");
-                }
-            });
-            // 系统内推送
-            AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg){
-                PushUtil::single($msg->identifier , $v , 'new');
-            });
-            $e_time = microtime(true);
-            var_dump("app 推送单次循环处理时间：" . bcmul($e_time - $s_time , 1 , 3));
-        }
-        $e_time1 = microtime(true);
-        var_dump("app 推送总耗时：" . bcmul($e_time1 - $s_time1 , 1 , 3));
+        AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
+            $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
+            $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , $msg , false);
+            if ($res['code'] != 200) {
+                ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");
+            }
+        });
     }
 
     /**
@@ -324,29 +341,19 @@ class ChatUtil extends Util
                 'data' => [
                     'callback' => [self::class , 'groupSendForAsyncTask'] ,
                     'param' => [
+                        $base->platform ,
                         $user_ids ,
+                        $param['target_user'] ,
+                        $param['target_user_ids'] ,
                         $msg ,
                     ]
                 ] ,
             ]));
-
-//            WebSocket::deliveryTask(json_encode([
-//                'type' => 'callback' ,
-//                'data' => [
-//                    'callback' => [self::class , 'appPushForAsyncTask'] ,
-//                    'param' => [
-//                        $base->platform ,
-//                        $user_ids ,
-//                        $param['target_user'] ,
-//                        $param['target_user_ids'] ,
-//                        $msg ,
-//                    ]
-//                ] ,
-//            ]));
-
             $msg->is_read = $self_is_read;
             if ($push_all) {
                 $base->push($msg->user_id , 'group_message' , $msg);
+            } else {
+                $base->send($msg->user_id , 'group_message' , $msg);
             }
             $base->push($msg->user_id , 'refresh_session');
             $base->push($msg->user_id , 'refresh_unread_count');

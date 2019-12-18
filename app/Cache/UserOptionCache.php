@@ -16,26 +16,17 @@ class UserOptionCache
 {
     public static function findByIdentifierAndUserId(string $identifier , int $user_id)
     {
-        $res = UserOptionRedis::userOption($identifier , $user_id);
-        if (!empty($res)) {
-            return json_decode($res);
+        $cache = UserOptionRedis::userOptionByIdentifierAndUserIdAndValue($identifier , $user_id);
+        if (!empty($cache)) {
+            return $cache;
         }
-        $res = UserOptionModel::findByUserId($user_id);
-        UserOptionRedis::userOption($identifier , $user_id , json_encode($res));
-        return $res;
+        $cache = UserOptionModel::findByUserId($user_id);
+        UserOptionRedis::userOptionByIdentifierAndUserIdAndValue($identifier , $user_id , $cache);
+        return $cache;
     }
 
-    public static function updateById(string $identifier , $user_id , array $data = [])
+    public static function delByIdentifierAndUserId(string $identifier , $user_id)
     {
-        UserOptionModel::updateById($user_id , $data);
-        UserOptionRedis::delUserOption($identifier , $user_id);
-    }
-
-    public static function updateByIds(string $identifier , array $user_id = [] , array $data = [])
-    {
-        foreach ($user_id as $v)
-        {
-            self::updateById($identifier , $v , $data);
-        }
+        return UserOptionRedis::delByIdentifierAndUserId($identifier , $user_id);
     }
 }

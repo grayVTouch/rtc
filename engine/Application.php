@@ -12,6 +12,7 @@ use App\Model\FriendModel;
 use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
+use App\Redis\QueueRedis;
 use function core\array_unit;
 use Core\Lib\File;
 use Core\Lib\Hash;
@@ -254,6 +255,62 @@ class Application
     }
 
     /**
+     * app 异步推送队列
+     */
+    public function consumeQueue()
+    {
+        $consume_queue_process = config('app.consume_queue_process');
+        $pids = [];
+        for ($i = 1; $i <= $consume_queue_process; ++$i)
+        {
+            $pid = pcntl_fork();
+            if ($pid < 0) {
+                throw new Exception("创建子进程失败");
+            }
+
+            if ($pid == 0) {
+                // 在每个子进程中创建 redis 连接
+                // 必须，不允许单个 redis 连接被多个进程共享
+                $this->initDatabase();
+                $this->initRedis();
+                // 子进程
+                while (true)
+                {
+                    // 消费队列
+                    $res = QueueRedis::shift();
+//                    var_dump("队列消费执行中 ... ");
+                    if (empty($res)) {
+                        // 队列已经被消费完毕
+                        // 等待 1 s 后在处理
+                        sleep(1);
+                        continue ;
+                    }
+                    $res = json_decode($res , true);
+                    /**
+                     * 数据结构如下
+                     *
+                     * [
+                     *      'callback' => [] ,
+                     *      'param' => [] ,
+                     * ]
+                     */
+                    if (empty($res)) {
+                        // 数据格式不规范
+                        continue;
+                    }
+                    // 执行队列中缓存的事件
+                    call_user_func_array($res['callback'] , $res['param']);
+                }
+                // 子进程执行完毕后必须要退出
+                exit;
+            }
+            // 父进程
+            $pids[] = $pid;
+        }
+    }
+
+
+    /**
      * 开始运行程序
      *
      * @throws Exception
@@ -266,6 +323,7 @@ class Application
         $this->initLog();
         $this->initialize();
         $this->dataPreload();
+        $this->consumeQueue();
         // 这个务必在最后执行！！
         // 因为 WebSocket 实例一旦创建成功
         // 那么实际上

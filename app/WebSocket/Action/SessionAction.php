@@ -9,12 +9,15 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\FriendData;
+use App\Data\GroupMemberData;
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
 use App\Model\MessageModel;
+use App\Model\MessageReadStatusModel;
 use App\Model\PushModel;
 use App\Model\SessionModel;
 use App\Model\UserModel;
@@ -52,7 +55,7 @@ class SessionAction extends Action
                 MessageUtil::handleMessage($recent_message , $v->user_id , $other_id);
                 // 私聊消息处理
                 $v->recent_message = $recent_message;
-                $v->unread = MessageModel::countByChatIdAndUserIdAndIsRead($v->target_id , $v->user_id , 0);
+                $v->unread = MessageReadStatusModel::unreadCountByUserIdAndChatId($v->user_id , $v->target_id);
                 $v->top = empty($v->other) ? 0 : $v->other->top;
                 $v->can_notice = empty($v->other) ? 1 : $v->other->can_notice;
                 if ($v->top == 1) {
@@ -77,7 +80,7 @@ class SessionAction extends Action
                     // 用户使用的平台
                     $v->group->name = '平台咨询';
                 }
-                $v->unread = GroupMessageReadStatusModel::countByUserIdAndGroupId($auth->user->id , $v->target_id , 0);
+                $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
                 $v->top = empty($v->group) ? 0 : $v->group->top;
                 $v->can_notice = empty($v->group) ? 1 : $v->group->can_notice;
                 if ($v->top == 1) {
@@ -91,7 +94,7 @@ class SessionAction extends Action
                 // 公告
                 $v->recent = PushModel::recentByUserIdAndType($auth->user->id , 'system');
                 // 未读消息数量
-                $v->unread = PushModel::unreadCountByUserIdAndType($auth->user->id , 'system');
+                $v->unread = PushModel::unreadCountByUserIdAndTypeAndIsRead($auth->user->id , 'system' , 0);
                 if ($v->top == 1) {
                     $top_session[] = $v;
                     continue ;
@@ -133,14 +136,15 @@ class SessionAction extends Action
             {
                 case 'private':
                     $other_id = ChatUtil::otherId($param['target_id'] , $auth->user->id);
-                    FriendModel::updateByUserIdAndFriendId($auth->user->id , $other_id , [
-                        'top' => $param['top']
-                    ]);
+                    // todo 非好友设置置顶会出现问题
+                    FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $other_id , array_unit($param , [
+                        'top'
+                    ]));
                     break;
                 case 'group':
-                    GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['target_id'] , [
-                        'top' => $param['top']
-                    ]);
+                    GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $param['target_id'] , $auth->user->id , array_unit($param , [
+                        'top'
+                    ]));
                     break;
             }
             DB::commit();
@@ -279,14 +283,14 @@ class SessionAction extends Action
         {
             case 'private':
                 $friend_id = ChatUtil::otherId($param['target_id'] , $auth->user->id);
-                FriendModel::updateByUserIdAndFriendId($auth->user->id , $friend_id , [
+                FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $friend_id , [
                     'background' => $param['background']
                 ]);
                 break;
             case 'group':
-                GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['target_id'] , [
-                    'background' => $param['background']
-                ]);
+                GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $param['target_id'] , $auth->user->id , array_unit($param , [
+                    'background'
+                ]));
                 break;
         }
         return self::success();

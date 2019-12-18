@@ -25,4 +25,10 @@ class UserOptionModel extends Model
     {
         return self::where('user_id' , $user_id)->delete();
     }
+
+    public static function updateByUserId(int $user_id , array $data = [])
+    {
+        return self::where('user_id' , $user_id)
+            ->update($data);
+    }
 }

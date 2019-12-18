@@ -9,10 +9,27 @@
 namespace App\Cache;
 
 
+use App\Model\GroupMemberModel;
+use App\Redis\GroupMemberRedis;
+
 class GroupMemberCache extends Cache
 {
     public static function findByIdentifierAndGroupIdAndUserId(string $identifier , int $group_id , int $user_id)
     {
+        $cache = GroupMemberRedis::memberByIdentifierAndGroupIdAndUserIdAndValue($identifier , $group_id , $user_id);
+        if (!empty($cache)) {
+            return $cache;
+        }
+        $cache = GroupMemberModel::findByUserIdAndGroupId($user_id , $group_id);
+        if (empty($cache)) {
+            return ;
+        }
+        GroupMemberRedis::memberByIdentifierAndGroupIdAndUserIdAndValue($identifier , $group_id , $user_id , $cache);
+        return $cache;
+    }
 
+    public static function delByIdentifierAndGroupIdAndUserId(string $identifier , int $user_id , int $group_id)
+    {
+        return GroupMemberRedis::delByIdentifierAndGroupIdAndUserId($identifier , $group_id , $user_id);
     }
 }

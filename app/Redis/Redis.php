@@ -192,10 +192,11 @@ class Redis
      *
      * @param string $identifier
      * @param int $user_id
+     * @param int $join_friend_method_id
      *
      * @var string
      */
-    protected static $userJoinFriendOption = '%s_user_join_friend_option_%s';
+    protected static $userJoinFriendOption = '%s_user_join_friend_option_%s_%s';
 
     /**
      * rtc_join_friend_method 表缓存信息
@@ -223,6 +224,8 @@ class Redis
      * @param string $identifier
      * @param int $group_id
      * @param int $user_id
+     *
+     * @var string
      */
     protected static $groupMember = '%s_group_member_%s_%s';
 
@@ -232,8 +235,21 @@ class Redis
      * @param string $identifier
      * @param int $user_id
      * @param int $friend_id
+     *
+     * @var string
      */
     protected static $friend = '%s_friend_%s_%s';
+
+    /**
+     * 黑名单 缓存
+     *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $block_user_id
+     *
+     * @var string
+     */
+    protected static $blacklist = '%s_blacklist_%s_%s';
 
 
     // 字符串类型设置

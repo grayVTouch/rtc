@@ -9,6 +9,7 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\FriendData;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
 use App\Model\FriendModel;
@@ -196,8 +197,8 @@ class FriendAction extends Action
         try {
             DB::beginTransaction();
             // 删除好友
-            FriendModel::delByUserIdAndFriendId($auth->user->id , $param['friend_id']);
-            FriendModel::delByUserIdAndFriendId($param['friend_id'] , $auth->user->id);
+            FriendData::delByIdentifierAndUserIdAndFriendId($auth->identifier , $auth->user->id , $param['friend_id']);
+            FriendData::delByIdentifierAndUserIdAndFriendId($auth->identifier , $param['friend_id'] , $auth->user->id);
             // 删除会话（删除解除好友关系的操作用户的相关会话）
             SessionUtil::delByUserIdAndTypeAndTargetId($auth->user->id , 'private' , $chat_id);
             DB::commit();
@@ -262,8 +263,8 @@ class FriendAction extends Action
         if (!in_array($param['burn'] , $burn_for_friend)) {
             return self::error('不支持的 flag 类型');
         }
-        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
-            'burn' ,
+        FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $param['friend_id'] , array_unit($param , [
+            'burn'
         ]));
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
@@ -284,8 +285,8 @@ class FriendAction extends Action
         if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
             return self::error('你们并非好友，无权限操作' , 403);
         }
-        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
-            'alias' ,
+        FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $param['friend_id'] , array_unit($param , [
+            'alias'
         ]));
         $auth->push($auth->user->id , 'refresh_friend');
         $auth->push($auth->user->id , 'refresh_session');
@@ -305,8 +306,8 @@ class FriendAction extends Action
         if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
             return self::error('你们并非好友，无权限操作' , 403);
         }
-        FriendModel::updateByUserIdAndFriendId($auth->user->id , $param['friend_id'] , array_unit($param , [
-            'can_notice' ,
+        FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $param['friend_id'] , array_unit($param , [
+            'can_notice'
         ]));
         return self::success();
     }

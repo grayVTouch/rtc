@@ -235,7 +235,8 @@ create table if not exists `rtc_blacklist` (
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   block_user_id int unsigned default 0 comment '屏蔽的用户Id: rtc_user.id' ,
   create_time datetime default current_timestamp comment '创建时间' ,
-  primary key `id` (`id`)
+  primary key `id` (`id`) ,
+  key `user_id|block_user_id` (`user_id` , `block_user_id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '黑名单列表';
 
 drop table if exists `rtc_delete_message`;
@@ -448,4 +449,25 @@ alter table `rtc_friend_group` add identifier varchar(255) default '' comment 'r
 alter table `rtc_application` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 alter table `rtc_friend` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 
+
+update `rtc_user_option` set identifier = 'nimo';
+update `rtc_user_join_friend_option` set identifier = 'nimo';
+update `rtc_group` set identifier = 'nimo';
+update `rtc_group_member` set identifier = 'nimo';
+update `rtc_message` set identifier = 'nimo';
+update `rtc_group_message` set identifier = 'nimo';
+update `rtc_message_read_status` set identifier = 'nimo';
+update `rtc_group_message_read_status` set identifier = 'nimo';
+update `rtc_blacklist` set identifier = 'nimo';
+update `rtc_session` set identifier = 'nimo';
+update `rtc_push` set identifier = 'nimo';
+update `rtc_user_token` set identifier = 'nimo';
+update `rtc_article` set identifier = 'nimo';
+update `rtc_article_type` set identifier = 'nimo';
+update `rtc_friend_group` set identifier = 'nimo';
+update `rtc_application` set identifier = 'nimo';
+update `rtc_friend` set identifier = 'nimo';
+
+
+-- 缓存方面更改了 user 和 user_option
 

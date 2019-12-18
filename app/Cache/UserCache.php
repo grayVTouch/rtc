@@ -16,19 +16,19 @@ class UserCache
 {
     public static function findByIdentifierAndId(string $identifier , int $id)
     {
-        $cache = UserRedis::user($identifier , $id);
+        $cache = UserRedis::userByIdentifierAndUserId($identifier , $id);
         if (!empty($cache)) {
             return $cache;
         }
         $cache = UserModel::findByIdWithV1($id);
-        UserRedis::user($identifier , $id , $cache);
+        UserRedis::userByIdentifierAndUserId($identifier , $id , $cache);
         return $cache;
     }
 
     public static function updateById(string $identifier , $id , array $data = [])
     {
         UserModel::updateById($id , $data);
-        UserRedis::delUser($identifier , $id);
+        UserRedis::delUserByIdentifierAndUserId($identifier , $id);
     }
 
     public static function updateByIds(string $identifier , array $ids = [] , array $data = [])
@@ -37,5 +37,10 @@ class UserCache
         {
             self::updateById($identifier , $v , $data);
         }
+    }
+
+    public static function delByIdentifierAndId(string $identifier , int $id)
+    {
+        return UserRedis::delUserByIdentifierAndUserId($identifier , $id);
     }
 }

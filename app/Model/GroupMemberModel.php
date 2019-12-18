@@ -35,6 +35,7 @@ class GroupMemberModel extends Model
                 ['group_id' , '=' , $group_id] ,
             ])
             ->first();
+        $res = convert_obj($res);
         self::single($res);
         return $res;
     }
@@ -177,6 +178,16 @@ class GroupMemberModel extends Model
     public static function getByGroupIdV1(int $group_id)
     {
         $res = self::where('group_id' , $group_id)
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
+    public static function getByGroupIdAndLimit(int $group_id , int $limit = 9)
+    {
+        $res = self::where('group_id' , $group_id)
+            ->limit($limit)
             ->get();
         $res = convert_obj($res);
         self::multiple($res);

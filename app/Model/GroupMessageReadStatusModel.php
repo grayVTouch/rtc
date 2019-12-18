@@ -123,6 +123,32 @@ class GroupMessageReadStatusModel extends Model
         return (int) $count;
     }
 
+    // 某个用户针对单个群聊会话的未读消息数量
+    public static function unreadCountByUserIdAndGroupId(int $user_id , int $group_id)
+    {
+        $count = GroupMessageModel::whereNotExists(function($query) use($user_id , $group_id){
+            $query->select('id')
+                ->from('group_message_read_status')
+                ->where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['group_id' , '=' , $group_id] ,
+                ])
+                ->whereRaw('rtc_group_message.id = rtc_group_message_read_status.group_message_id');
+        })
+            ->whereNotExists(function($query) use($user_id , $group_id){
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                        ['group_id' , '=' , $group_id] ,
+                    ])
+                    ->whereRaw('rtc_group_message.id = rtc_delete_message_for_private.message_id');
+            })
+            ->where('group_id' , $group_id)
+            ->count();
+        return (int) $count;
+    }
+
     public static function delByGroupMessageId(int $group_message_id)
     {
         return self::where('group_message_id' , $group_message_id)->delete();
@@ -136,6 +162,28 @@ class GroupMessageReadStatusModel extends Model
         ])->first();
         $res = convert_obj($res);
         self::single($res);
+        return $res;
+    }
+
+    // 获取用户未读消息（排除 阅后即焚消息 + 语音消息）
+    public static function unreadByUserIdAndGroupIdExcludeVoice(int $user_id , string $group_id)
+    {
+        $res = GroupMessageModel::whereNotExists(function($query) use($user_id , $group_id){
+            $query->select('id')
+                ->from('group_message_read_status')
+                ->whereRaw('rtc_group_message.id = rtc_group_message_read_status.group_message_id')
+                ->where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['group_id' , '=' , $group_id] ,
+                ]);
+        })
+            ->where([
+                ['group_id' , '=' , $group_id] ,
+            ])
+            ->whereNotIn('type' , ['voice'])
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
         return $res;
     }
 }

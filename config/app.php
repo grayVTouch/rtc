@@ -126,4 +126,12 @@ return [
 
     // redis 缓存过期时间，单位：s
     'cache_duration' => 8 * 3600 ,
+
+    // 设置队列消费的进程数量
+    'consume_queue_process' => 4 ,
+
+    // 极限验证
+    'enable_gt3' => true ,
+
+
 ];

@@ -11,7 +11,7 @@ namespace App\Redis;
 
 class GroupMemberRedis extends Redis
 {
-    public static function set(string $identifier , int $group_id , int $user_id , $value = null)
+    public static function memberByIdentifierAndGroupIdAndUserIdAndValue(string $identifier , int $group_id , int $user_id , $value = null)
     {
         $name = sprintf(self::$groupMember , $identifier , $group_id , $user_id);
         if (is_null($value)) {
@@ -21,8 +21,9 @@ class GroupMemberRedis extends Redis
         return self::string($name , json_encode($value));
     }
 
-    public static function destroy(string $identifier , int $group_id , int $user_id)
+    public static function delByIdentifierAndGroupIdAndUserId(string $identifier , int $group_id , int $user_id)
     {
         $name = sprintf(self::$groupMember , $identifier , $group_id , $user_id);
+        return self::del($name);
     }
 }

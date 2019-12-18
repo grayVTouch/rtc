@@ -37,6 +37,18 @@ class FriendModel extends Model
         return $res;
     }
 
+    public static function findByUserIdAndFriendIdWithV1(int $user_id , int $friend_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['friend_id' , '=' , $friend_id] ,
+            ])
+            ->first();
+        $res = convert_obj($res);
+        self::single($res);
+        return $res;
+    }
+
     /**
      * 检查是否时好友
      *

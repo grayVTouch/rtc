@@ -10,6 +10,8 @@ namespace Engine;
 
 
 use App\Model\ClearTimerLogModel;
+use App\Model\DeleteMessageForGroupModel;
+use App\Model\DeleteMessageForPrivateModel;
 use App\Model\DeleteMessageModel;
 use App\Model\FriendModel;
 use App\Model\MessageModel;
@@ -195,30 +197,30 @@ class WebSocket
             if (!empty($user)) {
                 if (empty($_conn)) {
                     // 客服下线后续处理
-                    if ($user->role == 'admin') {
-                        // 如果是客服，自动退出客服群
-                        $groups = GroupMemberModel::getByUserId($user->id);
-                        foreach ($groups as $v)
-                        {
-                            $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
-                            $group_bind_waiter = (int) $group_bind_waiter;
-                            if ($group_bind_waiter != $user_id) {
-                                // 绑定的并非当前离线客服
-                                continue ;
-                            }
-                            $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
-                            $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
-                            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
-                            $msg = GroupMessageModel::findById($group_message_id);
-                            MessageUtil::handleGroupMessage($msg);
-                            $push[] = [
-                                'identifier'    => $v->user->identifier ,
-                                'user_ids'      => $user_ids ,
-                                'type'          => 'group_message' ,
-                                'data'          => $msg
-                            ];
-                        }
-                    }
+//                    if ($user->role == 'admin') {
+//                        // 如果是客服，自动退出客服群
+//                        $groups = GroupMemberModel::getByUserId($user->id);
+//                        foreach ($groups as $v)
+//                        {
+//                            $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
+//                            $group_bind_waiter = (int) $group_bind_waiter;
+//                            if ($group_bind_waiter != $user_id) {
+//                                // 绑定的并非当前离线客服
+//                                continue ;
+//                            }
+//                            $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
+//                            $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
+//                            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
+//                            $msg = GroupMessageModel::findById($group_message_id);
+//                            MessageUtil::handleGroupMessage($msg);
+//                            $push[] = [
+//                                'identifier'    => $v->user->identifier ,
+//                                'user_ids'      => $user_ids ,
+//                                'type'          => 'group_message' ,
+//                                'data'          => $msg
+//                            ];
+//                        }
+//                    }
                     // 用户离线后自动退出会话
                     $sessions = SessionModel::getByUserId($user->id);
                     foreach ($sessions as $v)
@@ -472,73 +474,73 @@ class WebSocket
         /**
          * 客服自动退出
          */
-        Timer::tick(2 * 1000 , function(){
-            $timer_log_id = 0;
-            TimerLogUtil::logCheck(function() use(&$timer_log_id){
-                $timer_log_id = TimerLogModel::u_insertGetId('客服通话检测中...' , 'platform_advoise');
-            });
-            try {
-                DB::beginTransaction();
-                $groups = GroupModel::serviceGroup();
-                $waiter_wait_max_duration = config('app.waiter_wait_max_duration');
-                $push = [];
-                foreach ($groups as $v)
-                {
-                    if (empty($user)) {
-                        // 如果没有找到用户信息，跳过不处理
-                        continue ;
-                    }
-                    $waiter_id = UserRedis::groupBindWaiter($v->user->identifier , $v->id);
-                    if (empty($waiter_id)) {
-                        // 没有绑定任何客服
-                        continue ;
-                    }
-                    $waiter = UserModel::findById($waiter_id);
-                    // 检查最近一条消息是否发送超时
-                    $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
-                    if (!empty($last_message)) {
-                        $create_time = strtotime($last_message->create_time);
-                        $free_duration = time() - $create_time;
-                        if ($free_duration < $waiter_wait_max_duration) {
-                            // 等待时间没有超过最长客服等待时间，跳过
-                            continue ;
-                        }
-                    }
-                    UserRedis::delGroupBindWaiter($v->user->identifier , $v->id);
-                    // 群通知：客服已经断开连接！
-                    $user_ids = GroupMemberModel::getUserIdByGroupId($v->id);
-                    $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
-                    GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
-                    $msg = GroupMessageModel::findById($group_message_id);
-                    MessageUtil::handleGroupMessage($msg);
-                    $push[] = [
-                        'identifier' => $v->user->identifier ,
-                        'user_ids'    => $user_ids ,
-                        'type'       => 'group_message' ,
-                        'data'       => $msg
-                    ];
-                }
-                DB::commit();
-                foreach ($push as $v)
-                {
-                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
-                }
-                TimerLogUtil::logCheck(function() use($timer_log_id){
-                    TimerLogModel::appendById($timer_log_id , '执行成功，结束');
-                });
-            } catch(Exception $e) {
-                DB::rollBack();
-                TimerLogUtil::logCheck(function() use($timer_log_id){
-                    TimerLogModel::appendById($timer_log_id , '执行发生异常，结束');
-                });
-                if (config('app.debug')) {
-                    throw $e;
-                }
-                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
-                $log = json_encode($log);
-                ProgramErrorLogModel::u_insertGetId('客服自动退出定时器执行发生异常' , $log , 'timer_event');
-            }
-        });
+//        Timer::tick(2 * 1000 , function(){
+//            $timer_log_id = 0;
+//            TimerLogUtil::logCheck(function() use(&$timer_log_id){
+//                $timer_log_id = TimerLogModel::u_insertGetId('客服通话检测中...' , 'platform_advoise');
+//            });
+//            try {
+//                DB::beginTransaction();
+//                $groups = GroupModel::serviceGroup();
+//                $waiter_wait_max_duration = config('app.waiter_wait_max_duration');
+//                $push = [];
+//                foreach ($groups as $v)
+//                {
+//                    if (empty($user)) {
+//                        // 如果没有找到用户信息，跳过不处理
+//                        continue ;
+//                    }
+//                    $waiter_id = UserRedis::groupBindWaiter($v->user->identifier , $v->id);
+//                    if (empty($waiter_id)) {
+//                        // 没有绑定任何客服
+//                        continue ;
+//                    }
+//                    $waiter = UserModel::findById($waiter_id);
+//                    // 检查最近一条消息是否发送超时
+//                    $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
+//                    if (!empty($last_message)) {
+//                        $create_time = strtotime($last_message->create_time);
+//                        $free_duration = time() - $create_time;
+//                        if ($free_duration < $waiter_wait_max_duration) {
+//                            // 等待时间没有超过最长客服等待时间，跳过
+//                            continue ;
+//                        }
+//                    }
+//                    UserRedis::delGroupBindWaiter($v->user->identifier , $v->id);
+//                    // 群通知：客服已经断开连接！
+//                    $user_ids = GroupMemberModel::getUserIdByGroupId($v->id);
+//                    $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
+//                    GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
+//                    $msg = GroupMessageModel::findById($group_message_id);
+//                    MessageUtil::handleGroupMessage($msg);
+//                    $push[] = [
+//                        'identifier' => $v->user->identifier ,
+//                        'user_ids'    => $user_ids ,
+//                        'type'       => 'group_message' ,
+//                        'data'       => $msg
+//                    ];
+//                }
+//                DB::commit();
+//                foreach ($push as $v)
+//                {
+//                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
+//                }
+//                TimerLogUtil::logCheck(function() use($timer_log_id){
+//                    TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+//                });
+//            } catch(Exception $e) {
+//                DB::rollBack();
+//                TimerLogUtil::logCheck(function() use($timer_log_id){
+//                    TimerLogModel::appendById($timer_log_id , '执行发生异常，结束');
+//                });
+//                if (config('app.debug')) {
+//                    throw $e;
+//                }
+//                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+//                $log = json_encode($log);
+//                ProgramErrorLogModel::u_insertGetId('客服自动退出定时器执行发生异常' , $log , 'timer_event');
+//            }
+//        });
 
         /**
          * todo 清理临时群 + 临时用户（数据量大时必须更改！）
@@ -588,7 +590,7 @@ class WebSocket
                      */
                     foreach ($temp_user as $v)
                     {
-                        UserUtil::delete($v->id);
+                        UserUtil::delete($v->identifier , $v->id);
                     }
                 }
                 /**
@@ -600,7 +602,7 @@ class WebSocket
                 if (!empty($temp_group)) {
                     foreach ($temp_group as $v)
                     {
-                        GroupUtil::delete($v->id);
+                        GroupUtil::delete($v->identifier , $v->id);
                     }
                 }
                 DB::commit();
@@ -641,7 +643,7 @@ class WebSocket
                 {
                     $v->member_ids = GroupMemberModel::getUserIdByGroupId($v->id);
                     // 删除群
-                    GroupUtil::delete($v->id);
+                    GroupUtil::delete($v->identifier , $v->id);
                 }
                 DB::commit();
                 foreach ($expired_group as $v)
@@ -738,14 +740,14 @@ class WebSocket
                             $messages = MessageModel::getByChatId($chat_id);
                             foreach ($messages as $v2)
                             {
-                                $reference_count = DeleteMessageModel::countByTypeAndTargetIdAndMessageId('private' , $chat_id , $v2->id);
+                                $reference_count = DeleteMessageForPrivateModel::countByChatIdAndMessageId($chat_id , $v2->id);
                                 $reference_count++;
                                 if ($reference_count >= 2) {
                                     // 删除记录
                                     BaseMessageUtil::delete($v2->id);
                                 } else {
                                     // 屏蔽消息记录
-                                    DeleteMessageModel::u_insertGetId('private' , $v->id , $v2->id , $chat_id);
+                                    DeleteMessageForPrivateModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $chat_id);
                                 }
                             }
                         }
@@ -781,14 +783,14 @@ class WebSocket
                             $member_count = GroupMemberModel::countByGroupId($v1->group_id);
                             foreach ($group_messages as $v2)
                             {
-                                $reference_count = DeleteMessageModel::countByTypeAndTargetIdAndMessageId('group' , $v1->group_id , $v2->id);
+                                $reference_count = DeleteMessageForGroupModel::countByGroupIddAndGroupMessageId($v1->group_id , $v2->id);
                                 $reference_count++;
                                 if ($reference_count >= $member_count) {
                                     // 删除记录
                                     GroupMessageUtil::delete($v2->id);
                                 } else {
                                     // 屏蔽消息记录
-                                    DeleteMessageModel::u_insertGetId('group_id' , $v->id , $v2->id , $v1->group_id);
+                                    DeleteMessageForGroupModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $v1->group_id);
                                 }
                             }
                         }

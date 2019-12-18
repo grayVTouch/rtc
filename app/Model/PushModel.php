@@ -46,19 +46,20 @@ class PushModel extends Model
     }
 
     // 未读消息推送数量
-    public static function unreadCountByUserIdAndType(int $user_id , string $type = '' , int $is_read = 0)
+    public static function unreadCountByUserIdAndTypeAndIsRead(int $user_id , string $type = '' , int $is_read = 0)
     {
         $where = [
-            ['prs.user_id' , '' , $user_id] ,
+            ['prs.user_id' , '=' , $user_id] ,
             ['prs.is_read' , '=' , $is_read] ,
         ];
         if (!empty($type)) {
             $where[] = ['p.type' , '=' , $type];
         }
-        return (int) (self::from('push as p')
+        $count = self::from('push as p')
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where($where)
-            ->count());
+            ->count();
+        return (int) $count;
     }
 
     // 最近一条推送消息

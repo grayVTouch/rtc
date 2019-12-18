@@ -79,15 +79,13 @@ class MessageModel extends Model
             $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['user'])
-            ->from('message as m')
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_m.id = rtc_dm.message_id')
+                $query->select('id')
+                    ->from('delete_message_for_private')
                     ->where([
-                        ['dm.type' , '=' , 'private'] ,
-                        ['dm.user_id' , '=' , $user_id] ,
-                    ]);
+                        ['user_id' , '=' , $user_id] ,
+                    ])
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id');
             })
             ->where($where)
             ->orderBy('id' , 'desc')
@@ -111,14 +109,12 @@ class MessageModel extends Model
             $where[] = ['id' , '>' , $limit_id];
         }
         $res = self::with(['user'])
-            ->from('message as m')
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_m.id = rtc_dm.message_id')
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id')
                     ->where([
-                        ['dm.type' , '=' , 'private'] ,
-                        ['dm.user_id' , '=' , $user_id] ,
+                        ['user_id' , '=' , $user_id] ,
                     ]);
             })
             ->where($where)
@@ -137,14 +133,12 @@ class MessageModel extends Model
     public static function recentMessage(int $user_id , string $chat_id)
     {
         $res = self::with(['user'])
-            ->from('message as m')
             ->whereNotExists(function($query) use($user_id){
-                $query->select('dm.id')
-                    ->from('delete_message as dm')
-                    ->whereRaw('rtc_dm.message_id = rtc_m.id')
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->whereRaw('rtc_delete_message_for_private.message_id = rtc_message.id')
                     ->where([
-                        ['dm.user_id' , '=' , $user_id] ,
-                        ['dm.type' , '=' , 'private'] ,
+                        ['user_id' , '=' , $user_id] ,
                     ]);
             })
             ->where('chat_id' , $chat_id)

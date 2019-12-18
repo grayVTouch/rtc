@@ -16,20 +16,20 @@ class GroupCache extends Cache
 {
     public static function findByIdentifierAndId(string $identifier , int $id)
     {
-        $cache = GroupRedis::group($identifier , $id);
-        if (empty($cache)) {
-            $group = GroupModel::findById($id);
-            if (empty($group)) {
-                return ;
-            }
-            GroupRedis::group($identifier , $id , $group);
-            $cache = $group;
+        $cache = GroupRedis::groupByIdentifierAndGroupIdAndValue($identifier , $id);
+        if (!empty($cache)) {
+            return $cache;
         }
+        $cache = GroupModel::findById($id);
+        if (empty($cache)) {
+            return ;
+        }
+        GroupRedis::groupByIdentifierAndGroupIdAndValue($identifier , $id , $cache);
         return $cache;
     }
 
     public static function delByIdentifierAndId(string $identifier , int $id)
     {
-        return GroupRedis::delGroup($identifier , $id);
+        return GroupRedis::delByIdentifierAndGroupId($identifier , $id);
     }
 }

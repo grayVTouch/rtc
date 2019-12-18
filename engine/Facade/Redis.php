@@ -29,6 +29,8 @@ use Core\Lib\Facade;
  * @method static sAdd(string $name , $value)
  * @method static SRem(string $name , $value)
  * @method static sIsMember(string $name , $value)
+ * @method static lPop(string $name)
+ * @method static rPop(string $name)
  *
  */
 class Redis extends Facade

@@ -9,6 +9,8 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\MessageReadStatusData;
+use App\Model\DeleteMessageForPrivateModel;
 use App\Model\DeleteMessageModel;
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
@@ -98,12 +100,23 @@ class MessageAction extends Action
             return self::error($validator->message());
         }
         $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
-        MessageReadStatusModel::updateReadStatusByUserIdAndChatIdExcludeBurnAndVoice($auth->user->id , $chat_id , 1);
-        // 通知用户刷新会话列表
-        $auth->push($auth->user->id , 'refresh_session');
-        $auth->push($auth->user->id , 'refresh_unread_count');
-        $auth->push($auth->user->id , 'refresh_session_unread_count');
-        return self::success();
+        try {
+            $res = MessageReadStatusModel::unreadByUserIdAndChatIdExcludeBurnAndVoice($auth->user->id , $chat_id);
+            foreach ($res as $v)
+            {
+                if (!empty(MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $v->id))) {
+                    continue ;
+                }
+                MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $v->chat_id , $v->id , 1);
+            }
+            // 通知用户刷新会话列表
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
+            return self::success();
+        } catch(Exception $e) {
+            throw $e;
+        }
     }
 
     // 删除消息记录
@@ -128,15 +141,7 @@ class MessageAction extends Action
                     DB::rollBack();
                     return self::error('包含不存在的消息id' , 404);
                 }
-                // 检查消息是否已经被删除
-
-                $data = [
-                    'user_id'   => $auth->user->id ,
-                    'type'      => 'private' ,
-                    'message_id' => $v ,
-                    'target_id'   => $message->chat_id ,
-                ];
-                DeleteMessageModel::insert($data);
+                DeleteMessageForPrivateModel::u_insertGetId($auth->identifier , $auth->user->id , $v , $message->chat_id);
             }
             DB::commit();
             $auth->push($auth->user->id , 'refresh_session');
@@ -168,10 +173,11 @@ class MessageAction extends Action
         if (!in_array($auth->user->id , $user_ids)) {
             return self::error('你无法更改他人的消息读取状态' , 403);
         }
-        $res = MessageReadStatusModel::updateReadStatusByUserIdAndMessageId($auth->user->id , $param['message_id'] , 1);
-        if ($res <= 0) {
-            return self::error('操作失败');
+        $res = MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $param['message_id']);
+        if (!empty($res)) {
+            return self::error('操作失败！该条消息已经是已读状态');
         }
+        MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
         // 推送给该条消息的双方，将本地数据库的消息删除
         $auth->pushAll($user_ids , 'delete_private_message_from_cache' , [$param['message_id']]);
         $auth->push($auth->user->id , 'refresh_session');
@@ -197,10 +203,11 @@ class MessageAction extends Action
         if (!in_array($auth->user->id , $user_ids)) {
             return self::error('你无法更改他人的消息读取状态' , 403);
         }
-        $res = MessageReadStatusModel::updateReadStatusByUserIdAndMessageId($auth->user->id , $param['message_id'] , 1);
-        if ($res <= 0) {
-            return self::error('操作失败');
+        $res = MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $param['message_id']);
+        if (!empty($res)) {
+            return self::error('操作失败！该条消息已经是已读状态');
         }
+        MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
         $sender = ChatUtil::otherId($message->chat_id , $message->user_id);
         // 推送给该条消息的双方，将本地数据库的消息删除
         $auth->push($sender , 'readed_for_private' , [$param['message_id']]);

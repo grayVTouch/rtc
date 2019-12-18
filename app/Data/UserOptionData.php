@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use App\Cache\UserOptionCache;
+use App\Model\UserOptionModel;
 
 /**
  * Created by PhpStorm.
@@ -17,5 +18,17 @@ class UserOptionData
     {
         $res = UserOptionCache::findByIdentifierAndUserId($identifier , $user_id);
         return $res;
+    }
+
+    public static function updateByIdentifierAndUserIdAndData(string $identifier , int $user_id , array $data = [])
+    {
+        UserOptionModel::updateByUserId($user_id , $data);
+        UserOptionCache::delByIdentifierAndUserId($identifier , $user_id);
+    }
+
+    public static function delByIdentifierAndUserId(string $identifier , int $user_id)
+    {
+        UserOptionModel::delByUserId($user_id);
+        UserOptionCache::delByIdentifierAndUserId($identifier , $user_id);
     }
 }

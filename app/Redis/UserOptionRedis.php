@@ -8,22 +8,21 @@
 
 namespace App\Redis;
 
-use Engine\Facade\Redis as RedisFacade;
-
 class UserOptionRedis extends Redis
 {
-    public static function userOption(string $identifier , int $user_id , string $value = null)
+    public static function userOptionByIdentifierAndUserIdAndValue(string $identifier , int $user_id , $value = null)
     {
-        $name = sprintf(self::$user , $identifier , $user_id);
+        $name = sprintf(self::$userOption , $identifier , $user_id);
         if (empty($value)) {
-            return RedisFacade::string($name);
+            $res = self::string($name);
+            return json_decode($res);
         }
-        return RedisFacade::string($name , $value , config('app.cache_duration'));
+        return self::string($name , json_encode($value));
     }
 
-    public static function delUserOption(string $identifier , int $user_id)
+    public static function delByIdentifierAndUserId(string $identifier , int $user_id)
     {
-        $name = sprintf(self::$user , $identifier , $user_id);
-        return RedisFacade::del($name);
+        $name = sprintf(self::$userOption , $identifier , $user_id);
+        return self::del($name);
     }
 }

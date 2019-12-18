@@ -15,23 +15,9 @@ use function core\array_unit;
 
 class MessageReadStatusCache extends Cache
 {
-    public static function insertGetId(string $identifier , int $user_id , int $message_id , string $chat_id , $is_read = 1)
+    public static function isReadByIdentifierAndUserIdAndMessageId(string $identifier , int $user_id , int $message_id)
     {
-        $data = compact('identifier' , 'user_id' , 'message_id' , 'chat_id' , 'is_read');
-        $id = MessageReadStatusModel::insertGetId(array_unit($data , [
-            'identifier' ,
-            'user_id' ,
-            'message_id' ,
-            'chat_id' ,
-            'is_read'
-        ]));
-        $data['id'] = $id;
-        MessageReadStatusRedis::messageReadStatus($identifier , $user_id , $message_id , (int) $is_read);
-    }
-
-    public static function isRead(string $identifier , int $user_id , int $message_id)
-    {
-        $is_read = MessageReadStatusRedis::messageReadStatus($identifier , $user_id , $message_id);
+        $is_read = MessageReadStatusRedis::messageReadStatusByIdentifierAndUserIdAndMessageIdAndValue($identifier , $user_id , $message_id);
         if ($is_read === false) {
             $res= MessageReadStatusModel::findByUserIdAndMessageId($user_id , $message_id);
             if (empty($res)) {
@@ -39,8 +25,13 @@ class MessageReadStatusCache extends Cache
             } else {
                 $is_read = $res->is_read;
             }
-            MessageReadStatusRedis::messageReadStatus($identifier , $user_id , $message_id , $is_read);
+            MessageReadStatusRedis::messageReadStatusByIdentifierAndUserIdAndMessageIdAndValue($identifier , $user_id , $message_id , $is_read);
         }
         return (int) $is_read;
+    }
+
+    public static function delByIdentifierAndUserIdAndMessageId(string $identifier , int $user_id , int $message_id)
+    {
+        return MessageReadStatusRedis::delByIdentifierAndUserIdAndMessageId($identifier , $user_id , $message_id);
     }
 }

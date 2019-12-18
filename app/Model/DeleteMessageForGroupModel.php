@@ -23,4 +23,25 @@ class DeleteMessageForGroupModel extends Model
         ]);
     }
 
+    public static function countByGroupIddAndGroupMessageId(int $group_id , int $group_message_id)
+    {
+        $count = self::where([
+            ['group_id' , '=' , $group_id] ,
+            ['group_message_id' , '=' , $group_message_id] ,
+        ])->count();
+        return (int) $count;
+    }
+
+    public static function delByGroupId(string $group_id)
+    {
+        return self::where('group_id' , $group_id)
+            ->delete();
+    }
+
+    public static function delByGroupMessageId(int $group_message_id)
+    {
+        return self::where('group_message_id' , $group_message_id)
+            ->delete();
+    }
+
 }

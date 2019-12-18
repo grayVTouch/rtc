@@ -9,7 +9,10 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\FriendData;
 use App\Data\GroupData;
+use App\Data\GroupMemberData;
+use App\Data\UserData;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\GroupModel;
@@ -355,7 +358,7 @@ class GroupAction extends Action
             $message = '"';
             foreach ($kick_user_ids as $v)
             {
-                GroupMemberModel::delByUserIdAndGroupId($v , $group->id);
+                GroupMemberData::delByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $v);
                 $user = UserModel::findById($v);
                 $nickname = UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username);
                 $message .= $nickname . ',';
@@ -497,7 +500,7 @@ class GroupAction extends Action
             DB::beginTransaction();
             // 获取群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-            GroupUtil::delete($param['group_id']);
+            GroupUtil::delete($group->identifier , $group->id);
             DB::commit();
             $auth->pushAll($user_ids , 'refresh_group');
             $auth->pushAll($user_ids , 'refresh_group_member');
@@ -551,9 +554,18 @@ class GroupAction extends Action
         $members = GroupMemberModel::getByGroupIdV1($group->id);
         foreach ($members as $v)
         {
-            GroupMemberUtil::handle($v);
-            UserUtil::handle($v->user , $auth->user->id);
-            GroupUtil::handle($v->group , $auth->user->id);
+            $v->user = UserData::findByIdentifierAndId($v->identifier , $v->user_id);
+            if (!empty($v->user)) {
+                $friend = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $auth->user->id , $v->user_id);
+                if (!empty($friend)) {
+                    $nickname = UserUtil::getNameFromNicknameAndUsername($v->user->nickname , $v->user->username);
+                    $v->user->nickname = empty($friend) ?
+                        $nickname :
+                        (empty($friend->alias) ?
+                            $nickname :
+                            $friend->alias);
+                }
+            }
             $v->origin_alias = $v->alias;
             $v->alias = empty($v->alias) ?
                 $v->user->nickname :
@@ -591,7 +603,7 @@ class GroupAction extends Action
         if (!in_array($param['auth'] , $group_auth)) {
             return self::error('auth 字段值不在支持的范围');
         }
-        GroupModel::updateById($param['group_id'] , array_unit($param , [
+        GroupData::updateByIdentifierAndIdAndData($auth->identifier , $param['group_id'] , array_unit($param , [
             'auth'
         ]));
         return self::success('操作成功');
@@ -638,8 +650,8 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('群不存在，禁止操作' , 404);
         }
-        GroupModel::updateById($group->id , [
-            'name' => $param['name'] ,
+        GroupData::updateByIdentifierAndIdAndData($auth->identifier , $group->id , [
+            'name' => $param['name']
         ]);
         // 获取用户
         $user_ids = GroupMemberModel::getUserIdByGroupId($group->id);
@@ -673,9 +685,9 @@ class GroupAction extends Action
         if (!GroupMemberModel::exist($auth->user->id , $param['group_id'])) {
             return self::error('您不再该群内，禁止操作' , 403);
         }
-        GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['group_id'] , [
-            'alias' => $param['alias']
-        ]);
+        GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $group->id , $auth->user->id , array_unit($param , [
+            'alias'
+        ]));
         return self::success();
     }
 
@@ -699,9 +711,9 @@ class GroupAction extends Action
         if (!in_array($param['can_notice'] , $bool_for_int)) {
             return self::error('不支持的 can_notice 值，当前受支持的值类型有' . implode(' , ' , $bool_for_int));
         }
-        GroupMemberModel::updateByUserIdAndGroupId($auth->user->id , $param['group_id'] , [
-            'can_notice' => $param['can_notice']
-        ]);
+        GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $group->id , $auth->user->id , array_unit($param , [
+            'can_notice'
+        ]));
         // 刷新群会话
         $auth->push($auth->user->id , 'refresh_session');
         return self::success();
@@ -723,9 +735,8 @@ class GroupAction extends Action
         if ($group->user_id != $auth->user->id) {
             return self::error('您不是群主' , 403);
         }
-        // 修改群公告
-        GroupModel::updateById($param['group_id'] , [
-            'announcement' => $param['announcement'] ,
+        GroupData::updateByIdentifierAndIdAndData($auth->identifier , $group->id , [
+            'announcement' => $param['announcement']
         ]);
         $message = sprintf("@所有人\n%s" , $param['announcement']);
         // 发送群消息通知
@@ -779,9 +790,9 @@ class GroupAction extends Action
             DB::beginTransaction();
             foreach ($user_ids as $v)
             {
-                GroupMemberModel::updateByUserIdAndGroupId($v , $group->id , [
-                    'banned' => $param['banned']
-                ]);
+                GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $group->id , $v , array_unit($param , [
+                    'banned'
+                ]));
             }
             DB::commit();
             return self::success();
@@ -812,7 +823,7 @@ class GroupAction extends Action
         if ($group->user_id != $auth->user->id) {
             return self::error('您不是群主' , 403);
         }
-        GroupModel::updateById($group->id , [
+        GroupData::updateByIdentifierAndIdAndData($auth->identifier , $group->id , [
             'banned' => $param['banned']
         ]);
         return self::success();

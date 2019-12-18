@@ -8,7 +8,9 @@
 
 namespace App\WebSocket\Util;
 
+use App\Data\GroupMessageReadStatusData;
 use App\Data\MessageReadStatusData;
+use App\Model\DeleteMessageForPrivateModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
 use App\Model\GroupMessageReadStatusModel;
@@ -78,7 +80,7 @@ class MessageUtil extends Util
         }
 
         if (!empty($user_id)) {
-            $group_message->is_read = GroupMessageReadStatusModel::isRead($user_id , $group_message->id);
+            $group_message->is_read = GroupMessageReadStatusData::isReadByIdentifierAndUserIdAndGroupMessageId($group_message->identifier , $user_id , $group_message->id);
         }
     }
 
@@ -96,8 +98,8 @@ class MessageUtil extends Util
             return ;
         }
         $msg->session_id = ChatUtil::sessionId('private' , $msg->chat_id);
-        $msg->self_is_read = MessageReadStatusData ::isRead($msg->identifier , $user_id , $msg->id);
-        $msg->other_is_read = MessageReadStatusData::isRead($msg->identifier , $other_id , $msg->id);
+        $msg->self_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $user_id , $msg->id);
+        $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
         if (isset($msg->user)) {
             TopUserUtil::handle($msg->user);
         }
@@ -133,6 +135,7 @@ class MessageUtil extends Util
     {
         MessageModel::delByIds($id_list);
         MessageReadStatusModel::delByMessageIds($id_list);
+        DeleteMessageForPrivateModel::delByMessageIds($id_list);
     }
 
 }

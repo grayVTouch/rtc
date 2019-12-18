@@ -16,14 +16,6 @@ class MessageReadStatusModel extends Model
     protected $table = 'message_read_status';
     public $timestamps = false;
 
-    // 初始化消息
-    public static function initByMessageId(string $identifier , int $message_id , string $chat_id , int $sender , int $receiver)
-    {
-
-        self::u_insertGetId($identifier , $sender , $chat_id , $message_id , 1);
-        self::u_insertGetId($identifier , $receiver , $chat_id ,  $message_id , 0);
-    }
-
     public static function u_insertGetId(string $identifier , int $user_id , string $chat_id , int $message_id , int $is_read)
     {
         return self::insertGetId([
@@ -33,20 +25,6 @@ class MessageReadStatusModel extends Model
             'message_id' => $message_id ,
             'is_read' => $is_read
         ]);
-    }
-
-    // 批量更新：更新状态
-    public static function updateReadStatus(int $user_id , string $chat_id , int $is_read)
-    {
-        return DB::table('message_read_status as mrs')
-            ->leftJoin('message as m' , 'mrs.message_id' , '=' , 'm.id')
-            ->where([
-                ['mrs.user_id' , '=' , $user_id] ,
-                ['m.chat_id' , '=' , $chat_id] ,
-            ])
-            ->update([
-                'is_read' => $is_read
-            ]);
     }
 
     /**
@@ -151,28 +129,28 @@ class MessageReadStatusModel extends Model
         return 0;
     }
 
-    public static function isRead(int $user_id , int $message_id)
+    // 某个私聊会话针对某个用户的未读消息数量
+    public static function unreadCountByUserIdAndChatId(int $user_id , string $chat_id)
     {
-        return (int) (self::where([
-                ['user_id' , '=' , $user_id] ,
-                ['message_id' , '=' , $message_id] ,
-            ])
-            ->value('is_read'));
-    }
-
-    // 已读/未读消息数量
-    public static function countByUserIdAndIsRead(int $user_id , int $is_read)
-    {
-        $count = self::whereNotExists(function($query){
+        $count = MessageModel::whereNotExists(function($query) use($user_id , $chat_id){
                 $query->select('id')
-                    ->from('delete_message')
-                    ->where('type' , 'private')
-                    ->whereRaw('rtc_message_read_status.message_id = rtc_delete_message.message_id');
+                    ->from('message_read_status')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                        ['chat_id' , '=' , $chat_id] ,
+                    ])
+                    ->whereRaw('rtc_message.id = rtc_message_read_status.message_id');
             })
-            ->where([
-                ['user_id' , '=' , $user_id] ,
-                ['is_read' , '=' , $is_read] ,
-            ])
+            ->whereNotExists(function($query) use($user_id , $chat_id){
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                        ['chat_id' , '=' , $chat_id] ,
+                    ])
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id');
+            })
+            ->where('chat_id' , $chat_id)
             ->count();
         return (int) $count;
     }
@@ -207,4 +185,36 @@ class MessageReadStatusModel extends Model
         self::single($res);
         return $res;
     }
+
+    public static function delByUserIdAndMessageId(int $user_id , int $message_id)
+    {
+        return self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['message_id' , '=' , $message_id] ,
+        ])->delete();
+    }
+
+    // 获取用户未读消息（排除 阅后即焚消息 + 语音消息）
+    public static function unreadByUserIdAndChatIdExcludeBurnAndVoice(int $user_id , string $chat_id)
+    {
+        $res = MessageModel::whereNotExists(function($query) use($user_id , $chat_id){
+                $query->select('id')
+                    ->from('message_read_status')
+                    ->whereRaw('rtc_message.id = rtc_message_read_status.message_id')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                        ['chat_id' , '=' , $chat_id] ,
+                    ]);
+            })
+            ->where([
+                ['chat_id' , '=' , $chat_id] ,
+                ['flag' , '=' , 'normal'] ,
+            ])
+            ->whereNotIn('type' , ['voice'])
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
 }

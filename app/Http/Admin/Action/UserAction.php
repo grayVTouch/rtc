@@ -32,7 +32,7 @@ class UserAction extends Action
         }
         try {
             DB::beginTransaction();
-            UserUtil::delete($user->id);
+            UserUtil::delete($user->identifier , $user->id);
             DB::commit();
             return self::success();
         } catch (Exception $e) {

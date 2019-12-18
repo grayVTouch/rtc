@@ -9,6 +9,9 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\UserData;
+use App\Data\UserJoinFriendOptionData;
+use App\Data\UserOptionData;
 use App\Lib\Push\AppPush;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
@@ -78,7 +81,7 @@ class UserAction extends Action
         $param['birthday'] = $param['birthday'] === '' ? $auth->user->birthday : $param['birthday'];
         $param['nickname'] = $param['nickname'] === '' ? $auth->user->nickname : $param['nickname'];
         $param['signature'] = $param['signature'] === '' ? $auth->user->signature : $param['signature'];
-        UserModel::updateById($auth->user->id , array_unit($param , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'avatar' ,
             'sex' ,
             'birthday' ,
@@ -152,7 +155,7 @@ class UserAction extends Action
         $param['friend_auth']           = $param['friend_auth'] === '' ? $user_option->friend_auth : $param['friend_auth'];
         $param['clear_timer_for_private']           = $param['clear_timer_for_private'] === '' ? $user_option->clear_timer_for_private : $param['clear_timer_for_private'];
         $param['clear_timer_for_group']           = $param['clear_timer_for_group'] === '' ? $user_option->clear_timer_for_group : $param['clear_timer_for_group'];
-        UserOptionModel::updateById($user_option->id , array_unit($param , [
+        UserOptionData::updateByIdentifierAndUserIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'private_notification' ,
             'group_notification' ,
             'write_status' ,
@@ -287,7 +290,7 @@ class UserAction extends Action
         }
         try {
             DB::begintransaction();
-            UserModel::updateById($auth->user->id , array_unit($param , [
+            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
                 'area_code' ,
                 'phone' ,
             ]));
@@ -386,7 +389,10 @@ class UserAction extends Action
         if (!in_array($param['enable'] , $bool_for_int)) {
             return self::error('不支持的 enable 值，当前受支持的值有 ' . implode(',' , $bool_for_int) , 403);
         }
-        UserJoinFriendOptionModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
+//        UserJoinFriendOptionModel::updateByUserIdAndJoinFriendMethodIdAndEnable($auth->user->id , $param['join_friend_method_id'] , $param['enable']);
+        UserJoinFriendOptionData::updateByIdentifierAndUserIdAndJoinFriendMethodIdAndData($auth->identifier , $auth->user->id , $param['join_friend_method_id'] , array_unit($param , [
+            'enable' ,
+        ]));
         return self::success();
     }
 
@@ -407,7 +413,7 @@ class UserAction extends Action
             return self::error('两次输入的密码不一致');
         }
         $destroy_password = Hash::make($param['destroy_password']);
-        UserModel::updateById($auth->user->id , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'destroy_password' => $destroy_password ,
             'is_init_destroy_password' => 1 ,
         ]);
@@ -431,7 +437,7 @@ class UserAction extends Action
             return self::error('两次输入的密码不一致');
         }
         $password = Hash::make($param['password']);
-        UserModel::updateById($auth->user->id , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'password' => $password ,
             'is_init_password' => 1 ,
         ]);
@@ -460,7 +466,7 @@ class UserAction extends Action
             return self::error('两次输入的销毁密码不一致');
         }
         $destroy_password = Hash::make($param['destroy_password']);
-        UserModel::updateById($auth->user->id , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'destroy_password' => $destroy_password ,
         ]);
         return self::success();
@@ -487,7 +493,7 @@ class UserAction extends Action
             return self::error('两次输入的登录密码不一致');
         }
         $password = Hash::make($param['password']);
-        UserModel::updateById($auth->user->id , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'password' => $password ,
         ]);
         return self::success();
@@ -505,7 +511,7 @@ class UserAction extends Action
         if (!in_array($param['enable_destroy_password'] , $bool_for_int)) {
             return self::error('enable_destroy_password 的值超出受支持的范围，当前支持的值有：' . implode(',' , $bool_for_int));
         }
-        UserModel::updateById($auth->user->id , array_unit($param , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'enable_destroy_password'
         ]));
         return self::success();
@@ -529,7 +535,7 @@ class UserAction extends Action
                 }
             }
         }
-        UserUtil::delete($auth->user->id);
+        UserUtil::delete($auth->identifier , $auth->user->id);
         return self::success();
     }
 
@@ -554,7 +560,7 @@ class UserAction extends Action
         if (strlen($param['key']) != 16) {
             return self::error('key 的长度强制要求为 16 位单字节字符');
         }
-        UserModel::updateById($auth->user->id , [
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'aes_key' => $param['key']
         ]);
         return self::success();

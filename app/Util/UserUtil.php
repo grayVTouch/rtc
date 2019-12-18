@@ -9,6 +9,12 @@
 namespace App\Util;
 
 
+use App\Data\BlacklistData;
+use App\Data\FriendData;
+use App\Data\GroupMemberData;
+use App\Data\UserData;
+use App\Data\UserJoinFriendOptionData;
+use App\Data\UserOptionData;
 use App\Model\ApplicationModel;
 use App\Model\BlacklistModel;
 use App\Model\FriendModel;
@@ -43,9 +49,10 @@ class UserUtil extends Util
         $user_recent_online_timestamp = UserRedis::userRecentOnlineTimestamp($user->identifier , $user->id);
         $user->user_recent_online_timestamp = empty($user_recent_online_timestamp) ? null : $user_recent_online_timestamp;
         if (!empty($relation_user_id)) {
-            $friend = FriendModel::findByUserIdAndFriendId($relation_user_id , $user->id);
+            $friend = FriendData::findByIdentifierAndUserIdAndFriendId($user->identifier , $relation_user_id , $user->id);
             // 黑名单
-            $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id) ? 1 : 0;
+//            $user->blocked = BlacklistData::blockedByIdentifierAndUserIdAndBlockUserId($user->identifier , $relation_user_id, $user->id);
+            $user->blocked = BlacklistModel::blocked($relation_user_id, $user->id);
             $user->is_friend = empty($friend) ? 0 : 1;
             // 保存用户自身设置的昵称
             $user->origin_nickname = $user->nickname;
@@ -130,7 +137,7 @@ class UserUtil extends Util
     }
 
     // 删除用户
-    public static function delete(int $user_id)
+    public static function delete(string $identifier , int $user_id)
     {
         $friend_ids = FriendModel::getFriendIdByUserId($user_id);
         foreach ($friend_ids as $v)
@@ -150,8 +157,8 @@ class UserUtil extends Util
             BlacklistModel::unblockUser($user_id , $v);
 
             // 删除好友关系
-            FriendModel::delByUserIdAndFriendId($user_id , $v);
-            FriendModel::delByUserIdAndFriendId($v , $user_id);
+            FriendData::delByIdentifierAndUserIdAndFriendId($identifier , $user_id , $v);
+            FriendData::delByIdentifierAndUserIdAndFriendId($identifier , $v , $user_id);
 
             // 删除验证消息（无法全面删除）
             ApplicationModel::delByUserId($user_id);
@@ -164,7 +171,7 @@ class UserUtil extends Util
 
             if ($v->group->user_id == $user_id) {
                 // 删除用户创建的群
-                GroupUtil::delete($v->group_id);
+                GroupUtil::delete($v->identifier , $v->group_id);
                 continue ;
             }
             // 删除用户发布的群消息
@@ -174,7 +181,7 @@ class UserUtil extends Util
                 GroupMessageUtil::delete($v2->id);
             }
             // 删除用户加入的群
-            GroupMemberModel::delByUserIdAndGroupId($user_id , $v->group_id);
+            GroupMemberData::delByIdentifierAndGroupIdAndUserId($identifier , $v->group_id , $user_id);
         }
         // 删除相关通知会话
         $push_type_for_push = config('business.push_type_for_push');
@@ -185,11 +192,15 @@ class UserUtil extends Util
         // 删除推送消息
         PushReadStatusModel::delByUserId($user_id);
         // 删除用户选项
-        UserOptionModel::delByUserId($user_id);
+        UserOptionData::delByIdentifierAndUserId($identifier , $user_id);
         // 删除用户添加方式
-        UserJoinFriendOptionModel::delByUserId($user_id);
+        $user_join_friend_option = UserJoinFriendOptionData::getByUserId($user_id);
+        foreach ($user_join_friend_option as $v)
+        {
+            UserJoinFriendOptionData::delByIdentifierAndUserIdAndJoinFriendMethodId($v->identifier , $v->user_id , $v->join_friend_method_id);
+        }
         // 删除用户
-        UserModel::delById($user_id);
+        UserData::delByIdentifierAndId($identifier , $user_id);
         // 用户下线
         WebSocket::clearRedis($user_id);
     }

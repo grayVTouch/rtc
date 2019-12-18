@@ -8,6 +8,8 @@
 
 namespace App\WebSocket\Action;
 
+use App\Data\GroupMessageReadStatusData;
+use App\Model\DeleteMessageForGroupModel;
 use App\Model\DeleteMessageModel;
 use App\Model\FriendModel;
 use App\Model\GroupModel;
@@ -88,12 +90,23 @@ class GroupMessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        GroupMessageReadStatusModel::updateStatusByUserIdAndGroupIdExcludeVoice($auth->user->id , $param['group_id'] , 1);
-        // 通知用户刷新会话列表
-        $auth->push($auth->user->id , 'refresh_session');
-        $auth->push($auth->user->id , 'refresh_unread_count');
-        $auth->push($auth->user->id , 'refresh_session_unread_count');
-        return self::success();
+        try {
+            $res = GroupMessageReadStatusModel::unreadByUserIdAndGroupIdExcludeVoice($auth->user->id , $param['group_id']);
+            foreach ($res as $v)
+            {
+                if (!empty(GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $v->id))) {
+                    continue ;
+                }
+                GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $v->chat_id , $v->id , 1);
+            }
+            // 通知用户刷新会话列表
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
+            return self::success();
+        } catch(Exception $e) {
+            throw $e;
+        }
     }
 
     // 设置单条消息为已读
@@ -112,10 +125,11 @@ class GroupMessageAction extends Action
         if ($message->user_id != $auth->user->id) {
             return self::error('您无法更改他人得消息读取状态' , 403);
         }
-        $res = GroupMessageReadStatusModel::setIsReadByUserIdAndGroupMessageId($auth->user->id , $param['group_message_id'] , 1);
-        if ($res <= 0) {
-            return self::error('操作失败');
+        $res = GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $message->id);
+        if (!empty($res)) {
+            return self::error('操作失败！该条消息已经是已读状态');
         }
+        GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->group_id , $message->id , 1);
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
         $auth->push($auth->user->id , 'refresh_session_unread_count');
@@ -144,13 +158,7 @@ class GroupMessageAction extends Action
                     DB::rollBack();
                     return self::error('包含不存在的消息' , 404);
                 }
-                $data = [
-                    'user_id'   => $auth->user->id ,
-                    'type'      => 'group' ,
-                    'message_id' => $v ,
-                    'target_id' => $group_message->group_id ,
-                ];
-                DeleteMessageModel::insert($data);
+                DeleteMessageForGroupModel::u_insertGetId($auth->identifier , $auth->user->id , $v , $group_message->group_id);
             }
             DB::commit();
             $auth->push($auth->user->id , 'refresh_session');

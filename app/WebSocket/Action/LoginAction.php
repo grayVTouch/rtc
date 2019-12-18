@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Action;
 
+use App\Data\UserData;
 use App\Lib\SMS\Zz253;
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
@@ -29,6 +30,7 @@ use Core\Lib\Validator;
 use App\WebSocket\Base;
 use function core\random;
 use Exception;
+use GeetestLib;
 use Illuminate\Support\Facades\DB;
 
 use App\Util\UserUtil as BaseUserUtil;
@@ -179,15 +181,46 @@ class LoginAction extends Action
             'sms_code'    => 'required' ,
             'verify_code'    => 'required' ,
             'verify_code_key'    => 'required' ,
+
+            // 极限验证
+            'geetest_challenge'    => 'required' ,
+            'geetest_validate'    => 'required' ,
+            'geetest_seccode'    => 'required' ,
+            'user_id_for_gt'    => 'required' ,
+            'ip_for_gt'    => 'required' ,
+            'gt_server_status'    => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
         // 检查图形验证码是否正确
-        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-        if ($res['code'] != 200) {
-            return self::error($res['data']);
+//        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+//        if ($res['code'] != 200) {
+//            return self::error($res['data']);
+//        }
+
+        /**
+         * ***********************************
+         * 极限验证
+         * ***********************************
+         */
+        $gt = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
+        $gt_check_data = array(
+            "user_id" => $param['user_id_for_gt'], # 网站用户id
+            "client_type" => "web", #web:电脑上的浏览器；h5:手机上的浏览器，包括移动应用内完全内置的web_view；native：通过原生SDK植入APP应用的方式
+            "ip_address" => $param['ip_for_gt'] # 请在此处传输用户请求验证时所携带的IP
+        );
+        if ($param['gt_server_status'] == 1) {   //服务器正常
+            $res = $gt->success_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'], $gt_check_data);
+            if ($res) {
+                return self::error('图形验证失败' , 900);
+            }
+        } else {  //服务器宕机,走failback模式
+            if ($gt->fail_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'])) {
+                return self::error('图形验证失败', 900);
+            }
         }
+
         $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
         if (empty($user)) {
             return self::error('手机号未注册');
@@ -205,6 +238,8 @@ class LoginAction extends Action
                 return self::error('短信验证码不正确');
             }
         }
+
+        // 新增验证码
         // 登录成功
         $param['identifier'] = $base->identifier;
         $param['user_id'] = $user->id;
@@ -719,9 +754,44 @@ class LoginAction extends Action
             return self::error('账号不存在');
         }
         $password = Hash::make($param['password']);
-        UserModel::updateById($user->id , [
+        UserData::updateByIdentifierAndIdAndData($base->identifier , $user->id , [
             'password' => $password
         ]);
         return self::success();
     }
+
+    public static function registerValidateSession(Base $base , array $param)
+    {
+        // 生成一个网站用户id
+        $user_id_for_gt = random(12 , 'mixed' , true);
+        $client_ip = '127.0.0.1';
+        $GtSdk = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
+        $data = [
+            // 网站用户id
+            "user_id"       => $user_id_for_gt ,
+            // web:电脑上的浏览器；h5:手机上的浏览器，包括移动应用内完全内置的web_view；native：通过原生SDK植入APP应用的方式
+            "client_type"   => "web" ,
+            // 请在此处传输用户请求验证时所携带的IP
+            "ip_address"    => $client_ip
+        ];
+        $status = $GtSdk->pre_process($data, 1);
+        $res = $GtSdk->get_response();
+        print_r($res);
+        $data = [
+            // 用户id 用于二次认证的时候确认是同一个用户用
+            'user_id_for_gt' => $user_id_for_gt ,
+            'ip_for_gt' => '127.0.0.1' ,
+            'gt_server_status' => $status ,
+
+            /**
+             * 以下参数是第三方极限验证提供的相应参数
+             */
+            'gt' => $res['gt'] ,
+            'challenge' => $res['challenge'] ,
+            'new_captcha' => $res['new_captcha'] ,
+            'success' => $res['success'] ,
+        ];
+        return self::success($data);
+    }
+
 }

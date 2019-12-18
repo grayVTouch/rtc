@@ -9,6 +9,8 @@
 namespace App\WebSocket;
 
 use App\WebSocket\Action\LoginAction;
+use function core\random;
+use GeetestLib;
 
 class Login extends Base
 {
@@ -55,6 +57,14 @@ class Login extends Base
         $param['sms_code'] = $param['sms_code'] ?? '';
         $param['verify_code'] = $param['verify_code'] ?? '';
         $param['verify_code_key'] = $param['verify_code_key'] ?? '';
+
+        $param['geetest_challenge'] = $param['geetest_challenge'] ?? '';
+        $param['geetest_validate'] = $param['geetest_validate'] ?? '';
+        $param['geetest_seccode'] = $param['geetest_seccode'] ?? '';
+        $param['user_id_for_gt'] = $param['user_id_for_gt'] ?? '';
+        $param['ip_for_gt'] = $param['ip_for_gt'] ?? '';
+        $param['gt_server_status'] = $param['gt_server_status'] ?? '';
+
         $res = LoginAction::loginUsePhone($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -208,5 +218,26 @@ class Login extends Base
             return $this->error($res['data'] , $res['code']);
         }
         return $this->success($res['data']);
+    }
+
+    // 注册极限验证会话（第一次）
+    public function registerValidateSession(array $param)
+    {
+        $res = LoginAction::registerValidateSession($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    public function testTwo()
+    {
+
+
+    }
+
+    public function testHttp()
+    {
+        print_r($_SERVER);
     }
 }

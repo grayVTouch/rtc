@@ -10,6 +10,7 @@ namespace App\Data;
 
 
 use App\Cache\GroupCache;
+use App\Model\GroupModel;
 
 class GroupData extends Data
 {
@@ -21,5 +22,17 @@ class GroupData extends Data
         }
         $res->user = UserData::findByIdentifierAndId($identifier , $res->user_id);
         return $res;
+    }
+
+    public static function updateByIdentifierAndIdAndData(string $identifier , int $group_id , array $data)
+    {
+        GroupModel::updateById($group_id , $data);
+        GroupCache::delByIdentifierAndId($identifier , $group_id);
+    }
+
+    public static function delByIdentifierAndId(string $identifier , int $id)
+    {
+        GroupModel::delById($id);
+        GroupCache::delByIdentifierAndId($identifier , $id);
     }
 }

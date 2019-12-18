@@ -11,9 +11,5 @@ namespace App\Util;
 
 class UnreadUtil extends Util
 {
-    // 刷新会话列表
-    public static function refreshUnread()
-    {
 
-    }
 }

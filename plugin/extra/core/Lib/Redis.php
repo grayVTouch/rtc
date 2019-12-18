@@ -164,4 +164,16 @@ class Redis
         return $this->native('sismember' , $key , $value);
     }
 
+    public function lPop(string $name)
+    {
+        $key = $this->key($name);
+        return $this->native('lPop' , $key);
+    }
+
+    public function rPop(string $name)
+    {
+        $key = $this->key($name);
+        return $this->native('rPop' , $key);
+    }
+
 }

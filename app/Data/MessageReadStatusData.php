@@ -10,16 +10,25 @@ namespace App\Data;
 
 
 use App\Cache\MessageReadStatusCache;
+use App\Model\MessageReadStatusModel;
 
 class MessageReadStatusData extends Data
 {
-    public static function isRead(string $identifier , int $user_id , int $message_id)
+    public static function isReadByIdentifierAndUserIdAndMessageId(string $identifier , int $user_id , int $message_id)
     {
-        return MessageReadStatusCache::isRead($identifier , $user_id , $message_id);
+        return MessageReadStatusCache::isReadByIdentifierAndUserIdAndMessageId($identifier , $user_id , $message_id);
     }
 
-    public static function insertGetId(string $identifier , int $user_id , int $message_id , string $chat_id , $is_read = 1)
+    public static function delByIdentifierAndUserIdAndMessageId(string $identifier , int $user_id , int $message_id)
     {
-        return MessageReadStatusCache::insertGetId($identifier , $user_id , $message_id , $chat_id , $is_read);
+        MessageReadStatusModel::delByUserIdAndMessageId($user_id , $message_id);
+        MessageReadStatusCache::delByIdentifierAndUserIdAndMessageId($identifier , $user_id , $message_id);
+    }
+
+    public static function insertGetId(string $identifier , int $user_id , string $chat_id , int $message_id , int $is_read)
+    {
+        $id = MessageReadStatusModel::u_insertGetId($identifier , $user_id , $chat_id , $message_id , $is_read);
+        MessageReadStatusCache::delByIdentifierAndUserIdAndMessageId($identifier , $user_id , $message_id);
+        return $id;
     }
 }

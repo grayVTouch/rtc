@@ -227,7 +227,7 @@ class UserRedis extends Redis
     }
 
 
-    public static function user(string $identifier , int $user_id , string $value = null)
+    public static function userByIdentifierAndUserId(string $identifier , int $user_id , $value = null)
     {
         $name = sprintf(self::$user , $identifier , $user_id);
         if (empty($value)) {
@@ -237,7 +237,7 @@ class UserRedis extends Redis
         return self::string($name , json_encode($value));
     }
 
-    public static function delUser(string $identifier , int $user_id)
+    public static function delUserByIdentifierAndUserId(string $identifier , int $user_id)
     {
         $name = sprintf(self::$user , $identifier , $user_id);
         return RedisFacade::del($name);
