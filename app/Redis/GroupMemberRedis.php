@@ -23,10 +23,6 @@ class GroupMemberRedis extends Redis
 
     public static function delByIdentifierAndGroupIdAndUserId(string $identifier , int $group_id , int $user_id)
     {
-        var_dump(self::$groupMember);
-        var_dump($identifier);
-        var_dump($group_id);
-        var_dump($user_id);
         $name = sprintf(self::$groupMember , $identifier , $group_id , $user_id);
         return self::del($name);
     }

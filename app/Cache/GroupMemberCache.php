@@ -28,7 +28,7 @@ class GroupMemberCache extends Cache
         return $cache;
     }
 
-    public static function delByIdentifierAndGroupIdAndUserId(string $identifier , int $user_id , int $group_id)
+    public static function delByIdentifierAndGroupIdAndUserId(string $identifier , int $group_id , int $user_id)
     {
         return GroupMemberRedis::delByIdentifierAndGroupIdAndUserId($identifier , $group_id , $user_id);
     }
