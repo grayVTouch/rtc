@@ -369,7 +369,7 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
             $e_time = microtime(true);
-            var_dump("群聊消息发送耗费时间：" . bcmul($e_time , $s_time , 1 , 3));
+            var_dump("群聊消息发送耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
