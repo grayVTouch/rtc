@@ -229,6 +229,7 @@ class Login extends Base
         }
         return $this->success($res['data']);
     }
+    
 
     public function testTwo()
     {

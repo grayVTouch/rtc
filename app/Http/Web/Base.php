@@ -41,6 +41,9 @@ class Base
             $this->error('identifier 不正确！！请先创建项目！' , 1000);
             return false;
         }
+        // 加载极验验证
+        require_once __DIR__ . '/../../../plugin/gt3/lib/class.geetestlib.php';
+        require_once __DIR__ . '/../../../plugin/gt3/config/config.php';
         return true;
     }
 

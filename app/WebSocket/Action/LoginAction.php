@@ -776,7 +776,6 @@ class LoginAction extends Action
         ];
         $status = $GtSdk->pre_process($data, 1);
         $res = $GtSdk->get_response();
-        print_r($res);
         $data = [
             // 用户id 用于二次认证的时候确认是同一个用户用
             'user_id_for_gt' => $user_id_for_gt ,
@@ -794,4 +793,8 @@ class LoginAction extends Action
         return self::success($data);
     }
 
+    public static function validateSession(Base $base , array $param)
+    {
+
+    }
 }
