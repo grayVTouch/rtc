@@ -64,6 +64,7 @@ class ChatUtil extends Util
      */
     public static function send(Base $base , array $param , bool $push_all = false)
     {
+        $s_time = microtime(true);
         $validator = Validator::make($param , [
             'user_id' => 'required' ,
             'other_id' => 'required' ,
@@ -123,6 +124,7 @@ class ChatUtil extends Util
             DB::commit();
             $msg = MessageModel::findById($id);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
+            $s_time1 = microtime(true);
             /**
              * 投递到异步任务
              */
@@ -136,6 +138,8 @@ class ChatUtil extends Util
                     ] ,
                 ]
             ]));
+            $e_time1 = microtime(true);
+            var_dump("投递异步任务花费时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
             if ($push_all) {
                 // 诸如一些服务端以某用户身份推送的消息（必须该方法要求发送消息必须有发送方）
                 // 这种情况下就要求所有相关用户都能接收到消息
@@ -146,6 +150,8 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_session');
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
+            $e_time = microtime(true);
+            var_dump("私聊消息发送耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
