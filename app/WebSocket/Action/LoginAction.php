@@ -183,43 +183,43 @@ class LoginAction extends Action
             'verify_code_key'    => 'required' ,
 
             // 极限验证
-            'geetest_challenge'    => 'required' ,
-            'geetest_validate'    => 'required' ,
-            'geetest_seccode'    => 'required' ,
-            'user_id_for_gt'    => 'required' ,
-            'ip_for_gt'    => 'required' ,
-            'gt_server_status'    => 'required' ,
+//            'geetest_challenge'    => 'required' ,
+//            'geetest_validate'    => 'required' ,
+//            'geetest_seccode'    => 'required' ,
+//            'user_id_for_gt'    => 'required' ,
+//            'ip_for_gt'    => 'required' ,
+//            'gt_server_status'    => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
         // 检查图形验证码是否正确
-//        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-//        if ($res['code'] != 200) {
-//            return self::error($res['data']);
-//        }
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
 
         /**
          * ***********************************
          * 极限验证
          * ***********************************
          */
-        $gt = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
-        $gt_check_data = array(
-            "user_id" => $param['user_id_for_gt'], # 网站用户id
-            "client_type" => "web", #web:电脑上的浏览器；h5:手机上的浏览器，包括移动应用内完全内置的web_view；native：通过原生SDK植入APP应用的方式
-            "ip_address" => $param['ip_for_gt'] # 请在此处传输用户请求验证时所携带的IP
-        );
-        if ($param['gt_server_status'] == 1) {   //服务器正常
-            $res = $gt->success_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'], $gt_check_data);
-            if ($res) {
-                return self::error('图形验证失败' , 900);
-            }
-        } else {  //服务器宕机,走failback模式
-            if ($gt->fail_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'])) {
-                return self::error('图形验证失败', 900);
-            }
-        }
+//        $gt = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
+//        $gt_check_data = array(
+//            "user_id" => $param['user_id_for_gt'], # 网站用户id
+//            "client_type" => "web", #web:电脑上的浏览器；h5:手机上的浏览器，包括移动应用内完全内置的web_view；native：通过原生SDK植入APP应用的方式
+//            "ip_address" => $param['ip_for_gt'] # 请在此处传输用户请求验证时所携带的IP
+//        );
+//        if ($param['gt_server_status'] == 1) {   //服务器正常
+//            $res = $gt->success_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'], $gt_check_data);
+//            if ($res) {
+//                return self::error('图形验证失败' , 900);
+//            }
+//        } else {  //服务器宕机,走failback模式
+//            if ($gt->fail_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'])) {
+//                return self::error('图形验证失败', 900);
+//            }
+//        }
 
         $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
         if (empty($user)) {
