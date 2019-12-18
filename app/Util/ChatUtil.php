@@ -101,28 +101,29 @@ class ChatUtil extends Util
         $param['aes_key'] = $user->aes_key;
         $param['identifier'] = $base->identifier;
         try {
-            DB::beginTransaction();
-            $id = MessageModel::insertGetId(array_unit($param , [
-                'user_id' ,
-                'chat_id' ,
-                'message' ,
-                'type' ,
-                'flag' ,
-                'extra' ,
-                'blocked' ,
-                'aes_key' ,
-                'old' ,
-                'identifier' ,
-            ]));
-            // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
-            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
-            if ($blocked) {
-                // 接收方把发送方拉黑了
-                DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
-            }
-            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'private' , $param['chat_id']);
-            DB::commit();
-            $msg = MessageModel::findById($id);
+//            DB::beginTransaction();
+//            $id = MessageModel::insertGetId(array_unit($param , [
+//                'user_id' ,
+//                'chat_id' ,
+//                'message' ,
+//                'type' ,
+//                'flag' ,
+//                'extra' ,
+//                'blocked' ,
+//                'aes_key' ,
+//                'old' ,
+//                'identifier' ,
+//            ]));
+//            // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
+//            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
+//            if ($blocked) {
+//                // 接收方把发送方拉黑了
+//                DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
+//            }
+//            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'private' , $param['chat_id']);
+//            DB::commit();
+//            $msg = MessageModel::findById($id);
+            $msg = MessageModel::findById(2386);
             MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
             /**
              * 投递到异步任务
