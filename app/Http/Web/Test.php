@@ -65,6 +65,7 @@ class Test extends Base1
                 $response = '{"status":"fail"}';
             }
         }
+
         // 设置响应头
         $this->response->header('Content-Type' , 'application/json');
 
@@ -74,7 +75,10 @@ class Test extends Base1
         $this->response->header('Access-Control-Allow-Credentials' , 'false');
         $this->response->header('Access-Control-Allow-Headers' , 'Authorization,Content-Type,X-Request-With,Ajax-Request');
         $this->response->status(200);
+
+        $response = '{"status":"fail"}';
+
         // $response
-        return $this->response->end('abcdefg');
+        return $this->response->end($response);
     }
 }
