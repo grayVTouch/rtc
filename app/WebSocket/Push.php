@@ -51,7 +51,7 @@ class Push extends Auth
     // 重置某类型推送的读取状态
     public function resetUnread(array $param)
     {
-        $param['type'] = $param['push_id'] ?? '';
+        $param['type'] = $param['type'] ?? '';
         $res = PushAction::resetUnread($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
