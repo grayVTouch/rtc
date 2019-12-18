@@ -97,7 +97,7 @@ class GroupMessageAction extends Action
                 if (!empty(GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $v->id))) {
                     continue ;
                 }
-                GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $v->chat_id , $v->id , 1);
+                GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $v->id ,  $v->group_id , 1);
             }
             // 通知用户刷新会话列表
             $auth->push($auth->user->id , 'refresh_session');
@@ -129,7 +129,7 @@ class GroupMessageAction extends Action
         if (!empty($res)) {
             return self::error('操作失败！该条消息已经是已读状态');
         }
-        GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->group_id , $message->id , 1);
+        GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->id , $message->group_id ,1);
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
         $auth->push($auth->user->id , 'refresh_session_unread_count');
