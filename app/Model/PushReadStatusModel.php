@@ -93,7 +93,7 @@ class PushReadStatusModel extends Model
     {
         return self::where([
             ['user_id' , '=' , $user_id] ,
-            ['type' , '=' , $user_id] ,
+            ['type' , '=' , $type] ,
         ])->update([
             'is_read' => $is_read
         ]);
