@@ -53,6 +53,7 @@ class PushAction extends Action
     public static function push(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
+            'identifier' => 'required' ,
             'push_type' => 'required' ,
             'type' => 'required' ,
             'title' => 'required' ,
@@ -149,7 +150,7 @@ class PushAction extends Action
                 {
                     case 'system':
                         // 创建会话
-                        $res = SessionUtil::createOrUpdate($auth->identifier , $v , 'system');
+                        $res = SessionUtil::createOrUpdate($param['identifier'] , $v , 'system');
                         if ($res['code'] != 200) {
                             DB::rollBack();
                             return self::error($res['data'] , 500);
@@ -167,11 +168,9 @@ class PushAction extends Action
             // 这样的情况下就比较糟糕了
             foreach ($user_ids as $v)
             {
-                $user = UserModel::findById($v);
-                PushUtil::single($user->identifier , $v , 'refresh_session');
-                PushUtil::single($user->identifier , $v , 'refresh_unread_count');
-                PushUtil::single($user->identifier , $v , 'refresh_session_unread_count');
-
+                PushUtil::single($param['identifier'] , $v , 'refresh_session');
+                PushUtil::single($param['identifier'] , $v , 'refresh_unread_count');
+                PushUtil::single($param['identifier'] , $v , 'refresh_session_unread_count');
             }
             return self::success();
         } catch(Exception $e) {
