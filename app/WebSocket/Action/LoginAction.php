@@ -219,6 +219,7 @@ class LoginAction extends Action
                     if ($cache == 'error') {
                         return self::error('请先通过极验验证');
                     }
+                    CacheRedis::del($gt_check_key);
                 }
             }
         } else {
