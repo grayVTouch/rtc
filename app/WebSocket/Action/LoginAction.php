@@ -214,10 +214,10 @@ class LoginAction extends Action
                     $gt_check_key = 'gt_check_' . $param['challenge'];
                     $cache = CacheRedis::value($gt_check_key);
                     if (empty($cache)) {
-                        return self::error('请先创建极验验证');
+                        return self::error('请先创建极验验证' , 700);
                     }
                     if ($cache == 'error') {
-                        return self::error('请先通过极验验证');
+                        return self::error('请先通过极验验证' , 700);
                     }
                     CacheRedis::del($gt_check_key);
                 }

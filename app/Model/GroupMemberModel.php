@@ -175,9 +175,17 @@ class GroupMemberModel extends Model
         return $res;
     }
 
-    public static function getByGroupIdV1(int $group_id)
+    public static function getByGroupIdV1(int $group_id , int $limit_id = 0 , int $limit = 10)
     {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '>' , $limit_id];
+        }
         $res = self::where('group_id' , $group_id)
+            ->orderBy('id' , 'asc')
+            ->limit($limit)
             ->get();
         $res = convert_obj($res);
         self::multiple($res);

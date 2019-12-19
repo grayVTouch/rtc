@@ -139,6 +139,8 @@ class Group extends Auth
     public function groupMember(array $param)
     {
         $param['group_id'] = $param['group_id'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
         $res = GroupAction::groupMember($this , $param);
         if ($res['code'] != 200) {
             return self::error($res['data'] , $res['code']);

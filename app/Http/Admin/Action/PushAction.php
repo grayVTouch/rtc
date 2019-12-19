@@ -143,6 +143,7 @@ class PushAction extends Action
                 'title' ,
                 'desc' ,
                 'content' ,
+                'identifier' ,
             ]));
             foreach ($user_ids as $v)
             {

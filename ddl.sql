@@ -256,7 +256,7 @@ create table if not exists `rtc_delete_message_for_private` (
   id int unsigned not null auto_increment ,
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
-  chat_id int unsigned default 0 comment '根据 user_id and other_id 根据一定规则生成的字符串' ,
+  chat_id varchar(255) default '' comment '根据 user_id and other_id 根据一定规则生成的字符串' ,
   message_id int unsigned default 0 comment 'rtc_message.id' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)

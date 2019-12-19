@@ -37,7 +37,7 @@ class GroupUtil extends Util
             $user = UserData::findByIdentifierAndId($group->identifier , $v->user_id);
             $member_avatar[] = [
                 'avatar'    => !empty($user) ? $user->avatar : '' ,
-                'nickname'  => !empty($user) ? $user->nickname : '' ,
+                'nickname'  => !empty($user) ? UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username) : '' ,
             ];
         }
         $group->member_avatar = $member_avatar;
