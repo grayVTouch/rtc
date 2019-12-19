@@ -398,6 +398,19 @@ create table if not exists `rtc_task_log` (
 
 drop table if exists `rtc_combination_word`;
 
+drop table if exists `rtc_bind_device`;
+create table if not exists `rtc_bind_device` (
+  id int unsigned not null auto_increment ,
+  `user_id` int unsigned default 0 comment 'rtc_user.id' ,
+  `device_code` varchar(1000) default '' comment '设备码' ,
+  platform varchar(500) default '' comment '设备平台' ,
+  identifier varchar(500) default '' comment '项目标识符' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户绑定的设备';
+
+drop table if exists `rtc_combination_word`;
+
 -- 上下线通知
 -- 写入状态通知
 -- 时效群到时解散

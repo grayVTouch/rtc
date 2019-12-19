@@ -10,6 +10,7 @@ namespace App\WebSocket\Action;
 
 use App\Data\UserData;
 use App\Lib\SMS\Zz253;
+use App\Model\BindDeviceModel;
 use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
@@ -20,6 +21,7 @@ use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Model\UserTokenModel;
+use App\Redis\CacheRedis;
 use App\Redis\UserRedis;
 use App\Util\MiscUtil;
 use App\WebSocket\Util\CaptchaUtil;
@@ -182,49 +184,49 @@ class LoginAction extends Action
             'verify_code'    => 'required' ,
             'verify_code_key'    => 'required' ,
 
-            // 极限验证
-//            'geetest_challenge'    => 'required' ,
-//            'geetest_validate'    => 'required' ,
-//            'geetest_seccode'    => 'required' ,
-//            'user_id_for_gt'    => 'required' ,
-//            'ip_for_gt'    => 'required' ,
-//            'gt_server_status'    => 'required' ,
+            // 设备验证
+            'device_code'    => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查图形验证码是否正确
-        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-        if ($res['code'] != 200) {
-            return self::error($res['data']);
+        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
+        if (empty($user)) {
+            return self::error('手机号未注册');
         }
-
         /**
          * ***********************************
          * 极限验证
          * ***********************************
          */
-
-//        $gt = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
-//        $gt_check_data = array(
-//            "user_id" => $param['user_id_for_gt'], # 网站用户id
-//            "client_type" => "web", #web:电脑上的浏览器；h5:手机上的浏览器，包括移动应用内完全内置的web_view；native：通过原生SDK植入APP应用的方式
-//            "ip_address" => $param['ip_for_gt'] # 请在此处传输用户请求验证时所携带的IP
-//        );
-//        if ($param['gt_server_status'] == 1) {   //服务器正常
-//            $res = $gt->success_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'], $gt_check_data);
-//            if ($res) {
-//                return self::error('图形验证失败' , 900);
-//            }
-//        } else {  //服务器宕机,走failback模式
-//            if ($gt->fail_validate($param['geetest_challenge'], $param['geetest_validate'], $param['geetest_seccode'])) {
-//                return self::error('图形验证失败', 900);
-//            }
-//        }
-
-        $user = UserModel::findByIdentifierAndAreaCodeAndPhone($base->identifier , $param['area_code'] , $param['phone']);
-        if (empty($user)) {
-            return self::error('手机号未注册');
+        if (config('app.enable_gt')) {
+            // 开启了极验验证
+            $support_gt_platform = config('app.support_gt_platform');
+            if (in_array($base->platform , $support_gt_platform)) {
+                if (empty($param['challenge'])) {
+                    // 没有提供 challenge，检查用户是否已经绑定过设备
+                    $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                    if (empty($bind_device)) {
+                        return self::error('未绑定设备标识符' , 800);
+                    }
+                } else {
+                    // 如果提供了 challenge，检查 极验验证结果是否正确
+                    $gt_check_key = 'gt_check_' . $param['challenge'];
+                    $cache = CacheRedis::value($gt_check_key);
+                    if (empty($cache)) {
+                        return self::error('请先创建极验验证');
+                    }
+                    if ($cache == 'error') {
+                        return self::error('请先通过极验验证');
+                    }
+                }
+            }
+        } else {
+            // 没有开启极验验证 只进行普通的图形验证码 验证
+            $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+            if ($res['code'] != 200) {
+                return self::error($res['data']);
+            }
         }
         if ($user->is_system != 1) {
             // 检查短信验证码

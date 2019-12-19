@@ -11,7 +11,7 @@ namespace App\Http\Web;
 
 use GeetestLib;
 
-class Test extends Base1
+class Test extends Common
 {
 
     public function genValidateSession()

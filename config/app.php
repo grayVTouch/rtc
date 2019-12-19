@@ -128,9 +128,14 @@ return [
     // 系统初始化标志
     'initialized' => __DIR__ . '/../initialized.lock' ,
 
-
     // 极限验证
-    'enable_gt3' => true ,
+    'enable_gt' => true ,
+
+    // gt3 验证 key
+    'gt_id' => '4a25d97aab053ee704e5774c16000aba' ,
+
+    // gt3 验证 secret
+    'gt_key' => '68d6bef97b42974744c319d3ad411f5a' ,
 
 
 ];

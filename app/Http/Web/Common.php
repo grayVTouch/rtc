@@ -15,7 +15,7 @@ use Swoole\Http\Request;
 use Swoole\Http\Response;
 use App\Model\ProjectModel;
 
-class Base1
+class Common
 {
     public $conn = null;
 
@@ -38,7 +38,6 @@ class Base1
     {
         // 加载极验验证
         require_once __DIR__ . '/../../../plugin/gt3/lib/class.geetestlib.php';
-        require_once __DIR__ . '/../../../plugin/gt3/config/config.php';
         return true;
     }
 
@@ -74,6 +73,20 @@ class Base1
 
         $this->response->status(200);
         return $this->response->end(json_for_http($code , $data));
+    }
+
+    // 响应：自由的响应方式
+    public function rawResponse(string $data = '')
+    {
+        // 设置响应头
+        $this->response->header('Content-Type' , 'application/json');
+        // 允许跨域
+        $this->response->header('Access-Control-Allow-Origin' , '*');
+        $this->response->header('Access-Control-Allow-Methods' , 'GET,POST,PUT,PATCH,DELETE');
+        $this->response->header('Access-Control-Allow-Credentials' , 'false');
+        $this->response->header('Access-Control-Allow-Headers' , 'Authorization,Content-Type,X-Request-With,Ajax-Request');
+        $this->response->status(200);
+        return $this->response->end($data);
     }
 
     // 结合当前业务的发送接口：发送单条数据

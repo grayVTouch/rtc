@@ -79,6 +79,8 @@ return [
         'refresh_blacklist' ,
         // 被迫下线通知
         'forced_offline' ,
+        // gt3 极验验证
+        'gt' ,
     ] ,
 
     // 消息
@@ -366,6 +368,11 @@ return [
 
     // 同一平台仅允许单一设备登录，支持该功能的平台范围
     'single_device_for_platform' => [
+        'app' ,
+    ] ,
+
+    // 需要极验验证的平台
+    'support_gt_platform' => [
         'app' ,
     ] ,
 
