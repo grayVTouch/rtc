@@ -222,7 +222,7 @@ class FriendAction extends Action
         foreach ($res as $v)
         {
             UserUtil::handle($v->user);
-            UserUtil::handle($v->friend);
+            UserUtil::handle($v->friend , $auth->user->id);
         }
         return self::success($res);
     }
