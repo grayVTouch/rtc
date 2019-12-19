@@ -204,6 +204,7 @@ class LoginAction extends Action
          * 极限验证
          * ***********************************
          */
+
 //        $gt = new GeetestLib(CAPTCHA_ID, PRIVATE_KEY);
 //        $gt_check_data = array(
 //            "user_id" => $param['user_id_for_gt'], # 网站用户id
