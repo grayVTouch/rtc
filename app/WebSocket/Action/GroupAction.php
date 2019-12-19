@@ -551,7 +551,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群' , 404);
         }
-        $param['limit'] = empty($param['limit']) ? 100 : $param['limit'];
+        $param['limit'] = empty($param['limit']) ? config('app.group_member_show_limit') : $param['limit'];
         $param['limit_id'] = empty($param['limit_id']) ? 0 : $param['limit_id'];
         $members = GroupMemberModel::getByGroupIdV1($group->id , $param['limit_id'] , $param['limit']);
         foreach ($members as $v)
