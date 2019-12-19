@@ -213,7 +213,7 @@ class FriendModel extends Model
     // 搜索好友（用户名 + 昵称）
     public static function searchByUserIdAndValueAndLimit(int $user_id , string $value , int $limit = 20)
     {
-        $value = strtolower($value);
+//        $value = strtolower($value);
         $where = [
             ['f.user_id' , '=' , $user_id]
         ];
@@ -224,16 +224,16 @@ class FriendModel extends Model
             ->from('friend as f')
             ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
-            ->whereRaw('lower(rtc_f.alias) like :alias or rtc_u.nickname like :nickname' , [
-                'alias' => "%{$value}%" ,
-                'nickname' => "%{$value}%" ,
-            ])
-//            ->where(function($query) use($value){
-//                // 利用子查询实现
-//                // where user_id = 1 and (alias like "%{$value}%" or nickname like "%{$value}%")
-//                $query->where('f.alias' , 'like' , "%{$value}%")
-//                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
-//            })
+//            ->whereRaw('lower(rtc_f.alias) like "%:alias%" or rtc_u.nickname like :nickname' , [
+//                'alias' => "%{$value}%" ,
+//                'nickname' => "%{$value}%" ,
+//            ])
+            ->where(function($query) use($value){
+                // 利用子查询实现
+                // where user_id = 1 and (alias like "%{$value}%" or nickname like "%{$value}%")
+                $query->where('f.alias' , 'like' , "%{$value}%")
+                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
+            })
             ->select('f.*')
             ->orderBy('f.id' , 'desc');
         if (!empty($limit)) {
