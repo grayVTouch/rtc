@@ -138,7 +138,7 @@ return [
     'gt_key' => '68d6bef97b42974744c319d3ad411f5a' ,
 
     // 群成员显示数量
-    'group_member_show_limit' => 30 ,
+    'group_member_show_limit' => 50 ,
 
 
 ];
