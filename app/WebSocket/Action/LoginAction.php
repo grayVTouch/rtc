@@ -278,6 +278,15 @@ class LoginAction extends Action
                     'used' => 1
                 ]);
             }
+            if (config('app.enable_gt')) {
+                // 如果启用了极验验证
+                BindDeviceModel::insertGetId([
+                    'user_id' => $user->id ,
+                    'device_code' => $param['device_code'] ,
+                    'platform' => $base->platform ,
+                    'identifier' => $base->identifier ,
+                ]);
+            }
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
