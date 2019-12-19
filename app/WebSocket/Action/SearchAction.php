@@ -39,15 +39,15 @@ class SearchAction extends Action
         $res = [];
         // 搜索好友
         if ($user_use_id = UserModel::findById($param['value'])) {
-            UserUtil::handle($user_use_id);
+            UserUtil::handle($user_use_id , $auth->user->id);
             $res[] = $user_use_id;
         }
         if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['value'])) {
-            UserUtil::handle($user_use_nickname);
+            UserUtil::handle($user_use_nickname , $auth->user->id);
             $res[] = $user_use_nickname;
         }
         if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['value'])) {
-            UserUtil::handle($user_use_phone);
+            UserUtil::handle($user_use_phone , $auth->user->id);
             $res[] = $user_use_phone;
         }
         return self::success($res);

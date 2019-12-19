@@ -17,9 +17,13 @@ return [
     // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
     'reuse_port' => true ,
     // 任务进程的数量
-    'task_worker' => 8 ,
+    'task_worker' => 4 ,
     // worker 进程的数量
-    'worker' => 8 ,
+    'worker' => 4 ,
+    // 设置队列消费的进程数量
+    'consume_queue_process' => 4 ,
+    // redis 缓存过期时间，单位：s
+    'cache_duration' => 8 * 3600 ,
     // 静态文件根目录
     'document_root' => realpath(__DIR__ . '/../public') ,
     // 调试模式
@@ -124,11 +128,6 @@ return [
     // 系统初始化标志
     'initialized' => __DIR__ . '/../initialized.lock' ,
 
-    // redis 缓存过期时间，单位：s
-    'cache_duration' => 8 * 3600 ,
-
-    // 设置队列消费的进程数量
-    'consume_queue_process' => 8 ,
 
     // 极限验证
     'enable_gt3' => true ,

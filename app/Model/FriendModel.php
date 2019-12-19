@@ -213,6 +213,7 @@ class FriendModel extends Model
     // 搜索好友（用户名 + 昵称）
     public static function searchByUserIdAndValueAndLimit(int $user_id , string $value , int $limit = 20)
     {
+        $value = strtolower($value);
         $where = [
             ['f.user_id' , '=' , $user_id]
         ];
@@ -226,8 +227,8 @@ class FriendModel extends Model
             ->where(function($query) use($value){
                 // 利用子查询实现
                 // where user_id = 1 and (alias like "%{$value}%" or nickname like "%{$value}%")
-                $query->where('f.alias' , 'like' , "%{$value}%")
-                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
+                $query->where('lower(f.alias)' , 'like' , "%{$value}%")
+                    ->orWhere('lower(u.nickname)' , 'like' , "%{$value}%");
             })
             ->select('f.*')
             ->orderBy('f.id' , 'desc');
