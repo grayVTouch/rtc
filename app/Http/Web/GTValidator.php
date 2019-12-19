@@ -57,12 +57,9 @@ class GTValidator extends Common
         ]);
     }
 
-    public function validateSession(array $param)
+    public function validateSession()
     {
-        $gt_id = config('app.gt_id');
-        $gt_key = config('app.gt_key');
-
-        $gt_validator = new GeetestLib($gt_id, $gt_key);
+        $param = $this->request->post;
         $param['geetest_challenge'] = $param['geetest_challenge'] ?? '';
         $param['geetest_validate'] = $param['geetest_validate'] ?? '';
         $param['geetest_seccode'] = $param['geetest_seccode'] ?? '';
@@ -85,6 +82,9 @@ class GTValidator extends Common
         $cache = json_decode($cache);
         var_dump("gt redis 缓存的数据：");
         print_r($cache);
+        $gt_id = config('app.gt_id');
+        $gt_key = config('app.gt_key');
+        $gt_validator = new GeetestLib($gt_id, $gt_key);
         $validate_res = 'error';
         if ($cache->gt_server == 1) {
             // 服务器正常
