@@ -858,8 +858,9 @@ class LoginAction extends Action
     }
 
     // 二维码数据
-    public static function loginQRCode(Base $baes , array $param)
+    public static function loginQRCode(Base $base , array $param)
     {
-
+        $app_download = config('app.app_download');
+        $qrcode_data = sprintf('%s/%s' , $app_download , '');
     }
 }

@@ -139,4 +139,7 @@ return [
 
     // 群成员显示数量
     'group_member_show_limit' => 45 ,
+
+    // app 下载连接地址
+    'app_download' => 'https://www.baidu.com' ,
 ];
