@@ -215,6 +215,8 @@ class LoginAction extends Action
                 return self::error('短信验证码不正确');
             }
         }
+
+        var_dump('获取到的 device_code: ' . $param['device_code'] . '; 获取到的 gt_verify: ' . $param['gt_verify']);
         if (config('app.enable_gt')) {
             // 开启了极验验证
             $support_gt_platform = config('business.support_gt_platform');
