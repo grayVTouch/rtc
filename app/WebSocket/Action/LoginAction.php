@@ -181,8 +181,8 @@ class LoginAction extends Action
             'area_code'    => 'required' ,
             'phone'    => 'required' ,
             'sms_code'    => 'required' ,
-            'verify_code'    => 'required' ,
-            'verify_code_key'    => 'required' ,
+//            'verify_code'    => 'required' ,
+//            'verify_code_key'    => 'required' ,
 
             // 设备验证
             'device_code'    => 'required' ,
@@ -203,13 +203,18 @@ class LoginAction extends Action
             // 开启了极验验证
             $support_gt_platform = config('app.support_gt_platform');
             if (in_array($base->platform , $support_gt_platform)) {
-                if (empty($param['challenge'])) {
-                    // 没有提供 challenge，检查用户是否已经绑定过设备
-                    $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
-                    if (empty($bind_device)) {
-                        return self::error('未绑定设备标识符' , 800);
-                    }
-                } else {
+                // 没有提供 challenge，检查用户是否已经绑定过设备
+                $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                if (empty($bind_device)) {
+                    return self::error('未绑定设备标识符' , 800);
+                }
+                if ($param['gt_verify'] != 1) {
+                    // 表示图形验证码验证成功
+                    return self::error('请先通过极验验证');
+                }
+//                if (empty($param['challenge'])) {
+//
+//                } else {
                     // 如果提供了 challenge，检查 极验验证结果是否正确
 //                    $gt_check_key = 'gt_check_' . $param['challenge'];
 //                    $cache = CacheRedis::value($gt_check_key);
@@ -220,7 +225,7 @@ class LoginAction extends Action
 //                        return self::error('请先通过极验验证' , 700);
 //                    }
 //                    CacheRedis::del($gt_check_key);
-                }
+//                }
             }
         } else {
             // 没有开启极验验证 只进行普通的图形验证码 验证
