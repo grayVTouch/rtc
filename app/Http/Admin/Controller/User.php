@@ -6,7 +6,7 @@
  * Time: 16:13
  */
 
-namespace App\Http\Admin;
+namespace App\Http\Admin\Controller;
 
 
 use App\Http\Admin\Action\UserAction;

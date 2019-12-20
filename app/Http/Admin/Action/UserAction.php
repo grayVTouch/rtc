@@ -9,7 +9,7 @@
 namespace App\Http\Admin\Action;
 
 
-use App\Http\Admin\Auth;
+use App\Http\Web\Controller\Auth;
 use App\Model\UserModel;
 use App\Util\UserUtil;
 use Core\Lib\Validator;

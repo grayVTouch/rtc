@@ -9,10 +9,10 @@
 namespace App\Http\Admin\Action;
 
 
+use App\Http\Web\Controller\Auth;
 use App\Model\PushModel as PushModel;
 use App\Model\PushReadStatusModel;
 use App\Model\UserModel;
-use App\Http\Admin\Auth;
 use App\Util\SessionUtil;
 use function core\array_unit;
 use Core\Lib\Validator;

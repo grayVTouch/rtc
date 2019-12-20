@@ -6,7 +6,7 @@
  * Time: 16:45
  */
 
-namespace App\Http\Admin;
+namespace App\Http\Admin\Controller;
 
 use App\Redis\MiscRedis;
 use App\Util\PushUtil;

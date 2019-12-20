@@ -6,7 +6,7 @@
  * Time: 23:38
  */
 
-namespace App\Http\Admin;
+namespace App\Http\Admin\Controller;
 
 
 use App\Http\Admin\Action\PushAction;
