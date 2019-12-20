@@ -63,6 +63,9 @@ class Base
         require_once __DIR__ . '/../../plugin/gt3/lib/class.geetestlib.php';
         require_once __DIR__ . '/../../plugin/gt3/config/config.php';
 
+        // 加载二维码
+        require_once __DIR__ . '/../../plugin/qrcode/vendor/autoload.php';
+
         return true;
     }
 

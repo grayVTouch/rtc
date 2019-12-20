@@ -67,6 +67,9 @@ class PushAction extends Action
             return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $push_type));
         }
         PushReadStatusModel::updateIsReadByUserIdAndType($auth->user->id , $param['type'] , 1);
+        $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
         return self::success();
     }
 }

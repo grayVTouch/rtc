@@ -31,6 +31,9 @@ use Core\Lib\Hash;
 use Core\Lib\Validator;
 use App\WebSocket\Base;
 use function core\random;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\LabelAlignment;
+use Endroid\QrCode\QrCode;
 use Exception;
 use GeetestLib;
 use Illuminate\Support\Facades\DB;
@@ -861,6 +864,26 @@ class LoginAction extends Action
     public static function loginQRCode(Base $base , array $param)
     {
         $app_download = config('app.app_download');
-        $qrcode_data = sprintf('%s/%s' , $app_download , '');
+        $qrcode_data = sprintf('%s/%s' , $app_download , '#client_id=' . $base->fd);
+
+        $qrCode = new QrCode($qrcode_data);
+        $qrCode->setSize(300);
+        $qrCode->setWriterByName('png');
+
+//        $qrCode->setMargin(10);
+//        $qrCode->setEncoding('UTF-8');
+//        $qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH());
+//        $qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
+//        $qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+//        $qrCode->setLogoPath(__DIR__.'/../assets/images/symfony.png');
+//        $qrCode->setLogoSize(150, 200);
+//        $qrCode->setRoundBlockSize(true);
+//        $qrCode->setValidateResult(false);
+//        $qrCode->setWriterOptions(['exclude_xml_declaration' => true]);
+
+        $image_data = $qrCode->writeString();
+        $image_base64 = base64_encode($image_data);
+        $image_base64 = sprintf("data:image/png;base64,%s" , $image_base64);
+        return self::success($image_base64);
     }
 }
