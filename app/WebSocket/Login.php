@@ -43,6 +43,9 @@ class Login extends Base
         $param['password'] = $param['password'] ?? '';
         $param['verify_code'] = $param['verify_code'] ?? '';
         $param['verify_code_key'] = $param['verify_code_key'] ?? '';
+
+        $param['device_code'] = $param['device_code'] ?? '';
+        $param['gt_verify'] = $param['gt_verify'] ?? '';
         $res = LoginAction::loginUseUsernameV1($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

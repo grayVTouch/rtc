@@ -339,11 +339,7 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查图形验证码是否正确
-        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-        if ($res['code'] != 200) {
-            return self::error($res['data']);
-        }
+
         $user = UserModel::findByIdentifierAndUsername($base->identifier , $param['username']);
         if (empty($user)) {
             return self::error('用户名未注册');
@@ -351,6 +347,47 @@ class LoginAction extends Action
         if (!Hash::check($param['password'] , $user->password)) {
             return self::error('密码错误');
         }
+
+        if (config('app.enable_gt')) {
+            // 开启了极验验证
+            $support_gt_platform = config('app.support_gt_platform');
+            if (in_array($base->platform , $support_gt_platform)) {
+                // 没有提供 challenge，检查用户是否已经绑定过设备
+                if ($param['gt_verify'] == '') {
+                    // 验证设备是否绑定该账号
+                    $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                    if (empty($bind_device)) {
+                        return self::error('未绑定设备标识符' , 800);
+                    }
+                } else {
+                    if ($param['gt_verify'] != 1) {
+                        return self::error('请先通过极验验证');
+                    }
+                }
+
+//                if (empty($param['challenge'])) {
+//
+//                } else {
+                // 如果提供了 challenge，检查 极验验证结果是否正确
+//                    $gt_check_key = 'gt_check_' . $param['challenge'];
+//                    $cache = CacheRedis::value($gt_check_key);
+//                    if (empty($cache)) {
+//                        return self::error('请先创建极验验证' , 700);
+//                    }
+//                    if ($cache == 'error') {
+//                        return self::error('请先通过极验验证' , 700);
+//                    }
+//                    CacheRedis::del($gt_check_key);
+//                }
+            }
+        } else {
+            // 没有开启极验验证 只进行普通的图形验证码 验证
+            $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+            if ($res['code'] != 200) {
+                return self::error($res['data']);
+            }
+        }
+
         // 登录成功
         $param['identifier'] = $base->identifier;
         $param['user_id'] = $user->id;
