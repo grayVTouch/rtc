@@ -333,8 +333,10 @@ class LoginAction extends Action
         $validator = Validator::make($param , [
             'username'    => 'required' ,
             'password'    => 'required' ,
-            'verify_code'    => 'required' ,
-            'verify_code_key'    => 'required' ,
+//            'verify_code'    => 'required' ,
+//            'verify_code_key'    => 'required' ,
+
+            'device_code' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -352,7 +354,6 @@ class LoginAction extends Action
             // 开启了极验验证
             $support_gt_platform = config('app.support_gt_platform');
             if (in_array($base->platform , $support_gt_platform)) {
-                // 没有提供 challenge，检查用户是否已经绑定过设备
                 if ($param['gt_verify'] == '') {
                     // 验证设备是否绑定该账号
                     $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
@@ -364,7 +365,6 @@ class LoginAction extends Action
                         return self::error('请先通过极验验证');
                     }
                 }
-
 //                if (empty($param['challenge'])) {
 //
 //                } else {
