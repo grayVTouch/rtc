@@ -199,23 +199,40 @@ class LoginAction extends Action
          * 极限验证
          * ***********************************
          */
+        if ($user->is_system != 1) {
+            // 检查短信验证码
+            $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
+            if (empty($sms_code)) {
+                return self::error('请先发送短信验证码');
+            }
+            if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
+                return self::error('请先发送短信验证码');
+            }
+            if ($sms_code->code != $param['sms_code']) {
+                return self::error('短信验证码不正确');
+            }
+        }
         if (config('app.enable_gt')) {
             // 开启了极验验证
             $support_gt_platform = config('app.support_gt_platform');
             if (in_array($base->platform , $support_gt_platform)) {
                 // 没有提供 challenge，检查用户是否已经绑定过设备
-                $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
-                if (empty($bind_device)) {
-                    return self::error('未绑定设备标识符' , 800);
+                if ($param['gt_verify'] == '') {
+                    // 验证设备是否绑定该账号
+                    $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                    if (empty($bind_device)) {
+                        return self::error('未绑定设备标识符' , 800);
+                    }
+                } else {
+                    if ($param['gt_verify'] != 1) {
+                        return self::error('请先通过极验验证');
+                    }
                 }
-                if ($param['gt_verify'] != 1) {
-                    // 表示图形验证码验证成功
-                    return self::error('请先通过极验验证');
-                }
+
 //                if (empty($param['challenge'])) {
 //
 //                } else {
-                    // 如果提供了 challenge，检查 极验验证结果是否正确
+                // 如果提供了 challenge，检查 极验验证结果是否正确
 //                    $gt_check_key = 'gt_check_' . $param['challenge'];
 //                    $cache = CacheRedis::value($gt_check_key);
 //                    if (empty($cache)) {
@@ -232,19 +249,6 @@ class LoginAction extends Action
             $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
             if ($res['code'] != 200) {
                 return self::error($res['data']);
-            }
-        }
-        if ($user->is_system != 1) {
-            // 检查短信验证码
-            $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 2);
-            if (empty($sms_code)) {
-                return self::error('请先发送短信验证码');
-            }
-            if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
-                return self::error('请先发送短信验证码');
-            }
-            if ($sms_code->code != $param['sms_code']) {
-                return self::error('短信验证码不正确');
             }
         }
 
