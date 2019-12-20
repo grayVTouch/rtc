@@ -425,6 +425,18 @@ class LoginAction extends Action
                 // 工作人员登陆后，消费未读消息
 //                UserUtil::consumeUnhandleMsg($user);
             }
+            if (config('app.enable_gt')) {
+                $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                if (empty($bind_device)) {
+                    // 如果启用了极验验证
+                    BindDeviceModel::insertGetId([
+                        'user_id' => $user->id ,
+                        'device_code' => $param['device_code'] ,
+                        'platform' => $base->platform ,
+                        'identifier' => $base->identifier ,
+                    ]);
+                }
+            }
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
