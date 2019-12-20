@@ -59,7 +59,7 @@ class Login extends Base
         $param['verify_code_key'] = $param['verify_code_key'] ?? '';
 
         $param['device_code'] = $param['device_code'] ?? '';
-//        $param['challenge'] = $param['challenge'] ?? '';
+        $param['gt_verify'] = $param['gt_verify'] ?? '';
         $res = LoginAction::loginUsePhone($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
