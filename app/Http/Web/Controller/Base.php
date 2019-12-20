@@ -6,7 +6,7 @@
  * Time: 16:45
  */
 
-namespace App\Http\Web;
+namespace App\Http\Web\Controller;
 
 use App\Redis\MiscRedis;
 use App\Util\PushUtil;
@@ -42,8 +42,8 @@ class Base
             return false;
         }
         // 加载极验验证
-        require_once __DIR__ . '/../../../plugin/gt3/lib/class.geetestlib.php';
-        require_once __DIR__ . '/../../../plugin/gt3/config/config.php';
+        require_once __DIR__ . '/../../../../plugin/gt3/lib/class.geetestlib.php';
+        require_once __DIR__ . '/../../../../plugin/gt3/config/config.php';
         return true;
     }
 
@@ -84,13 +84,13 @@ class Base
     // 结合当前业务的发送接口：发送单条数据
     public function send(int $user_id , string $type = '' , array $data = [])
     {
-        return $this->push($user_id , $type , $data , [$this->fd]);
+        return $this->push($user_id , $type , $data , [$this->request->fd]);
     }
 
     // 结合当前业务的发送接口：发送多条数据
     public function sendAll(array $user_ids , string $type = '' , array $data = [])
     {
-        return $this->pushAll($user_ids , $type , $data , [$this->fd]);
+        return $this->pushAll($user_ids , $type , $data , [$this->request->fd]);
     }
 
     // 单条推送：推送其他数据

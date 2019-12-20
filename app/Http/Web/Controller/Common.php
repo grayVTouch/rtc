@@ -6,7 +6,7 @@
  * Time: 16:45
  */
 
-namespace App\Http\Web;
+namespace App\Http\Web\Controller;
 
 use App\Redis\MiscRedis;
 use App\Util\PushUtil;
@@ -37,7 +37,7 @@ class Common
     public function before() :bool
     {
         // 加载极验验证
-        require_once __DIR__ . '/../../../plugin/gt3/lib/class.geetestlib.php';
+        require_once __DIR__ . '/../../../../plugin/gt3/lib/class.geetestlib.php';
         return true;
     }
 

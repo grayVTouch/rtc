@@ -211,15 +211,15 @@ class LoginAction extends Action
                     }
                 } else {
                     // 如果提供了 challenge，检查 极验验证结果是否正确
-                    $gt_check_key = 'gt_check_' . $param['challenge'];
-                    $cache = CacheRedis::value($gt_check_key);
-                    if (empty($cache)) {
-                        return self::error('请先创建极验验证' , 700);
-                    }
-                    if ($cache == 'error') {
-                        return self::error('请先通过极验验证' , 700);
-                    }
-                    CacheRedis::del($gt_check_key);
+//                    $gt_check_key = 'gt_check_' . $param['challenge'];
+//                    $cache = CacheRedis::value($gt_check_key);
+//                    if (empty($cache)) {
+//                        return self::error('请先创建极验验证' , 700);
+//                    }
+//                    if ($cache == 'error') {
+//                        return self::error('请先通过极验验证' , 700);
+//                    }
+//                    CacheRedis::del($gt_check_key);
                 }
             }
         } else {
@@ -807,6 +807,12 @@ class LoginAction extends Action
     }
 
     public static function validateSession(Base $base , array $param)
+    {
+
+    }
+
+    // 二维码数据
+    public static function loginQRCode(Base $baes , array $param)
     {
 
     }

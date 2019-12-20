@@ -236,4 +236,14 @@ class Login extends Base
     {
         print_r($_SERVER);
     }
+
+    // 生成二维码数据
+    public function loginQRCode(array $param)
+    {
+        $res = LoginAction::loginQRCode($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }

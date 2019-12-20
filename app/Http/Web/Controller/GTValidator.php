@@ -6,11 +6,10 @@
  * Time: 14:30
  */
 
-namespace App\Http\Web;
+namespace App\Http\Web\Controller;
 
 
 use App\Redis\CacheRedis;
-use App\Util\PushUtil;
 use Core\Lib\Validator;
 use function core\random;
 use Engine\Facade\WebSocket;
@@ -43,10 +42,12 @@ class GTValidator extends Common
             'gt_server'     => (int) $res
 
         ]));
-        WebSocket::push($this->request->fd , json_encode([
-            'type' => 'gt' ,
-            'data' => $gt_res['challenge'] ,
-        ]));
+        // 个人觉得这个地方实在是没什么用
+        //
+//        WebSocket::push($this->request->fd , json_encode([
+//            'type' => 'gt' ,
+//            'data' => $gt_res['challenge'] ,
+//        ]));
         return $this->rawResponse(json_encode($gt_res));
     }
 
@@ -108,7 +109,7 @@ class GTValidator extends Common
         }
         // 删除缓存的 redis key
         CacheRedis::del($gt_cache_key);
-        CacheRedis::value('gt_check_res_' . $param['geetest_challenge'] , $validate_res);
+//        CacheRedis::value('gt_check_res_' . $param['geetest_challenge'] , $validate_res);
         var_dump('验证结果: ' . $validate_res);
         return $this->rawResponse($this->gtResponse($validate_res == 'success' ? 'success' : 'fail'));
     }

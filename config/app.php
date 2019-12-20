@@ -139,6 +139,4 @@ return [
 
     // 群成员显示数量
     'group_member_show_limit' => 45 ,
-
-
 ];

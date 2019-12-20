@@ -6,10 +6,10 @@
  * Time: 23:41
  */
 
-namespace App\Http;
+namespace App\Http\Web\Controller;
 
 
-use App\Http\Action\ProjectAction;
+use App\Http\Web\Action\ProjectAction;
 
 class Project extends Base
 {

@@ -6,7 +6,7 @@
  * Time: 23:57
  */
 
-namespace App\Http\Web;
+namespace App\Http\Web\Controller;
 
 
 use App\Model\UserTokenModel;

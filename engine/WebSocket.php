@@ -372,7 +372,7 @@ class WebSocket
             $param = $request->post;
             $param['identifier'] = $param['identifier'] ?? '';
             $namespace = 'App\Http';
-            $class = sprintf('%s\%s\%s' , $namespace , $router['module'] , $router['class']);
+            $class = sprintf('%s\%s\Controller\%s' , $namespace , $router['module'] , $router['class']);
             if (!class_exists($class)) {
                 throw new Exception(" Class {$class} Not Found");
             }

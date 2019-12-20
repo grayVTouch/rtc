@@ -6,7 +6,7 @@
  * Time: 10:07
  */
 
-namespace App\Http\Action;
+namespace App\Http\Web\Action;
 
 
 use App\Model\ProjectModel;
