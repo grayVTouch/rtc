@@ -1,0 +1,26 @@
+{
+    "name": "endroid/test",
+    "description": "Endroid Test",
+    "keywords": ["endroid", "test"],
+    "homepage": "https://github.com/endroid/test",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jeroen van den Enden",
+            "email": "info@endroid.nl"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "bin": [
+        "bin/code-quality",
+        "bin/test",
+        "bin/unit-test",
+        "bin/functional-test"
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}

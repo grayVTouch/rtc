@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+cp -r vendor/endroid/test/defaults/. .
+rm -rf .travis.yml
+
+vendor/bin/code-quality
+vendor/bin/unit-test
+vendor/bin/functional-test

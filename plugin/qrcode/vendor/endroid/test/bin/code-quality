@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+
+# PHP CS Fixer
+
+if [ ! -f vendor/bin/php-cs-fixer ]; then
+    printf "\nRunning CS Fixer ...\n\n"
+    curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.16.1/php-cs-fixer.phar -o vendor/bin/php-cs-fixer
+    chmod +x vendor/bin/php-cs-fixer
+fi
+
+vendor/bin/php-cs-fixer fix src --config=vendor/endroid/test/.php_cs --using-cache=no || true
+
+
+# PHPStan
+
+if [ ! -f vendor/bin/phpstan ]; then
+    printf "\nRunning PHPStan ...\n\n"
+    curl -L https://github.com/phpstan/phpstan/releases/download/0.11.19/phpstan.phar -o vendor/bin/phpstan
+    chmod +x vendor/bin/phpstan
+fi
+
+vendor/bin/phpstan analyse src --configuration=vendor/endroid/test/phpstan.neon --level=max
+
+
+# Psalm
+
+if [ ! -f vendor/bin/psalm ]; then
+    printf "\nRunning Psalm ...\n\n"
+    curl -L https://github.com/vimeo/psalm/releases/download/3.5.1/psalm.phar -o vendor/bin/psalm
+    chmod +x vendor/bin/psalm
+fi
+
+vendor/bin/psalm --config=vendor/endroid/test/psalm.xml --show-info=false
