@@ -226,7 +226,7 @@ class LoginAction extends Action
                     // 验证设备是否绑定该账号
                     $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
                     if (empty($bind_device)) {
-                        return self::error('未绑定设备标识符' , 800);
+                        return self::error('未绑定设备标识符,device_code:' . $param['device_code'] , 800);
                     }
                 } else {
                     if ($param['gt_verify'] != 1) {
@@ -294,13 +294,16 @@ class LoginAction extends Action
                 ]);
             }
             if (config('app.enable_gt')) {
-                // 如果启用了极验验证
-                BindDeviceModel::insertGetId([
-                    'user_id' => $user->id ,
-                    'device_code' => $param['device_code'] ,
-                    'platform' => $base->platform ,
-                    'identifier' => $base->identifier ,
-                ]);
+                $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
+                if (empty($bind_device)) {
+                    // 如果启用了极验验证
+                    BindDeviceModel::insertGetId([
+                        'user_id' => $user->id ,
+                        'device_code' => $param['device_code'] ,
+                        'platform' => $base->platform ,
+                        'identifier' => $base->identifier ,
+                    ]);
+                }
             }
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
@@ -363,7 +366,7 @@ class LoginAction extends Action
                     // 验证设备是否绑定该账号
                     $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
                     if (empty($bind_device)) {
-                        return self::error('未绑定设备标识符' , 800);
+                        return self::error('未绑定设备标识符,device_code:' . $param['device_code'] , 800);
                     }
                 } else {
                     if ($param['gt_verify'] != 1) {
