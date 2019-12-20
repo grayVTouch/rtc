@@ -214,7 +214,7 @@ class LoginAction extends Action
         }
         if (config('app.enable_gt')) {
             // 开启了极验验证
-            $support_gt_platform = config('app.support_gt_platform');
+            $support_gt_platform = config('business.support_gt_platform');
             if (in_array($base->platform , $support_gt_platform)) {
                 // 没有提供 challenge，检查用户是否已经绑定过设备
                 if ($param['gt_verify'] == '') {
@@ -352,7 +352,7 @@ class LoginAction extends Action
 
         if (config('app.enable_gt')) {
             // 开启了极验验证
-            $support_gt_platform = config('app.support_gt_platform');
+            $support_gt_platform = config('business.support_gt_platform');
             if (in_array($base->platform , $support_gt_platform)) {
                 if ($param['gt_verify'] == '') {
                     // 验证设备是否绑定该账号

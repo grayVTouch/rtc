@@ -62,7 +62,6 @@ class Login extends Base
         $param['sms_code'] = $param['sms_code'] ?? '';
         $param['invite_code'] = $param['invite_code'] ?? '';
         $res = LoginAction::registerForShare($this , $param);
-//        $res = LoginAction::test();
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
