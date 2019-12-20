@@ -9,7 +9,7 @@
 namespace App\Http\Admin\Action;
 
 
-use App\Http\Web\Controller\Auth;
+use App\Http\Admin\Controller\Auth;
 use App\Model\PushModel as PushModel;
 use App\Model\PushReadStatusModel;
 use App\Model\UserModel;
