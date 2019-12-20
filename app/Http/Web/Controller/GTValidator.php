@@ -60,7 +60,9 @@ class GTValidator extends Common
 
     public function validateSession()
     {
-        print_r(file_get_contents('php://input'));
+
+        var_dump(file_get_contents('php://input'));
+
         $param = $this->request->post;
         $param['geetest_challenge'] = $param['geetest_challenge'] ?? '';
         $param['geetest_validate'] = $param['geetest_validate'] ?? '';
