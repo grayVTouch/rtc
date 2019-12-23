@@ -530,7 +530,7 @@ class UserAction extends Action
                 if ($validator->fails()) {
                     return self::error($validator->message());
                 }
-                if (!Hash::make($param['destroy_password'] , $auth->user->destroy_password)) {
+                if (!Hash::check($param['destroy_password'] , $auth->user->destroy_password)) {
                     return self::error('销毁密码错误' , 403);
                 }
             }
