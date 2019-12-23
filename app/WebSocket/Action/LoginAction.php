@@ -15,6 +15,8 @@ use App\Model\FriendModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupModel;
 use App\Model\JoinFriendMethodModel;
+use App\Model\PushModel;
+use App\Model\PushReadStatusModel;
 use App\Model\SmsCodeModel;
 use App\Model\UserInfoModel;
 use App\Model\UserJoinFriendOptionModel;
@@ -24,6 +26,7 @@ use App\Model\UserTokenModel;
 use App\Redis\CacheRedis;
 use App\Redis\UserRedis;
 use App\Util\MiscUtil;
+use App\Util\SessionUtil;
 use App\WebSocket\Util\CaptchaUtil;
 use App\WebSocket\Util\UserUtil;
 use function core\array_unit;
@@ -643,8 +646,14 @@ class LoginAction extends Action
                     'enable' => 1 ,
                 ]);
             }
-
+            // 新用户注册推送
+            $new_user_notification = config('app.new_user_notification');
+            $system = 'system';
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , $new_user_notification , '' , $id);
+            PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
+            SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
+
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
@@ -726,7 +735,12 @@ class LoginAction extends Action
                     'enable' => 1 ,
                 ]);
             }
-
+            // 新用户注册推送
+            $new_user_notification = config('app.new_user_notification');
+            $system = 'system';
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , $new_user_notification , '' , $id);
+            PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
+            SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
             return self::success();
         } catch(Exception $e) {

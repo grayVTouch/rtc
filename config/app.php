@@ -142,4 +142,8 @@ return [
 
     // app 下载连接地址
     'app_download' => 'https://www.baidu.com' ,
+
+    // 新用户注册推送
+    'new_user_notification' => '欢迎使用嗨聊！嗨聊通信时最安全的通信软件，所有的消息和通话哦都是通过点对点加密传输。' ,
+
 ];
