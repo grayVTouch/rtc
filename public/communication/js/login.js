@@ -37,6 +37,7 @@
             } ,
 
             initialize () {
+                const self = this;
                 // 生成二维码
                 this.ins.rtc.loginQRCodeForTest(null , (res) => {
                     if (res.code != 200) {
@@ -46,11 +47,14 @@
                     this.val.qrcode = res.data;
                 });
 
-                this.ins.rtc.on('');
+                this.ins.rtc.on('login_user' , function(data){
+                    self.val.qrcode = data.avatar;
+                    console.log('登录用户信息' , data);
+                });
 
                 // 监听 ws 推送
-                this.ins.rtc.on('logined' , () => {
-
+                this.ins.rtc.on('logined' , function(){
+                    console.log("成功登录信息");
                 });
 
             } ,

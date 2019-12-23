@@ -266,7 +266,7 @@ class SessionAction extends Action
             'user_id' => $auth->user->id ,
             'other_id' => $other_id ,
             'type' => 'notification' ,
-            'message' => sprintf('"%s" 双向撤回了消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
+            'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
             'old' => 1 ,
         ] , true);
         return self::success();
@@ -294,7 +294,7 @@ class SessionAction extends Action
                 'group_id' => $param['group_id'] ,
                 'type' => 'notification' ,
                 'user_id' => $auth->user->id ,
-                'message' => sprintf('"%s" 双向撤回了消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
+                'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
                 'old' => 1 ,
             ] , true);
             return self::success();
