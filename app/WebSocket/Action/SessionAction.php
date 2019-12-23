@@ -270,7 +270,7 @@ class SessionAction extends Action
             'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
             'old' => 1 ,
         ] , true);
-        $auth->pushAll($user_ids , 'empty_private_session_from_cache' , [$param['chat_id']]);
+        $auth->pushAll($user_ids , 'sync_private_session' , $param['chat_id']);
         return self::success();
     }
 
@@ -300,7 +300,7 @@ class SessionAction extends Action
                 'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
                 'old' => 1 ,
             ] , true);
-            $auth->pushAll($user_ids , 'empty_group_session_from_cache' , [$param['group_id']]);
+            $auth->pushAll($user_ids , 'sync_group_session' , $param['group_id']);
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
