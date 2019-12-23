@@ -180,6 +180,8 @@ class Application
                     $id = UserModel::insertGetId(array_unit($copy_system_user_data , [
                         'identifier' ,
                         'username' ,
+                        'nickname' ,
+                        'avatar' ,
                         'password' ,
                         'area_code' ,
                         'phone' ,
