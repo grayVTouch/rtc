@@ -18,7 +18,10 @@ class ArticleModel extends Model
     public static function firstByArticleTypeId(int $article_type_id)
     {
         $res = self::with(['articleType'])
-            ->where('article_type_id' , $article_type_id)
+            ->where([
+                ['article_type_id' , '=' , $article_type_id] ,
+                ['enable' , '=' , 1] ,
+            ])
             ->first();
         if (empty($res)) {
             return ;
@@ -46,7 +49,9 @@ class ArticleModel extends Model
         $filter['id'] = $filter['id'] ?? '';
         $order['field'] = $order['field'] ?? 'id';
         $order['value'] = $order['value'] ?? 'desc';
-        $where = [];
+        $where = [
+            ['enable' , '=' , 1] ,
+        ];
         if ($filter['id'] != '') {
             $where[] = ['id' , '=' , $filter['id']];
         }
