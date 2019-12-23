@@ -572,11 +572,11 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-//        // 检查图形验证码是否正确
-//        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-//        if ($res['code'] != 200) {
-//            return self::error($res['data']);
-//        }
+        // 检查图形验证码是否正确
+        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+        if ($res['code'] != 200) {
+            return self::error($res['data']);
+        }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
             return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));
@@ -649,7 +649,7 @@ class LoginAction extends Action
             // 新用户注册推送
             $new_user_notification = config('app.new_user_notification');
             $system = 'system';
-            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , $new_user_notification , '' , $id);
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification);
             PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
             SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
@@ -738,7 +738,7 @@ class LoginAction extends Action
             // 新用户注册推送
             $new_user_notification = config('app.new_user_notification');
             $system = 'system';
-            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , $new_user_notification , '' , $id);
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification);
             PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
             SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
