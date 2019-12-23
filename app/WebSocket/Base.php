@@ -47,6 +47,7 @@ class Base
     // 前置操作
     public function before() :bool
     {
+        var_dump("这边接收到的 identifier: " . $this->identifier);
         // 检查 identifier 是否正确！！
         if (empty(ProjectModel::findByIdentifier($this->identifier))) {
             $this->error('identifier 不正确！！请先创建项目！' , 400);

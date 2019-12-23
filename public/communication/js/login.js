@@ -30,19 +30,26 @@
                     identifier: 'nimo' ,
                     platform: 'web' ,
                     open () {
+                        // 连接打开的情况下才能够进行初始化
                         self.initialize();
                     } ,
                 });
             } ,
 
             initialize () {
-                this.ins.rtc.loginQRCode(null , (res) => {
+                // 生成二维码
+                this.ins.rtc.loginQRCodeForTest(null , (res) => {
                     if (res.code != 200) {
                         console.log('ws 接口获取到了错误信息：' . res.data);
                         return ;
                     }
                     this.val.qrcode = res.data;
                 });
+
+            } ,
+
+            wsInitialize () {
+
             } ,
 
             run () {

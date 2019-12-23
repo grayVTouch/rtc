@@ -369,7 +369,7 @@ class WebSocket
                 $this->httpResponse($response , '请求的地址不正确' , 400);
                 return ;
             }
-            $param['identifier'] = $this->post['identifier'] ?? ($this->get['identifier'] ?? '');
+            $param['identifier'] = $request->post['identifier'] ?? ($request->get['identifier'] ?? '');
             $namespace = 'App\Http';
             $class = sprintf('%s\%s\Controller\%s' , $namespace , $router['module'] , $router['class']);
             if (!class_exists($class)) {

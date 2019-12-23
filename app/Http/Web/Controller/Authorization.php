@@ -19,7 +19,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Util\UserUtil as BaseUserUtil;
 
-class Authroization extends Base
+class Authorization extends Base
 {
     // pc 端登录页面授权
     public function auth()

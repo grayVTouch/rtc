@@ -86,6 +86,17 @@ class Session extends Auth
         return $this->success($res['data']);
     }
 
+    // 清空会话内当前产生的聊天记录
+    public function emptyGroupHistory(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = SessionAction::emptyGroupHistory($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     // 设置会话背景
     public function setSessionBackground(array $param)
     {

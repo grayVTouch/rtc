@@ -162,6 +162,11 @@
             this.send('/Login/loginQRCode' , data , callback);
         } ,
 
+        // 登录二维码
+        loginQRCodeForTest (data , callback) {
+            this.send('/Login/loginQRCodeForTest' , data , callback);
+        } ,
+
         // 获取会话列表
         session (data , callback) {
             this.send('/Session/session' , data , callback);
