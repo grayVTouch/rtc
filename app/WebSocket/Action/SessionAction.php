@@ -245,7 +245,7 @@ class SessionAction extends Action
         return self::success();
     }
 
-    // 会话清理（彻底删除会话）
+    // 私聊：会话清理（彻底删除消息记录）
     public static function emptyPrivateHistory(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
@@ -260,6 +260,25 @@ class SessionAction extends Action
         }
         // 推送
         $user_ids = ChatUtil::userIds($param['chat_id']);
+        $auth->pushAll($user_ids , 'refresh_session');
+        return self::success();
+    }
+
+    // 群聊：会话清理（彻底删除消息记录）
+    public static function emptyGroupHistory(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = SessionUtil::emptyHistory('group' , $param['group_id']);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        // 推送
+        $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
         $auth->pushAll($user_ids , 'refresh_session');
         return self::success();
     }

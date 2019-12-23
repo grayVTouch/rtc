@@ -369,6 +369,7 @@ return [
     // 同一平台仅允许单一设备登录，支持该功能的平台范围
     'single_device_for_platform' => [
         'app' ,
+        'web' ,
     ] ,
 
     // 需要极验验证的平台

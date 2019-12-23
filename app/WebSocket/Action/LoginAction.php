@@ -903,4 +903,29 @@ class LoginAction extends Action
         $image_base64 = sprintf("data:image/png;base64,%s" , $image_base64);
         return self::success($image_base64);
     }
+
+    // 二维码数据
+    public static function loginQRCodeForTest(Base $base , array $param)
+    {
+        $qr_code_data = 'http://192.168.145.129:10001/Web/Authorization/auth?client_id=' . $base->fd;
+        $qr_code = new QrCode($qr_code_data);
+        $qr_code->setSize(430);
+        $qr_code->setWriterByName('png');
+
+//        $qrCode->setMargin(10);
+//        $qrCode->setEncoding('UTF-8');
+//        $qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH());
+//        $qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
+//        $qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+//        $qrCode->setLogoPath(__DIR__.'/../assets/images/symfony.png');
+//        $qrCode->setLogoSize(150, 200);
+//        $qrCode->setRoundBlockSize(true);
+//        $qrCode->setValidateResult(false);
+//        $qrCode->setWriterOptions(['exclude_xml_declaration' => true]);
+
+        $image_data = $qr_code->writeString();
+        $image_base64 = base64_encode($image_data);
+        $image_base64 = sprintf("data:image/png;base64,%s" , $image_base64);
+        return self::success($image_base64);
+    }
 }
