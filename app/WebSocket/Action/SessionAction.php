@@ -23,6 +23,7 @@ use App\Model\SessionModel;
 use App\Model\UserModel;
 use App\Redis\SessionRedis;
 use App\Util\ChatUtil;
+use App\Util\GroupMessageUtil;
 use App\Util\GroupUtil;
 use App\Util\MiscUtil;
 use App\Util\PageUtil;
@@ -273,14 +274,22 @@ class SessionAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = SessionUtil::emptyHistory('group' , $param['group_id']);
-        if ($res['code'] != 200) {
-            return self::error($res['data'] , $res['code']);
+        try {
+            DB::beginTransaction();
+            $group_message = GroupMessageModel::getByGroupIdAndUserId($param['group_id'] , $auth->user->id);
+            foreach ($group_message as $v)
+            {
+                GroupMessageUtil::delete($v->id);
+            }
+            DB::commit();
+            // 推送
+            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
+            $auth->pushAll($user_ids , 'refresh_session');
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-        // 推送
-        $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-        $auth->pushAll($user_ids , 'refresh_session');
-        return self::success();
     }
 
     // 设置会话背景
