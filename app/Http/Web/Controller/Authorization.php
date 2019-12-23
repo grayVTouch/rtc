@@ -36,12 +36,12 @@ class Authorization extends Base
         $user_id = '600027';
         $user = UserData::findByIdentifierAndId('nimo' , $user_id);
         WebSocket::push($param['client_id'] , json_encode([
-            'type' => 'login_user' ,
-            'data' => $user
+            'type' => 'avatar' ,
+            'data' => $user->avatar
         ]));
         var_dump('ws 推送 ');
 
-        sleep(3);
+        sleep(5);
         $param['platform'] = 'web';
         $param['identifier'] = 'nimo';
         $param['user_id'] = $user->id;

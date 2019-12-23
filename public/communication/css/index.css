@@ -1,0 +1,159 @@
+.app {
+    max-width: 1000px;
+    min-width: 800px;
+    height: 650px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50% , -50%);
+}
+
+/**
+ * **********************
+ * 左侧菜单栏
+ * **********************
+ */
+.app > .left {
+    width: 280px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 1;
+    background-color: #2e3238;
+    color: #fff;
+}
+
+
+/*** 头像 ***/
+.app > .left > .avatar {
+    padding: 18px;
+}
+
+.app > .left > .avatar:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.app > .left > .avatar > * {
+    height: 40px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+}
+
+.app > .left > .avatar .left {
+    float: left;
+}
+
+.app > .left > .avatar .left:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.app > .left > .avatar .left > * {
+    float: left;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+}
+
+.app > .left > .avatar .left .avatar {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+.app > .left > .avatar .left .avatar .image {
+    width: 100%;
+    height: 100%;
+}
+
+.app > .left > .avatar .left .username {
+    padding-left: 10px;
+    line-height: 40px;
+    font-size: 16px;
+}
+
+.app > .left > .avatar .right {
+    float: right;
+}
+
+.app > .left > .avatar .right .menu {
+    float: right;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+}
+
+.app > .left > .avatar .right .menu .image {
+    width: 30px;
+    height: 30px;
+}
+
+.app > .left > .avatar .right .menu .functions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #fff;
+    transform: translate(0% , 100%);
+    -webkit-transform: translate(0% , 100%);
+    -moz-transform: translate(0% , 100%);
+    -ms-transform: translate(0% , 100%);
+    -o-transform: translate(0% , 100%);
+}
+
+.app > .left > .avatar .right .menu .functions .function {
+    height: 50px;
+    padding: 8px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+}
+
+.app > .left > .avatar .right .menu .functions .function:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.app > .left > .avatar .right .menu .functions .function > * {
+    height: 100%;
+    float: left;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+}
+
+.app > .left > .avatar .right .menu .functions .function .left {
+
+}
+
+.app > .left > .avatar .right .menu .functions .function .left .image {
+    width: 34px;
+    height: 34px;
+}
+
+.app > .left > .avatar .right .menu .functions .function .right {
+    margin-left: 40px;
+}
+
+/**
+ * **********************
+ * 右边输入框
+ * **********************
+ */
+
+.app > .right {
+    padding-left: 280px;
+}

@@ -73,7 +73,7 @@ return [
         'delete_private_message_from_cache' ,
         // 通知给定的用户清空应用本地数据中的给定私聊会话记录
         'empty_private_session_from_cache' ,
-        // 通知给定的用户清空应用本地数据中的给定私聊会话记录
+        // 通知给定的用户清空应用本地数据中的给定群聊会话记录
         'empty_group_session_from_cache' ,
         // 刷新黑名单列表
         'refresh_blacklist' ,
@@ -83,8 +83,8 @@ return [
         'gt' ,
         // pc 端登录成功 ws 推送
         'logined' ,
-        // pc 端登录页面使用的用户身份
-        'login_user' ,
+        // pc 端登录页面使用的用户头像
+        'avatar' ,
     ] ,
 
     // 消息

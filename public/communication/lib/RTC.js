@@ -22,6 +22,8 @@
             platform: '' ,
             // 调试模式
             debug: true ,
+            // 用户身份认证问题
+            token: null ,
         };
         if (G.isUndefined(option)) {
             option = this._default;
@@ -41,6 +43,7 @@
         this.identifier = G.isValid(option.identifier) ? option.identifier : this._default.identifier;
         this.platform = G.isValid(option.platform) ? option.platform : this._default.platform;
         this.debug = G.isValid(option.debug) ? option.debug : this._default.debug;
+        this.token = G.isValid(option.token) ? option.token : this._default.token;
         // 模拟数据
         this.simulation = {
             // 调试模式
@@ -144,6 +147,8 @@
                 user_id: this.simulation.user_id ,
                 // 调试模式
                 debug: this.simulation.debug ,
+                // 登录身份
+                token: this.token ,
                 // 发送的数据
                 data ,
             };

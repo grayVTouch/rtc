@@ -261,6 +261,7 @@ class SessionAction extends Action
         }
         // 推送
         $other_id = ChatUtil::otherId($param['chat_id'] , $auth->user->id);
+        $user_ids = ChatUtil::userIds($param['chat_id']);
         // 发送一个通知
         ChatUtil::send($auth , [
             'user_id' => $auth->user->id ,
@@ -269,6 +270,7 @@ class SessionAction extends Action
             'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
             'old' => 1 ,
         ] , true);
+        $auth->pushAll($user_ids , 'empty_private_session_from_cache' , [$param['chat_id']]);
         return self::success();
     }
 
@@ -289,6 +291,7 @@ class SessionAction extends Action
                 GroupMessageUtil::delete($v->id);
             }
             DB::commit();
+            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
             // 发送一个通知
             ChatUtil::groupSend($auth , [
                 'group_id' => $param['group_id'] ,
@@ -297,6 +300,7 @@ class SessionAction extends Action
                 'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
                 'old' => 1 ,
             ] , true);
+            $auth->pushAll($user_ids , 'empty_group_session_from_cache' , [$param['group_id']]);
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();

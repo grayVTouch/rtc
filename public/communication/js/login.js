@@ -7,6 +7,8 @@
         data: {
             val: {
                 qrcode: '' ,
+                avatar: '' ,
+                mode: 'qrcode' ,
             } ,
             ins: {
                 rtc: null ,
@@ -38,6 +40,27 @@
 
             initialize () {
                 const self = this;
+
+                this.getQRCode();
+
+                this.ins.rtc.on('avatar' , function(res){
+                    self.val.avatar = res;
+                    self.val.mode = 'user';
+                });
+
+                // 监听 ws 推送
+                this.ins.rtc.on('logined' , function(res){
+                    // 将用户的 token 信息存储到 SessionStorage 中
+                    G.session.set('user_id' , res.user_id);
+                    G.session.set('token' , res.token);
+                    window.location.href = 'index.html';
+
+                });
+
+            } ,
+
+            // 获取二维码
+            getQRCode () {
                 // 生成二维码
                 this.ins.rtc.loginQRCodeForTest(null , (res) => {
                     if (res.code != 200) {
@@ -46,17 +69,12 @@
                     }
                     this.val.qrcode = res.data;
                 });
+            } ,
 
-                this.ins.rtc.on('login_user' , function(data){
-                    self.val.qrcode = data.avatar;
-                    console.log('登录用户信息' , data);
-                });
-
-                // 监听 ws 推送
-                this.ins.rtc.on('logined' , function(){
-                    console.log("成功登录信息");
-                });
-
+            // 切换账号
+            switchUser () {
+                this.val.mode = 'qrcode';
+                this.getQRCode();
             } ,
 
             run () {

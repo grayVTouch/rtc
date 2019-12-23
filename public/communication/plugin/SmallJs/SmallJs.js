@@ -4982,53 +4982,105 @@
 
     // localStorage 操作
     g.storage = {
-        get: function(k){
-            return window.localStorage.getItem(k);
-        } ,
+        local: {
+            get: function(k){
+                return window.localStorage.getItem(k);
+            } ,
 
-        set: function(k , v){
-            if (g.isUndefined(v) && g.isObject(k)) {
-                var k1 = null;
-                var v1 = null;
-                for (k1 in k)
-                {
-                    v1 = k1[k1];
-                    window.localStorage.setItem(k1 , v1);
+            set: function(k , v){
+                if (g.isUndefined(v) && g.isObject(k)) {
+                    var k1 = null;
+                    var v1 = null;
+                    for (k1 in k)
+                    {
+                        v1 = k1[k1];
+                        window.localStorage.setItem(k1 , v1);
+                    }
+                    return ;
                 }
-                return ;
+
+                window.localStorage.setItem(k , v);
+            } ,
+
+            exists: function(k){
+                return !g.isNull(this.get(k));
+            } ,
+
+            del: function(k){
+                if (g.isArray(k)) {
+                    k.forEach(function(v){
+                        window.localStorage.removeItem(v);
+                    });
+                    return ;
+                }
+
+                window.localStorage.removeItem(k);
+            } ,
+
+            clear: function(){
+                return window.localStorage.clear();
+            } ,
+
+            // json 操作
+            json: function(k , v){
+                if (g.isUndefined(v)) {
+                    return g.jsonDecode(this.get(k));
+                }
+
+                this.set(k , g.jsonEncode(v));
             }
-
-            window.localStorage.setItem(k , v);
         } ,
 
-        exists: function(k){
-            return !g.isNull(this.get(k));
-        } ,
+        session: {
+            get: function(k){
+                return window.sessionStorage.getItem(k);
+            } ,
 
-        del: function(k){
-            if (g.isArray(k)) {
-                k.forEach(function(v){
-                    window.localStorage.removeItem(v);
-                });
-                return ;
+            set: function(k , v){
+                if (g.isUndefined(v) && g.isObject(k)) {
+                    var k1 = null;
+                    var v1 = null;
+                    for (k1 in k)
+                    {
+                        v1 = k1[k1];
+                        window.sessionStorage.setItem(k1 , v1);
+                    }
+                    return ;
+                }
+
+                window.sessionStorage.setItem(k , v);
+            } ,
+
+            exists: function(k){
+                return !g.isNull(this.get(k));
+            } ,
+
+            del: function(k){
+                if (g.isArray(k)) {
+                    k.forEach(function(v){
+                        window.sessionStorage.removeItem(v);
+                    });
+                    return ;
+                }
+
+                window.sessionStorage.removeItem(k);
+            } ,
+
+            clear: function(){
+                return window.sessionStorage.clear();
+            } ,
+
+            // json 操作
+            json: function(k , v){
+                if (g.isUndefined(v)) {
+                    return g.jsonDecode(this.get(k));
+                }
+
+                this.set(k , g.jsonEncode(v));
             }
-
-            window.localStorage.removeItem(k);
         } ,
-
-        clear: function(){
-            return window.localStorage.clear();
-        } ,
-
-        // json 操作
-        json: function(k , v){
-            if (g.isUndefined(v)) {
-                return g.jsonDecode(this.get(k));
-            }
-
-            this.set(k , g.jsonEncode(v));
-        }
     };
+
 
     // 树遍历
     g.tree = {
@@ -7873,7 +7925,8 @@
     g.$s		= new Set();
     g.$q        = new Queue();
     g.c         = g.cookie;
-    g.s         = g.storage;
+    g.s         = g.storage.local;
+    g.session   = g.storage.session;
     g.t         = g.tree;
     g.v         = g.validate;
     g.click		= g.browser() === 'mobile' ? 'touchstart' : 'click';

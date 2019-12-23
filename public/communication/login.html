@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="plugin/Run/base.css">
     <link rel="stylesheet" href="css/public.css">
     <link rel="stylesheet" href="css/login.css">
 </head>
@@ -11,17 +12,17 @@
         <!-- 登录界面 -->
         <div class="login">
             <!-- 扫码登陆页面 -->
-            <div class="qrcode">
+            <div class="qrcode" v-if="val.mode == 'qrcode'">
                 <div class="top"><img :src="val.qrcode" class="image qr-code"></div>
                 <div class="mid">使用手机嗨聊扫码登录</div>
                 <div class="btm">网页版嗨聊需要配合手机使用</div>
             </div>
 
             <!-- 登录提示页面 -->
-            <div class="logined">
-                <div class="top"><img src="val.avatar" class="image avatar"></div>
+            <div class="user" v-if="val.mode == 'user'">
+                <div class="top"><img :src="val.avatar" class="image avatar"></div>
                 <div class="btm">
-                    <button>切换账号</button>
+                    <button class="btn" @click="switchUser">切换账号</button>
                 </div>
             </div>
         </div>
