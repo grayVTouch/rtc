@@ -149,6 +149,7 @@ class Application
                 'area_code' => config('app.waiter_area_code') ,
                 'phone' => config('app.waiter_phone') ,
                 'nickname' => config('app.system_waiter_name') ,
+                'avatar' => config('app.system_waiter_avatar') ,
                 // 系统用户
                 'is_system' => 1 ,
                 // 测试用户

@@ -572,11 +572,11 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查图形验证码是否正确
-        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
-        if ($res['code'] != 200) {
-            return self::error($res['data']);
-        }
+//        // 检查图形验证码是否正确
+//        $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
+//        if ($res['code'] != 200) {
+//            return self::error($res['data']);
+//        }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
             return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));

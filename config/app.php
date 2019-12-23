@@ -84,7 +84,7 @@ return [
     'identity' => 'test' ,
 
     // 系统服务员名称
-    'system_waiter_name' => '系统客服' ,
+    'system_waiter_name' => '客服' ,
 
     // 客服咨询会话名称
     'customer_channel_name' => '官方客服' ,
@@ -99,6 +99,9 @@ return [
 
     // 默认客服手机号码【13 位数字的手机号码，请固定 15 位数字】
     'waiter_phone' => '00000000000' ,
+
+    // 客服头像
+    'system_waiter_avatar' => 'http://combi.oss-ap-southeast-1.aliyuncs.com/shp/20191223/f5a146a17d2d09f62b260ea3fb14d41f.png' ,
 
     // 是否开启消息加密
     // 如果开启加密，那么将会使用
@@ -145,5 +148,7 @@ return [
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信时最安全的通信软件，所有的消息和通话哦都是通过点对点加密传输。' ,
+
+
 
 ];
