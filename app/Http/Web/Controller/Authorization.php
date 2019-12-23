@@ -35,7 +35,12 @@ class Authorization extends Base
         }
         $user_id = '600027';
         $user = UserData::findByIdentifierAndId('nimo' , $user_id);
-        WebSocket::push($param['client_id'] , json_encode($user));
+        WebSocket::push($param['client_id'] , json_encode([
+            'type' => 'login_user' ,
+            'data' => $user
+        ]));
+        var_dump('ws 推送 ');
+
         sleep(3);
         $param['platform'] = 'web';
         $param['identifier'] = 'nimo';
@@ -87,6 +92,7 @@ class Authorization extends Base
                     'token' => $param['token'] ,
                 ] ,
             ]));
+            var_dump('ws 推送 logined');
             return $this->success('操作成功');
         } catch(Exception $e) {
             DB::rollBack();

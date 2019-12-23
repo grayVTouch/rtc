@@ -81,6 +81,10 @@ return [
         'forced_offline' ,
         // gt3 极验验证
         'gt' ,
+        // pc 端登录成功 ws 推送
+        'logined' ,
+        // pc 端登录页面使用的用户身份
+        'login_user' ,
     ] ,
 
     // 消息

@@ -46,9 +46,12 @@
                     this.val.qrcode = res.data;
                 });
 
-            } ,
+                this.ins.rtc.on('');
 
-            wsInitialize () {
+                // 监听 ws 推送
+                this.ins.rtc.on('logined' , () => {
+
+                });
 
             } ,
 

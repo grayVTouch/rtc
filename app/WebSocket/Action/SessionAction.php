@@ -260,8 +260,15 @@ class SessionAction extends Action
             return self::error($res['data'] , $res['code']);
         }
         // 推送
-        $user_ids = ChatUtil::userIds($param['chat_id']);
-        $auth->pushAll($user_ids , 'refresh_session');
+        $other_id = ChatUtil::otherId($param['chat_id'] , $auth->user->id);
+        // 发送一个通知
+        ChatUtil::send($auth , [
+            'user_id' => $auth->user->id ,
+            'other_id' => $other_id ,
+            'type' => 'notification' ,
+            'message' => sprintf('"%s" 双向撤回了消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
+            'old' => 1 ,
+        ] , true);
         return self::success();
     }
 
@@ -282,9 +289,14 @@ class SessionAction extends Action
                 GroupMessageUtil::delete($v->id);
             }
             DB::commit();
-            // 推送
-            $user_ids = GroupMemberModel::getUserIdByGroupId($param['group_id']);
-            $auth->pushAll($user_ids , 'refresh_session');
+            // 发送一个通知
+            ChatUtil::groupSend($auth , [
+                'group_id' => $param['group_id'] ,
+                'type' => 'notification' ,
+                'user_id' => $auth->user->id ,
+                'message' => sprintf('"%s" 双向撤回了消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
+                'old' => 1 ,
+            ] , true);
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
