@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../Run/base.css" />
+    <link rel="stylesheet" href="../Run/form/ui.css" />
+    <link rel="stylesheet" href="../Run/form/input.css" />
+    <link rel="stylesheet" href="css/Editor.css" />
+</head>
+<body>
+
+<style>
+    body {
+        padding:20px;
+    }
+    #container {
+        margin-bottom:20px;
+    }
+
+    #textarea {
+    }
+
+    #html {
+        width:300px;
+        height:200px;
+        border:1px solid red;
+        margin:0px;
+        margin-bottom:20px;
+    }
+</style>
+
+<table class="input-tb">
+    <tbody>
+    <tr>
+        <td>可编辑的 html</td>
+        <td><div id="html" contenteditable="true"></div></td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="multiple-rows">
+            <button id="add_text" class="btn-7">追加富文本内容</button>
+            <button id="get_text" class="btn-7">获取文本</button>
+            <button id="add_focus_last" class="btn-7">添加焦点-尾部</button>
+            <button id="add_focus_first" class="btn-7">添加焦点-起始</button>
+            <button id="add_focus_origin" class="btn-7">添加焦点-上次位置</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div >
+
+<script src="../SmallJs/SmallJs.js"></script>
+<script src="js/Editor.js"></script>
+<script>
+    (function(){
+        "use strict";
+
+        // var textarea = G('#textarea');
+        var html = G('#html');
+        var addText = G('#add_text');
+        var getText = G('#get_text');
+        var addFocusLast = G('#add_focus_last');
+        var addFocusFirst = G('#add_focus_first');
+        var addFocusOrigin = G('#add_focus_origin');
+
+        // 光标上次获取焦点时的选区
+        var selection = {
+            startOffset: 0 ,
+            endOffset: 0
+        };
+
+        var editor = new Editor();
+
+        addText.on('click' , function(event){
+            // var text = textarea.val();
+
+            var text = "![face][image](//static.360buyimg.com/im/w_web/img/classic/s38.gif)";
+
+            if (text === '') {
+                alert('不允许插入空值！！');
+                return ;
+            }
+
+            var changeHtml = editor.html(text);
+            console.log(changeHtml);
+
+            var _html = html.html();
+            var innerHtml = _html + changeHtml;
+
+            // 设置 html
+            html.html(innerHtml);
+
+            // 设置光标位置
+            G.setCursorPointForContentEditableElement(html.get(0) , 'last');
+        } , true , false);
+
+        getText.on('click' , function(event){
+            var innerHtml = html.html();
+            console.log(editor.text(innerHtml));
+            // console.log(editor.html(innerHtml));
+            console.log(innerHtml);
+        } , true , false);
+
+        addFocusLast.on('click' , function(){
+            G.setCursorPointForContentEditableElement(html.get(0) , 'last');
+        } , true , false);
+
+        addFocusFirst.on('click' , function(){
+            G.setCursorPointForContentEditableElement(html.get(0) , 'first');
+        } , true , false);
+
+        var pointer;
+
+        html.on('blur' , () => {
+            pointer = G.getCursorPointForContentEditableElement(html.get(0));
+        });
+
+        addFocusOrigin.on('click' , function(){
+            G.setCursorPointForContentEditableElement(pointer.node , pointer.position);
+        } , true , false);
+
+    })();
+</script>
+</body>
+</html>

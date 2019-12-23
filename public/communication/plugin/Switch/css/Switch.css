@@ -1,0 +1,32 @@
+/**
+ ********************
+ * 切换类
+ ***********************
+ */
+.switch {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.switch .items {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.switch .items:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.switch .items .item {
+    float: left;
+    height: 100%;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    overflow:auto;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv='content-type' content='text/html;charset=utf8' />
+    <link rel="stylesheet" href="../Run/base.css" />
+    <link rel="stylesheet" href="css/Loading.css" />
+</head>
+<body>
+<style>
+    .con {
+        min-width:300px;
+        height:500px;
+        border:1px solid red;
+        position:relative;
+        overflow: auto;
+    }
+
+    .content {
+        width: 800px;
+        height: 900px;
+        background-color: green;
+    }
+</style>
+
+<div id="container" class="con">
+
+    <div class="content"></div>
+
+    <!-- 加载元素 -->
+    <div class="Loading">
+        <!-- 背景颜色 -->
+        <div class='bg'></div>
+        <div class="cons">
+            <div class="text">
+                <!-- 进度信息：仅在开发时保留 -->
+                <span class="line">上传基本信息开始</span>
+            </div>
+            <!-- 加载动画 -->
+            <div class="animate">
+                <!-- line-scale -->
+                <div class="item center line-scale hide">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <!-- ball-purlse -->
+                <div class="item center ball-pulse hide">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <!-- loader -->
+                <div class="item roll-loader hide">
+                    <div class="loader">
+                        <div class="loader-outter"></div>
+                        <div class="loader-inner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 关闭按钮 -->
+        <div class="btns">
+            <div class="btn close">
+                <div class="positive"></div>
+                <div class="negative"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<button type="button" id="btn" class="btn-2">切换</button>
+
+<script src="../SmallJs/SmallJs.js"></script>
+<script src="js/Loading.js"></script>
+<script>
+    (function(){
+        'use strict';
+
+        var con = G('#container');
+        var l = new Loading(con.get(0) , {
+            status: 'show' ,
+            type: 'ball-pulse' ,
+            text: ['第一步' , '第二部' , '第三部'] ,
+            close: function(){
+                console.log('请求已经关闭');
+            }
+        });
+
+        var btn = G('#btn');
+        btn.on('click' , function(){
+            if (l.status === 'show') {
+                l.hide();
+            } else {
+                l.show();
+            }
+        } , true , false);
+    })();
+</script>
+</body>
+</html>
