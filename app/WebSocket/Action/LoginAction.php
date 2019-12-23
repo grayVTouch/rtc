@@ -547,6 +547,7 @@ class LoginAction extends Action
                 'user_id' => $id ,
             ]);
             DB::commit();
+            // 注册成功
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
