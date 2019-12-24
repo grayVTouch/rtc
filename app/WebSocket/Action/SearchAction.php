@@ -150,10 +150,6 @@ class SearchAction extends Action
         }
         $friend = FriendModel::searchByUserIdWithAliasAndNicknameAndUsername($auth->user->id , $param['value']);
         $group  = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
-
-        var_dump($friend);
-        var_dump($group);
-
         foreach ($friend as $v)
         {
             $v->type = 'private';
