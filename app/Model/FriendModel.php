@@ -213,7 +213,7 @@ class FriendModel extends Model
     // 搜索好友（用户名 + 昵称）
     public static function searchByUserIdAndValueAndLimit(int $user_id , string $value , int $limit = 20)
     {
-//        $value = strtolower($value);
+        $value = strtolower($value);
         $where = [
             ['f.user_id' , '=' , $user_id]
         ];
@@ -228,17 +228,19 @@ class FriendModel extends Model
 //                'alias' => "%{$value}%" ,
 //                'nickname' => "%{$value}%" ,
 //            ])
-            ->where(function($query) use($value){
-                // 利用子查询实现
-                // where user_id = 1 and (alias like "%{$value}%" or nickname like "%{$value}%")
-                $query->where('f.alias' , 'like' , "%{$value}%")
-                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
-            })
+//            ->where(function($query) use($value){
+//                $query->where('f.alias' , 'like' , "%{$value}%")
+//                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
+//            })
+            ->whereRaw('lower(f.alias) like "%:alias%" or lower(u.nickname) like "%:nickname%"' , [
+                'alias' => $value ,
+                'nickname' => $value
+            ])
             ->select('f.*')
             ->orderBy('f.id' , 'desc');
-        if (!empty($limit)) {
-            $ins->limit($limit);
-        }
+//        if (!empty($limit)) {
+//            $ins->limit($limit);
+//        }
         $res = $ins->get();
         $res = convert_obj($res);
         foreach ($res as $v)
