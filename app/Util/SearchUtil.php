@@ -41,21 +41,21 @@ class SearchUtil extends Util
     public static function searchGroupByUserIdAndValueAndLimitForLocal(int $user_id , $value , $limit = 0): array
     {
         $qualified_groups = [];
-        $group_ids = GroupMemberModel::getGroupIdByUserId($user_id);
-        foreach ($group_ids as $v)
+        $my_group = GroupMemberModel::getByUserId($user_id);
+        foreach ($my_group as $v)
         {
-            $member = GroupMemberModel::searchByGroupIdAndValueOnlyFirst($v , $value);
-            if (empty($member)) {
-                continue ;
+
+            if (isset($v->group) && mb_strpos($v->group->name , $value) !== false) {
+                GroupUtil::handle($v->group , $user_id);
+                $qualified_groups[] = $v->group;
+            } else {
+                $member = GroupMemberModel::searchByGroupIdAndValueOnlyFirst($v->group_id , $value);
+                if (empty($member)) {
+                    continue ;
+                }
+                GroupUtil::handle($v->group , $user_id);
+                $qualified_groups[] = $v;
             }
-            if (!empty($limit) && count($qualified_groups) >= $limit) {
-                return $qualified_groups;
-            }
-            $group = $member->group;
-            $group->member = $member->user;
-            GroupUtil::handle($group , $user_id);
-            UserUtil::handle($group->member , $user_id);
-            $qualified_groups[] = $group;
         }
         return $qualified_groups;
     }

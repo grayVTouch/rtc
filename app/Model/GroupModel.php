@@ -103,11 +103,14 @@ class GroupModel extends Model
 
     public static function searchByUserIdWithName(int $user_id , $value)
     {
+        $value = strtolower($value);
         $res = self::from('group_member as gm')
             ->leftJoin('group as g' , 'g.id' , '=' , 'gm.group_id')
             ->where([
-                ['g.name' , 'like' , "%{$value}%"] ,
                 ['gm.user_id' , '=' , $user_id] ,
+            ])
+            ->whereRaw('lower(rtc_g.name) like "%:name%"' , [
+                'name' => $value
             ])
             ->select('g.*', 'gm.create_time as join_time')
             ->get();

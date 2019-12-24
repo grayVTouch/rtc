@@ -241,8 +241,11 @@ class GroupMemberModel extends Model
             ->join('user as u' , 'gm.user_id' , '=' , 'u.id')
             ->where([
                 ['gm.group_id' , '=' , $group_id] ,
-                ['u.nickname' , 'like' , "%{$value}%"] ,
             ])
+            ->whereRaw('lower(rtc_u.nickname) like "%:nickname%"' , [
+                'nickname'  => $value
+            ])
+            ->select('gm.*')
             ->first();
         if (empty($res)) {
             return ;

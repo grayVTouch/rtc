@@ -224,14 +224,6 @@ class FriendModel extends Model
             ->from('friend as f')
             ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
-//            ->whereRaw('lower(rtc_f.alias) like "%:alias%" or rtc_u.nickname like :nickname' , [
-//                'alias' => "%{$value}%" ,
-//                'nickname' => "%{$value}%" ,
-//            ])
-//            ->where(function($query) use($value){
-//                $query->where('f.alias' , 'like' , "%{$value}%")
-//                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
-//            })
             ->whereRaw('lower(rtc_f.alias) like "%:alias%" or lower(rtc_u.nickname) like "%:nickname%"' , [
                 'alias'     => $value ,
                 'nickname'  => $value
@@ -255,15 +247,21 @@ class FriendModel extends Model
     // 搜索用户
     public static function searchByUserIdWithAliasAndNicknameAndUsername(int $user_id , $value)
     {
+        $value = strtolower($value);
         $res = self::with(['user' , 'friend'])
             ->from('friend as f')
             ->leftJoin('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where('f.user_id' , $user_id)
-            ->where(function($query) use($value){
-                $query->where('f.alias' , 'like' , "%{$value}%")
-                    ->orWhere('u.nickname' , 'like' , "%{$value}%")
-                    ->orWhere('u.username' , 'like' , "%{$value}%");
-            })
+//            ->where(function($query) use($value){
+//                $query->where('f.alias' , 'like' , "%{$value}%")
+//                    ->orWhere('u.nickname' , 'like' , "%{$value}%")
+//                    ->orWhere('u.username' , 'like' , "%{$value}%");
+//            })
+            ->whereRaw('lower(rtc_f.alias) like "%:alias%" or lower(rtc_u.nickname) like "%:nickname%" or lower(rtc_u.username) like "%:username%"' , [
+                'alias' => $value ,
+                'nickname' => $value ,
+                'username' => $value ,
+            ])
             ->select('f.*')
             ->get();
         $res = convert_obj($res);

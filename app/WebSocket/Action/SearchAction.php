@@ -56,7 +56,6 @@ class SearchAction extends Action
     // 本地搜索
     // 第一：好友搜索
     // 第二：群搜索
-    // 第三：历史消息记录
     public static function searchInLocal(Auth $auth , array $param)
     {
         $validator = Validator::make($param, [
@@ -71,12 +70,6 @@ class SearchAction extends Action
         $qualified_users = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
         // 搜索群组（搜索群名称）
         $qualified_groups = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
-        // 私聊记录
-        $qualified_private_for_history = SearchUtil::searchPrivateSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
-        // 群聊记录
-        $qualified_group_for_history = SearchUtil::searchGroupSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
-        // 合并消息列表
-        $history = array_merge($qualified_private_for_history , $qualified_group_for_history);
         // 合并记录排序
         usort($history , function($a , $b){
             if ($a->create_time == $b->create_time) {
@@ -89,8 +82,6 @@ class SearchAction extends Action
             'user' => $qualified_users ,
             // 符合条件的群组
             'group' => $qualified_groups ,
-            // 符合条件的聊天记录
-            'history' => $history ,
         ];
         return self::success($res);
     }
