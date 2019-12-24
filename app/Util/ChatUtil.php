@@ -165,6 +165,15 @@ class ChatUtil extends Util
         // todo app 推送要额外的事件队列处理
         AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
+            switch ($msg->type)
+            {
+                case 'image':
+                    $message = '[图片]';
+                    break;
+                case 'voice':
+                    $message = '[语音]';
+                    break;
+            }
             $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , $msg , false);
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
@@ -260,6 +269,15 @@ class ChatUtil extends Util
         $msg = convert_obj($msg);
         AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
+            switch ($msg->type)
+            {
+                case 'image':
+                    $message = '[图片]';
+                    break;
+                case 'voice':
+                    $message = '[语音]';
+                    break;
+            }
             $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , $msg , false);
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");

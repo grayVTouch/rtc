@@ -77,16 +77,27 @@ class FriendAction extends Action
             } else {
                 $param['status'] = 'wait';
             }
-            ApplicationModel::insertGetId(array_unit($param , [
-                'type' ,
-                'op_type' ,
-                'user_id' ,
-                'relation_user_id' ,
-                'status' ,
-                'remark' ,
-                'log' ,
-                'identifier' ,
-            ]));
+            // 检查用户申请是否存在
+            $app = ApplicationModel::findByUserIdAndOpTypeAndRelationUserIdForPrivate($param['friend_id'] , $param['op_type'] , $auth->user->id);
+            if (empty($app)) {
+                // 当申请不存在的时候就
+                ApplicationModel::insertGetId(array_unit($param , [
+                    'type' ,
+                    'op_type' ,
+                    'user_id' ,
+                    'relation_user_id' ,
+                    'status' ,
+                    'remark' ,
+                    'log' ,
+                    'identifier' ,
+                ]));
+            } else {
+                // 更新申请时间
+                ApplicationModel::updateById($app->id , [
+                    'create_time'   => date('Y-m-d H:i:s' , time()) ,
+                    'status'        => $param['status'] ,
+                ]);
+            }
             DB::commit();
             if ($friend->user_option->friend_auth == 1) {
                 // 推送申请数量更新

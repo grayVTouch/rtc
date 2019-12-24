@@ -79,7 +79,6 @@ class GroupAction extends Action
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
             $auth->push($group->user_id , 'refresh_app_unread_count');
-
             AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
                 AppPushUtil::pushForAppGroup($param['user_id'] , $param['log'] , '申请进群');
             });

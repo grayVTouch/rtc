@@ -28,6 +28,7 @@ class ApplicationModel extends Model
         ];
         $res = self::with(['user'])
             ->where($where)
+            ->orderBy('create_time' , 'desc')
             ->orderBy('id' , 'desc')
             ->offset($offset)
             ->limit($limit)
@@ -89,5 +90,33 @@ class ApplicationModel extends Model
                     ])
                     ->whereIn('id' , $id_list)
                     ->count()) > 0;
+    }
+
+    // 检查请求是否存在
+    public static function findByUserIdAndOpTypeAndRelationUserIdForPrivate(int $user_id , string $op_type , string $relation_user_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['type' , '=' , 'private'] ,
+                ['op_type' , '=' , $op_type] ,
+                ['relation_user_id' , '=' , $relation_user_id] ,
+            ])
+            ->first();
+        self::single($res);
+        return $res;
+    }
+
+    public static function findByUserIdAndOpTypeAndGroupIdAndRelationUserIdForGroup(int $user_id , string $op_type , int $group_id , string $relation_user_id)
+    {
+        $res = self::where([
+            ['user_id' , '=' , $user_id] ,
+            ['type' , '=' , 'group'] ,
+            ['op_type' , '=' , $op_type] ,
+            ['group_id' , '=' , $group_id] ,
+            ['relation_user_id' , '=' , $relation_user_id] ,
+        ])
+            ->first();
+        self::single($res);
+        return $res;
     }
 }
