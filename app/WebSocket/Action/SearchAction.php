@@ -156,6 +156,8 @@ class SearchAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        print_r($param);
+        var_dump($param['value']);
         $friend = FriendModel::searchByUserIdWithAliasAndNicknameAndUsername($auth->user->id , $param['value']);
         $group = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
         foreach ($friend as $v)
