@@ -232,7 +232,7 @@ class FriendModel extends Model
 //                $query->where('f.alias' , 'like' , "%{$value}%")
 //                    ->orWhere('u.nickname' , 'like' , "%{$value}%");
 //            })
-            ->whereRaw('lower(f.alias) like "%:alias%" or lower(u.nickname) like "%:nickname%"' , [
+            ->whereRaw('lower(rtc_friend.alias) like "%:alias%" or lower(rtc_user.nickname) like "%:nickname%"' , [
                 'alias' => $value ,
                 'nickname' => $value
             ])
