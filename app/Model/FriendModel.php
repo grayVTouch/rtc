@@ -224,10 +224,7 @@ class FriendModel extends Model
             ->from('friend as f')
             ->join('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where($where)
-            ->whereRaw('lower(rtc_f.alias) like "%:alias%" or lower(rtc_u.nickname) like "%:nickname%"' , [
-                'alias'     => $value ,
-                'nickname'  => $value
-            ])
+            ->whereRaw(DB::raw("(lower(rtc_f.alias) like '%{$value}%' or lower(rtc_u.nickname) like '%{$value}%')"))
             ->select('f.*')
             ->orderBy('f.id' , 'desc');
 //        if (!empty($limit)) {
@@ -252,16 +249,7 @@ class FriendModel extends Model
             ->from('friend as f')
             ->leftJoin('user as u' , 'u.id' , '=' , 'f.friend_id')
             ->where('f.user_id' , $user_id)
-//            ->where(function($query) use($value){
-//                $query->where('f.alias' , 'like' , "%{$value}%")
-//                    ->orWhere('u.nickname' , 'like' , "%{$value}%")
-//                    ->orWhere('u.username' , 'like' , "%{$value}%");
-//            })
-            ->whereRaw('(lower(rtc_f.alias) like "%:alias%" or lower(rtc_u.nickname) like "%:nickname%" or lower(rtc_u.username) like "%:username%")' , [
-                'alias' => $value ,
-                'nickname' => $value ,
-                'username' => $value ,
-            ])
+            ->whereRaw(DB::raw("(lower(rtc_f.alias) like '%{$value}%' or lower(rtc_u.nickname) like '%{$value}%' or lower(rtc_u.username) like '%{$value}%')"))
             ->select('f.*')
             ->get();
         $res = convert_obj($res);

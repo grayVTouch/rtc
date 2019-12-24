@@ -236,15 +236,14 @@ class GroupMemberModel extends Model
 
     public static function searchByGroupIdAndValueOnlyFirst(int $group_id , string $value)
     {
+        $value = strtolower($value);
         $res = self::with(['group' , 'user'])
             ->from('group_member as gm')
             ->join('user as u' , 'gm.user_id' , '=' , 'u.id')
             ->where([
                 ['gm.group_id' , '=' , $group_id] ,
             ])
-            ->whereRaw('lower(rtc_u.nickname) like "%:nickname%"' , [
-                'nickname'  => $value
-            ])
+            ->whereRaw(DB::raw("lower(rtc_u.nickname) like '%{$value}%'"))
             ->select('gm.*')
             ->first();
         if (empty($res)) {

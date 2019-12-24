@@ -109,9 +109,7 @@ class GroupModel extends Model
             ->where([
                 ['gm.user_id' , '=' , $user_id] ,
             ])
-            ->whereRaw('lower(rtc_g.name) like "%:name%"' , [
-                'name' => $value
-            ])
+            ->whereRaw(DB::raw("lower(rtc_g.name) like '%{$value}%'"))
             ->select('g.*', 'gm.create_time as join_time')
             ->get();
         $res = convert_obj($res);

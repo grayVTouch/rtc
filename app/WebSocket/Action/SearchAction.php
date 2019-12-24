@@ -65,18 +65,10 @@ class SearchAction extends Action
             return self::error($validator->message());
         }
         $limit = 3;
-
         // 搜索自身
         $qualified_users = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
         // 搜索群组（搜索群名称）
         $qualified_groups = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
-        // 合并记录排序
-        usort($history , function($a , $b){
-            if ($a->create_time == $b->create_time) {
-                return 0;
-            }
-            return $a->create_time > $b->create_time ? -1 : 1;
-        });
         $res = [
             // 符合提交的好友
             'user' => $qualified_users ,
@@ -156,10 +148,12 @@ class SearchAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-//        print_r($param);
-//        var_dump($param['value']);
         $friend = FriendModel::searchByUserIdWithAliasAndNicknameAndUsername($auth->user->id , $param['value']);
-        $group = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
+        $group  = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
+
+        var_dump($friend);
+        var_dump($group);
+
         foreach ($friend as $v)
         {
             $v->type = 'private';
