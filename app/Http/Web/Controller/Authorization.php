@@ -33,14 +33,13 @@ class Authorization extends Base
         if (!WebSocket::exist($param['client_id'])) {
             return $this->error('客户端已经离线');
         }
-        $user_id = '600027';
+        $user_id = '600550';
         $user = UserData::findByIdentifierAndId('nimo' , $user_id);
         WebSocket::push($param['client_id'] , json_encode([
             'type' => 'avatar' ,
             'data' => $user->avatar
         ]));
         var_dump('ws 推送 ');
-
         sleep(5);
         $param['platform'] = 'web';
         $param['identifier'] = 'nimo';

@@ -28,7 +28,7 @@
             initWebSocket () {
                 const self = this;
                 this.ins.rtc = new RTC({
-                    url: 'ws://192.168.145.129:10001' ,
+                    url: topContext.websocket ,
                     identifier: 'nimo' ,
                     platform: 'web' ,
                     open () {

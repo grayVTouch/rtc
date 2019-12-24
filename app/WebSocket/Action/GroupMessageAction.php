@@ -122,9 +122,9 @@ class GroupMessageAction extends Action
         if (empty($message)) {
             return self::error('未找到消息id对应的记录' , 404);
         }
-        if ($message->user_id != $auth->user->id) {
-            return self::error('您无法更改他人得消息读取状态' , 403);
-        }
+//        if ($message->user_id != $auth->user->id) {
+//            return self::error('您无法更改他人得消息读取状态' , 403);
+//        }
         $res = GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $message->id);
         if (!empty($res)) {
             return self::error('操作失败！该条消息已经是已读状态');

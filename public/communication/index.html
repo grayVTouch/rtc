@@ -13,14 +13,14 @@
     <div class="left">
         <div class="avatar">
             <div class="left">
-                <div class="avatar"><img src="file/avatar.png" class="image"></div>
-                <div class="username">running</div>
+                <div class="avatar"><img :src="val.user.avatar" class="image"></div>
+                <div class="username">{{ val.user.nickname }}</div>
             </div>
             <div class="right">
-                <div class="menu">
+                <div class="menu" @click.stop="showFunction">
                     <img src="file/menu.png" class="image">
-                    <div class="functions">
-                        <div class="function">
+                    <div class="functions" v-if="val.showFunction" @click.stop>
+                        <div class="function" @click="logout">
                             <div class="left"><img src="file/logout.png" class="image"></div>
                             <div class="right">退出</div>
                         </div>
@@ -28,7 +28,56 @@
                 </div>
             </div>
         </div>
-        <div class="search"></div>
+        <div class="search">
+            <div>
+                <div class="c-search">
+                    <div class="in">
+                        <div class="left"><img src="file/search.png" class="image"></div>
+                        <div class="right"><input type="text" class="search-input" placeholder="搜索"></div>
+
+                        <div class="res">
+
+                            <div class="friend">
+                                <div class="title">好友</div>
+                                <div class="list">
+
+                                    <div class="line">
+                                        <div class="in">
+                                            <div class="left"><img src="file/avatar.png"></div>
+                                            <div class="right">A00志成电脑张加假</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="line">
+                                        <div class="left"><img src="file/avatar.png"></div>
+                                        <div class="right">A00志成电脑张加假</div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="group">
+                                <div class="title">群组</div>
+                                <div class="list">
+
+                                    <div class="line">
+                                        <div class="left"><img src="file/avatar.png"></div>
+                                        <div class="right">A00志成电脑张加假</div>
+                                    </div>
+
+                                    <div class="line">
+                                        <div class="left"><img src="file/avatar.png"></div>
+                                        <div class="right">A00志成电脑张加假</div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="menu"></div>
         <div class="session"></div>
     </div>
@@ -49,7 +98,9 @@
 </div>
 
 <script src="plugin/SmallJs/SmallJs.js"></script>
+<script src="lib/RTC.js"></script>
 <script src="lib/vue.js"></script>
+<script src="js/public.js"></script>
 <script src="js/index.js"></script>
 </body>
 </html>

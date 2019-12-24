@@ -21,7 +21,7 @@
             // 支持的平台标识符有： app|web
             platform: '' ,
             // 调试模式
-            debug: true ,
+            debug: false ,
             // 用户身份认证问题
             token: null ,
         };
@@ -49,7 +49,7 @@
             // 调试模式
             debug: this.debug ? 'running' : '' ,
             // 模拟的用户
-            user_id: 600027
+            user_id: 0
         };
         this.open = G.isFunction(option.open) ? option.open : this._default.open;
         this.message = G.isFunction(option.message) ? option.message : this._default.message;
@@ -134,6 +134,7 @@
             }
             const request = this.genRequestId();
             this.callback[request] = callback;
+            data = G.isValid(data) ? data : {};
             data = {
                 // 路由地址
                 router ,
@@ -175,6 +176,11 @@
         // 获取会话列表
         session (data , callback) {
             this.send('/Session/session' , data , callback);
+        } ,
+
+        // 查看自身用户信息
+        self (data , callback) {
+            this.send('/User/self' , data , callback);
         } ,
 
         run () {
