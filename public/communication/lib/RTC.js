@@ -24,6 +24,11 @@
             debug: false ,
             // 用户身份认证问题
             token: null ,
+            // 首次重连将会立即链接，接下去的每次链接都会等待给定的时间后进行重连
+            // 单位：s
+            interval: 1 ,
+            // 重连状态
+
         };
         if (G.isUndefined(option)) {
             option = this._default;
@@ -44,6 +49,9 @@
         this.platform = G.isValid(option.platform) ? option.platform : this._default.platform;
         this.debug = G.isValid(option.debug) ? option.debug : this._default.debug;
         this.token = G.isValid(option.token) ? option.token : this._default.token;
+        // 首次连接时长
+        this.onceReconnect = true;
+        this.interval = G.isValid(option.interval) ? option.interval : this._default.interval;
         // 模拟数据
         this.simulation = {
             // 调试模式
@@ -65,6 +73,12 @@
         // 建立连接
         connect () {
             this.websocket = new WebSocket(this.url);
+
+            // 事件定义
+            this.websocket.onopen = this.openEvent.bind(this);
+            this.websocket.onmessage = this.messageEvent.bind(this);
+            this.websocket.onclose = this.closeEvent.bind(this);
+            this.websocket.onerror = this.errorEvent.bind(this);
         } ,
 
         // 生成随机数
@@ -117,8 +131,14 @@
         closeEvent () {
             // 重置链接打开状态
             this.opened = false;
-            // 重连
-            this.connect();
+
+            if (this.onceReconnect) {
+                this.onceReconnect = false;
+                // 重连
+                this.connect();
+            } else {
+                window.setTimeout(this.connect.bind(this) , this.interval);
+            }
         } ,
 
         errorEvent (e) {
@@ -157,10 +177,7 @@
         } ,
 
         defineEvent () {
-            this.websocket.onopen = this.openEvent.bind(this);
-            this.websocket.onmessage = this.messageEvent.bind(this);
-            this.websocket.onclose = this.closeEvent.bind(this);
-            this.websocket.onerror = this.errorEvent.bind(this);
+
         } ,
 
         // 登录二维码
@@ -185,7 +202,6 @@
 
         run () {
             this.connect();
-            this.defineEvent();
         } ,
     };
 

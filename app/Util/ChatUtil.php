@@ -98,7 +98,7 @@ class ChatUtil extends Util
         $param['blocked'] = (int) $blocked;
         $param['old'] = $param['old'] ?? '';
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
-        $param['aes_key'] = $user->aes_key;
+        $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
         try {
             DB::beginTransaction();
@@ -333,7 +333,7 @@ class ChatUtil extends Util
         $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
         $param['old'] = $param['old'] ?? '';
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
-        $param['aes_key'] = $user->aes_key;
+        $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
         try {
             DB::beginTransaction();

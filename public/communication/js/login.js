@@ -35,6 +35,11 @@
                         // 连接打开的情况下才能够进行初始化
                         self.initialize();
                     } ,
+
+                    // ws 重连成功后
+                    reconnect () {
+                        self.initialize();
+                    } ,
                 });
             } ,
 

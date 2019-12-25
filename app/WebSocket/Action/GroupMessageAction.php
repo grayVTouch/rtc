@@ -264,6 +264,7 @@ class GroupMessageAction extends Action
                     'message' => $v->message ,
                     'extra' => $v->extra ,
                     'old' => $v->old ,
+                    'aes_key' => $v->aes_key ,
                 ] , true);
                 if ($forward['code'] != 200) {
                     $res['error'][] = [
@@ -314,6 +315,8 @@ class GroupMessageAction extends Action
                     'type' => $v->type ,
                     'message' => $v->message ,
                     'extra' => $v->extra ,
+                    'old' => $v->old ,
+                    'aes_key' => $v->aes_key ,
                 ] , true);
                 if ($forward['code'] != 200) {
                     $res['error'][] = [

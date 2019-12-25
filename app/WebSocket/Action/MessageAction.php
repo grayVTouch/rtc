@@ -310,7 +310,8 @@ class MessageAction extends Action
                     'type' => $v->type ,
                     'message' => $v->message ,
                     'extra' => $v->extra ,
-                    'old'   => $v->old
+                    'old'   => $v->old ,
+                    'aes_key' => $v->aes_key ,
                 ] , true);
                 if ($forward['code'] != 200) {
                     $res['error'][] = [
@@ -361,6 +362,8 @@ class MessageAction extends Action
                     'type' => $v->type ,
                     'message' => $v->message ,
                     'extra' => $v->extra ,
+                    'aes_key' => $v->aes_key ,
+                    'old' => $v->old ,
                 ] , true);
                 if ($forward['code'] != 200) {
                     $res['error'][] = [
@@ -375,8 +378,6 @@ class MessageAction extends Action
         } else {
             // 待扩充
         }
-
-
     }
 
     // 消息合并转发
