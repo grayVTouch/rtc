@@ -32,10 +32,11 @@ class UnreadAction extends Action
         {
             if ($v->type == 'private') {
                 // 检查是否开启了免打扰
-//                $other_id = ChatUtil::otherId($v->target_id , $session->user_id);
-//                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $session->user_id , $other_id);
-//                $can_notice = empty($relation) ? 1 : $relation->can_notice;
-                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
+                $other_id = ChatUtil::otherId($v->target_id , $v->user_id);
+                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($v->identifier , $v->user_id , $other_id);
+                $can_notice = empty($relation) ? 1 : $relation->can_notice;
+                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
+//                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
 //                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
 
             }
@@ -43,7 +44,11 @@ class UnreadAction extends Action
 //                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
 //                $can_notice = empty($member) ? 1 : $member->can_notice;
 //                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $v->user_id);
+                $can_notice = empty($member) ? 1 : $member->can_notice;
+                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
+
+//                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
 
             }
         }
@@ -68,19 +73,20 @@ class UnreadAction extends Action
         {
             if ($v->type == 'private') {
                 // 检查是否开启了免打扰
-//                $other_id = ChatUtil::otherId($v->target_id , $session->user_id);
-//                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $session->user_id , $other_id);
-//                $can_notice = empty($relation) ? 1 : $relation->can_notice;
+                $other_id = ChatUtil::otherId($v->target_id , $v->user_id);
+                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($v->identifier , $v->user_id , $other_id);
+                $can_notice = empty($relation) ? 1 : $relation->can_notice;
+                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
 
-//                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
-                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
+//                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
 
             }
             if ($v->type == 'group') {
-//                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
-//                $can_notice = empty($member) ? 1 : $member->can_notice;
-//                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $v->user_id);
+                $can_notice = empty($member) ? 1 : $member->can_notice;
+                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
+
+//                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
 
 
             }
