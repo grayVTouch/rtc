@@ -20,8 +20,11 @@ $credentials = new Aws\Credentials\Credentials('AKIAIXU3H2XGLTGGQDZQ', 'GZ/6Lfod
 $s3 = new Aws\S3\S3Client([
 //    'profile' => 'default',
     'version' => 'latest',
-    'region' => 'us-east-2' ,
-    'credentials' => $credentials
+    'region' => 'ap-east-1' ,
+    'credentials' => $credentials ,
+    'http' => [
+        'verify' => '/path/to/my/cert.pem'
+    ]
 ]);
 
 $avatar = file_get_contents(__DIR__ . '/avatar.png');

@@ -9,11 +9,15 @@
 namespace App\WebSocket\Action;
 
 
+use App\Data\FriendData;
+use App\Data\GroupMemberData;
 use App\Model\ApplicationModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\PushModel;
 use App\Model\SessionModel;
+use App\Model\UserModel;
+use App\Util\ChatUtil;
 use App\WebSocket\Auth;
 
 class UnreadAction extends Action
@@ -27,10 +31,20 @@ class UnreadAction extends Action
         foreach ($session as $v)
         {
             if ($v->type == 'private') {
-                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
+                // 检查是否开启了免打扰
+                $other_id = ChatUtil::otherId($v->target_id , $session->user_id);
+                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $session->user_id , $other_id);
+                $can_notice = empty($relation) ? 1 : $relation->can_notice;
+//                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
+                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
+
             }
             if ($v->type == 'group') {
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
+                $can_notice = empty($member) ? 1 : $member->can_notice;
+                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
+//                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+
             }
         }
         // 申请记录
@@ -53,10 +67,20 @@ class UnreadAction extends Action
         foreach ($session as $v)
         {
             if ($v->type == 'private') {
-                $unread_count_by_private += MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id);
+                // 检查是否开启了免打扰
+                $other_id = ChatUtil::otherId($v->target_id , $session->user_id);
+                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $session->user_id , $other_id);
+                $can_notice = empty($relation) ? 1 : $relation->can_notice;
+
+                $unread_count_by_private += $can_notice == 1 ? MessageReadStatusModel::unreadCountByUserIdAndChatId($auth->user->id , $v->target_id) : 0;
+
             }
             if ($v->type == 'group') {
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
+                $can_notice = empty($member) ? 1 : $member->can_notice;
+                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
+
+
             }
         }
         // 推送消息（全部类型：公告等其他）
