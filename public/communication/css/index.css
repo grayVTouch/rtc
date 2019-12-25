@@ -1,5 +1,6 @@
 .app {
-    width: 1000px;
+    /*width: 1000px;*/
+    width: 400px;
     height: 650px;
     position: absolute;
     left: 50%;
@@ -228,10 +229,93 @@
     -moz-transform: translate(0% , 100%);
     -ms-transform: translate(0% , 100%);
     -o-transform: translate(0% , 100%);
+    background-color: #33363b;
+    box-shadow: 0 0 10px #2a2a2a;
+    -moz-box-shadow: 0 0 10px #2a2a2a;
+    -webkit-box-shadow: 0 0 10px #2a2a2a;
 }
 
-.app > .left > .search .c-search > .in > .res > .friend {
+.app > .left > .search .c-search > .in > .res > .item {
+    margin-bottom: 10px;
+    background-color: #393c43;
+}
 
+.app > .left > .search .c-search > .in > .res > .item:nth-last-of-type(1) {
+    margin-bottom: 0;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .title {
+    height: 25px;
+    line-height: 25px;
+    padding: 3px 9px;
+    font-size: 16px;
+    color: #787b87;
+
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list {
+
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line {
+    padding: 10px 9px;
+    cursor: pointer;
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+    border-bottom: 1px solid #33363b;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line:hover {
+    background-color: #595b64;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .focus {
+    background-color: #595b64;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line:nth-last-of-type(1) {
+    border-bottom: none;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line .in {
+    position: relative;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line .in .left {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line .in .left .image {
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+}
+
+.app > .left > .search .c-search > .in > .res > .item .list .line .right  {
+    margin-left: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    padding-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*** 左侧：菜单栏 ***/
+.app > .left > .menu {
+    padding: 0 0 4px 0;
+}
+
+.app > .left > .menu .item {
+    float: left;
+    width: 33.33%;
 }
 
 

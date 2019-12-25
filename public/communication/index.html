@@ -33,41 +33,47 @@
                 <div class="c-search">
                     <div class="in">
                         <div class="left"><img src="file/search.png" class="image"></div>
-                        <div class="right"><input type="text" class="search-input" placeholder="搜索"></div>
+                        <div class="right"><input type="text" class="search-input" @input="search" placeholder="搜索"></div>
 
-                        <div class="res">
+                        <div class="res" v-if="val.showSearch">
 
-                            <div class="friend">
+                            <div class="item friend">
                                 <div class="title">好友</div>
                                 <div class="list">
 
-                                    <div class="line">
+                                    <div class="line focus">
                                         <div class="in">
-                                            <div class="left"><img src="file/avatar.png"></div>
+                                            <div class="left"><img src="file/avatar.png" class="image"></div>
                                             <div class="right">A00志成电脑张加假</div>
                                         </div>
                                     </div>
 
                                     <div class="line">
-                                        <div class="left"><img src="file/avatar.png"></div>
-                                        <div class="right">A00志成电脑张加假</div>
+                                        <div class="in">
+                                            <div class="left"><img src="file/avatar.png" class="image"></div>
+                                            <div class="right">A00志成电脑张加假</div>
+                                        </div>
                                     </div>
 
                                 </div>
                             </div>
 
-                            <div class="group">
+                            <div class="item group">
                                 <div class="title">群组</div>
                                 <div class="list">
 
                                     <div class="line">
-                                        <div class="left"><img src="file/avatar.png"></div>
-                                        <div class="right">A00志成电脑张加假</div>
+                                        <div class="in">
+                                            <div class="left"><img src="file/avatar.png" class="image"></div>
+                                            <div class="right">A00志成电脑张加假</div>
+                                        </div>
                                     </div>
 
                                     <div class="line">
-                                        <div class="left"><img src="file/avatar.png"></div>
-                                        <div class="right">A00志成电脑张加假</div>
+                                        <div class="in">
+                                            <div class="left"><img src="file/avatar.png" class="image"></div>
+                                            <div class="right">A00志成电脑张加假</div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -78,7 +84,18 @@
                 </div>
             </div>
         </div>
-        <div class="menu"></div>
+        <div class="menu">
+            <div class="in">
+                <!-- 消息 -->
+                <div class="message">
+                    <img src="file/message.png" class="image">
+                </div>
+                <!-- 联系人-->
+                <div class="relation">
+                    <img src="file/relation.png" class="image">
+                </div>
+            </div>
+        </div>
         <div class="session"></div>
     </div>
     <div class="right">

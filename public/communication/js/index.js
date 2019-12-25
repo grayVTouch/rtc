@@ -5,8 +5,11 @@
         el: '#app' ,
         data: {
             val: {
+                // 系统功能展示
                 showFunction: false ,
                 user: {} ,
+                // 搜索展示
+                showSearch: false ,
             } ,
 
             ins: {
@@ -38,6 +41,11 @@
                     // 获取用户的登录凭证
                     token ,
                     open () {
+                        // ws 打开后进行初始化
+                        self.initialize();
+                    } ,
+                    reconnect () {
+                        // 重连后，重新初始化
                         self.initialize();
                     } ,
                 });
@@ -88,6 +96,25 @@
                 G.session.del('user_id');
                 G.session.del('token');
                 window.location.href = 'login.html';
+            } ,
+
+            showSearch () {
+                this.val.showSearch = true;
+            } ,
+
+            hideSearch () {
+                this.val.showSearch = false;
+            } ,
+
+            // 搜索
+            search (e) {
+                const tar = G(e.currentTarget);
+                const val = tar.val();
+                if (val.length > 0) {
+                    this.showSearch();
+                } else {
+                    this.hideSearch();
+                }
             } ,
 
             run () {

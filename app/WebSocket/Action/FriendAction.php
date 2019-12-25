@@ -204,6 +204,14 @@ class FriendAction extends Action
         if (!FriendModel::isFriend($auth->user->id , $param['friend_id'])) {
             return self::error('你们并非好友，无权限操作' , 403);
         }
+        // 检查你删除的好友是否是客服
+        $user = UserModel::findById($param['friend_id']);
+        if (empty($user)) {
+            return self::error('你删除的好友不存在' , 404);
+        }
+        if ($user->is_system) {
+            return self::error('您无法删除客服' , 403);
+        }
         $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
         try {
             DB::beginTransaction();

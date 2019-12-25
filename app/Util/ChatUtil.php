@@ -100,6 +100,7 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
+
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [

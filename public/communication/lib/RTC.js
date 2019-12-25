@@ -51,7 +51,7 @@
         this.token = G.isValid(option.token) ? option.token : this._default.token;
         // 首次连接时长
         this.onceReconnect = true;
-        this.interval = G.isValid(option.interval) ? option.interval : this._default.interval;
+        this.interval = G.isValid(option.interval) ? option.interval * 1000 : this._default.interval * 1000;
         // 模拟数据
         this.simulation = {
             // 调试模式
@@ -93,6 +93,8 @@
             }
             if (!this.once) {
                 // 并非第一次打开
+                // 将重连状态重置
+                this.onceReconnect = true;
                 if (G.isFunction(this.reconnect)) {
                     this.reconnect.call(this);
                 }
