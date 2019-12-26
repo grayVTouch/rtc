@@ -263,6 +263,32 @@ class MessageModel extends Model
     {
         $res = self::with(['user'])
             ->whereIn('id' , $id_list)
+            ->whereNotExists(function($query){
+                $query->select('id')
+                    ->from('rtc_delete_message_for_private')
+                    ->whereRaw();
+            })
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
+
+    // 多条消息记录比对
+    public static function getByUserIdAndIdsExcludeDeleted(int $user_id , array $id_list = [])
+    {
+        $res = self::with(['user'])
+            ->whereIn('id' , $id_list)
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('id')
+                    ->from('rtc_delete_message_for_private')
+                    ->where('user_id' , '=' , $user_id)
+                    ->whereRaw('rtc_message.id = rtc_delete_messsage_for_private.message_id');
+            })
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)

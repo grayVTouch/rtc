@@ -49,7 +49,6 @@ class UnreadAction extends Action
                 $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
 
 //                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
-
             }
         }
         // 申请记录
