@@ -495,7 +495,7 @@ class MessageAction extends Action
             return self::error($validator->message());
         }
         $id_list = json_decode($param['id_list'] , true);
-        $res = MessageModel::getByUserIdAndIdsExcludeDeleted($id_list);
+        $res = MessageModel::getByUserIdAndIdsExcludeDeleted($auth->user->id , $id_list);
         foreach ($res as $v)
         {
             $other_id = ChatUtil::otherId($v->chat_id , $auth->user->id);
