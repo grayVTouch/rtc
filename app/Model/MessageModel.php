@@ -70,6 +70,26 @@ class MessageModel extends Model
         return $res;
     }
 
+    // 单条消息记录同步-排除被删除的消息
+    public static function findByUserIdAndIdExcludeDeleted(int $user_id , int $id)
+    {
+        $res = self::with(['user'])
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->where('user_id' , $user_id)
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id');
+            })
+            ->find($id);
+        if (empty($res)) {
+            return ;
+        }
+        $res = convert_obj($res);
+        self::single($res);
+        UserModel::single($res->user);
+        return $res;
+    }
+
     public static function history(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
@@ -282,7 +302,7 @@ class MessageModel extends Model
                 $query->select('id')
                     ->from('delete_message_for_private')
                     ->where('user_id' , '=' , $user_id)
-                    ->whereRaw('rtc_message.id = rtc_delete_messsage_for_private.message_id');
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id');
             })
             ->get();
         $res = convert_obj($res);

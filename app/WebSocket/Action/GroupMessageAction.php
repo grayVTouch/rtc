@@ -448,7 +448,7 @@ class GroupMessageAction extends Action
             return self::error($validator->message());
         }
         $id_list = json_decode($param['id_list'] , true);
-        $res = GroupMessageModel::getByIds($id_list);
+        $res = GroupMessageModel::getByUserIdAndIdsExcludeDeleted($auth->user->id , $id_list);
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v);

@@ -238,4 +238,19 @@ class GroupMessageModel extends Model
         }
         return $res;
     }
+
+    public static function getByUserIdAndIdsExcludeDeleted(int $user_id , array $id_list = [])
+    {
+        $res = self::whereIn('id' , $id_list)
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('id')
+                    ->from('delete_message_for_group')
+                    ->where('user_id' , $user_id)
+                    ->whereRaw('rtc_group_message.id = rtc_delete_message_for_group.group_message_id');
+            })
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
 }
