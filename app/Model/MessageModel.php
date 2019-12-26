@@ -283,12 +283,12 @@ class MessageModel extends Model
     {
         $res = self::with(['user'])
             ->whereIn('id' , $id_list)
-            ->whereNotExists(function($query) use($user_id){
-                $query->select('id')
-                    ->from('rtc_delete_message_for_private')
-                    ->where('user_id' , '=' , $user_id)
-                    ->whereRaw('rtc_message.id = rtc_delete_messsage_for_private.message_id');
-            })
+//            ->whereNotExists(function($query) use($user_id){
+//                $query->select('id')
+//                    ->from('rtc_delete_message_for_private')
+//                    ->where('user_id' , '=' , $user_id)
+//                    ->whereRaw('rtc_message.id = rtc_delete_messsage_for_private.message_id');
+//            })
             ->get();
         $res = convert_obj($res);
         foreach ($res as $v)
