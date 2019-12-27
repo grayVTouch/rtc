@@ -577,6 +577,11 @@ class LoginAction extends Action
         if ($res['code'] != 200) {
             return self::error($res['data']);
         }
+        // 检查昵称是否正确
+//        $reg_for_nickname = "/[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]+/";
+//        if (preg_match($reg_for_nickname , $param['nickname']) > 0) {
+//            return self::error('昵称不符合格式，请提供正确的昵称');
+//        }
         $role_range = config('business.role');
         if (!in_array($param['role'] , $role_range)) {
             return self::error('不支持得角色类型，当前受支持的角色类型有' . implode(',' , $role_range));
