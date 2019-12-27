@@ -129,10 +129,15 @@ class SessionAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        // 检查会话是否存在，如果会话不存在禁止操作
+        $session = SessionModel::findByUserIdAndTypeAndTargetId($auth->user->id , $param['type'] , $param['target_id']);
+        if (empty($session)) {
+            return self::error('会话不存在，禁止操作' , 404);
+        }
         try {
             DB::beginTransaction();
             // 新增会话
-            SessionUtil::createOrUpdate($auth->identifier , $auth->user->id , $param['type'] , $param['target_id']);
+//            SessionUtil::createOrUpdate($auth->identifier , $auth->user->id , $param['type'] , $param['target_id']);
             switch ($param['type'])
             {
                 case 'private':
