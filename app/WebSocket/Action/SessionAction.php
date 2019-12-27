@@ -137,12 +137,22 @@ class SessionAction extends Action
             {
                 case 'private':
                     $other_id = ChatUtil::otherId($param['target_id'] , $auth->user->id);
-                    // todo 非好友设置置顶会出现问题
+                    // 检查是否陌生人会话
+                    $friend = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $auth->user->id , $other_id);
+                    if (empty($friend)) {
+                        DB::rollBack();
+                        return self::error('陌生人会话，禁止操作' , 403);
+                    }
                     FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $other_id , array_unit($param , [
                         'top'
                     ]));
                     break;
                 case 'group':
+                    $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $param['target_id'] , $auth->user->id);
+                    if (empty($member)) {
+                        DB::rollBack();
+                        return self::error('您不是该群的群成员，禁止操作' , 403);
+                    }
                     GroupMemberData::updateByIdentifierAndGroupIdAndUserIdAndData($auth->identifier , $param['target_id'] , $auth->user->id , array_unit($param , [
                         'top'
                     ]));
