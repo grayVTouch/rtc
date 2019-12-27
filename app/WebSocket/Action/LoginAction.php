@@ -675,6 +675,8 @@ class LoginAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        // 昵称正则匹配
+        $reg_for_nickname = "//";
         // 检查图形验证码是否正确
         $res = CaptchaUtil::check($param['verify_code'] , $param['verify_code_key']);
         if ($res['code'] != 200) {

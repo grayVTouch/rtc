@@ -91,15 +91,18 @@ class GroupMessageModel extends Model
         return $res;
     }
 
-    public static function history(int $user_id , $group_id , int $limit_id = 0 , int $limit = 20)
+    public static function history(int $user_id , $group_id , string $join_group_time , int $limit_id = 0 , int $limit = 20)
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
+            // 另外，加载的消息记录必须 >= 加入群的时间
+            ['create_time' , '>=' , $join_group_time] ,
         ];
         if (!empty($limit_id)) {
             $where[] = ['id' , '<' , $limit_id];
         }
         $res = self::with(['group' , 'user'])
+            // 不能加载被删除的消息记录
             ->whereNotExists(function($query) use($user_id){
                 $query->select('id')
                     ->from('delete_message_for_group')
@@ -122,10 +125,12 @@ class GroupMessageModel extends Model
         return $res;
     }
 
-    public static function lastest(int $user_id , $group_id , int $limit_id = 0)
+    public static function lastest(int $user_id , $group_id , string $join_group_time , int $limit_id = 0)
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
+            // 加载消息的时间必须大于加入群的时间
+            ['create_time' , '>=' , $join_group_time] ,
         ];
         if (!empty($limit_id)) {
             $where[] = ['id' , '>' , $limit_id];

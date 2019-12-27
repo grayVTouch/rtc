@@ -8,6 +8,9 @@
 
 require_once __DIR__ . '/plugin/aws/vendor/autoload.php';
 
+var_dump((int) "0");
+
+exit;
 
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
@@ -26,7 +29,7 @@ $s3 = new Aws\S3\S3Client([
     'credentials' => $credentials ,
     'http' => [
 //        'verify' => __DIR__ . '/ca-bundle.crt' ,
-        'verify' => __DIR__ . '/cert.pem' ,
+        'verify' => __DIR__ . '/curl_cacert.pem' ,
     ],
 ]);
 $bucket = 'nimo';
@@ -52,56 +55,3 @@ try {
 } catch (S3Exception $e) {
     echo $e->getMessage() . PHP_EOL;
 }
-
-
-
-//
-//
-//$filepath = __DIR__ . '/avatar.png';
-//$file_md5 = md5_file($filepath);
-//$avatar = file_get_contents($filepath);
-//$filename = 'test.png';
-//$bucket = 'nimo';
-//
-//$uploader = new \Aws\S3\MultipartUploader($s3, $filepath, [
-//    //存储桶
-//    'bucket' => $bucket,
-//    //上传后的新地址
-//    'key'    => $file_md5,
-//    //设置访问权限  公开,不然访问不了
-//    'ACL'    => 'public-read',
-//    //分段上传
-//    'before_initiate' => function (\Aws\Command $command) {
-//        // $command is a CreateMultipartUpload operation
-//        $command['CacheControl'] = 'max-age=3600';
-//    },
-//    'before_upload'   => function (\Aws\Command $command) {
-//        // $command is an UploadPart operation
-//        $command['RequestPayer'] = 'requester';
-//    },
-//    'before_complete' => function (\Aws\Command $command) {
-//        // $command is a CompleteMultipartUpload operation
-//        $command['RequestPayer'] = 'requester';
-//    },
-//]);
-//
-//try {
-//    $result = $uploader->upload();
-//    //上传成功--返回上传后的地址
-//    $data = [
-//        'type' => '1',
-//        'data' => urldecode($result['ObjectURL'])
-//    ];
-//} catch (Aws\Exception\MultipartUploadException $e) {
-//    //上传失败--返回错误信息
-//    $uploader =  new \Aws\S3\MultipartUploader($s3, $filepath, [
-//        'state' => $e->getState(),
-//    ]);
-//    $data = [
-//        'type' => '0',
-//        'data' =>  $e->getMessage(),
-//    ];
-//}
-//
-//print_r($data);
-//var_dump($data);

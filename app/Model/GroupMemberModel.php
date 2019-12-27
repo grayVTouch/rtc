@@ -192,6 +192,24 @@ class GroupMemberModel extends Model
         return $res;
     }
 
+    public static function getByGroupIdAndMasterIdAndLimitIdAndLimitExcludeMaster(int $group_id ,  int $master_id , int $limit_id = 0 , int $limit = 10)
+    {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+            ['user_id' , '<>' , $master_id] ,
+        ];
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '>' , $limit_id];
+        }
+        $res = self::where($where)
+            ->orderBy('id' , 'asc')
+            ->limit($limit)
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
     public static function getByGroupIdAndLimit(int $group_id , int $limit = 9)
     {
         $res = self::where('group_id' , $group_id)

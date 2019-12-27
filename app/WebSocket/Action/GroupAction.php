@@ -357,12 +357,17 @@ class GroupAction extends Action
             $message = '"';
             foreach ($kick_user_ids as $v)
             {
+                // 注意顺序：
+                // 屏蔽消息的动作必须要在踢除群成员之前，因为屏蔽群消息回计算消息的引用计数
+                // 如果消息的引用计数超过群成员人数的话，那么会被永久删除，否则将只屏蔽！消息主体还会
+                // 被保留下来
+                SessionUtil::delByUserIdAndTypeAndTargetId($v , 'group' , $group->id);
+                // 注意顺序：
+                // 删除群成员，必须要放在删除会话记录之前
                 GroupMemberData::delByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $v);
                 $user = UserModel::findById($v);
                 $nickname = UserUtil::getNameFromNicknameAndUsername($user->nickname , $user->username);
                 $message .= $nickname . ',';
-                // 删除这个人关于该会话的相关消息
-                SessionUtil::delByUserIdAndTypeAndTargetId($v , 'group' , $group->id);
             }
             $message = mb_substr($message , 0 , mb_strlen($message) - 1);
             $message .= '" 被移除了群聊';
@@ -552,7 +557,19 @@ class GroupAction extends Action
         }
         $param['limit'] = empty($param['limit']) ? config('app.group_member_show_limit') : $param['limit'];
         $param['limit_id'] = empty($param['limit_id']) ? 0 : $param['limit_id'];
-        $members = GroupMemberModel::getByGroupIdV1($group->id , $param['limit_id'] , $param['limit']);
+        // 如果没有提供 once 参数，默认当成是首次加载
+        // 这是一个兼容操作
+        $param['once'] = $param['once'] === '' ? 1 : (int) $param['once'];
+        if ($param['once'] == 1) {
+            // 首次加载
+            $limit = max($param['limit'] - 1 , 1);
+            $master = GroupMemberModel::findByUserIdAndGroupId($group->user_id , $group->id );
+            $members = GroupMemberModel::getByGroupIdAndMasterIdAndLimitIdAndLimitExcludeMaster($group->id , $group->user_id , $param['limit_id'] , $limit);
+            $members = array_merge([$master] , $members);
+        } else {
+            // 分批加载
+            $members = GroupMemberModel::getByGroupIdAndMasterIdAndLimitIdAndLimitExcludeMaster($group->id , $group->user_id , $param['limit_id'] , $param['limit']);
+        }
         foreach ($members as $v)
         {
             $v->user = UserData::findByIdentifierAndId($v->identifier , $v->user_id);

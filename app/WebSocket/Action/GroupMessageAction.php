@@ -8,6 +8,7 @@
 
 namespace App\WebSocket\Action;
 
+use App\Data\GroupMemberData;
 use App\Data\GroupMessageReadStatusData;
 use App\Model\DeleteMessageForGroupModel;
 use App\Model\DeleteMessageModel;
@@ -49,9 +50,13 @@ class GroupMessageAction extends Action
         if (empty($group)) {
             return self::error('未找到群对应信息' , 404);
         }
+        $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+        if (empty($member)) {
+            return self::error('您不是该群的成员，禁止操作' , 403);
+        }
         $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
         $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
-        $res = GroupMessageModel::history($auth->user->id , $group->id , $limit_id , $limit);
+        $res = GroupMessageModel::history($auth->user->id , $group->id , $member->create_time ,  $limit_id , $limit);
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v , $auth->user->id);
@@ -72,8 +77,12 @@ class GroupMessageAction extends Action
         if (empty($group)) {
             return self::error('未找到群对应信息' , 404);
         }
+        $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+        if (empty($member)) {
+            return self::error('您不是该群的成员，禁止操作' , 403);
+        }
         $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
-        $res = GroupMessageModel::lastest($auth->user->id , $group->id , $limit_id);
+        $res = GroupMessageModel::lastest($auth->user->id , $group->id , $member->create_time , $limit_id);
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v , $auth->user->id);
