@@ -73,6 +73,20 @@ class Chat extends Auth
         return $this->success($res['data']);
     }
 
+    // 私聊消息发送：发送语音通话
+    public function sendVoiceCallForPrivate(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $param['old']     = $param['old'] ?? '';
+        $res = ChatAction::send($this , 'voice_call' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 
 
     // 群消息发送：文本

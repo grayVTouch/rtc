@@ -52,7 +52,7 @@ class ChatAction extends Action
     public static function send(Auth $auth , $type , array $param = [])
     {
         $param['user_id']   = $auth->user->id;
-        $param['other_id']   = $param['friend_id'];
+        $param['other_id']  = $param['friend_id'];
         $param['type']      = $type;
         return ChatUtil::send($auth , $param);
     }

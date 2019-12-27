@@ -9,7 +9,19 @@
 namespace App\WebSocket;
 
 
+use App\WebSocket\Action\MiscAction;
+
 class Misc extends Auth
 {
-//    public function
+    // 检查是国内还是国外
+    public function outside(array $param)
+    {
+        $res = MiscAction::outside($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+
 }

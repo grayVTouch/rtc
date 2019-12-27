@@ -101,7 +101,6 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
-
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [
@@ -174,6 +173,12 @@ class ChatUtil extends Util
                     break;
                 case 'voice':
                     $message = '[语音]';
+                    break;
+                case 'card':
+                    $message = '[名片]';
+                    break;
+                case 'voice_call':
+                    $message = '[语音通话]';
                     break;
             }
             $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , $msg , false);
@@ -278,6 +283,12 @@ class ChatUtil extends Util
                     break;
                 case 'voice':
                     $message = '[语音]';
+                    break;
+                case 'card':
+                    $message = '[名片]';
+                    break;
+                case 'voice_call':
+                    $message = '[语音通话]';
                     break;
             }
             $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , $msg , false);

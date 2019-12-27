@@ -212,7 +212,7 @@ class GroupMessageAction extends Action
                 AesUtil::encrypt($message , $res->aes_key , config('app.aes_vi')) ,
         ]);
         $res = GroupMessageModel::findById($param['group_message_id']);
-        MessageUtil::handleGroupMessage($res);
+        MessageUtil::handleGroupMessage($res , $auth->user->id);
         $user_ids = GroupMemberModel::getUserIdByGroupId($res->group_id);
         $auth->pushAll($user_ids , 'refresh_session');
         $auth->sendAll($user_ids , 'refresh_group_message' , $res);
