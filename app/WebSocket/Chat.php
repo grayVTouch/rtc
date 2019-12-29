@@ -87,6 +87,55 @@ class Chat extends Auth
         return $this->success($res['data']);
     }
 
+    // 私聊：语音通话 发起方挂断通话
+    public function senderRefuseVoiceCallForPrivate(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $param['end_time'] = $param['end_time'] ?? '';
+        $res = ChatAction::updateVoiceCallStatusForPrivate($this , 'hang' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 私聊：语音通话 接收方挂断通话
+    public function receiverRefuseVoiceCallForPrivate(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $param['end_time'] = $param['end_time'] ?? '';
+        $res = ChatAction::updateVoiceCallStatusForPrivate($this , 'refuse' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 私聊：语音通话 接收方接听通话
+    public function receiverAcceptVoiceCallForPrivate(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $param['end_time'] = $param['end_time'] ?? '';
+        $res = ChatAction::updateVoiceCallStatusForPrivate($this , 'accept' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 私聊：语音通话 记录语音通话成功后的挂断时间
+    public function logVoiceCallCloseTimeForPrivate(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $param['close_time'] = $param['close_time'] ?? '';
+        $param['duration'] = $param['duration'] ?? '';
+        $res = ChatAction::logVoiceCallCloseTimeForPrivate($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
 
 
     // 群消息发送：文本

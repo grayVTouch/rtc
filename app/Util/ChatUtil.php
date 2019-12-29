@@ -104,12 +104,28 @@ class ChatUtil extends Util
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
         if ($param['type'] == 'voice_call') {
+            $time = time();
+            $datetime = date('Y-m-d H:i:s' , $time);
             // 如果是语音通话
             $param['extra'] = json_encode([
                 // 频道
                 'channel' => random(64 , 'letter' , true) ,
                 // 接听状态
                 'status' => 'wait' ,
+                // 开始时间
+                'start_time' => $datetime ,
+                // 结束时间
+                'end_time' => $datetime ,
+                // 挂断时间
+                'close_time' => $datetime ,
+                // 开始时间[unix]
+                'start_time_for_unix' => $time ,
+                // 结束时间[unix]
+                'end_time_for_unix' => $time ,
+                // 挂断时间[unix]
+                'close_time_for_unix' => $time ,
+                // 通话时长，单位 s
+                'duration' => 0
             ]);
         }
         try {
@@ -211,13 +227,15 @@ class ChatUtil extends Util
         }
         $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
         SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
-        // 检查是否开启了消息免打扰
-        $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id);
-        if (!empty($relation)) {
-            if ($relation->can_notice == 0) {
-                // 接收方开启了消息免打扰
-                MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
-            }
+        if (
+            $msg->type == 'voice_call' ||
+            (
+                ($relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id)) &&
+                $relation->can_notice == 0
+            )
+        ) {
+            // 语音通话-默认是已读的
+            MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
         }
         $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
         $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $msg->user_id , $msg->id);;

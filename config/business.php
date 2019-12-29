@@ -85,6 +85,10 @@ return [
         'logined' ,
         // pc 端登录页面使用的用户头像
         'avatar' ,
+        // 语音通话-已接听
+        'accept_voice_call' ,
+        // 语音通话-已挂断
+        'close_voice_call' ,
     ] ,
 
     // 消息
@@ -396,8 +400,24 @@ return [
         // 对方拒绝
         'refuse' ,
         // 接听成功
-        'success' ,
+        'accept' ,
         // 自己挂断
-        'hung' ,
+        'hang' ,
     ] ,
+
+    // 语音消息允许操作的状态
+    'deny_voice_call_status' => [
+        'refuse' ,
+        'accept' ,
+        'hang' ,
+    ] ,
+
+    // 语音通话消息 extra 完整格式
+    'extra_for_voice_call' => [
+        'channel' => 'xxx' ,
+        'status' => 'wait' ,
+        'start_time' => '2019-10-11 10:00:00' ,
+        'end_time' => '2019-10-11 11:00:00' ,
+        'duration' => 3600 ,
+    ],
 ];

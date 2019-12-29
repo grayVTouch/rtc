@@ -58,6 +58,109 @@ class ChatAction extends Action
     }
 
     /**
+     * *******
+     * 挂断电话
+     * *******
+     */
+    public static function updateVoiceCallStatusForPrivate(Auth $auth , string $status , array $param)
+    {
+        $validator = Validator::make($param , [
+            'message_id' => 'required' ,
+            'end_time' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $voice_call_status = config('app.voice_call_status');
+        if (!in_array($status , $voice_call_status)) {
+            return self::error('不支持的语音状态' , 403);
+        }
+        $msg = MessageModel::findById($param['message_id']);
+        if (empty($msg)) {
+            return self::error('消息不存在' , 404);
+        }
+        // 检查下消息类型
+        if ($msg->type != 'voice_call') {
+            return self::error('消息类型错误，请提供 type = voice_call 的消息' , 403);
+        }
+        $extra = json_decode($msg->extra , true);
+        if (empty($extra)) {
+            return self::error('语音通话消息不完整' , 500);
+        }
+        $deny_voice_call_status = config('app.deny_voice_call_status');
+        if (in_array($extra['status'] , $deny_voice_call_status)) {
+            return self::error('该消息禁止更改状态' , 403);
+        }
+        $user_ids = ChatUtil::userIds($msg->chat_id);
+        if (!in_array($auth->user->id , $user_ids)) {
+            return self::error('您正在试图更改他人会话的消息，禁止操作' , 403);
+        }
+        $extra['status'] = $status;
+        $extra['end_time'] = $param['end_time'];
+        $extra['end_time_for_unix'] = strtotime($extra['end_time']);
+        $extra_for_update = json_encode($extra);
+        MessageModel::updateById($msg->id , [
+            'extra' => $extra_for_update
+        ]);
+        $msg->extra = $extra_for_update;
+        $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
+        MessageUtil::handleMessage($msg , $other_id , $auth->user->id);
+        // 通知对方已接听 还是 已挂断
+        $auth->push($other_id , $status == 'success' ? 'accept_voice_call' : 'close_voice_call' , $msg);
+        $auth->push($other_id , 'refresh_private_message' , $msg);
+        MessageUtil::handleMessage($msg , $auth->user->id , $other_id);
+        $auth->send($auth->user->id , 'refresh_private_message' , $msg);
+        $auth->pushAll($user_ids , 'refresh_session');
+        return self::success($msg);
+    }
+
+    public static function logVoiceCallCloseTimeForPrivate(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'message_id' => 'required' ,
+            'close_time' => 'required' ,
+            'duration' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $msg = MessageModel::findById($param['message_id']);
+        if (empty($msg)) {
+            return self::error('消息不存在' , 404);
+        }
+        // 检查下消息类型
+        if ($msg->type != 'voice_call') {
+            return self::error('消息类型错误，请提供 type = voice_call 的消息' , 403);
+        }
+        $extra = json_decode($msg->extra , true);
+        if (empty($extra)) {
+            return self::error('语音通话消息不完整' , 500);
+        }
+        if ($extra['status'] != 'accept') {
+            return self::error('该消息禁止更改状态' , 403);
+        }
+        $user_ids = ChatUtil::userIds($msg->chat_id);
+        if (!in_array($auth->user->id , $user_ids)) {
+            return self::error('您正在试图更改他人会话的消息，禁止操作' , 403);
+        }
+        $extra['close_time'] = $param['close_time'];
+        $extra['close_time_for_unix'] = strtotime($param['close_time']);
+        $extra['duration'] = $param['duration'];
+        $extra_for_update = json_encode($extra);
+        MessageModel::updateById($msg->id , [
+            'extra' => $extra_for_update
+        ]);
+        $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
+        MessageUtil::handleMessage($msg , $other_id , $auth->user->id);
+        // 通知对方已经挂断
+        $auth->push($other_id , 'close_voice_call' , $msg);
+        $auth->push($other_id , 'refresh_private_message' , $msg);
+        MessageUtil::handleMessage($msg , $auth->user->id , $other_id);
+        $auth->send($auth->user->id , 'refresh_private_message' , $msg);
+        return self::success($msg);
+    }
+
+    /**
      * 群消息发送
      *
      * @throws \Exception
