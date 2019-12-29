@@ -10,6 +10,7 @@ namespace App\Util;
 
 
 use App\Cache\MessageReadStatusCache;
+use App\Data\FriendData;
 use App\Data\GroupMemberData;
 use App\Data\GroupMessageReadStatusData;
 use App\Data\MessageReadStatusData;
@@ -36,6 +37,7 @@ use function core\array_unit;
 use function core\convert_obj;
 use Core\Lib\Throwable;
 use Core\Lib\Validator;
+use function core\random;
 use Engine\Facade\WebSocket;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +103,15 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
+        if ($param['type'] == 'voice_call') {
+            // 如果是语音通话
+            $param['extra'] = json_encode([
+                // 频道
+                'channel' => random(64 , 'letter' , true) ,
+                // 接听状态
+                'status' => 'wait' ,
+            ]);
+        }
         try {
             DB::beginTransaction();
             $id = MessageModel::insertGetId(array_unit($param , [
@@ -200,6 +211,14 @@ class ChatUtil extends Util
         }
         $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
         SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
+        // 检查是否开启了消息免打扰
+        $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id);
+        if (!empty($relation)) {
+            if ($relation->can_notice == 0) {
+                // 接收方开启了消息免打扰
+                MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
+            }
+        }
         $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
         $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $msg->user_id , $msg->id);;
         PushUtil::single($msg->identifier , $other_id , 'private_message' , $msg);
@@ -239,6 +258,13 @@ class ChatUtil extends Util
 //            $s_time1 = microtime(true);
             // 消息已读未读
             SessionUtil::createOrUpdate($msg->identifier , $v , 'group' , $msg->group_id);
+            $relation = GroupMemberData::findByIdentifierAndGroupIdAndUserId($msg->identifier , $msg->group_id , $v);
+            if (!empty($relation)) {
+                if ($relation->can_notice == 0) {
+                    // 接收方开启了消息免打扰
+                    GroupMessageReadStatusData::insertGetId($msg->identifier , $v , $msg->id , $msg->group_id , 1);
+                }
+            }
             $msg->is_read = GroupMessageReadStatusData::isReadByIdentifierAndUserIdAndGroupMessageId($msg->identifier , $v , $msg->id);
             PushUtil::single($msg->identifier , $v , 'group_message' , $msg);
             PushUtil::single($msg->identifier , $v , 'refresh_session');

@@ -388,4 +388,16 @@ return [
         // 消息发送相关
         'chat' ,
     ] ,
+
+    // 语音通话接听状态
+    'voice_call_status' => [
+        // 等待接听
+        'wait' ,
+        // 对方拒绝
+        'refuse' ,
+        // 接听成功
+        'success' ,
+        // 自己挂断
+        'hung' ,
+    ] ,
 ];

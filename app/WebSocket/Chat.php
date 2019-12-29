@@ -209,4 +209,16 @@ class Chat extends Auth
         }
         return $this->success($res['data']);
     }
+
+    // 记录开始通话时间
+    public function logVoiceCallStartTime(array $param)
+    {
+        $param['message_id'] = $param['message_id'] ?? '';
+        $param['start_time'] = $param['start_time'] ?? '';
+        $res = ChatAction::logVoiceCallStartTime($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 }
