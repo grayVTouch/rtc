@@ -13,7 +13,8 @@
                 // 选项切换
                 tab: 'session' ,
                 // 当前展示的聊天窗口
-                history: 'initialize' ,
+                // history: 'initialize' ,
+                history: 'one' ,
 
             } ,
 

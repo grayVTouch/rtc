@@ -177,11 +177,45 @@
         </div>
 
         <!-- 历史聊天记录 -->
-        <div class="history hide">
+        <div class="history" v-if="val.history == 'one'">
             <!-- 标题 -->
-            <div class="title"></div>
+            <div class="title">
+                <!-- 用户 -->
+                <div class="name">陈碧玲 <img src="file/dir.png" class="image spread"></div>
+                <!-- 用户列表 -->
+                <div class="users">
+                    <!-- 新增 -->
+                    <div class="item add">
+                        <div class="horizontal"></div>
+                        <div class="vertical"></div>
+                    </div>
+
+                    <!-- 减少 -->
+                    <div class="item sub">
+                        <div class="horizontal"></div>
+                        <div class="vertical"></div>
+                    </div>
+
+                    <!-- 用户 -->
+                    <div class="item user">
+                        <div class="top avatar"><img src="file/avatar.png" class="image"></div>
+                        <div class="btm name">陈碧玲</div>
+                    </div>
+
+                </div>
+            </div>
             <!-- 消息列表 -->
-            <div class="list"></div>
+            <div class="message">
+                <div class="line self">
+                    <div class="avatar"><img src="file/avatar.png" class="image"></div>
+                    <div class="content">
+                        <div class="content">内容</div>
+                        <div class="status">加载中</div>
+                    </div>
+                    <div class="tip">
+                </div>
+                <div class="line other"></div>
+            </div>
             <!-- 输入 -->
             <div class="input"></div>
         </div>
