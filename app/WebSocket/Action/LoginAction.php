@@ -929,7 +929,8 @@ class LoginAction extends Action
     // 二维码数据
     public static function loginQRCodeForTest(Base $base , array $param)
     {
-        $qr_code_data = 'http://192.168.145.129:10001/Web/Authorization/auth?client_id=' . $base->fd;
+        $qr_code_data = 'http://websocket.bonuswallet.org:10001/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
+//        $qr_code_data = 'http://192.168.145.129:10001/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
         $qr_code = new QrCode($qr_code_data);
         $qr_code->setSize(430);
         $qr_code->setWriterByName('png');

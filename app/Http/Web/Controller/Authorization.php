@@ -40,7 +40,7 @@ class Authorization extends Base
             'data' => $user->avatar
         ]));
         var_dump('ws 推送 ');
-        sleep(5);
+        sleep(2);
         $param['platform'] = 'web';
         $param['identifier'] = 'nimo';
         $param['user_id'] = $user->id;

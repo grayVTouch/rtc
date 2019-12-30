@@ -10,6 +10,11 @@
                 user: {} ,
                 // 搜索展示
                 showSearch: false ,
+                // 选项切换
+                tab: 'session' ,
+                // 当前展示的聊天窗口
+                history: 'initialize' ,
+
             } ,
 
             ins: {

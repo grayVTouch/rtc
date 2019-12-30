@@ -1,6 +1,6 @@
 .app {
-    /*width: 1000px;*/
-    width: 400px;
+    width: 1000px;
+    /*width: 400px;*/
     height: 650px;
     position: absolute;
     left: 50%;
@@ -106,6 +106,7 @@
     position: absolute;
     bottom: 0;
     right: 0;
+    z-index: 100;
     background-color: #fff;
     transform: translate(0% , 100%);
     -webkit-transform: translate(0% , 100%);
@@ -224,6 +225,7 @@
     height: 420px;
     overflow: hidden;
     overflow-y: auto;
+    z-index: 10;
     transform: translate(0% , 100%);
     -webkit-transform: translate(0% , 100%);
     -moz-transform: translate(0% , 100%);
@@ -310,14 +312,241 @@
 
 /*** 左侧：菜单栏 ***/
 .app > .left > .menu {
-    padding: 0 0 4px 0;
+    height: 39px;
+    padding: 0 18px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
 }
 
-.app > .left > .menu .item {
+.app > .left > .menu > .in {
+    padding-bottom: 4px;
+    border-bottom: 1px solid #24272c;
+}
+
+.app > .left > .menu > .in:after {
+    display: block;
+    content: '';
+    clear: both;
+}
+
+.app > .left > .menu > .in > .item {
     float: left;
     width: 33.33%;
+    text-align: center;
+    height: 35px;
+    line-height: 35px;
+    position: relative;
+    cursor: pointer;
 }
 
+.app > .left > .menu > .in > .item:before {
+    display: block;
+    content: '';
+    width: 1px;
+    height: 20px;
+    background-color: #24272c;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(0% , -50%);
+    -webkit-transform: translate(0% , -50%);
+    -moz-transform: translate(0% , -50%);
+    -ms-transform: translate(0% , -50%);
+    -o-transform: translate(0% , -50%);
+}
+
+.app > .left > .menu .item > .image {
+    width: 24px;
+    height: 24px;
+}
+
+
+/*** 选项切换 ***/
+.app > .left > .tab {
+    /*padding: 0 18px;*/
+}
+
+.app > .left > .tab > .session {
+
+}
+
+.app > .left > .tab > .session > .line {
+    padding: 12px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid #24272c;
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+}
+
+.app > .left > .tab > .session > .line:nth-last-of-type(1) {
+    border-bottom: 0;
+}
+
+.app > .left > .tab > .session > .line:hover {
+    background-color: #3a3f45;
+}
+
+.app > .left > .tab > .session > .line > .in {
+    position: relative;
+}
+
+.app > .left > .tab > .session > .line > .in > .left {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.app > .left > .tab > .session > .line > .in > .left .unread {
+    width: 12px;
+    height: 12px;
+    line-height: 12px;
+    text-align: center;
+    border-radius: 20px;
+    background-color: red;
+    font-size: 12px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(50% , -50%);
+    -webkit-transform: translate(50% , -50%);
+    -moz-transform: translate(50% , -50%);
+    -ms-transform: translate(50% , -50%);
+    -o-transform: translate(50% , -50%);
+}
+
+.app > .left > .tab > .session > .line > .in > .left > .image {
+    width: 40px;
+    height: 40px;
+    vertical-align: top;
+}
+
+.app > .left > .tab > .session > .line > .in > .right {
+    font-size: 12px;
+    margin-left: 50px;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .top {
+    height: 20px;
+    line-height: 20px;
+    position: relative;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .top > .username {
+    margin-right:  35px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .top > .time {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .btm {
+    height: 20px;
+    line-height: 20px;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .btm > .message {
+    margin-right: 25px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .btm > .mute {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.app > .left > .tab > .session > .line > .in > .right > .btm > .mute > .image {
+    width: 16px;
+    height: 16px;
+}
+
+/*** 用户关系 ***/
+.app > .left > .tab > .relation > .item {
+
+}
+
+.app > .left > .tab > .relation > .item > .title {
+    background-color: #292d32;
+    color: #787b87;
+    font-size: 14px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 18px;
+}
+
+.app > .left > .tab > .relation > .item > .list {
+
+}
+
+.app > .left > .tab > .relation > .item > .list .line {
+    padding: 10px 18px;
+    border-bottom: 1px solid #24272c;
+    cursor: pointer;
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+}
+
+.app > .left > .tab > .relation > .item > .list .line:hover {
+    background-color: #3b4047;
+}
+
+.app > .left > .tab > .relation > .item > .list .line:nth-last-of-type(1) {
+    border-bottom: 0;
+}
+
+.app > .left > .tab > .relation > .item > .list .line > .in {
+    position: relative;
+}
+
+.app > .left > .tab > .relation > .item > .list > .line > .in .left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 30px;
+    width: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+.app > .left > .tab > .relation > .item > .list > .line > .in .left > .image {
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+}
+
+.app > .left > .tab > .relation > .item > .list > .line > .in .right {
+    margin-left: 40px;
+    height: 30px;
+    line-height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 13px;
+}
 
 /**
  * **********************
@@ -328,10 +557,44 @@
 .app > .right {
     padding-left: 280px;
     height: 100%;
-
 }
 
 .app > .right > .history {
     background-color: #eee;
     height: 100%;
+}
+
+/*** 初始化展示的聊天框 ***/
+.app > .right .initialize {
+
+}
+
+.app > .right .initialize .title {
+    padding: 0 20px;
+}
+
+.app > .right .initialize .title > .in {
+    height: 50px;
+    line-height: 50px;
+    border-bottom: 1px solid #d6d6d6;
+}
+
+.app > .right .initialize > .content {
+
+}
+
+.app > .right .initialize > .content > .top {
+    padding-top: 80px;
+    text-align: center;
+}
+
+.app > .right .initialize > .content > .top .image {
+    width: 130px;
+    height: 130px;
+}
+
+.app > .right .initialize > .content > .btm {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
 }
