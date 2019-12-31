@@ -121,6 +121,8 @@ class FriendAction extends Action
                 $user_ids = [$auth->user->id , $param['friend_id']];
                 // 刷新好友列表
                 $auth->pushAll($user_ids , 'refresh_friend');
+                $auth->pushAll($user_ids , 'refresh_unread_count');
+                $auth->pushAll($user_ids , 'refresh_app_unread_count');
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
                     'user_id' => $auth->user->id ,
@@ -189,6 +191,8 @@ class FriendAction extends Action
                 // 同意成为好友
                 $user_ids = [$app->user_id , $app->relation_user_id];
                 $auth->pushAll($user_ids , 'refresh_friend');
+                $auth->pushAll($user_ids , 'refresh_unread_count');
+                $auth->pushAll($user_ids , 'refresh_app_unread_count');
                 ChatUtil::send($auth , [
                     'type' => 'notification' ,
                     'user_id' => $app->user_id ,

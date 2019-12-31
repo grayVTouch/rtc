@@ -363,6 +363,7 @@ class UserAction extends Action
     public static function emptyApp(Auth $auth , array $param)
     {
         ApplicationModel::delByUserId($auth->user->id);
+        $auth->push($auth->user->id , 'refresh_unread_count');
         $auth->push($auth->user->id , 'refresh_app_unread_count');
         return self::success();
     }
