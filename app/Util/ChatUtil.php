@@ -204,6 +204,9 @@ class ChatUtil extends Util
                 case 'card':
                     $message = '[名片]';
                     break;
+                case 'file':
+                    $message = '[文件]';
+                    break;
                 case 'voice_call':
                     $message = '[语音通话]';
                     break;
@@ -330,6 +333,9 @@ class ChatUtil extends Util
                     break;
                 case 'card':
                     $message = '[名片]';
+                    break;
+                case 'file':
+                    $message = '[文件]';
                     break;
                 case 'voice_call':
                     $message = '[语音通话]';
