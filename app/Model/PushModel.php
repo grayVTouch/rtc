@@ -33,7 +33,7 @@ class PushModel extends Model
     }
 
     // 新增数据
-    public static function u_insertGetId(string $identifier , string $push_type , string $type , string $role = 'all' , int $user_id = 0 , string $title = '' , string $content = '' , string $desc = '')
+    public static function u_insertGetId(string $identifier , string $push_type , string $type , string $role = 'all' , int $user_id = 0 , string $title = '' , string $content = '' , string $desc = '' , int $is_show = 1)
     {
         return self::insertGetId([
             'identifier' => $identifier ,
@@ -44,6 +44,7 @@ class PushModel extends Model
             'title' => $title ,
             'content' => $content ,
             'desc' => $desc ,
+            'is_show' => $is_show ,
         ]);
     }
 

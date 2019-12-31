@@ -654,7 +654,7 @@ class LoginAction extends Action
             // 新用户注册推送
             $new_user_notification = config('app.new_user_notification');
             $system = 'system';
-            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification);
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification , 0);
             PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
             SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
@@ -745,7 +745,7 @@ class LoginAction extends Action
             // 新用户注册推送
             $new_user_notification = config('app.new_user_notification');
             $system = 'system';
-            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification);
+            $push_id = PushModel::u_insertGetId($base->identifier , 'single' , $system , '' , $id , $new_user_notification , $new_user_notification , $new_user_notification , 0);
             PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
             SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();

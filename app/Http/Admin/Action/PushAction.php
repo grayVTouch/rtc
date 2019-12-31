@@ -13,6 +13,7 @@ use App\Http\Admin\Controller\Auth;
 use App\Model\PushModel as PushModel;
 use App\Model\PushReadStatusModel;
 use App\Model\UserModel;
+use App\Util\AppPushUtil;
 use App\Util\SessionUtil;
 use function core\array_unit;
 use Core\Lib\Validator;
@@ -160,6 +161,7 @@ class PushAction extends Action
                 }
                 // 设置未读消息数量
                 PushReadStatusModel::u_insertGetId($param['identifier'] , $v , $id , $param['type'] , 0);
+//                AppPushUtil::
             }
             DB::commit();
             // 必须要等到事务提交之后才允许推送

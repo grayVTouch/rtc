@@ -211,6 +211,7 @@ create table if not exists `rtc_push` (
   title varchar(500) comment '标题' ,
   `desc` varchar(3000) default '' comment '描述' ,
   `content` longtext comment '内容' ,
+  `is_show` tinyint default 1 comment '是否显示：例如注册时的单人公告要求不能再后台显示，所以有些公告需要屏蔽' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '推送表';
@@ -463,6 +464,7 @@ alter table `rtc_article_type` add identifier varchar(255) default '' comment 'r
 alter table `rtc_friend_group` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 alter table `rtc_application` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 alter table `rtc_friend` add identifier varchar(255) default '' comment 'rtc_project.identifier';
+alter table `rtc_push` add `is_show` tinyint default 1 comment '是否显示：例如注册时的单人推送要求不能再后台显示，所以有些推送需要屏蔽';
 
 
 update `rtc_user_option` set identifier = 'nimo';
