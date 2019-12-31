@@ -330,7 +330,7 @@ class ChatUtil extends Util
                         $platform ,
                         $v ,
                         $msg ,
-                        $absolute
+                        $absolute ?? false
                     ]
                 ]));
             }
