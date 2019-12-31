@@ -125,6 +125,8 @@ return [
         'password_red_envelope' ,
         // 撤回消息
         'withdraw' ,
+        // 视频
+        'video' ,
     ] ,
 
     /**

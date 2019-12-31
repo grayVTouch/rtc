@@ -144,10 +144,13 @@ class Redis
         }
     }
 
-    public function sAdd(string $name , $value)
+    public function sAdd(string $name , $value , int $timeout = 0)
     {
         $key = $this->key($name);
-        return $this->native('sAdd' , $key , $value);
+        $this->native('sAdd' , $key , $value);
+        if (!empty($timeout)) {
+            $this->native('expire' , $key , $timeout);
+        }
     }
 
     // 删除
