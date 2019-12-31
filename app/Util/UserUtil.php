@@ -162,6 +162,7 @@ class UserUtil extends Util
 
             // 删除验证消息（无法全面删除）
             ApplicationModel::delByUserId($user_id);
+            ApplicationModel::delByTypeAndRelationUserId('private' , $v);
         }
         $groups = GroupMemberModel::getByUserId($user_id);
         foreach ($groups as $v)

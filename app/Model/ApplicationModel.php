@@ -75,6 +75,14 @@ class ApplicationModel extends Model
         return self::where('user_id' , $user_id)->delete();
     }
 
+    public static function delByTypeAndRelationUserId(string $type , int $relation_user_id)
+    {
+        return self::where([
+            ['type' , '=' , $type] ,
+            ['relation_user_id' , '=' , $relation_user_id] ,
+        ])->delete();
+    }
+
     public static function delGroupApplication(int $group_id)
     {
         return self::where([
