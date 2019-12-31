@@ -128,7 +128,7 @@ class ApplicationModel extends Model
         return $res;
     }
 
-    public static function updateByTypeAndUserIdAndRelationUserId(string $type , int $user_id , int $relation_user_id , array $data)
+    public static function updateByTypeAndUserIdAndRelationUserId(string $type , int $user_id , int $relation_user_id , array $data = [])
     {
         return self::where([
             ['type' , '=' , $type] ,

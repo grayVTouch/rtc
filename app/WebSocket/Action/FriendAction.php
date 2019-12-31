@@ -77,7 +77,7 @@ class FriendAction extends Action
                 // 假设时自动通过，那么双方发起的申请都设置为通过
                 ApplicationModel::updateByTypeAndUserIdAndRelationUserId('private' , $auth->user->id , $param['friend_id'] , [
                     'status' => 'auto_approve' ,
-                    'create_time' , date('Y-m-d H:i:s' , time()) ,
+                    'create_time' => date('Y-m-d H:i:s' , time()) ,
                 ]);
             } else {
                 $param['status'] = 'wait';
@@ -180,7 +180,7 @@ class FriendAction extends Action
                 // 假设时自动通过，那么双方发起的申请都设置为通过
                 ApplicationModel::updateByTypeAndUserIdAndRelationUserId('private' , (int) $app->relation_user_id , $app->user_id , [
                     'status' => 'approve' ,
-                    'create_time' , date('Y-m-d H:i:s' , time()) ,
+                    'create_time' => date('Y-m-d H:i:s' , time()) ,
                 ]);
             }
             DB::commit();
