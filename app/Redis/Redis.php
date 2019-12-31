@@ -15,12 +15,13 @@ class Redis
     // 命名规则 项目id + keyName + id
 
     /**
+     *
      * user_id 映射的 fd
      *
      * @param string $identifier
      * @param int $fd
      *
-     * @var string
+     * @var set 集合
      */
     protected static $userIdMappingFd = '%s_user_id_mapping_fd_%s';
 
@@ -260,6 +261,9 @@ class Redis
         }
         return RedisFacade::string($name , $val , config('app.cache_duration'));
     }
+
+    // 集合类型设置
+//    public static function
 
     public static function del(string $name)
     {

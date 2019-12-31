@@ -18,49 +18,15 @@ class UserRedis extends Redis
     {
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         if (is_null($fd)) {
-            $res = RedisFacade::string($name);
-            return json_decode($res , true);
+            return RedisFacade::setAll($name);
         }
-        $value = RedisFacade::string($name);
-        $value = json_decode($value , true);
-        if (empty($value)) {
-            $value = [$fd];
-        } else {
-            $copy = [];
-            foreach ($value as $v)
-            {
-                if ($v == $fd) {
-                    continue ;
-                }
-                $copy[] = $v;
-            }
-            $copy[] = $fd;
-            $value = $copy;
-        }
-        $value = json_encode($value);
-        // 注意我们这个允许多端登录！！
-        return RedisFacade::string($name , $value , config('app.timeout'));
+        return RedisFacade::sAdd($name , $fd , config('app.timeout'));
     }
 
     public static function delFdByUserId($identifier , $user_id , int $fd)
     {
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
-        $res = self::userIdMappingFd($identifier , $user_id);
-        if (empty($res)) {
-            return true;
-        }
-        $result = [];
-        foreach ($res as $v)
-        {
-            if ($v == $fd) {
-                continue ;
-            }
-            $result[] = $v;
-        }
-        if (empty($result)) {
-            return RedisFacade::del($name);
-        }
-        return RedisFacade::string($name , json_encode($result) , config('app.timeout'));
+        return RedisFacade::sRem($name , $fd);
     }
 
     // 检查用户是否在线
