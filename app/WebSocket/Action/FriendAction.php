@@ -74,6 +74,11 @@ class FriendAction extends Action
                 // 未开启好友验证
                 FriendModel::u_insertGetId($auth->identifier , $auth->user->id , $param['friend_id']);
                 FriendModel::u_insertGetId($auth->identifier , $param['friend_id'] , $auth->user->id);
+                // 假设时自动通过，那么双方发起的申请都设置为通过
+                ApplicationModel::updateByTypeAndUserIdAndRelationUserId('private' , $auth->user->id , $param['friend_id'] , [
+                    'status' => 'auto_approve' ,
+                    'create_time' , date('Y-m-d H:i:s' , time()) ,
+                ]);
             } else {
                 $param['status'] = 'wait';
             }
@@ -172,6 +177,11 @@ class FriendAction extends Action
                 // 同意
                 FriendModel::u_insertGetId($auth->identifier , $app->user_id , $app->relation_user_id);
                 FriendModel::u_insertGetId($auth->identifier , $app->relation_user_id , $app->user_id);
+                // 假设时自动通过，那么双方发起的申请都设置为通过
+                ApplicationModel::updateByTypeAndUserIdAndRelationUserId('private' , (int) $app->relation_user_id , $app->user_id , [
+                    'status' => 'approve' ,
+                    'create_time' , date('Y-m-d H:i:s' , time()) ,
+                ]);
             }
             DB::commit();
             $auth->push($app->user_id , 'refresh_application');

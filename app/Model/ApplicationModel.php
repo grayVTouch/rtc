@@ -127,4 +127,13 @@ class ApplicationModel extends Model
         self::single($res);
         return $res;
     }
+
+    public static function updateByTypeAndUserIdAndRelationUserId(string $type , int $user_id , int $relation_user_id , array $data)
+    {
+        return self::where([
+            ['type' , '=' , $type] ,
+            ['user_id' , '=' , $user_id] ,
+            ['relation_user_id' , '=' , $relation_user_id] ,
+        ])->update($data);
+    }
 }
