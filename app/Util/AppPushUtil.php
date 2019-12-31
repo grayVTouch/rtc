@@ -183,7 +183,7 @@ class AppPushUtil extends Util
     /**
      * 群聊-推送检查
      */
-    public static function pushCheckForGroup(string $platform , int $user_id , int $group_id , callable $callback)
+    public static function pushCheckForGroup(string $platform , int $user_id , int $group_id , callable $callback , bool $absolute = false)
     {
         if (!config('app.enable_app_push')) {
             return ;
@@ -193,27 +193,32 @@ class AppPushUtil extends Util
             return ;
         }
         $user = UserModel::findById($user_id);
-        // 检查用户是否在绘画里面
-        $session_id = ChatUtil::sessionId('group' , $group_id);
-        if (SessionRedis::existSessionMember($user->identifier , $session_id , $user->id)) {
-            // 用户在房间里面，不做推送
-            return ;
-        }
-        if (empty($user->user_option)) {
-            ProgramErrorLogModel::u_insertGetId("Bug: 用户选项信息不完善（请在 rtc_user_option 中为用户新增记录） [user_id: {$user_id}]");
-            return ;
-        }
-        if ($user->user_option->group_notification == 0) {
-            return ;
-        }
         // 开启了全局推送
         $member = GroupMemberModel::findByUserIdAndGroupId($user_id , $group_id);
         if (empty($member)) {
             ProgramErrorLogModel::u_insertGetId("Bug: 用户不在群里面 [group_id: {$group_id}；user_id: {$user_id}]");
             return ;
         }
-        if ($member->can_notice != 1) {
-            return ;
+        if (!$absolute) {
+            // 这边表示该用户并非必须推送的用户
+            // 所以需要过滤用户选项，检查是否是可以排除的推送
+
+            // 检查用户是否在会话里面
+            $session_id = ChatUtil::sessionId('group' , $group_id);
+            if (SessionRedis::existSessionMember($user->identifier , $session_id , $user->id)) {
+                // 用户在房间里面，不做推送
+                return ;
+            }
+            if ($member->can_notice != 1) {
+                return ;
+            }
+            if (empty($user->user_option)) {
+                ProgramErrorLogModel::u_insertGetId("Bug: 用户选项信息不完善（请在 rtc_user_option 中为用户新增记录） [user_id: {$user_id}]");
+                return ;
+            }
+            if ($user->user_option->group_notification == 0) {
+                return ;
+            }
         }
         // 检查用户是否在会话里面
         call_user_func($callback);

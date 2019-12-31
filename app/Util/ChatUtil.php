@@ -293,7 +293,13 @@ class ChatUtil extends Util
             PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
             // 添加到异步队列的速度正常来说应该是没有任何影响的
             // 系统内推送
-            if ($target_user != 'designation' || in_array($v , $target_user_ids)) {
+            if (
+                $target_user != 'designation' ||
+                (
+                    in_array($v , $target_user_ids) &&
+                    ($absolute = true)
+                )
+            ) {
                 AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg){
                     PushUtil::single($msg->identifier , $v , 'new');
                 });
@@ -303,7 +309,8 @@ class ChatUtil extends Util
                     'param' => [
                         $platform ,
                         $v ,
-                        $msg
+                        $msg ,
+                        $absolute
                     ]
                 ]));
             }
@@ -318,9 +325,10 @@ class ChatUtil extends Util
     /**
      * 群聊队列事件
      */
-    public static function queueForGroup(string $platform , int $user_id , $msg)
+    public static function queueForGroup(string $platform , int $user_id , $msg , bool $absolute = false)
     {
         $msg = convert_obj($msg);
+
         AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             switch ($msg->type)
@@ -345,7 +353,7 @@ class ChatUtil extends Util
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");
             }
-        });
+        } , $absolute);
     }
 
     /**
