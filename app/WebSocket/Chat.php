@@ -15,20 +15,15 @@ class Chat extends Auth
     // 私聊消息发送：文本
     public function sendTextForPrivate(array $param)
     {
-        $s_time = microtime(true);
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
         $res = ChatAction::send($this , 'text' , $param);
         if ($res['code'] != 200) {
-            $response = $this->error($res['data'] , $res['code']);
-        } else {
-            $response = $this->success($res['data']);
+            return $this->error($res['data'] , $res['code']);
         }
-        $e_time = microtime(true);
-        var_dump("私聊文本消息发送耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
-        return $response;
+        return $this->success($res['data']);
     }
 
     // 私聊消息发送：图片

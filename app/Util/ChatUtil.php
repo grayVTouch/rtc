@@ -176,7 +176,7 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
             $e_time = microtime(true);
-            var_dump("私聊消息发送耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+            var_dump("【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊消息发送成功，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
@@ -189,6 +189,7 @@ class ChatUtil extends Util
      */
     public static function queueTaskForPrivate($platform , $other_id , $msg)
     {
+        $s_time = microtime(true);
         $msg = convert_obj($msg);
         // todo app 推送要额外的事件队列处理
         AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id){
@@ -216,6 +217,9 @@ class ChatUtil extends Util
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
             }
         });
+        $e_time = microtime(true);
+        var_dump("【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊队列任务（App 推送）执行完毕，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+
     }
 
     /**
@@ -223,6 +227,7 @@ class ChatUtil extends Util
      */
     public static function sendForAsyncTask(string $platform , $msg)
     {
+        $s_time = microtime(true);
         $msg = convert_obj($msg);
         if ($msg->blocked == 1) {
             // 接收方已经把发送方加入黑名单
@@ -259,6 +264,8 @@ class ChatUtil extends Util
                 $msg
             ] ,
         ]));
+        $e_time = microtime(true);
+        var_dump("【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊异步任务执行完毕（推送消息给接受方成功），耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
     }
 
 
@@ -267,10 +274,10 @@ class ChatUtil extends Util
      */
     public static function groupSendForAsyncTask($platform , array $user_ids , string $target_user , $target_user_ids , $msg)
     {
+        $s_time = microtime(true);
         // 获取群成员，过滤掉自身
         $msg = convert_obj($msg);
         $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
-        $s_time = microtime(true);
         foreach ($user_ids as $v)
         {
             if ($v == $msg->user_id) {
@@ -305,7 +312,7 @@ class ChatUtil extends Util
                 });
                 // app 推送添加到异步消息队列
                 QueueRedis::push(json_encode([
-                    'callback' => [self::class , 'queueForGroup'] ,
+                    'callback' => [self::class , 'queueTaskForGroup'] ,
                     'param' => [
                         $platform ,
                         $v ,
@@ -318,17 +325,16 @@ class ChatUtil extends Util
 //            var_dump("单次循环花费多少时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
         }
         $e_time = microtime(true);
-        var_dump("群聊异步任务执行完毕耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
-
+        var_dump("【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊异步任务执行完毕（消息推送给接收方完成），耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
     }
 
     /**
      * 群聊队列事件
      */
-    public static function queueForGroup(string $platform , int $user_id , $msg , bool $absolute = false)
+    public static function queueTaskForGroup(string $platform , int $user_id , $msg , bool $absolute = false)
     {
+        $s_time = microtime(true);
         $msg = convert_obj($msg);
-
         AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             switch ($msg->type)
@@ -354,6 +360,9 @@ class ChatUtil extends Util
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");
             }
         } , $absolute);
+        $e_time = microtime(true);
+        var_dump("【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊队列任务（App 推送）执行完毕耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
+
     }
 
     /**
@@ -452,7 +461,7 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
             $e_time = microtime(true);
-            var_dump("群聊消息发送耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+            var_dump("【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊消息发送成功，耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
