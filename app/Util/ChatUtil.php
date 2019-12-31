@@ -313,7 +313,6 @@ class ChatUtil extends Util
             PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
             // 添加到异步队列的速度正常来说应该是没有任何影响的
             // 系统内推送
-            var_dump($target_user);
             if (
                 ($target_user == 'all' && $absolute = true) ||
                 $target_user != 'designation' ||

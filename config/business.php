@@ -341,6 +341,8 @@ return [
         'auto' ,
         // 用户指定推送
         'designation' ,
+        // 所有人
+        'all' ,
     ] ,
 
     // 推送类型
