@@ -172,17 +172,4 @@ class ChatAction extends Action
         return ChatUtil::groupSend($auth , $param);
     }
 
-    public static function logVoiceCallStartTime(Auth $auth , array $param)
-    {
-        $validator = Validator::make($param , [
-            'message_id' => 'required' ,
-            'start_time' => 'required' ,
-        ]);
-        if ($validator->fails()) {
-            return self::error($validator->message());
-        }
-        $msg = MessageModel::findById($param['message_id']);
-
-    }
-
 }

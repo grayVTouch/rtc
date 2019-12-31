@@ -59,6 +59,20 @@ class Chat extends Auth
         return $this->success($res['data']);
     }
 
+    // 私聊消息发送：图片
+    public function sendFileForPrivate(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $param['old']     = $param['old'] ?? '';
+        $res = ChatAction::send($this , 'file' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     // 私聊消息发送：名片
     public function sendCardForPrivate(array $param)
     {
@@ -196,6 +210,22 @@ class Chat extends Auth
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
         $res = ChatAction::groupSend($this , 'card' , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 群消息发送：语音
+    public function sendFileForGroup(array $param)
+    {
+        $param['group_id']  = $param['group_id'] ?? '';
+        $param['message']   = $param['message'] ?? '';
+        $param['extra']     = $param['extra'] ?? '';
+        $param['target_user'] = $param['target_user'] ?? '';
+        $param['target_user_ids'] = $param['target_user_ids'] ?? '';
+        $param['old']     = $param['old'] ?? '';
+        $res = ChatAction::groupSend($this , 'file' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
