@@ -28,6 +28,6 @@ class MiscAction extends Action
         if ($info['country_id'] != 'CN') {
             return self::success(1);
         }
-        return self::error(0);
+        return self::success(0);
     }
 }
