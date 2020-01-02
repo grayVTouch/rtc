@@ -368,6 +368,7 @@ class ChatUtil extends Util
                 'id'        => $msg->id ,
                 'group_id'   => $msg->group_id ,
                 'name'      => $msg->group->name ,
+                'type'      => $msg->type ,
             ] , false);
 //            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}；推送的结果：" . json_encode($res));
             if ($res['code'] != 200) {
