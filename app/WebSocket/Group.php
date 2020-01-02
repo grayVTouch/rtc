@@ -283,4 +283,15 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 个人退群
+    public function exitGroup(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::exitGroup($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

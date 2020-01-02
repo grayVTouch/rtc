@@ -126,7 +126,9 @@ return [
     'aes_vi' => 'ards423j32k4h423' ,
 
     // 分享注册下载链接
-    'share_register_link' => 'http://websocket.gca.cool:10001/share/register.html' ,
+//    'share_register_link' => 'http://websocket.gca.cool:10001/share/register.html' ,
+    // 这个实际是 app 下载地址
+    'share_register_link' => 'https://dwpub.ftpidc.cn/HiChat' ,
 
     // 系统初始化标志
     'initialized' => __DIR__ . '/../initialized.lock' ,
@@ -144,7 +146,7 @@ return [
     'group_member_show_limit' => 45 ,
 
     // app 下载连接地址
-    'app_download' => 'https://www.baidu.com' ,
+    'app_download' => 'https://dwpub.ftpidc.cn/HiChat' ,
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,

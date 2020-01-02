@@ -19,6 +19,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'text' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -33,6 +34,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'image' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -47,6 +49,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'voice' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -61,6 +64,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'file' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -75,6 +79,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'video' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -89,6 +94,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'card' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -103,6 +109,7 @@ class Chat extends Auth
         $param['message']   = $param['message'] ?? '';
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::send($this , 'voice_call' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -170,6 +177,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'text' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -186,6 +194,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'image' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -202,6 +211,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'voice' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -218,6 +228,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'card' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -234,6 +245,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'file' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
@@ -250,6 +262,7 @@ class Chat extends Auth
         $param['target_user'] = $param['target_user'] ?? '';
         $param['target_user_ids'] = $param['target_user_ids'] ?? '';
         $param['old']     = $param['old'] ?? '';
+        $param['create_time']     = $param['create_time'] ?? '';
         $res = ChatAction::groupSend($this , 'video' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

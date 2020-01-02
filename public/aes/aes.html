@@ -14,12 +14,13 @@
     // 自定义键 和 iv
     //为了避免补位，直接用16位的秘钥
     // 必须是 16 位密钥
-    var key =  CryptoJS.enc.Utf8.parse("abcdefgh12345678");
+    var key =  CryptoJS.enc.Utf8.parse("187a7je8nePN6G1Y");
     // var key =  'fuck';
     console.log(key);
     // var iv = CryptoJS.enc.Hex.parse('1234567890123456');
     // var iv = CryptoJS.enc.Utf8.parse('1234567890123456');
-    var iv = CryptoJS.enc.Utf8.parse('abcd12345fdskdk2');
+    // var iv = CryptoJS.enc.Utf8.parse('abcd12345fdskdk2');
+    var iv = CryptoJS.enc.Utf8.parse('ards423j32k4h423');
     var origin = 'hello boys and girls!!we will win the fight!!';
     var option = {
         iv: iv ,
@@ -36,7 +37,8 @@
 
 
     // enc = 'JsxcMPYXGVTjO4x3Ad+rHg==';
-    enc = 'srJCddLmpwpAkMLuXvOfYLCVxSc7poeW4O0ts4JBCFD5xHTIqc2p3qMgeIg1HM1B';
+    // enc = 'srJCddLmpwpAkMLuXvOfYLCVxSc7poeW4O0ts4JBCFD5xHTIqc2p3qMgeIg1HM1B';
+    enc = 'n/zXf7FCl0d4oJqAEXIrJA==';
     // Decrypt
     var bytes  = CryptoJS.AES.decrypt(enc, key , option);
 

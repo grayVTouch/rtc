@@ -103,6 +103,9 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
+        $param['create_time'] = $param['create_time'] ?? '';
+        $param['create_time'] = empty($param['create_time']) ? date('Y-m-d H:i:s') : $param['create_time'];
+
         if ($param['type'] == 'voice_call') {
             $time = time();
             $datetime = date('Y-m-d H:i:s' , $time);
@@ -141,6 +144,7 @@ class ChatUtil extends Util
                 'aes_key' ,
                 'old' ,
                 'identifier' ,
+                'create_time' ,
             ]));
             // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
             MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
@@ -412,6 +416,8 @@ class ChatUtil extends Util
         $param['old'] = $param['old'] === '' ? 1 : $param['old'];
         $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
         $param['identifier'] = $base->identifier;
+        $param['create_time'] = $param['create_time'] ?? '';
+        $param['create_time'] = empty($param['create_time']) ? date('Y-m-d H:i:s') : $param['create_time'];
         try {
             DB::beginTransaction();
             $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
@@ -423,6 +429,7 @@ class ChatUtil extends Util
                 'aes_key' ,
                 'old' ,
                 'identifier' ,
+                'create_time' ,
             ]));
             $self_is_read = 1;
             GroupMessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $group_message_id , $param['group_id'] , $self_is_read);

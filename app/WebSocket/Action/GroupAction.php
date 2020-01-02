@@ -854,4 +854,46 @@ class GroupAction extends Action
         return self::success($customer);
     }
 
+    public static function exitGroup(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查群是否存在
+        $group = GroupData::findByIdentifierAndId($auth->identifier , $param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在' , 404);
+        }
+        $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+        if (empty($member)) {
+            return self::error('您不是该群的成员' , 403);
+        }
+        try {
+            DB::beginTransaction();
+            // 删除群成员
+            GroupMemberData::delByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+            // 删除群会话
+            SessionUtil::delByUserIdAndTypeAndTargetId($auth->user->id , 'group' , $group->id);
+            DB::commit();
+            $member_ids = GroupMemberModel::getUserIdByGroupId($group->id);
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->pushAll($member_ids , 'refresh_group_member');
+            // 单独通知群主，有人退群
+            AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $group){
+                $name = UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username);
+                $message = "用户 {$name} 主动退出了群 {$group->name}";
+                AppPushUtil::push($group->user_id , $message , $message);
+                // 新消息推送
+//                $auth->push($group->user_id , 'new');
+            });
+            return self::success();
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
 }
