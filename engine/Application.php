@@ -301,6 +301,7 @@ class Application
                         // 数据格式不规范
                         continue;
                     }
+                    var_dump("队列消费成功： " . $res['callback']);
                     // 执行队列中缓存的事件
                     call_user_func_array($res['callback'] , $res['param']);
                 }
