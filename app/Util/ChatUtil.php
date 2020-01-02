@@ -232,6 +232,7 @@ class ChatUtil extends Util
             $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , [
                 'id' => $msg->id ,
                 'user_id' => $msg->user_id ,
+                'type' => $msg->type ,
                 'chat_id' => $msg->chat_id ,
                 'name'  => $msg->user->nickname ,
             ] , false);
