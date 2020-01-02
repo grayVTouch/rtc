@@ -359,7 +359,7 @@ class ChatUtil extends Util
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             $message = self::getMessageByTypeAndMessage($msg->type , $message);
             $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , $msg , false);
-            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}");
+            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}；推送的结果：" . $res['code']);
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");
             }
