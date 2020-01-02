@@ -229,7 +229,10 @@ class ChatUtil extends Util
         AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             $message = self::getMessageByTypeAndMessage($msg->type , $message);
-            $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , $msg , false);
+            $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , [
+                'id' => $msg->id ,
+                'chat_id' => $msg->chat_id
+            ] , false);
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
             }
@@ -317,7 +320,7 @@ class ChatUtil extends Util
             PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
             // 添加到异步队列的速度正常来说应该是没有任何影响的
             // 系统内推送
-            var_dump($target_user);
+//            var_dump($target_user);
             if (
                 ($target_user == 'all' && $absolute = true) ||
                 $target_user != 'designation' ||
@@ -326,7 +329,7 @@ class ChatUtil extends Util
                     ($absolute = true)
                 )
             ) {
-                var_dump('推送的群成员 user_id: ' . $v);
+//                var_dump('推送的群成员 user_id: ' . $v);
                 AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg){
                     PushUtil::single($msg->identifier , $v , 'new');
                 });
@@ -358,8 +361,12 @@ class ChatUtil extends Util
         AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             $message = self::getMessageByTypeAndMessage($msg->type , $message);
-            $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , $msg , false);
-            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}；推送的结果：" . json_encode($res));
+            // extra 极光推送 4000 Byte 长度限制
+            $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , [
+                'id'        => $msg->id ,
+                'group_id'   => $msg->group_id ,
+            ] , false);
+//            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}；推送的结果：" . json_encode($res));
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$msg->group_id}] [sender: {$msg->user_id}; receiver: {$user_id}]");
             }
