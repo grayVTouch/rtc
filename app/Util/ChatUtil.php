@@ -235,6 +235,7 @@ class ChatUtil extends Util
                 'type' => $msg->type ,
                 'chat_id' => $msg->chat_id ,
                 'name'  => $msg->user->nickname ,
+                'extra'  => $msg->extra ,
             ] , false);
             if ($res['code'] != 200) {
                 ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [chat_id: {$msg->chat_id}] [sender: {$msg->user_id}; receiver: {$other_id}]");
@@ -369,6 +370,7 @@ class ChatUtil extends Util
                 'group_id'   => $msg->group_id ,
                 'name'      => $msg->group->name ,
                 'type'      => $msg->type ,
+                'extra'      => $msg->extra ,
             ] , false);
 //            var_dump("群聊app推送结果：group_id: {$msg->group_id}，receiver: {$user_id}；推送的结果：" . json_encode($res));
             if ($res['code'] != 200) {
