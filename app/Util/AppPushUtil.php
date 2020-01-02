@@ -33,6 +33,8 @@ class AppPushUtil extends Util
             'type' => 'private' ,
             'data' => $data ,
         ];
+        // 推送的数据格式
+        var_dump('极光推送的数据：' . json_encode($extra));
         $extra = json_encode($extra);
         if ($async) {
             return self::push($user_id , $content , $title , $extra);
