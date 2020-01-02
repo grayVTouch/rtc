@@ -34,9 +34,9 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         // 推送的数据格式
-        if ($data['type'] == 'voice_call') {
-            var_dump('极光推送的数据：' . json_encode($extra));
-        }
+//        if ($data['type'] == 'voice_call') {
+//            var_dump('极光推送的数据：' . json_encode($extra));
+//        }
         $extra = json_encode($extra);
         if ($async) {
             return self::push($user_id , $content , $title , $extra);
