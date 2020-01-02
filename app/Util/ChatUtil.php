@@ -241,7 +241,6 @@ class ChatUtil extends Util
         });
         $e_time = microtime(true);
         var_dump(date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊队列任务（App 推送）执行完毕，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
-
     }
 
     /**

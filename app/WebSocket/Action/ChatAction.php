@@ -71,7 +71,7 @@ class ChatAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $voice_call_status = config('app.voice_call_status');
+        $voice_call_status = config('business.voice_call_status');
         if (!in_array($status , $voice_call_status)) {
             return self::error('不支持的语音状态' , 403);
         }
@@ -87,7 +87,7 @@ class ChatAction extends Action
         if (empty($extra)) {
             return self::error('语音通话消息不完整' , 500);
         }
-        $deny_voice_call_status = config('app.deny_voice_call_status');
+        $deny_voice_call_status = config('business.deny_voice_call_status');
         if (in_array($extra['status'] , $deny_voice_call_status)) {
             return self::error('该消息禁止更改状态' , 403);
         }

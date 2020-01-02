@@ -270,7 +270,6 @@ class Application
             if ($pid < 0) {
                 throw new Exception("创建子进程失败");
             }
-
             if ($pid == 0) {
                 // 在每个子进程中创建 redis 连接
                 // 必须，不允许单个 redis 连接被多个进程共享
@@ -301,7 +300,6 @@ class Application
                         // 数据格式不规范
                         continue;
                     }
-//                    var_dump("队列消费成功： " . json_encode($res['callback']));
                     // 执行队列中缓存的事件
                     call_user_func_array($res['callback'] , $res['param']);
                 }
