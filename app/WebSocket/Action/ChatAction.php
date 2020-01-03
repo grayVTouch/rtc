@@ -106,7 +106,7 @@ class ChatAction extends Action
         $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
         MessageUtil::handleMessage($msg , $other_id , $auth->user->id);
         // 通知对方已接听 还是 已挂断
-        $auth->push($other_id , $status == 'success' ? 'accept_voice_call' : 'close_voice_call' , $msg);
+        $auth->push($other_id , $status == 'accept' ? 'accept_voice_call' : 'close_voice_call' , $msg);
         $auth->push($other_id , 'refresh_private_message' , $msg);
         MessageUtil::handleMessage($msg , $auth->user->id , $other_id);
         $auth->send($auth->user->id , 'refresh_private_message' , $msg);
