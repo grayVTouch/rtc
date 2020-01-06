@@ -89,7 +89,8 @@ class ChatAction extends Action
         }
         $deny_voice_call_status = config('business.deny_voice_call_status');
         if (in_array($extra['status'] , $deny_voice_call_status)) {
-            return self::error('该消息禁止更改状态' , 403);
+            // 比较特殊
+            return self::success('该消息禁止更改状态' , 200);
         }
         $user_ids = ChatUtil::userIds($msg->chat_id);
         if (!in_array($auth->user->id , $user_ids)) {
@@ -137,7 +138,7 @@ class ChatAction extends Action
             return self::error('语音通话消息不完整' , 500);
         }
         if ($extra['status'] != 'accept') {
-            return self::error('该消息禁止更改状态' , 403);
+            return self::error('该消息禁止操作' , 403);
         }
         $user_ids = ChatUtil::userIds($msg->chat_id);
         if (!in_array($auth->user->id , $user_ids)) {

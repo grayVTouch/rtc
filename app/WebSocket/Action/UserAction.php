@@ -243,7 +243,7 @@ class UserAction extends Action
             'id'    => $user->id ,
         ];
         $base64 = base64_encode(json_encode($data));
-        $link = sprintf('%s?identity=%s&data=%s' , $download , config('app.identity') , $base64);
+        $link = sprintf('%s?identity=%s&data=%s' , $download , $auth->identifier , $base64);
         return self::success($link);
     }
 
