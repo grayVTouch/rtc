@@ -94,9 +94,9 @@ class Base
     }
 
     // 针对当前连接进行推送
-    public function clientPush($type , $data = '')
+    public function clientPush($client_id , $type , $data = '')
     {
-        return $this->conn->push($this->fd , json_encode(compact('type' , 'data')));
+        return $this->conn->push($client_id , json_encode(compact('type' , 'data')));
     }
 
     // 结合当前业务的发送接口：发送单条数据

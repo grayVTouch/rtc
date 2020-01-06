@@ -17,11 +17,16 @@ $redis->auth('364793');
 
 // 使用 集合
 
-$redis->sAdd('user_id_mapping_fd' , 1);
-$redis->sAdd('user_id_mapping_fd' , 2);
+//$redis->sAdd('user_id_mapping_fd' , 1);
+//$redis->sAdd('user_id_mapping_fd' , 2);
 
 
 // 取出数据
-$data = $redis->sMembers('fuck');
+//$data = $redis->sMembers('fuck');
 
-var_dump($data);
+//var_dump($data);
+
+$list = $redis->keys('rtc_*');
+
+var_dump($list);
+var_dump("你好");

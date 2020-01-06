@@ -91,8 +91,9 @@ class Application
 
     public function clearRedis()
     {
-        // 清空 redis
-        RedisFacade::flushAll();
+        $option = config('database.redis');
+        $keys = RedisFacade::native('keys', $option['prefix'] . '*');
+        RedisFacade::native('del', $keys);
     }
 
     /**

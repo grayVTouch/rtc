@@ -39,4 +39,10 @@ class UserTokenModel extends Model
             ['platform' , '=' , $platform] ,
         ])->delete();
     }
+
+    public static function delByToken(string $token)
+    {
+        return self::where('token' , $token)
+            ->delete();
+    }
 }

@@ -296,7 +296,7 @@ class User extends Auth
         return self::success($res['data']);
     }
 
-    // 分享注册二维码数据
+    // 分享注册二维码数据（实际上内部逻辑业务上有发生更改）
     public function shareRegisterQRCode(array $param)
     {
         $res = UserAction::shareRegisterQRCode($this , $param);
@@ -326,4 +326,37 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
+    public function logout(array $param)
+    {
+        $res = UserAction::logout($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    public function avatar(array $param)
+    {
+        $param['client_id'] = $param['client_id'] ?? '';
+        $res = UserAction::avatar($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 授权登录
+    public function authPc(array $param)
+    {
+        $param['client_id'] = $param['client_id'] ?? '';
+        $res = UserAction::authPc($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+
+
 }

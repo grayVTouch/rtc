@@ -20,6 +20,14 @@ use function extra\config as config_function;
  */
 function config(string $key , array $args = []){
     $dir = __DIR__ . '/../config';
+    switch (ENV)
+    {
+        case 'production':
+            break;
+        case 'development':
+            $dir .= '/development';
+            break;
+    }
     return config_function($dir , $key , $args);
 }
 

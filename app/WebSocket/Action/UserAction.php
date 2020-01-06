@@ -20,12 +20,15 @@ use App\Model\GroupModel;
 use App\Model\JoinFriendMethodModel;
 use App\Model\SessionModel;
 use App\Model\SmsCodeModel;
+use App\Model\SystemParamModel;
 use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
+use App\Model\UserTokenModel;
 use App\Redis\UserRedis;
 use App\Util\ChatUtil;
 use App\Util\GroupUtil;
+use App\Util\MiscUtil;
 use App\Util\PageUtil;
 use App\Util\SessionUtil;
 use App\WebSocket\Auth;
@@ -33,6 +36,7 @@ use App\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Hash;
 use Core\Lib\Validator;
+use Engine\Facade\WebSocket;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use function WebSocket\ws_config;
@@ -544,9 +548,9 @@ class UserAction extends Action
     // 分享注册二维码
     public static function shareRegisterQRCode(Auth $auth , array $param)
     {
-        $share_register_link = config('app.share_register_link');
-        $share_register_link = sprintf('%s?invite_code=%s' , $share_register_link , $auth->user->invite_code);
-        return self::success($share_register_link);
+        $app_download = config('app.app_download');
+        $app_download = sprintf('%s?invite_code=%s' , $app_download , $auth->user->invite_code);
+        return self::success($app_download);
     }
 
     //
@@ -591,6 +595,106 @@ class UserAction extends Action
             $auth->push($auth->user->id , 'refresh_session_unread_count');
             return self::success();
         } catch(Exception $e){
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    // 退出登录
+    public static function logout(Auth $auth , array $param)
+    {
+        // 解绑用户id 和 极光推送的绑定关系
+        $res = AppPush::sync($auth->user->id , 1);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , 500);
+        }
+        // 解绑用户id 和 连接id
+        UserRedis::delFdByUserId($auth->identifier , $auth->user->id , $auth->fd);
+        // 删除 客户端连接 id 映射的用户id
+        UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
+        // 删除 token
+        UserTokenModel::delByToken($auth->token);
+        return self::success();
+    }
+
+    public static function avatar(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'client_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查给定的客户端连接是否存在
+        if (!WebSocket::exist($param['client_id'])) {
+            return self::success('头像信息推送失败！客户端连接已经断线！请重新发起认证');
+        }
+        $auth->push($param['client_id'] , 'avatar' , $auth->user->avatar);
+        return self::success();
+    }
+
+    // pc 端授权登录
+    public static function authPc(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'client_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查给定的客户端连接是否存在
+        if (!WebSocket::exist($param['client_id'])) {
+            return self::success('授权认证失败！客户端连接已经断线！请重新发起认证');
+        }
+        $param['platform'] = 'web';
+        $param['identifier'] = $auth->identifier;
+        $param['user_id'] = $auth->user->id;
+        $param['token']  = MiscUtil::token();
+        $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
+        try {
+            DB::beginTransaction();
+            // 先检查当前登录平台是否是非 pc 浏览器
+            // 如果时非 pc 浏览器，那么将其他有效的 token 删除
+            // 或让其等价于 无效
+            // 这是为了保证 同一平台仅 允许 单个设备登录
+            $single_device_for_platform = config('business.single_device_for_platform');
+            if (in_array($param['platform'], $single_device_for_platform)) {
+                // 删除掉其他 token
+                UserTokenModel::delByUserIdAndPlatform($auth->user->id, $param['platform']);
+            }
+            UserRedis::fdMappingPlatform($param['identifier'], $param['client_id'], $param['platform']);
+            UserTokenModel::u_insertGetId($param['identifier'], $param['user_id'], $param['token'], $param['expire'], $param['platform']);
+            // 上线通知
+            $online = UserRedis::isOnline($param['identifier'], $auth->user->id);
+            UserUtil::mapping($param['identifier'], $auth->user->id, $param['client_id']);
+            if (!$online) {
+                // 之前如果不在线，现在上线，那么推送更新
+                UserUtil::onlineStatusChange($param['identifier'], $param['user_id'], 'online');
+            }
+            DB::commit();
+            if (in_array($param['platform'], $single_device_for_platform)) {
+                // 通知其他客户端你已经被迫下线
+                $client_ids = UserRedis::userIdMappingFd($param['identifier'], $auth->user->id);
+                foreach ($client_ids as $v) {
+                    // 检查平台
+                    $platform = UserRedis::fdMappingPlatform($param['identifier'], $v);
+                    if (!in_array($platform, $single_device_for_platform)) {
+                        continue;
+                    }
+                    if ($v == $param['client_id']) {
+                        // 跳过当前用户
+                        continue;
+                    }
+                    // 通知对方下线
+                    $auth->push($v, 'forced_offline');
+                }
+            }
+            $auth->clientPush($param['client_id'], 'logined', [
+                'user_id' => $auth->user->id,
+                'token' => $param['token'],
+            ]);
+            return self::success('操作成功');
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }

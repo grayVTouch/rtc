@@ -412,6 +412,18 @@ create table if not exists `rtc_bind_device` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户绑定的设备';
 
+drop table if exists `rtc_system_param`;
+create table if not exists `rtc_system_param` (
+  id int unsigned not null auto_increment ,
+  `name` varchar(255) default '' comment '名称' ,
+  `key` varchar(255) default '' comment 'key' ,
+  `value` varchar(255) default '' comment 'value' ,
+  `desc` varchar(1000) default '' comment 'value' ,
+  identifier varchar(500) default '' comment '项目标识符' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '系统参数';
+
 drop table if exists `rtc_combination_word`;
 
 -- 上下线通知
@@ -484,6 +496,7 @@ update `rtc_article_type` set identifier = 'nimo';
 update `rtc_friend_group` set identifier = 'nimo';
 update `rtc_application` set identifier = 'nimo';
 update `rtc_friend` set identifier = 'nimo';
+
 
 
 -- 缓存方面更改了 user 和 user_option

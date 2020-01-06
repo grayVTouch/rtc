@@ -41,6 +41,7 @@ class Authorization extends Base
         ]));
         var_dump('ws 推送 ');
         sleep(2);
+
         $param['platform'] = 'web';
         $param['identifier'] = 'nimo';
         $param['user_id'] = $user->id;

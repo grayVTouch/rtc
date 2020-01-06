@@ -21,7 +21,7 @@ use Core\Lib\Facade;
  * @method static lPush(string $name , string $value)
  * @method static rPush(string $name , string $value)
  * @method static lRange(string $name , int $start = 0 , int $end = -1)
- * @method static del(string $name)
+ * @method static del($name)
  * @method static parse(string $str = '')
  * @method static json($obj = null)
  * @method static flushAll()

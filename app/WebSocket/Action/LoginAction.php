@@ -18,6 +18,7 @@ use App\Model\JoinFriendMethodModel;
 use App\Model\PushModel;
 use App\Model\PushReadStatusModel;
 use App\Model\SmsCodeModel;
+use App\Model\SystemParamModel;
 use App\Model\UserInfoModel;
 use App\Model\UserJoinFriendOptionModel;
 use App\Model\UserModel;
@@ -903,10 +904,14 @@ class LoginAction extends Action
     public static function loginQRCode(Base $base , array $param)
     {
         $app_download = config('app.app_download');
-        $qrcode_data = sprintf('%s/%s' , $app_download , '#client_id=' . $base->fd);
+        $data = base64_encode(json_encode([
+            'client_id' => $base->fd ,
+            'identifier' => $base->identifier ,
+        ]));
+        $qrcode_data = sprintf('%s?data=%s' , $app_download , $data);
 
         $qrCode = new QrCode($qrcode_data);
-        $qrCode->setSize(300);
+        $qrCode->setSize(430);
         $qrCode->setWriterByName('png');
 
 //        $qrCode->setMargin(10);
@@ -929,9 +934,18 @@ class LoginAction extends Action
     // 二维码数据
     public static function loginQRCodeForTest(Base $base , array $param)
     {
-        $qr_code_data = 'http://websocket.bonuswallet.org:10001/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
+//        $qr_code_data = 'http://websocket.hichatvip.com:10010/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
+
 //        $qr_code_data = 'http://192.168.145.129:10001/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
-        $qr_code = new QrCode($qr_code_data);
+
+        $app_download = config('app.app_download');
+        $data = base64_encode(json_encode([
+            'client_id' => $base->fd ,
+            'identifier' => $base->identifier ,
+        ]));
+        $qrcode_data = sprintf('%s?data=%s' , $app_download , $data);
+//        $qr_code = new QrCode($qr_code_data);
+        $qr_code = new QrCode($qrcode_data);
         $qr_code->setSize(430);
         $qr_code->setWriterByName('png');
 
@@ -951,4 +965,6 @@ class LoginAction extends Action
         $image_base64 = sprintf("data:image/png;base64,%s" , $image_base64);
         return self::success($image_base64);
     }
+
+
 }

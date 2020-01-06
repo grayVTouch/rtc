@@ -101,7 +101,7 @@ class MessageUtil extends Util
         $msg->self_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $user_id , $msg->id);
         $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
         if (isset($msg->user)) {
-            TopUserUtil::handle($msg->user);
+            TopUserUtil::handle($msg->user , $other_id);
         }
         if ($msg->type == 'message_set') {
             // 合并转发的消息

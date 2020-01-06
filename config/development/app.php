@@ -7,13 +7,13 @@
  */
 
 // http 域名
-$host = 'http://192.168.145.128';
+$host = 'http://hichatvip.com';
 
 return [
     // 监听的 ip
     'ip' => '0.0.0.0' ,
     // 监听的端口
-    'port' => 10001 ,
+    'port' => 10010 ,
     // 重复使用端口【如果 worker != 1，请务必设置端口重用 = true】
     'reuse_port' => true ,
     // 任务进程的数量

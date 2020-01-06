@@ -150,6 +150,7 @@ class ChatAction extends Action
         MessageModel::updateById($msg->id , [
             'extra' => $extra_for_update
         ]);
+        $msg->extra = $extra_for_update;
         $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
         MessageUtil::handleMessage($msg , $other_id , $auth->user->id);
         // 通知对方已经挂断
