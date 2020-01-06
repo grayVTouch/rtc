@@ -87,10 +87,12 @@ class ChatAction extends Action
         if (empty($extra)) {
             return self::error('语音通话消息不完整' , 500);
         }
+        $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
         $deny_voice_call_status = config('business.deny_voice_call_status');
         if (in_array($extra['status'] , $deny_voice_call_status)) {
             // 比较特殊
-            return self::success('该消息禁止更改状态' , 200);
+            MessageUtil::handleMessage($msg , $auth->user->id , $other_id);
+            return self::success($msg);
         }
         $user_ids = ChatUtil::userIds($msg->chat_id);
         if (!in_array($auth->user->id , $user_ids)) {
@@ -104,7 +106,6 @@ class ChatAction extends Action
             'extra' => $extra_for_update
         ]);
         $msg->extra = $extra_for_update;
-        $other_id = ChatUtil::otherId($msg->chat_id , $auth->user->id);
         MessageUtil::handleMessage($msg , $other_id , $auth->user->id);
         // 通知对方已接听 还是 已挂断
         $auth->push($other_id , $status == 'accept' ? 'accept_voice_call' : 'close_voice_call' , $msg);
