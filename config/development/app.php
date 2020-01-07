@@ -70,8 +70,6 @@ return [
     'page' => 1 ,
     // 消息撤回允许的时间范围
     'withdraw_duration' => 2 * 60 ,
-    // app 应用市场
-    'download' => 'http://www.baidu.com' ,
     // 定时器：私聊记录清理时间点
     'time_point_for_clear_private_message_timer' => '04:00:00' ,
     // 定时器：群聊记录清理时间点
@@ -122,8 +120,7 @@ return [
 //    'aes_vi' => '1234567890123456' ,
     'aes_vi' => 'ards423j32k4h423' ,
 
-    // 分享注册下载链接
-    // 这个实际是 app 下载地址
+    // 分享注册链接
     'share_register_link' => 'https://dwpub.ftpidc.cn/HiChat' ,
 
     // 系统初始化标志

@@ -640,7 +640,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群信息' , 404);
         }
-        $download = config('app.download');
+        $download = config('app.app_download');
         $data = [
             'type'  => 'group' ,
             'id'    => $param['group_id'] ,

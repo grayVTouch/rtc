@@ -162,7 +162,7 @@ class WebSocket
     public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
-        var_dump(date('Y-m-d H:i:s') . ' 存在客户端连接');
+        var_dump('env: ' . ENV . '; ' .  date('Y-m-d H:i:s') . ' 存在客户端连接');
 //        $websocket->push($http->fd , '你已经成功连接客户端');
     }
 
@@ -185,9 +185,9 @@ class WebSocket
                 UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
             }
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
-            var_dump(date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（还有其他客户端活跃）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（还有其他客户端活跃）');
         } else {
-            var_dump(date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有对应客户端下线）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有对应客户端下线）');
         }
         // 清除 Redis（删除的太快了）
         $user = UserModel::findById($user_id);

@@ -180,7 +180,7 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
             $e_time = microtime(true);
-            var_dump(date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊消息发送成功，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+            var_dump('env: ' . ENV . '; identifier: ' . $base->identifier . '; ' . date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊消息发送成功，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();
@@ -242,7 +242,7 @@ class ChatUtil extends Util
             }
         });
         $e_time = microtime(true);
-        var_dump(date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊队列任务（App 推送）执行完毕，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+        var_dump('env: ' . ENV . '; identifier: ' . $msg->identifier . '; ' . date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊队列任务（App 推送）执行完毕，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
     }
 
     /**
@@ -288,7 +288,7 @@ class ChatUtil extends Util
             ] ,
         ]));
         $e_time = microtime(true);
-        var_dump(date('Y-m-d H:i:s') .  " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊异步任务执行完毕（推送消息给接受方成功），耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+        var_dump('env: ' . ENV . '; identifier: ' . $msg->identifier . '; ' . date('Y-m-d H:i:s') .  " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊异步任务执行完毕（推送消息给接受方成功），耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
     }
 
 
@@ -351,7 +351,7 @@ class ChatUtil extends Util
 //            var_dump("单次循环花费多少时间：" . bcmul($e_time1 - $s_time1 , 1 , 3));
         }
         $e_time = microtime(true);
-        var_dump(date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊异步任务执行完毕（消息推送给接收方完成），耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
+        var_dump('env: ' . ENV . '; identifier: ' . $msg->identifier . '; ' . date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊异步任务执行完毕（消息推送给接收方完成），耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
     }
 
     /**
@@ -378,7 +378,7 @@ class ChatUtil extends Util
             }
         } , $absolute);
         $e_time = microtime(true);
-        var_dump(date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊队列任务（App 推送）执行完毕耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
+        var_dump('env: ' . ENV . '; identifier: ' . $msg->identifier . '; ' . date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊队列任务（App 推送）执行完毕耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
 
     }
 
@@ -481,7 +481,7 @@ class ChatUtil extends Util
             $base->push($msg->user_id , 'refresh_unread_count');
             $base->push($msg->user_id , 'refresh_session_unread_count');
             $e_time = microtime(true);
-            var_dump(date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊消息发送成功，耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
+            var_dump('env: ' . ENV . '; identifier: ' . $base->identifier . '; ' . date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊消息发送成功，耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
             return self::success($msg);
         } catch(Exception $e) {
             DB::rollBack();

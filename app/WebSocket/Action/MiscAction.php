@@ -21,13 +21,13 @@ class MiscAction extends Action
             return self::error('获取客户端信息失败' , 500);
         }
         $info = RegionUtil::getByIP($res['remote_ip']);
-        if ($info['code'] != 200) {
+        if ($info['code'] == 500) {
             return self::error($info['data'] , 500);
         }
-        $info = $info['data'];
-        if ($info['country_id'] != 'CN') {
-            return self::success(1);
+        if ($info['code'] != 200) {
+            // 百度的api 仅能够获取国内的 ip ，其他ip都会产生错误码
+            return self::success(0);
         }
-        return self::success(0);
+        return self::success(1);
     }
 }

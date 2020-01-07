@@ -237,7 +237,7 @@ class UserAction extends Action
         if (empty($user)) {
             return self::error('未找到用户信息' , 404);
         }
-        $download = config('app.download');
+        $download = config('app.app_download');
         $data = [
             'type'  => 'user' ,
             'id'    => $user->id ,

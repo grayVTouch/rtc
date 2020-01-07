@@ -934,17 +934,7 @@ class LoginAction extends Action
     // 二维码数据
     public static function loginQRCodeForTest(Base $base , array $param)
     {
-//        $qr_code_data = 'http://websocket.hichatvip.com:10010/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
-
-//        $qr_code_data = 'http://192.168.145.129:10001/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
-
-        $app_download = config('app.app_download');
-        $data = base64_encode(json_encode([
-            'client_id' => $base->fd ,
-            'identifier' => $base->identifier ,
-        ]));
-        $qrcode_data = sprintf('%s?data=%s' , $app_download , $data);
-//        $qr_code = new QrCode($qr_code_data);
+        $qrcode_data = 'http://websocket.hichatvip.com:10010/Web/Authorization/auth?identifier=nimo&client_id=' . $base->fd;
         $qr_code = new QrCode($qrcode_data);
         $qr_code->setSize(430);
         $qr_code->setWriterByName('png');
