@@ -11,14 +11,19 @@ namespace App\WebSocket\Action;
 
 use App\Data\FriendData;
 use App\Data\GroupMemberData;
+use App\Data\GroupMessageReadStatusData;
+use App\Data\MessageReadStatusData;
 use App\Model\ApplicationModel;
 use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\PushModel;
+use App\Model\PushReadStatusModel;
 use App\Model\SessionModel;
 use App\Model\UserModel;
 use App\Util\ChatUtil;
 use App\WebSocket\Auth;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class UnreadAction extends Action
 {
@@ -100,4 +105,78 @@ class UnreadAction extends Action
         return self::success($unread_count_by_app);
     }
 
+    // 重置会话未读消息数量
+    public static function resetSessionUnread(Auth $auth , array $param)
+    {
+        $param['push'] = false;
+        self::setUnreadForPrivate($auth , $param);
+        self::setUnreadForGroup($auth , $param);
+        self::setUnreadForSystem($auth , $param);
+        $auth->push($auth->user->id , 'refresh_session');
+        $auth->push($auth->user->id , 'refresh_unread_count');
+        $auth->push($auth->user->id , 'refresh_session_unread_count');
+        return self::success();
+    }
+
+    // 重置私聊消息为已读消息
+    public static function setUnreadForPrivate(Auth $auth , array $param)
+    {
+        $session = SessionModel::getByUserIdAndType($auth->user->id , 'private');
+        foreach ($session as $v)
+        {
+            $msgs = MessageReadStatusModel::unreadByUserIdAndChatId($auth->user->id , $v->target_id);
+            foreach ($msgs as $msg)
+            {
+                if (!empty(MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $msg->id))) {
+                    continue ;
+                }
+                MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $msg->chat_id , $msg->id , 1);
+            }
+        }
+        $param['push'] = $param['push'] ?? true;
+        $param['push'] = is_bool($param['push']) ? $param['push'] : true;
+        if ($param['push']) {
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
+        }
+        return self::success();
+    }
+
+    public static function setUnreadForGroup(Auth $auth , array $param)
+    {
+        $session = SessionModel::getByUserIdAndType($auth->user->id , 'group');
+        foreach ($session as $v)
+        {
+            $msgs = GroupMessageReadStatusModel::unreadByUserIdAndGroupId($auth->user->id , $v->target_id);
+            foreach ($msgs as $msg)
+            {
+                if (!empty(GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $msg->id))) {
+                    continue ;
+                }
+                GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $msg->id ,  $msg->group_id , 1);
+            }
+        }
+        $param['push'] = $param['push'] ?? true;
+        $param['push'] = is_bool($param['push']) ? $param['push'] : true;
+        if ($param['push']) {
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
+        }
+        return self::success();
+    }
+
+    public static function setUnreadForSystem(Auth $auth , array $param)
+    {
+        PushReadStatusModel::updateIsReadByUserIdAndType($auth->user->id , 'system' , 1);
+        $param['push'] = $param['push'] ?? true;
+        $param['push'] = is_bool($param['push']) ? $param['push'] : true;
+        if ($param['push']) {
+            $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_unread_count');
+            $auth->push($auth->user->id , 'refresh_session_unread_count');
+        }
+        return self::success();
+    }
 }

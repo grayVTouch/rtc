@@ -217,4 +217,27 @@ class MessageReadStatusModel extends Model
         return $res;
     }
 
+    // 获取用户未读消息（排除 阅后即焚消息 + 语音消息）
+    public static function unreadByUserIdAndChatId(int $user_id , string $chat_id)
+    {
+        $res = MessageModel::whereNotExists(function($query) use($user_id , $chat_id){
+            $query->select('id')
+                ->from('message_read_status')
+                ->whereRaw('rtc_message.id = rtc_message_read_status.message_id')
+                ->where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['chat_id' , '=' , $chat_id] ,
+                ]);
+        })
+            ->where([
+                ['chat_id' , '=' , $chat_id] ,
+//                ['flag' , '=' , 'normal'] ,
+            ])
+//            ->whereNotIn('type' , ['voice'])
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
 }

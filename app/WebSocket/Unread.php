@@ -42,4 +42,14 @@ class Unread extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 重置所有消息为已读消息
+    public function resetSessionUnread(array $param)
+    {
+        $res = UnreadAction::resetSessionUnread($this , $param);
+        if ($res['code'] != 200) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

@@ -186,4 +186,25 @@ class GroupMessageReadStatusModel extends Model
         self::multiple($res);
         return $res;
     }
+
+    public static function unreadByUserIdAndGroupId(int $user_id , string $group_id)
+    {
+        $res = GroupMessageModel::whereNotExists(function($query) use($user_id , $group_id){
+            $query->select('id')
+                ->from('group_message_read_status')
+                ->whereRaw('rtc_group_message.id = rtc_group_message_read_status.group_message_id')
+                ->where([
+                    ['user_id' , '=' , $user_id] ,
+                    ['group_id' , '=' , $group_id] ,
+                ]);
+        })
+            ->where([
+                ['group_id' , '=' , $group_id] ,
+            ])
+//            ->whereNotIn('type' , ['voice'])
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
 }
