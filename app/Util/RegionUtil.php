@@ -27,6 +27,7 @@ class RegionUtil extends Util
         if (empty($res)) {
             return self::error('网络请求失败' , 500);
         }
+//        var_dump("http 调用获取到的结果： " . $res);
         $res = json_decode($res , true);
         if ($res['status'] != 0) {
             // 错误码详情查询网站：http://lbsyun.baidu.com/index.php?title=webapi/ip-api

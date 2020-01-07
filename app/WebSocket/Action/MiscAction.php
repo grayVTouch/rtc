@@ -26,8 +26,8 @@ class MiscAction extends Action
         }
         if ($info['code'] != 200) {
             // 百度的api 仅能够获取国内的 ip ，其他ip都会产生错误码
-            return self::success(0);
+            return self::success(1);
         }
-        return self::success(1);
+        return self::success(0);
     }
 }
