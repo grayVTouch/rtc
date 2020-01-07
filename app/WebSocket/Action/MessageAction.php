@@ -175,7 +175,7 @@ class MessageAction extends Action
         }
         $res = MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $param['message_id']);
         if (!empty($res)) {
-            return self::error('操作失败！该条消息已经是已读状态');
+            return self::success('操作失败！该条消息已经是已读状态');
         }
         MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
         // 推送给该条消息的双方，将本地数据库的消息删除
@@ -205,7 +205,7 @@ class MessageAction extends Action
         }
         $res = MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $param['message_id']);
         if (!empty($res)) {
-            return self::error('操作失败！该条消息已经是已读状态');
+            return self::success('操作失败！该条消息已经是已读状态');
         }
         MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
         $sender = ChatUtil::otherId($message->chat_id , $message->user_id);

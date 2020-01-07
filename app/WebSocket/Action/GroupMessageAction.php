@@ -136,7 +136,7 @@ class GroupMessageAction extends Action
 //        }
         $res = GroupMessageReadStatusModel::findByUserIdAndGroupMessageId($auth->user->id , $message->id);
         if (!empty($res)) {
-            return self::error('操作失败！该条消息已经是已读状态');
+            return self::success('操作失败！该条消息已经是已读状态');
         }
         GroupMessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->id , $message->group_id ,1);
         $auth->push($auth->user->id , 'refresh_session');
