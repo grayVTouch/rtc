@@ -14,6 +14,7 @@ use App\Data\FriendData;
 use App\Data\GroupMemberData;
 use App\Data\GroupMessageReadStatusData;
 use App\Data\MessageReadStatusData;
+use App\Data\UserData;
 use App\Model\BlacklistModel;
 use App\Model\DeleteMessageForPrivateModel;
 use App\Model\DeleteMessageModel;
@@ -107,6 +108,11 @@ class ChatUtil extends Util
         $param['create_time'] = empty($param['create_time']) ? date('Y-m-d H:i:s') : $param['create_time'];
 
         if ($param['type'] == 'voice_call') {
+            $other = UserData::findByIdentifierAndId($base->identifier , $param['other_id']);
+            if ($other->is_system == 1) {
+                return self::error('禁止向客服发起语音通话' , 403);
+            }
+            // 检查接收方是否是客服
             $time = time();
             $datetime = date('Y-m-d H:i:s' , $time);
             // 如果是语音通话
