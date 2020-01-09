@@ -109,6 +109,8 @@ return [
         'voice' ,
         // 文件
         'file' ,
+        //
+        'chat_file' ,
         // 名片
         'card' ,
         // 视频通话

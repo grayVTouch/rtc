@@ -24,4 +24,3 @@ const ENV = 'production';
 //const ENV = 'development';
 
 require_once __DIR__ . '/bootstrap/bootstrap.php';
-

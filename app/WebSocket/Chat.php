@@ -65,6 +65,7 @@ class Chat extends Auth
         $param['extra']     = $param['extra'] ?? '';
         $param['old']     = $param['old'] ?? '';
         $param['create_time']     = $param['create_time'] ?? '';
+//        $res = ChatAction::send($this , 'file' , $param);
         $res = ChatAction::send($this , 'file' , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);

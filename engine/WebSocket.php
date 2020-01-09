@@ -127,7 +127,9 @@ class WebSocket
         // 解析配置
         $this->parseConfig();
         $this->app = $app;
+
         $this->websocket = new BaseWebSocket($this->ip , $this->port);
+
         $this->websocket->set($this->getConfig());
         // 在 manager 进程中调用
         $this->websocket->on('WorkerStart' , [$this , 'workerStart']);

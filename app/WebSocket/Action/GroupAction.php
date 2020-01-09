@@ -473,6 +473,7 @@ class GroupAction extends Action
                     'extra'     => '' ,
                 ] , true);
             }
+            $auth->pushAll($user_ids , 'refresh_group');
             return self::success($group_id);
         } catch(Exception $e) {
             DB::rollBack();
@@ -880,6 +881,7 @@ class GroupAction extends Action
             DB::commit();
             $member_ids = GroupMemberModel::getUserIdByGroupId($group->id);
             $auth->push($auth->user->id , 'refresh_session');
+            $auth->push($auth->user->id , 'refresh_group');
             $auth->pushAll($member_ids , 'refresh_group_member');
             // 单独通知群主，有人退群
             AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $group){
