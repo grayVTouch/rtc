@@ -832,12 +832,7 @@ class WebSocket
         // 资源文件定期清理
         // 正式上线后，清理时间：app.res_duration
         // 清理间隔时间： 12 小时
-        Timer::tick(1 * 3600 * 1000 , function(){
-            // 每天凌晨 3点执行
-            $time = date('H:i');
-//            if ($time < ) {
-//
-//            }
+        Timer::tick(24 * 3600 * 1000 , function(){
             $timer_log_id = 0;
             TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = TimerLogModel::u_insertGetId('资源文件过期处理中...' , 'clear_oss_res');
