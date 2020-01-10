@@ -22,9 +22,11 @@ use App\Model\TimerLogModel;
 use App\Model\SessionModel;
 use App\Redis\SessionRedis;
 use App\Redis\TimerRedis;
+use App\Util\AesUtil;
 use App\Util\ChatUtil;
 use App\Util\GroupMessageUtil;
 use App\Util\GroupUtil;
+use App\Util\OssUtil;
 use App\Util\TimerLogUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Util\MessageUtil;
@@ -825,6 +827,63 @@ class WebSocket
                 $log = json_encode($log);
                 ProgramErrorLogModel::u_insertGetId('清理消息记录的定时器执行发生错误' , $log , 'timer_event');
             }
+        });
+
+        // 资源文件定期清理
+        // 正式上线后，清理时间：app.res_duration
+        // 清理间隔时间： 12 小时
+        Timer::tick(1 * 3600 * 1000 , function(){
+            // 每天凌晨 3点执行
+            $time = date('H:i');
+//            if ($time < ) {
+//
+//            }
+            $timer_log_id = 0;
+            TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = TimerLogModel::u_insertGetId('资源文件过期处理中...' , 'clear_oss_res');
+            });
+            $aes_vi = config('app.aes_vi');
+            // 资源文件过期时间
+            $res_duration = config('app.res_duration');
+            // 资源文件的消息类型
+            $message_type_for_oss = config('app.message_type_for_oss');
+            // 私聊文件清理
+            $messages = MessageModel::getByTypeAndNotExpired($message_type_for_oss);
+            $datetime = date('Y-m-d H:i:s');
+            foreach ($messages as $v)
+            {
+                $create_time_for_unix = strtotime($v->create_time);
+                $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
+                if ($datetime <= $expired_time) {
+                    // 尚未过期
+                    continue ;
+                }
+                $msg = $v->old < 1 ? AesUtil::decrypt($v->message , $v->aes_key , $aes_vi) : $v->message;
+                OssUtil::delAll([$msg]);
+                MessageModel::updateById($v->id , [
+                    'res_expired' => 1
+                ]);
+                usleep(50 * 1000);
+            }
+            $messages = GroupMessageModel::getByTypeAndNotExpired($message_type_for_oss);
+            foreach ($messages as $v)
+            {
+                $create_time_for_unix = strtotime($v->create_time);
+                $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
+                if ($datetime <= $expired_time) {
+                    // 尚未过期
+                    continue ;
+                }
+                $msg = $v->old < 1 ? AesUtil::decrypt($v->message , $v->aes_key , $aes_vi) : $v->message;
+                OssUtil::delAll([$msg]);
+                GroupMessageModel::updateById($v->id , [
+                    'res_expired' => 1
+                ]);
+                usleep(50 * 1000);
+            }
+            TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+            });
         });
 
     }

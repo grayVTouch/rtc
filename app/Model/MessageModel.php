@@ -313,4 +313,13 @@ class MessageModel extends Model
         }
         return $res;
     }
+
+    public static function getByTypeAndNotExpired(array $type = [])
+    {
+        $res = self::whereIn('type' , $type)
+            ->where('res_expired' , '<>' , 1)
+            ->get();
+        self::multiple($res);
+        return $res;
+    }
 }

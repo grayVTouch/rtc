@@ -156,6 +156,7 @@ create table if not exists `rtc_message` (
   blocked tinyint default 0 comment '0-正常消息 1-黑名单消息' ,
   old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
   aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
+  res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '私聊消息';
@@ -171,6 +172,7 @@ create table if not exists `rtc_group_message` (
   extra text comment '额外数据' ,
   old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
   aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
+  res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';
@@ -477,6 +479,10 @@ alter table `rtc_friend_group` add identifier varchar(255) default '' comment 'r
 alter table `rtc_application` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 alter table `rtc_friend` add identifier varchar(255) default '' comment 'rtc_project.identifier';
 alter table `rtc_push` add `is_show` tinyint default 1 comment '是否显示：例如注册时的单人推送要求不能再后台显示，所以有些推送需要屏蔽';
+
+
+alter table rtc_message add res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期';
+alter table rtc_group_message add res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期';
 
 
 update `rtc_user_option` set identifier = 'nimo';

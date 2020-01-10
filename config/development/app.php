@@ -144,6 +144,14 @@ return [
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,
 
+    // 需要一并删除 oss 上文件的消息类型
+    'message_type_for_oss' => [
+        'image' ,
+        'voice' ,
+        'file' ,
+    ] ,
 
+    // 资源过期时间
+    'res_duration' => 7 * 24 * 3600 ,
 
 ];

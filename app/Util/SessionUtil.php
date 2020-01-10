@@ -98,17 +98,27 @@ class SessionUtil extends Util
         }
         if ($type == 'private') {
             // 删除屏蔽的消息
-            DeleteMessageForPrivateModel::delByChatId($target_id);
+//            DeleteMessageForPrivateModel::delByChatId($target_id);
             // 删除未读状态
-            MessageReadStatusModel::delByChatId($target_id);
+//            MessageReadStatusModel::delByChatId($target_id);
             // 删除私聊消息
-            MessageModel::delByChatId($target_id);
+//            MessageModel::delByChatId($target_id);
+            $res = MessageModel::getByChatId($target_id);
+            foreach ($res as $v)
+            {
+                MessageUtil::delete($v->id);
+            }
             return self::success();
         }
+        $res = GroupMessageModel::getByGroupId($target_id);
+        foreach ($res as $v)
+        {
+            GroupMessageUtil::delete($v->id);
+        }
         // 群聊
-        DeleteMessageForGroupModel::delByGroupId($target_id);
-        GroupMessageReadStatusModel::delByGroupId($target_id);
-        GroupMessageModel::delByGroupId($target_id);
+//        DeleteMessageForGroupModel::delByGroupId($target_id);
+//        GroupMessageReadStatusModel::delByGroupId($target_id);
+//        GroupMessageModel::delByGroupId($target_id);
         return self::success();
     }
 
