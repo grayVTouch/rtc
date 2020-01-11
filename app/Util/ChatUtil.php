@@ -264,15 +264,19 @@ class ChatUtil extends Util
         }
         $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
         SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
+        $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id);
         if (
             $msg->type == 'voice_call' ||
             (
-                ($relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id)) &&
+                $relation &&
                 $relation->can_notice == 0
             )
         ) {
             // 语音通话-默认是已读的
             MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
+        }
+        if (empty($relation)) {
+            $msg->user->nickname = empty($relation->alias) ? $msg->user->nickname : $relation->alias;
         }
         $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
         $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $msg->user_id , $msg->id);;
@@ -458,7 +462,10 @@ class ChatUtil extends Util
             SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'group' , $param['group_id']);
             DB::commit();
             $msg = GroupMessageModel::findById($group_message_id);
+            $msg->user = $msg->user ?? new class() {};
+            $msg->user->nickname = empty($member->alias) ? $msg->user->nickname : $member->alias;
             MessageUtil::handleGroupMessage($msg);
+
             // 群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
             /**

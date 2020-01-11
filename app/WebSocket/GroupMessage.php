@@ -109,7 +109,7 @@ class GroupMessage extends Auth
         return $this->success($res['data']);
     }
 
-    // 私聊消息-同步（用于同步app本地数据库和线上数据库）
+    // 群聊消息-同步（用于同步app本地数据库和线上数据库）
     public function sync(array $param)
     {
         $param['id_list'] = $param['id_list'] ?? '';

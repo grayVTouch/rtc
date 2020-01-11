@@ -246,7 +246,8 @@ class GroupMessageModel extends Model
 
     public static function getByUserIdAndIdsExcludeDeleted(int $user_id , array $id_list = [])
     {
-        $res = self::whereIn('id' , $id_list)
+        $res = self::with(['user' , 'group'])
+            ->whereIn('id' , $id_list)
             ->whereNotExists(function($query) use($user_id){
                 $query->select('id')
                     ->from('delete_message_for_group')
@@ -255,7 +256,12 @@ class GroupMessageModel extends Model
             })
             ->get();
         $res = convert_obj($res);
-        self::multiple($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+            GroupModel::single($v->group);
+        }
         return $res;
     }
 

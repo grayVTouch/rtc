@@ -20,7 +20,9 @@ use App\Model\GroupMessageReadStatusModel;
 use App\Model\UserModel;
 use App\Util\AesUtil;
 use App\Util\ChatUtil;
+use App\Util\GroupUtil;
 use App\Util\MiscUtil;
+use App\Util\UserUtil;
 use App\WebSocket\Auth;
 use function core\array_unit;
 use Core\Lib\Validator;
@@ -60,6 +62,13 @@ class GroupMessageAction extends Action
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v , $auth->user->id);
+            GroupUtil::handle($v->group , $auth->user->id);
+            UserUtil::handle($v->user , $auth->user->id);
+            $member_for_message = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $v->user_id);
+            if (!empty($member_for_message)) {
+                $v->user = $v->user ?? new class() {};
+                $v->user->nickname = empty($member_for_message->alias) ? $v->user->nickname : $member_for_message->alias;
+            }
         }
         return self::success($res);
     }
@@ -86,6 +95,13 @@ class GroupMessageAction extends Action
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v , $auth->user->id);
+            GroupUtil::handle($v->group , $auth->user->id);
+            UserUtil::handle($v->user , $auth->user->id);
+            $member_for_message = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $v->user_id);
+            if (!empty($member_for_message)) {
+                $v->user = $v->user ?? new class() {};
+                $v->user->nickname = empty($member_for_message->alias) ? $v->user->nickname : $member_for_message->alias;
+            }
         }
         return self::success($res);
     }
@@ -461,6 +477,13 @@ class GroupMessageAction extends Action
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v);
+            GroupUtil::handle($v->group , $auth->user->id);
+            UserUtil::handle($v->user , $auth->user->id);
+            $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->group_id , $v->user_id);
+            if (!empty($member)) {
+                $v->user = $v->user ?? new class() {};
+                $v->user->nickname = empty($member->alias) ? $v->user->nickname : $member->alias;
+            }
         }
         return self::success($res);
     }
