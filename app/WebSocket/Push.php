@@ -35,13 +35,25 @@ class Push extends Auth
         return $this->success($res['data']);
     }
 
-    // 我的推送
+    // 我的推送（历史记录）
     public function myPush(array $param)
     {
         $param['type']      = $param['type'] ?? '';
         $param['limit']     = $param['limit'] ?? '';
         $param['limit_id']  = $param['limit_id'] ?? '';
         $res = PushAction::myPush($this , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 我的推送
+    public function latest(array $param)
+    {
+        $param['type']      = $param['type'] ?? '';
+        $param['limit_id']  = $param['limit_id'] ?? '';
+        $res = PushAction::latest($this , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }

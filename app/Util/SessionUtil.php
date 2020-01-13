@@ -9,6 +9,8 @@
 namespace App\Util;
 
 
+use App\Data\GroupData;
+use App\Data\GroupMemberData;
 use App\Model\DeleteMessageForGroupModel;
 use App\Model\DeleteMessageForPrivateModel;
 use App\Model\DeleteMessageModel;
@@ -17,6 +19,7 @@ use App\Model\GroupMessageReadStatusModel;
 use App\Model\MessageModel;
 use App\Model\MessageReadStatusModel;
 use App\Model\SessionModel;
+use App\Model\UserModel;
 use function core\array_unit;
 
 class SessionUtil extends Util
@@ -28,6 +31,30 @@ class SessionUtil extends Util
         $type_range = config('business.session_type');
         if (!in_array($type , $type_range)) {
             return self::error('不支持的 type，当前受支持的 type 有' . implode(' , ' , $type_range));
+        }
+        switch ($type)
+        {
+            case 'private':
+                $user_ids = ChatUtil::userIds($target_id);
+                $users = UserModel::getByIds($user_ids);
+                if (count($users) != 2) {
+                    return self::error('创建会话失败！存在不存在的用户' , 404);
+                }
+                break;
+            case 'group':
+                $group = GroupData::findByIdentifierAndId($identifier , $target_id);
+                if (empty($group)) {
+                    return self::error('创建会话失败！群不存在' , 404);
+                }
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($identifier , $target_id  , $user_id);
+                if (empty($member)) {
+                    return self::error('创建会话失败！您不是群成员' , 403);
+                }
+                break;
+            case 'system':
+                break;
+            default:
+                return self::error('不支持的会话类型');
         }
         $session_id = '';
         if ($type == 'system') {

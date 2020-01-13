@@ -121,7 +121,7 @@ return [
     'aes_vi' => 'ards423j32k4h423' ,
 
     // 分享注册链接
-    'share_register_link' => 'https://dwpub.ftpidc.cn/HiChat' ,
+    'share_register_link' => 'https://sapp.link/download/nxmq2' ,
 
     // 系统初始化标志
     'initialized' => __DIR__ . '/../initialized.lock' ,
@@ -139,7 +139,7 @@ return [
     'group_member_show_limit' => 45 ,
 
     // app 下载连接地址
-    'app_download' => 'https://dwpub.ftpidc.cn/HiChat' ,
+    'app_download' => 'https://sapp.link/download/nxmq2' ,
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,

@@ -603,10 +603,13 @@ class UserAction extends Action
     // 退出登录
     public static function logout(Auth $auth , array $param)
     {
-        // 解绑用户id 和 极光推送的绑定关系
-        $res = AppPush::sync($auth->user->id , 1);
-        if ($res['code'] != 200) {
-            return self::error($res['data'] , 500);
+        $deny_platform = ['web' , 'pc'];
+        if (!in_array($auth->platform , $deny_platform)) {
+            // 解绑用户id 和 极光推送的绑定关系
+            $res = AppPush::sync($auth->user->id , 1);
+            if ($res['code'] != 200) {
+                return self::error($res['data'] , 500);
+            }
         }
         // 解绑用户id 和 连接id
         UserRedis::delFdByUserId($auth->identifier , $auth->user->id , $auth->fd);

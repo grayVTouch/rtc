@@ -9,6 +9,7 @@
 namespace App\Model;
 
 
+use function core\convert_obj;
 use Illuminate\Support\Facades\DB;
 
 class PushModel extends Model
@@ -102,10 +103,39 @@ class PushModel extends Model
             ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
             ->where($where)
             ->orderBy('prs.id' , 'desc')
-            ->select('p.*' , 'p.create_time')
+            ->select('p.*' , 'prs.create_time')
             ->limit($limit)
             ->get();
-        self::multiple($res);
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+        }
+        return $res;
+    }
+
+    public static function latestByUserIdAndTypeAndLimitId(int $user_id , $type = '' , $limit_id = 0)
+    {
+        $where = [
+            ['prs.user_id' , '=' , $user_id] ,
+        ];
+        if (!empty($type)) {
+            $where[] = ['p.type' , '=' , $type];
+        }
+        if (!empty($limit_id)) {
+            $where[] = ['p.id' , '>' , $limit_id];
+        }
+        $res = self::from('push as p')
+            ->leftJoin('push_read_status as prs' , 'p.id' , '=' , 'prs.push_id')
+            ->where($where)
+            ->orderBy('prs.id' , 'desc')
+            ->select('p.*' , 'prs.create_time')
+            ->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+        }
         return $res;
     }
 }

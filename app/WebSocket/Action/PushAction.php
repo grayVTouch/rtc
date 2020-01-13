@@ -49,8 +49,34 @@ class PushAction extends Action
 
     public static function myPush(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'type' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $push_type_for_push = config('business.push_type_for_push');
+        if (!in_array($param['type'] , $push_type_for_push)) {
+            return self::error('不支持的推送类型，当前受支持的推送类型有：' . implode(',' , $push_type_for_push));
+        }
         $limit = empty($param['limit']) ? config('app.limit') : $param['limit'];
         $res = PushModel::getByUserIdAndTypeAndLimitIdAndLimit($auth->user->id , $param['type'] , $param['limit_id'] , $limit);
+        return self::success($res);
+    }
+
+    public static function latest(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'type' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $push_type_for_push = config('business.push_type_for_push');
+        if (!in_array($param['type'] , $push_type_for_push)) {
+            return self::error('不支持的推送类型，当前受支持的推送类型有：' . implode(',' , $push_type_for_push));
+        }
+        $res = PushModel::latestByUserIdAndTypeAndLimitId($auth->user->id , $param['type'] , $param['limit_id']);
         return self::success($res);
     }
 

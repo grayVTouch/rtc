@@ -184,17 +184,18 @@ class MessageAction extends Action
         if (!in_array($auth->user->id , $user_ids)) {
             return self::error('你无法更改他人的消息读取状态' , 403);
         }
-//        $other_id = ChatUtil::otherId($message->chat_id , $message->user_id);
         $res = MessageReadStatusModel::findByUserIdAndMessageId($auth->user->id , $param['message_id']);
         if (!empty($res)) {
             return self::success('操作失败！该条消息已经是已读状态');
         }
         MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
         // 推送给该条消息的双方，将本地数据库的消息删除
-        $auth->push($auth->user->id , 'delete_private_message_from_cache' , [$param['message_id']]);
-        $auth->push($auth->user->id , 'refresh_session');
-        $auth->push($auth->user->id , 'refresh_unread_count');
-        $auth->push($auth->user->id , 'refresh_session_unread_count');
+        $message_ids = [$param['message_id']];
+        $auth->send($auth->user->id , 'delete_private_message_from_cache' , $message_ids);
+        $auth->push($message->user_id , 'delete_private_message_from_cache' , $message_ids);
+        $auth->pushAll($user_ids , 'refresh_session');
+        $auth->pushAll($user_ids , 'refresh_unread_count');
+        $auth->pushAll($user_ids , 'refresh_session_unread_count');
         return self::success();
     }
 
@@ -220,9 +221,8 @@ class MessageAction extends Action
             return self::success('操作失败！该条消息已经是已读状态');
         }
         MessageReadStatusData::insertGetId($auth->identifier , $auth->user->id , $message->chat_id , $message->id , 1);
-        $sender = ChatUtil::otherId($message->chat_id , $message->user_id);
         // 推送给该条消息的双方，将本地数据库的消息删除
-        $auth->push($sender , 'readed_for_private' , [$param['message_id']]);
+        $auth->push($message->user_id , 'readed_for_private' , [$param['message_id']]);
         $auth->push($auth->user->id , 'refresh_session');
         $auth->push($auth->user->id , 'refresh_unread_count');
         $auth->push($auth->user->id , 'refresh_session_unread_count');
