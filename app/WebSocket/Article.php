@@ -28,6 +28,9 @@ class Article extends Auth
     // 加密技术
     protected $articleTypeIdForEncryption = 5;
 
+    // 用户协议
+    protected $articleTypeIdForUserProtocol = 6;
+
     // 关于我们
     public function aboutUs(array $param)
     {
@@ -52,6 +55,16 @@ class Article extends Auth
     public function privacyPolicy(array $param)
     {
         $res = ArticleAction::firstByArticleTypeId($this , $this->articleTypeIdForPrivacyPolicy , $param);
+        if ($res['code'] != 200) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
+    // 用户协议
+    public function userProtocol(array $param)
+    {
+        $res = ArticleAction::firstByArticleTypeId($this , $this->articleTypeIdForUserProtocol , $param);
         if ($res['code'] != 200) {
             return $this->error($res['data'] , $res['code']);
         }
