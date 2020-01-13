@@ -11,7 +11,7 @@ namespace App\WebSocket;
 
 use App\WebSocket\Action\ArticleNoAuthAction;
 
-class Article extends Base
+class ArticleNoAuth extends Base
 {
     // 用户协议
     protected $articleTypeIdForUserProtocol = 6;
