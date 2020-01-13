@@ -12,18 +12,19 @@ namespace App\WebSocket\Action;
 use App\Model\ArticleModel;
 use App\Util\PageUtil;
 use App\WebSocket\Auth;
+use App\WebSocket\Base;
 use Core\Lib\Validator;
 
 class ArticleNoAuthAction extends Action
 {
 
-    public static function firstByArticleTypeId(Auth $auth , int $article_type_id , array $param)
+    public static function firstByArticleTypeId(Base $base , int $article_type_id , array $param)
     {
         $res = ArticleModel::firstByArticleTypeId($article_type_id);
         return self::success($res);
     }
 
-    public static function detailForArticle(Auth $auth , int $article_type_id , array $param)
+    public static function detailForArticle(Base $base , int $article_type_id , array $param)
     {
         $validator = Validator::make($param , [
             'id' => 'required' ,
