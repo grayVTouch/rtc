@@ -349,6 +349,7 @@ class User extends Auth
     // 授权登录
     public function authPc(array $param)
     {
+//        var_dump('pc 端授权登录');
         $param['client_id'] = $param['client_id'] ?? '';
         $res = UserAction::authPc($this , $param);
         if ($res['code'] != 200) {

@@ -342,6 +342,7 @@ class FriendAction extends Action
         FriendData::updateByIdentifierAndUserIdAndFriendIdAndData($auth->identifier , $auth->user->id , $param['friend_id'] , array_unit($param , [
             'can_notice'
         ]));
+        $auth->push($auth->user->id , 'refresh_session');
         return self::success();
     }
 

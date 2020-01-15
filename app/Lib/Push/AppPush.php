@@ -27,6 +27,7 @@ class AppPush {
     private static $api = 'http://push.t1.tuuz.cc';
 
     private static $token = 'nimo';
+    private static $token2 = 'nimo2';
 
     /*
      *

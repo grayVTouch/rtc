@@ -426,6 +426,14 @@ create table if not exists `rtc_system_param` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '系统参数';
 
+-- drop table if exists `rtc_report`;
+-- create table if not exists `rtc_report` (
+--   id int unsigned not null auto_increment ,
+--   user_id int unsigned default 0 comment 'rtc_user.id' ,
+--
+--   primary key `id` (`id`)
+-- ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '举报功能';
+
 drop table if exists `rtc_combination_word`;
 
 -- 上下线通知

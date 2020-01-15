@@ -844,12 +844,12 @@ class WebSocket
             $message_type_for_oss = config('app.message_type_for_oss');
             // 私聊文件清理
             $messages = MessageModel::getByTypeAndNotExpired($message_type_for_oss);
-            $datetime = date('Y-m-d H:i:s');
+            $time = time();
             foreach ($messages as $v)
             {
                 $create_time_for_unix = strtotime($v->create_time);
-                $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
-                if ($datetime <= $expired_time) {
+                $expired_time = $create_time_for_unix + $res_duration;
+                if ($time <= $expired_time) {
                     // 尚未过期
                     continue ;
                 }
@@ -865,7 +865,7 @@ class WebSocket
             {
                 $create_time_for_unix = strtotime($v->create_time);
                 $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
-                if ($datetime <= $expired_time) {
+                if ($time <= $expired_time) {
                     // 尚未过期
                     continue ;
                 }
