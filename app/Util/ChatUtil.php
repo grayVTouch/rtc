@@ -140,10 +140,10 @@ class ChatUtil extends Util
         // 将 html 标签转义成 html 实体
         if ($param['old'] < 1) {
             $aes_vi = config('app.aes_vi');
-            $message = AesUtil::decrypt($param['message'] , $user->aes_key  , $aes_vi);
+            $message = AesUtil::decrypt($param['message'] , $param['aes_key']  , $aes_vi);
             $message = strip_tags($message);
             // 重新加密
-            $param['message'] = AesUtil::encrypt($message , $user->aes_key , $aes_vi);
+            $param['message'] = AesUtil::encrypt($message , $param['aes_key'] , $aes_vi);
         } else {
             $param['message'] = strip_tags($param['message']);
         }
@@ -457,10 +457,10 @@ class ChatUtil extends Util
         // 将 html 标签转义成 html 实体
         if ($param['old'] < 1) {
             $aes_vi = config('app.aes_vi');
-            $message = AesUtil::decrypt($param['message'] , $user->aes_key  , $aes_vi);
+            $message = AesUtil::decrypt($param['message'] , $param['aes_key'] , $aes_vi);
             $message = strip_tags($message);
             // 重新加密
-            $param['message'] = AesUtil::encrypt($message , $user->aes_key , $aes_vi);
+            $param['message'] = AesUtil::encrypt($message , $param['aes_key'] , $aes_vi);
         } else {
             $param['message'] = strip_tags($param['message']);
         }
