@@ -147,10 +147,10 @@ class AppPushUtil extends Util
         if (!config('app.enable_app_push')) {
             return ;
         }
-        $deny_platform_for_push = config('business.deny_platform_for_push');
-        if (in_array($platform , $deny_platform_for_push)) {
-            return ;
-        }
+//        $deny_platform_for_push = config('business.deny_platform_for_push');
+//        if (in_array($platform , $deny_platform_for_push)) {
+//            return ;
+//        }
         // 检查全局推送是否开启
         $chat_id = ChatUtil::chatId($user_id , $other_id);
         $other = UserData::findByIdentifierAndId($identifier , $other_id);
@@ -192,10 +192,10 @@ class AppPushUtil extends Util
         if (!config('app.enable_app_push')) {
             return ;
         }
-        $deny_platform_for_push = config('business.deny_platform_for_push');
-        if (in_array($platform , $deny_platform_for_push)) {
-            return ;
-        }
+//        $deny_platform_for_push = config('business.deny_platform_for_push');
+//        if (in_array($platform , $deny_platform_for_push)) {
+//            return ;
+//        }
         $user = UserModel::findById($user_id);
         // 开启了全局推送
         $member = GroupMemberModel::findByUserIdAndGroupId($user_id , $group_id);
@@ -236,10 +236,10 @@ class AppPushUtil extends Util
         if (!config('app.enable_app_push')) {
             return ;
         }
-        $deny_platform_for_push = config('business.deny_platform_for_push');
-        if (in_array($platform , $deny_platform_for_push)) {
-            return ;
-        }
+//        $deny_platform_for_push = config('business.deny_platform_for_push');
+//        if (in_array($platform , $deny_platform_for_push)) {
+//            return ;
+//        }
         // 检查全局推送是否开启
         $user = UserModel::findById($user_id);
         if (empty($user)) {

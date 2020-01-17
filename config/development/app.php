@@ -139,7 +139,8 @@ return [
     'group_member_show_limit' => 45 ,
 
     // app 下载连接地址
-    'app_download' => 'https://sapp.link/download/nxmq2' ,
+//    'app_download' => 'https://sapp.link/download/nxmq2' ,
+    'app_download' => 'https://fir.im/OJBKapk' ,
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,
