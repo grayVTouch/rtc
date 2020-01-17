@@ -30,7 +30,7 @@ class AppPush {
     private static $token = 'nimo';
 
     // 专门针对 ios 进行的推送
-    private static $tokenForIos = 'nimo2';
+    private static $tokenForIos = 'nimo';
 
     /*
      *
