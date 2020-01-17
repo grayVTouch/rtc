@@ -426,4 +426,12 @@ return [
         'end_time' => '2019-10-11 11:00:00' ,
         'duration' => 3600 ,
     ],
+
+    // 资源消息类型
+    'res_type_for_message' => [
+        'image' ,
+        'voice' ,
+        'file' ,
+        'video' ,
+    ] ,
 ];

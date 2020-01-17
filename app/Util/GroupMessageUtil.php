@@ -29,8 +29,8 @@ class GroupMessageUtil extends Util
         // 删除消息
         GroupMessageModel::delById($group_message_id);
         // 删除 oss 云存储上的文件
-        $message_type_for_oss = config('app.message_type_for_oss');
-        if (in_array($message->type , $message_type_for_oss)) {
+        $res_type_for_message = config('business.res_type_for_message');
+        if (in_array($message->type , $res_type_for_message)) {
             $iv = config('app.aes_vi');
             $msg = $message->old < 1 ? AesUtil::decrypt($message->message , $message->aes_key , $iv) : $message->message;
             OssUtil::delAll([$msg]);

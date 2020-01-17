@@ -242,10 +242,10 @@ class ChatUtil extends Util
         $s_time = microtime(true);
         $msg = convert_obj($msg);
         // todo app 推送要额外的事件队列处理
-        AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id){
+        AppPushUtil::pushCheckForOther($msg->identifier , $platform , $msg->user_id , $other_id , function() use($msg , $other_id , $platform){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             $message = self::getMessageByTypeAndMessage($msg->type , $message);
-            $res = AppPushUtil::pushForPrivate($other_id , $message , '你收到了一条好友消息' , [
+            $res = AppPushUtil::pushForPrivate($platform , $other_id , $message , '你收到了一条好友消息' , [
                 'id' => $msg->id ,
                 'user_id' => $msg->user_id ,
                 'type' => $msg->type ,
@@ -276,11 +276,12 @@ class ChatUtil extends Util
         SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
         $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id);
         if (
-            $msg->type == 'voice_call' ||
-            (
-                $relation &&
-                $relation->can_notice == 0
-            )
+            $msg->type == 'voice_call'
+//            $msg->type == 'voice_call' ||
+//            (
+//                $relation &&
+//                $relation->can_notice == 0
+//            )
         ) {
             // 语音通话-默认是已读的
             MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
@@ -329,13 +330,13 @@ class ChatUtil extends Util
 //            $s_time1 = microtime(true);
             // 消息已读未读
             SessionUtil::createOrUpdate($msg->identifier , $v , 'group' , $msg->group_id);
-            $relation = GroupMemberData::findByIdentifierAndGroupIdAndUserId($msg->identifier , $msg->group_id , $v);
-            if (!empty($relation)) {
-                if ($relation->can_notice == 0) {
-                    // 接收方开启了消息免打扰
-                    GroupMessageReadStatusData::insertGetId($msg->identifier , $v , $msg->id , $msg->group_id , 1);
-                }
-            }
+//            $relation = GroupMemberData::findByIdentifierAndGroupIdAndUserId($msg->identifier , $msg->group_id , $v);
+//            if (!empty($relation)) {
+//                if ($relation->can_notice == 0) {
+//                    // 接收方开启了消息免打扰
+//                    GroupMessageReadStatusData::insertGetId($msg->identifier , $v , $msg->id , $msg->group_id , 1);
+//                }
+//            }
             $msg->is_read = GroupMessageReadStatusData::isReadByIdentifierAndUserIdAndGroupMessageId($msg->identifier , $v , $msg->id);
             PushUtil::single($msg->identifier , $v , 'group_message' , $msg);
             PushUtil::single($msg->identifier , $v , 'refresh_session');
@@ -381,11 +382,11 @@ class ChatUtil extends Util
     {
         $s_time = microtime(true);
         $msg = convert_obj($msg);
-        AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($user_id , $msg){
+        AppPushUtil::pushCheckForGroup($platform , $user_id , $msg->group_id , function() use($platform , $user_id , $msg){
             $message = $msg->old == 1 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
             $message = self::getMessageByTypeAndMessage($msg->type , $message);
             // extra 极光推送 4000 Byte 长度限制
-            $res = AppPushUtil::pushForGroup($user_id , $message , '你收到了一条群消息' , [
+            $res = AppPushUtil::pushForGroup($platform , $user_id , $message , '你收到了一条群消息' , [
                 'id'        => $msg->id ,
                 'group_id'   => $msg->group_id ,
                 'name'      => $msg->group->name ,
@@ -627,8 +628,8 @@ class ChatUtil extends Util
                         // 跳过发送消息的人
                         continue ;
                     }
-                    AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
-                        $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                    AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($base , $v , $param , $msg){
+                        $res = AppPushUtil::pushForGroup($base->platform , $v , $msg->message , '你收到了一条群消息' , $msg);
                         if ($res['code'] != 200) {
                             ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                         }
@@ -669,8 +670,8 @@ class ChatUtil extends Util
                     // 跳过发送消息的人
                     continue ;
                 }
-                AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($v , $param , $msg){
-                    $res = AppPushUtil::pushForGroup($v , $msg->message , '你收到了一条群消息' , $msg);
+                AppPushUtil::pushCheckForGroup($base->platform , $param['user_id'] , $group->id , function() use($base , $v , $param , $msg){
+                    $res = AppPushUtil::pushForGroup($base->platform , $v , $msg->message , '你收到了一条群消息' , $msg);
                     if ($res['code'] != 200) {
                         ProgramErrorLogModel::u_insertGetId("Notice: App推送失败 [group_id: {$param['group_id']}] [sender: {$param['user_id']}; receiver: {$v}]");
                     }

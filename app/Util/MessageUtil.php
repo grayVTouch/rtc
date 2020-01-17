@@ -26,10 +26,10 @@ class MessageUtil extends Util
         // 删除消息
         MessageModel::delById($message_id);
         // todo 新增：内容，删除亚马逊云存储上的文件
-        $message_type_for_oss = config('app.message_type_for_oss');
+        $res_type_for_message = config('business.res_type_for_message');
 //        print_r($message_type_for_oss);
 //        var_dump($message->type);
-        if (in_array($message->type , $message_type_for_oss)) {
+        if (in_array($message->type , $res_type_for_message)) {
             $iv = config('app.aes_vi');
             $msg = $message->old < 1 ? AesUtil::decrypt($message->message , $message->aes_key , $iv) : $message->message;
             OssUtil::delAll([$msg]);

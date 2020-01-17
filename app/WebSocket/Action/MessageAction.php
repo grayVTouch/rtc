@@ -22,6 +22,7 @@ use App\Model\MessageReadStatusModel;
 use App\Model\UserModel;
 use App\Util\AesUtil;
 use App\Util\ChatUtil;
+use App\Util\OssUtil;
 use App\WebSocket\Auth;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\Util\UserUtil;
@@ -252,6 +253,16 @@ class MessageAction extends Action
         $withdraw_duration = config('app.withdraw_duration');
         if ($withdraw_duration < time() - strtotime($res->create_time)) {
             return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
+        }
+        $res_type_range = config('business.res_type_for_message');
+        if (in_array($res->type , $res_type_range)) {
+            // 删除 oss 上存放的资源
+            $aes_vi = config('app.aes_vi');
+            $oss_file = $res->old < 1 ? AesUtil::decrypt($res->message , $res->aes_key , $aes_vi) : $res->message;
+            $del_res = OssUtil::delAll([$oss_file]);
+            if ($del_res['code'] != 200) {
+                return self::error('消息撤回失败：删除 oss 对应的资源文件失败' , 500);
+            }
         }
         $other_id = ChatUtil::otherId($res->chat_id , $res->user_id);
         $message = sprintf('"%s" 撤回了消息' , $res->user->nickname);

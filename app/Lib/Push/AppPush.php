@@ -26,8 +26,11 @@ class AppPush {
 
     private static $api = 'http://push.t1.tuuz.cc';
 
+    // nimo 推送
     private static $token = 'nimo';
-    private static $token2 = 'nimo2';
+
+    // 专门针对 ios 进行的推送
+    private static $tokenForIos = 'nimo2';
 
     /*
      *
@@ -51,20 +54,20 @@ class AppPush {
      */
 
     // 顶栏推送/单人推送
-    public static function push(int $user_id , string $content, string $title = '' , $extra = null)
+    public static function push(string $platform , int $user_id , string $content, string $title = '' , $extra = null)
     {
-        return self::pushAll([$user_id] , $content , $title , $extra);
+        return self::pushAll($platform , [$user_id] , $content , $title , $extra);
     }
 
     // 顶栏推送/多人推送
-    public static function pushAll(array $user_ids , $content , string $title = '' , $extra = null)
+    public static function pushAll(string $platform , array $user_ids , $content , string $title = '' , $extra = null)
     {
         $data = [];
         $data['users'] = json_encode($user_ids);
         $data['content'] = $content;
         $data['title'] = $title;
         $data['extra'] = $extra;
-        $res = self::curl('/push' , $data);
+        $res = self::curl($platform ,'/push' , $data);
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
@@ -76,17 +79,17 @@ class AppPush {
     }
 
     // 静默推送/单人推送
-    public static function pushWithQuiet($uid, $content, $extra) {
-        return self::pushAllWithQuiet([$uid] , $content , $extra);
+    public static function pushWithQuiet(string $platform , $uid, $content, $extra) {
+        return self::pushAllWithQuiet($platform , [$uid] , $content , $extra);
     }
 
     // 静默推送/多人推送
-    public static function pushAllWithQuiet(array $user_ids , $content , $extra) {
+    public static function pushAllWithQuiet(string $platform , array $user_ids , $content , $extra) {
         $data = [];
         $data['users']      = json_encode($user_ids);
         $data['content']    = $content;
         $data['extra']      = $extra;
-        $res = self::curl('/message' , $data);
+        $res = self::curl($platform , '/message' , $data);
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
@@ -98,12 +101,12 @@ class AppPush {
     }
 
     // 全推
-    public static function fullPush($content, $title = null, $extra = null) {
+    public static function fullPush(string $platform , $content, $title = null, $extra = null) {
         $data = [];
         $data['content'] = $content;
         $data['title'] = $title;
         $data['extra'] = $extra;
-        $res = self::curl('/push_all' , $data);
+        $res = self::curl($platform , '/push_all' , $data);
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
@@ -149,11 +152,19 @@ class AppPush {
     }
 
     // 推送
-    private static function curl(string $path = '/sync' , array $data = []) {
+    private static function curl(string $platform , string $path = '/sync' , array $data = []) {
         if (empty($data)) {
             return false;
         }
-        $data['token'] = self::$token;
+        $platform = strtolower($platform);
+        switch ($platform)
+        {
+            case 'ios':
+                $data['token'] = self::$tokenForIos;
+                break;
+            default:
+                $data['token'] = self::$token;
+        }
         $path = rtrim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
         return Http::post($url , [

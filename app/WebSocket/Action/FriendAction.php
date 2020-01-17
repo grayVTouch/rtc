@@ -110,8 +110,8 @@ class FriendAction extends Action
                 // 推送总未读消息数量更新
                 $auth->push($param['friend_id'] , 'refresh_unread_count');
                 $auth->push($param['friend_id'] , 'refresh_app_unread_count');
-                AppPushUtil::pushCheckForUser($auth->platform , $param['friend_id'] , function() use($param){
-                    AppPushUtil::pushForAppFriend($param['friend_id'] , $param['log'] , '申请成为好友');
+                AppPushUtil::pushCheckForUser($auth->platform , $param['friend_id'] , function() use($auth , $param){
+                    AppPushUtil::pushForAppFriend($auth->platform , $param['friend_id'] , $param['log'] , '申请成为好友');
                 });
                 AppPushUtil::pushCheckWithNewForUser($param['friend_id'] , function() use($param , $auth){
                     $auth->push($param['friend_id'] , 'new');

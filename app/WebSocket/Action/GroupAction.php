@@ -79,8 +79,8 @@ class GroupAction extends Action
             $auth->push($group->user_id , 'refresh_application');
             $auth->push($group->user_id , 'refresh_unread_count');
             $auth->push($group->user_id , 'refresh_app_unread_count');
-            AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
-                AppPushUtil::pushForAppGroup($param['user_id'] , $param['log'] , '申请进群');
+            AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $param){
+                AppPushUtil::pushForAppGroup($auth->platform , $param['user_id'] , $param['log'] , '申请进群');
             });
             AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($param , $auth){
                 $auth->push($param['user_id'] , 'new');
@@ -181,8 +181,8 @@ class GroupAction extends Action
                 $auth->push($group->user_id , 'refresh_application');
                 $auth->push($group->user_id , 'refresh_unread_count');
                 $auth->push($group->user_id , 'refresh_app_unread_count');
-                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($param){
-                    AppPushUtil::pushForInviteGroup($param['user_id'] , $param['log'] , '邀请进群');
+                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $param){
+                    AppPushUtil::pushForInviteGroup($auth->platform , $param['user_id'] , $param['log'] , '邀请进群');
                 });
                 AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($param , $auth){
                     $auth->push($param['user_id'] , 'new');
@@ -386,8 +386,8 @@ class GroupAction extends Action
             foreach ($kick_user_ids as $v)
             {
                 // 通知被移除的成员他们已经被移除群聊
-                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($v , $group){
-                    AppPushUtil::push($v , sprintf('你被踢出了群 %s' , $group->name) , '退群通知');
+                AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $v , $group){
+                    AppPushUtil::push($auth->platform , $v , sprintf('你被踢出了群 %s' , $group->name) , '退群通知');
                 });
                 AppPushUtil::pushCheckWithNewForUser($group->user_id , function() use($v , $auth){
                     $auth->push($v , 'new');
@@ -519,8 +519,8 @@ class GroupAction extends Action
                 if ($v == $auth->user->id) {
                     continue ;
                 }
-                AppPushUtil::pushCheckForUser($auth->platform , $v , function() use($v , $group){
-                    AppPushUtil::push($v , '群主解散了群 ' . $group->name);
+                AppPushUtil::pushCheckForUser($auth->platform , $v , function() use($auth , $v , $group){
+                    AppPushUtil::push($auth->platform , $v , '群主解散了群 ' . $group->name);
                 });
                 AppPushUtil::pushCheckWithNewForUser($v , function() use($v , $auth){
                     $auth->push($v , 'new');
@@ -887,7 +887,7 @@ class GroupAction extends Action
             AppPushUtil::pushCheckForUser($auth->platform , $group->user_id , function() use($auth , $group){
                 $name = UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username);
                 $message = "用户 {$name} 主动退出了群 {$group->name}";
-                AppPushUtil::push($group->user_id , $message , $message);
+                AppPushUtil::push($auth->platform , $group->user_id , $message , $message);
                 // 新消息推送
 //                $auth->push($group->user_id , 'new');
             });

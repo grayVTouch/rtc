@@ -26,7 +26,7 @@ class AppPushUtil extends Util
     public static $module = 'chat';
 
     // 私聊|顶栏推送|单人
-    public static function pushForPrivate(int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
+    public static function pushForPrivate(string $platform , int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
     {
         $extra = [
             'module' => self::$module ,
@@ -39,9 +39,9 @@ class AppPushUtil extends Util
 //        }
         $extra = json_encode($extra);
         if ($async) {
-            return self::push($user_id , $content , $title , $extra);
+            return self::push($platform , $user_id , $content , $title , $extra);
         }
-        return AppPush::push($user_id , $content , $title , $extra);
+        return AppPush::push($platform , $user_id , $content , $title , $extra);
     }
 
     /**
@@ -64,7 +64,7 @@ class AppPushUtil extends Util
     }
 
     // 群聊|顶栏推送|单人
-    public static function pushForGroup(int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
+    public static function pushForGroup(string $platform , int $user_id , string $content , string $title = '' , $data = [] , bool $async = true)
     {
         $extra = [
             'module' => self::$module ,
@@ -73,13 +73,13 @@ class AppPushUtil extends Util
         ];
         $extra = json_encode($extra);
         if ($async) {
-            return self::push($user_id , $content , $title , $extra);
+            return self::push($platform , $user_id , $content , $title , $extra);
         }
-        return AppPush::push($user_id , $content , $title , $extra);
+        return AppPush::push($platform , $user_id , $content , $title , $extra);
     }
 
     // 群聊|顶栏推送|多人
-    public static function pushAllForGroup(array $user_ids , string $content , string $title = '' , $data = [])
+    public static function pushAllForGroup(string $platform , array $user_ids , string $content , string $title = '' , $data = [])
     {
         $extra = [
             'module' => self::$module ,
@@ -87,11 +87,11 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'pushAll'] , $platform , $user_ids , $content , $title , $extra);
     }
 
     // 邀请进群|顶栏推送|单人
-    public static function pushForInviteGroup(int $user_id , string $content , string $title = '' , $data = [])
+    public static function pushForInviteGroup(string $platform , int $user_id , string $content , string $title = '' , $data = [])
     {
         $extra = [
             'module' => self::$module ,
@@ -99,11 +99,11 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $platform , $user_id , $content , $title , $extra);
     }
 
     // 个人申请进群|顶栏推送|单人
-    public static function pushForAppGroup(int $user_id , string $content , string $title = '' , $data = [])
+    public static function pushForAppGroup(string $platform , int $user_id , string $content , string $title = '' , $data = [])
     {
         $extra = [
             'module' => self::$module ,
@@ -111,11 +111,11 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $platform , $user_id , $content , $title , $extra);
     }
 
     // 申请成为好友|顶栏推送|单人
-    public static function pushForAppFriend(int $user_id , string $content , string $title = '' , $data = [])
+    public static function pushForAppFriend(string $platform , int $user_id , string $content , string $title = '' , $data = [])
     {
         $extra = [
             'module' => self::$module ,
@@ -123,19 +123,19 @@ class AppPushUtil extends Util
             'data' => $data ,
         ];
         $extra = json_encode($extra);
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $platform , $user_id , $content , $title , $extra);
     }
 
     // 普通通知信息|顶栏推送|单人
-    public static function push(int $user_id , string $content , string $title = '' , $extra = null)
+    public static function push(string $platform , int $user_id , string $content , string $title = '' , $extra = null)
     {
-        return self::taskPush([AppPush::class , 'push'] , $user_id , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'push'] , $platform , $user_id , $content , $title , $extra);
     }
 
     // 普通通知信息|顶栏推送|单人
-    public static function pushAll(array $user_ids , string $content , string $title = '' , $extra = null)
+    public static function pushAll(string $platform , array $user_ids , string $content , string $title = '' , $extra = null)
     {
-        return self::taskPush([AppPush::class , 'pushAll'] , $user_ids , $content , $title , $extra);
+        return self::taskPush([AppPush::class , 'pushAll'] , $platform , $user_ids , $content , $title , $extra);
     }
 
     /**
