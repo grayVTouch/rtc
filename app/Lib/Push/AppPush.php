@@ -27,7 +27,7 @@ class AppPush {
     private static $api = 'http://push.t1.tuuz.cc';
 
     // nimo 推送
-    private static $token = 'nimo';
+    private static $token = 'nimo2';
 
     // 专门针对 ios 进行的推送
     private static $tokenForIos = 'nimo2';
