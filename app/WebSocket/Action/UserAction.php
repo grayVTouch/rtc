@@ -255,7 +255,7 @@ class UserAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        $res = AppPush::sync($auth->user->id , $param['rid']);
+        $res = AppPush::sync($auth->platform , $auth->user->id , $param['rid']);
         if ($res['code'] != 200) {
             return self::error($res['data'] , 500);
         }
@@ -606,7 +606,7 @@ class UserAction extends Action
         $deny_platform = ['web' , 'pc'];
         if (!in_array($auth->platform , $deny_platform)) {
             // 解绑用户id 和 极光推送的绑定关系
-            $res = AppPush::sync($auth->user->id , 1);
+            $res = AppPush::sync($auth->platform , $auth->user->id , 1);
             if ($res['code'] != 200) {
                 return self::error($res['data'] , 500);
             }

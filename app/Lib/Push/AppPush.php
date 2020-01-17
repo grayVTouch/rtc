@@ -123,11 +123,11 @@ class AppPush {
      * @param $user_id 用户id
      * @param $registration_id 设备id
      */
-    public static function sync($user_id, $registration_id) {
+    public static function sync(string $platform , $user_id, $registration_id) {
         $data = [];
         $data['user']   = $user_id;
         $data['rid']    = $registration_id;
-        $res = self::curl('/sync' , $data);
+        $res = self::curl($platform , '/sync' , $data);
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
