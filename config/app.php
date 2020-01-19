@@ -25,9 +25,9 @@ return [
     // redis 缓存过期时间，单位：s
     'cache_duration' => 8 * 3600 ,
     // 客户端心跳检查 间隔时间 单位 s
-    'client_heart_check_time' => 2 * 60 ,
+    'client_heart_check_time' => 40 ,
     // 客户端接收到心跳检查的时候客户端在给定时间内必须向服务端发数据
-    'client_response_time' => 10 ,
+    'client_response_time' => 60 ,
     // 静态文件根目录
     'document_root' => realpath(__DIR__ . '/../public') ,
     // 调试模式
