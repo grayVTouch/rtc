@@ -95,6 +95,8 @@ class WebSocket
         $this->workerNum        = config('app.worker');
         $this->documentRoot     = config('app.document_root');
         $this->enableReusePort  = config('app.reuse_port');
+        $this->clientHeartCheckTime  = config('app.client_heart_check_time');
+        $this->clientResponseTime  = config('app.client_response_time');
     }
 
     /**
@@ -116,6 +118,13 @@ class WebSocket
             $option['document_root'] = $this->documentRoot;
             $option['enable_static_handler'] = true;
         }
+        if (!empty($this->clientHeartCheckTime)) {
+            $option['heartbeat_check_interval'] = $this->clientHeartCheckTime;
+        }
+        if (!empty($this->clientResponseTime)) {
+            $option['heartbeat_idle_time'] = $this->clientResponseTime;
+        }
+
         return $option;
     }
 
