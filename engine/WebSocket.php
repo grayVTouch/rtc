@@ -901,32 +901,32 @@ class WebSocket
         /**
          * 客户端下线处理
          */
-        Timer::tick(10 * 1000 , function(){
-            $list_for_fd_mapping_user_id = Redis::keys('*fd_mapping_user_id_*');
-//            var_dump('redis 中获取到的数量: ' . count($list_for_fd_mapping_user_id));
-            $reg = '/(\d+)$/';
-            var_dump('自动清理离线客户端定时器运行中');
-            foreach ($list_for_fd_mapping_user_id as $v)
-            {
-                if (preg_match($reg , $v , $matches) < 1) {
-                    // 没有获取到 fd
-                    continue ;
-                }
-                if (count($matches) != 2) {
-                    // 说明没有匹配
-                    continue ;
-                }
-                $fd = (int) $matches[1];
-                $pong = $this->push($fd , 'ping');
-                var_dump('fd: ' . $fd . ' ; 是否在线：' . $pong);
-                if ($pong) {
-                    // 在线
-                    continue ;
-                }
-                // 客户端下线
-                $this->clientOffline($fd);
-            }
-        });
+//        Timer::tick(10 * 1000 , function(){
+//            $list_for_fd_mapping_user_id = Redis::keys('*fd_mapping_user_id_*');
+////            var_dump('redis 中获取到的数量: ' . count($list_for_fd_mapping_user_id));
+//            $reg = '/(\d+)$/';
+//            var_dump('自动清理离线客户端定时器运行中');
+//            foreach ($list_for_fd_mapping_user_id as $v)
+//            {
+//                if (preg_match($reg , $v , $matches) < 1) {
+//                    // 没有获取到 fd
+//                    continue ;
+//                }
+//                if (count($matches) != 2) {
+//                    // 说明没有匹配
+//                    continue ;
+//                }
+//                $fd = (int) $matches[1];
+//                $pong = $this->push($fd , 'ping');
+//                var_dump('fd: ' . $fd . ' ; 是否在线：' . $pong);
+//                if ($pong) {
+//                    // 在线
+//                    continue ;
+//                }
+//                // 客户端下线
+//                $this->clientOffline($fd);
+//            }
+//        });
     }
 
     /**
