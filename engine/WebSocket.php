@@ -206,7 +206,7 @@ class WebSocket
                 UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
             }
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
-            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（所有客户端下线）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有客户端下线）');
         } else {
             var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线）');
         }
@@ -1004,7 +1004,7 @@ class WebSocket
     // 发送数据
     public function push(int $fd , string $data = '')
     {
-        $this->websocket->push($fd , $data);
+        return $this->websocket->push($fd , $data);
     }
 
     // 是否存在
