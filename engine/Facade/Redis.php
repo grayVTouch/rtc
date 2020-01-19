@@ -15,6 +15,7 @@ use Core\Lib\Facade;
  *
  * @method static native(string $method , ...$args)
  * @method static key(string $name)
+ * @method static keys(string $name)
  * @method static string(string $name , string $value = '' , int $timeout = 0)
  * @method static hash(string $name , string $key , string $value = '' , int $timeout = 0)
  * @method static hashAll(string $name , array $data = [] , int $timeout = 0)

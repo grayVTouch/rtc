@@ -270,7 +270,4 @@ class Redis
         return RedisFacade::del($name);
     }
 
-
-
-
 }

@@ -46,6 +46,7 @@ use App\Redis\UserRedis;
 use App\Util\PushUtil;
 use App\Util\MessageUtil as BaseMessageUtil;
 use Engine\Facade\Log;
+use Engine\Facade\Redis;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -171,7 +172,23 @@ class WebSocket
     }
 
 
+    /**
+     * @param Server $server
+     * @param int $fd
+     * @param int $reacter_id
+     * @throws Exception
+     */
     public function close(Server $server , int $fd , int $reacter_id)
+    {
+        // 客户端下线
+        $this->clientOffline($fd);
+    }
+
+    /**
+     * @param int $fd
+     * @throws Exception
+     */
+    public function clientOffline(int $fd)
     {
         $this->isOpen = false;
         $identifier = MiscRedis::fdMappingIdentifier($fd);
@@ -881,6 +898,32 @@ class WebSocket
             });
         });
 
+        /**
+         * 客户端下线处理
+         */
+        Timer::tick(10 * 1000 , function(){
+            $list_for_fd_mapping_user_id = Redis::keys('*fd_mapping_user_id_*');
+//            var_dump('redis 中获取到的数量: ' . count($list_for_fd_mapping_user_id));
+            $reg = '/(\d+)$/';
+            foreach ($list_for_fd_mapping_user_id as $v)
+            {
+                if (preg_match($reg , $v , $matches) < 1) {
+                    // 没有获取到 fd
+                    continue ;
+                }
+                if (count($matches) != 2) {
+                    // 说明没有匹配
+                    continue ;
+                }
+                $fd = (int) $matches[1];
+                if ($this->exist($fd)) {
+                    // 在线
+                    continue ;
+                }
+                // 客户端下线
+                $this->clientOffline($fd);
+            }
+        });
     }
 
     /**
