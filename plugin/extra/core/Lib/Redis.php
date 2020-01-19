@@ -179,4 +179,10 @@ class Redis
         return $this->native('rPop' , $key);
     }
 
+    public function keys(string $name)
+    {
+        $key = $this->key($name);
+        return $this->native('keys' , $key);
+    }
+
 }
