@@ -206,9 +206,9 @@ class WebSocket
                 UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
             }
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
-            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（还有其他客户端活跃）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 对应的某客户端下线（所有客户端下线）');
         } else {
-            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有对应客户端下线）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线）');
         }
         // 清除 Redis（删除的太快了）
         $user = UserModel::findById($user_id);
@@ -905,6 +905,7 @@ class WebSocket
             $list_for_fd_mapping_user_id = Redis::keys('*fd_mapping_user_id_*');
 //            var_dump('redis 中获取到的数量: ' . count($list_for_fd_mapping_user_id));
             $reg = '/(\d+)$/';
+            var_dump('自动清理离线客户端定时器运行中');
             foreach ($list_for_fd_mapping_user_id as $v)
             {
                 if (preg_match($reg , $v , $matches) < 1) {
@@ -916,7 +917,9 @@ class WebSocket
                     continue ;
                 }
                 $fd = (int) $matches[1];
-                if ($this->exist($fd)) {
+                $exist = $this->exist($fd);
+                var_dump('fd: ' . $fd . ' ; 是否在线：' . $exist);
+                if ($exist) {
                     // 在线
                     continue ;
                 }
