@@ -917,9 +917,9 @@ class WebSocket
                     continue ;
                 }
                 $fd = (int) $matches[1];
-                $exist = $this->exist($fd);
-                var_dump('fd: ' . $fd . ' ; 是否在线：' . $exist);
-                if ($exist) {
+                $pong = $this->push($fd , 'ping');
+                var_dump('fd: ' . $fd . ' ; 是否在线：' . $pong);
+                if ($pong) {
                     // 在线
                     continue ;
                 }
