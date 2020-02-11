@@ -1,0 +1,177 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: grayVTouch
+ * Date: 2019/10/12
+ * Time: 13:57
+ */
+
+namespace App\WebSocket\V1\Action;
+
+
+use App\WebSocket\V1\Model\FriendModel;
+use App\WebSocket\V1\Model\GroupMemberModel;
+use App\WebSocket\V1\Model\GroupMessageModel;
+use App\WebSocket\V1\Model\GroupModel;
+use App\WebSocket\V1\Model\MessageModel;
+use App\WebSocket\V1\Model\UserModel;
+use App\WebSocket\V1\Util\ChatUtil;
+use App\WebSocket\V1\Util\GroupUtil;
+use App\WebSocket\V1\Util\SearchUtil;
+use App\WebSocket\V1\Util\SessionUtil;
+use App\WebSocket\V1\Util\UserUtil;
+use App\WebSocket\V1\Controller\Auth;
+use Core\Lib\Validator;
+use function core\obj_to_array;
+
+class SearchAction extends Action
+{
+
+    // 全网搜索
+    public static function searchInNet(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'value' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = [];
+        // 搜索好友
+        if ($user_use_id = UserModel::findById($param['value'])) {
+            UserUtil::handle($user_use_id , $auth->user->id);
+            $res[] = $user_use_id;
+        }
+        if ($user_use_nickname = UserModel::findByIdentifierAndNickname($auth->identifier , $param['value'])) {
+            UserUtil::handle($user_use_nickname , $auth->user->id);
+            $res[] = $user_use_nickname;
+        }
+        if ($user_use_phone = UserModel::findByIdentifierAndPhone($auth->identifier , $param['value'])) {
+            UserUtil::handle($user_use_phone , $auth->user->id);
+            $res[] = $user_use_phone;
+        }
+        return self::success($res);
+    }
+
+    // 本地搜索
+    // 第一：好友搜索
+    // 第二：群搜索
+    public static function searchInLocal(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param, [
+            'value' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $limit = 3;
+        // 搜索自身
+        $qualified_users = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
+        // 搜索群组（搜索群名称）
+        $qualified_groups = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value'] , $limit);
+        $res = [
+            // 符合提交的好友
+            'user' => $qualified_users ,
+            // 符合条件的群组
+            'group' => $qualified_groups ,
+        ];
+        return self::success($res);
+    }
+
+    // 本地搜索-完整的好友列表
+    public static function searchForFriendInLocal(Auth $auth , array $param)
+    {
+        $res = SearchUtil::searchUserByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        return self::success($res);
+    }
+
+    // 本地搜索-完整的群列表
+    public static function searchForGroupInLocal(Auth $auth , array $param)
+    {
+        $res = SearchUtil::searchGroupByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        return self::success($res);
+    }
+
+    // 本地搜索-私聊会话记录
+    public static function searchForSessionInLocal(Auth $auth , array $param)
+    {
+        // 私聊记录
+        $qualified_private_for_history = SearchUtil::searchPrivateSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        // 群聊记录
+        $qualified_group_for_history = SearchUtil::searchGroupSessionByUserIdAndValueAndLimitForLocal($auth->user->id , $param['value']);
+        // 合并消息列表
+        $history = array_merge($qualified_private_for_history , $qualified_group_for_history);
+        // 合并记录排序
+        usort($history , function($a , $b){
+            if ($a->create_time == $b->create_time) {
+                return 0;
+            }
+            return $a->create_time > $b->create_time ? -1 : 1;
+        });
+        return self::success($history);
+    }
+
+    // 本地搜索-单个私聊会话的聊天记录
+    public static function searchForPrivateHistoryInLocal(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'chat_id' => 'required' ,
+            'value' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+//        print_r($param);
+        $res = SearchUtil::searchPrivateHistoryByUserIdChatIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['chat_id'] , $param['value'] , $param['limit_id'] , $param['limit']);
+        return self::success($res);
+    }
+
+    // 本地搜索-单个私聊会话的聊天记录
+    public static function searchForGroupHistoryInLocal(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'value' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = SearchUtil::searchGroupHistoryByUserIdAndGroupIdAndValueAndLimitIdAndLimitForLocal($auth->user->id , $param['group_id'] , $param['value'] , $param['limit_id'] , $param['limit']);
+        return self::success($res);
+    }
+
+    public static function searchMyFriendAndGroup(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'value' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $friend = FriendModel::searchByUserIdWithAliasAndNicknameAndUsername($auth->user->id , $param['value']);
+        $group  = GroupModel::searchByUserIdWithName($auth->user->id , $param['value']);
+        foreach ($friend as $v)
+        {
+            $v->type = 'private';
+            $v->sort_time = $v->create_time;
+            UserUtil::handle($v->user);
+            UserUtil::handle($v->friend , $auth->user->id);
+        }
+        foreach ($group as $v)
+        {
+            $v->type = 'group';
+            $v->sort_time = $v->join_time;
+            GroupUtil::handle($v);
+        }
+        $friend = obj_to_array($friend);
+        $group  = obj_to_array($group);
+        $res = array_merge($friend , $group);
+        usort($res , function ($a , $b){
+            if ($a['sort_time'] == $a['sort_time']) {
+                return 0;
+            }
+            return $a['sort_time'] > $b['sort_time'] ? 1 : -1;
+        });
+        return self::success($res);
+    }
+}

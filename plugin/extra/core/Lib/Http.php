@@ -164,9 +164,9 @@ class Http {
             CURLOPT_URL => $option['url'] ,
             // 要发送的请求头
             CURLOPT_HTTPHEADER => $option['header'] ,
-            CURLOPT_POST => $option['method'] == 'post' ,
-            CURLOPT_PORT => $option['port'] ,
-            CURLOPT_POSTFIELDS => $option['data'] ,
+//            CURLOPT_POST => $option['method'] == 'post' ,
+//            CURLOPT_PORT => $option['port'] ,
+//            CURLOPT_POSTFIELDS => $option['data'] ,
             // user-agent 必须携带！
             CURLOPT_USERAGENT => self::$userAgent ,
             // 要携带的 cookie，不知道能够坚持多久？？
@@ -176,6 +176,10 @@ class Http {
             CURLOPT_MAXREDIRS  => 3 ,
             CURLOPT_TIMEOUT => $option['timeout'] ,
         ];
+        $curl_option[CURLOPT_POST] = $option['method'] == 'post';
+        if ($curl_option[CURLOPT_POST]) {
+            $curl_option[CURLOPT_POSTFIELDS] = $option['data'];
+        }
         if ($option['proxy_tunnel']) {
             // 代理
             $curl_option[CURLOPT_PROXYTYPE] = self::getProxyType($option['proxy_type']);

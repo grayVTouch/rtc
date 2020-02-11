@@ -34,8 +34,11 @@ function check_len($str , $len , $sign = 'eq'){
 }
 
 // 检查手机号码
-function check_phone($phone){
-    return (bool) (preg_match('/^[1][3-8]\d{9}$/u' , $phone) || preg_match('/^\d+\-\d+$/' , $phone));
+function check_phone($phone , $all = true){
+    if (!$all) {
+        return (bool) preg_match('/^1\d{10}$/' , $phone);
+    }
+    return (bool) (preg_match('/^1\d{10}$/' , $phone) || preg_match('/^\d+\-\d+$/' , $phone));
 }
 
 // 检查价格

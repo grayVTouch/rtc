@@ -14,6 +14,7 @@ use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\QueueRedis;
 use function core\array_unit;
+use function core\format_path;
 use Core\Lib\File;
 use Core\Lib\Hash;
 use function core\obj_to_array;
@@ -44,10 +45,33 @@ class Application
      */
     protected $http;
 
+    // 系统相关路径
+    private $path = [];
+
 
     public function __construct()
     {
+        // 注册相关路径
+        $this->setPath('root' , format_path(__DIR__ . '/../'));
+        $this->setPath('plugin' , format_path(__DIR__ . '/../plugin'));
+        $this->setPath('app' , format_path(__DIR__ . '/../app'));
+        $this->setPath('engine' , format_path(__DIR__ . '/../engine'));
+        $this->setPath('common' , format_path(__DIR__ . '/../common'));
+        $this->setPath('config' , format_path(__DIR__ . '/../config'));
+        $this->setPath('public' , format_path(__DIR__ . '/../public'));
+        $this->setPath('bootstrap' , format_path(__DIR__ . '/../bootstrap'));
+    }
 
+    // 注册路径
+    public function setPath(string $key , string $path)
+    {
+        $this->path[$key] = $path;
+    }
+
+    // 获取路径
+    public function getPath(string $key)
+    {
+        return $this->path[$key];
     }
 
     /**
@@ -56,6 +80,11 @@ class Application
     private function initWebSocket()
     {
         $this->websocket = new WebSocket($this);
+    }
+
+    public function initApp()
+    {
+        FacadeLib::register('app' , $this);
     }
 
     // 在 worker 进程启动后执行（必须！！
@@ -321,6 +350,7 @@ class Application
      */
     public function run()
     {
+        $this->initApp();
         $this->initDatabase();
         $this->initRedis();
         $this->clearRedis();

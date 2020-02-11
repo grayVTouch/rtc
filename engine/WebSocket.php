@@ -333,12 +333,23 @@ class WebSocket
             $data['request']   = $data['request'] ?? '';
             $data['data']       = $data['data'] ?? [];
             $router = $this->parseRouter($data['router']);
-            if (!$router) {
+            if ($router === false) {
                 $this->websocket->disconnect($frame->fd, 400, "未找到对应路由：{$data['router']}");
                 return;
             }
-            $namespace = 'App\WebSocket\\';
-            $class = sprintf('%s%s' , $namespace , $router['class']);
+            $namespace = 'App\WebSocket';
+            // todo 兼容性写法，如果后期所有客户端代码都已经升级到模块化路由的时候需要取消基础路由的支持
+            switch ($router['type'])
+            {
+                case 'base':
+                    $class = $namespace . '\\' . $router['class'];
+                    break;
+                case 'module':
+                    $class = $namespace . '\\' . $router['module'] . '\Controller\\' . $router['class'];
+                    break;
+                default:
+                    throw new Exception("不支持的模块");
+            }
             if (!class_exists($class)) {
                 throw new Exception(" Class {$class} Not Found");
             }
@@ -983,12 +994,33 @@ class WebSocket
         }
         $router = ltrim($router , '/');
         $res = explode('/' , $router);
-        if (count($res) != 2) {
+        $count = count($res);
+        $range = [2 , 3];
+        if (!in_array($count , $range)) {
             return false;
         }
+        switch ($count)
+        {
+            case 2:
+                $type = 'base';
+                $module = '';
+                $class = $res[0];
+                $method = $res[1];
+                break;
+            case 3:
+                $type = 'module';
+                $module = $res[0];
+                $class = $res[1];
+                $method = $res[2];
+                break;
+            default:
+                return false;
+        }
         return [
-            'class'     => $res[0] ,
-            'method'    => $res[1] ,
+            'type'      => $type ,
+            'module'   => $module ,
+            'class'     => $class ,
+            'method'    => $method ,
         ];
     }
 

@@ -32,9 +32,44 @@ create table if not exists `rtc_user` (
   is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是' ,
   aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   is_test tinyint default 0 comment '是否是测试账号：0-否 1-是' ,
+  balance decimal(13 , 2) default 0 comment '用户余额' ,
+  `language` varchar(500) default 'zh-cn' comment '语言，可选的值请参考国际语言代码缩写表，访问地址: http://www.rzfanyi.com/ArticleShow.asp?ArtID=969' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户表';
+
+-- 红包表
+drop table if exists `rtc_red_packet`;
+create table if not exists `rtc_red_packet` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
+  `type` varchar(500) default '' comment '红包类型：private-个人红包 group-群红包' ,
+  sub_type varchar(255) default 0 comment '当且仅当type=group的时候有效，random-拼手气红包 common-普通红包' ,
+  total decimal(13 , 2) unsigned default 0 comment '红包金额' ,
+  `number` smallint unsigned default 1 comment '红包数量' ,
+  receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
+  receive_number smallint unsigned default 0 comment '领取数量' ,
+  receive_amount decimal(13,2) default 0 comment '领取金额' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '红包表';
+
+drop table if exists `rtc_red_packet_receive_log`;
+create table if not exists `rtc_log_for_red_packet` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
+  `type` varchar(500) default '' comment '红包类型：private-个人红包 group-群红包' ,
+  sub_type varchar(255) default 0 comment '当且仅当type=group的时候有效，random-拼手气红包 common-普通红包' ,
+  total decimal(13 , 2) default 0 comment '红包金额' ,
+  `count` smallint default 1 comment '红包数量' ,
+  receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
+  number_of_recipient smallint unsigned default 0 comment '领取数量' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '红包表';
+
 
 drop table if exists `rtc_user_option`;
 create table if not exists `rtc_user_option` (
