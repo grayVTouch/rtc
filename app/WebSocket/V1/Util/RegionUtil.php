@@ -21,7 +21,7 @@ class RegionUtil extends Util
 
     // 腾讯地图
     private static $qq = [
-        'query' => 'https://apis.map.qq.com/ws/location/v1/ip?key=%s&ip=%s' ,
+        'query' => 'https://apis.map.qq.com/ws/location/v1/ip' ,
         'secret' => 'JU6BZ-55L36-Z4ESJ-MYGND-SZQQK-ZZFMS' ,
     ];
 

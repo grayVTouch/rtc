@@ -13,6 +13,7 @@ create table if not exists `rtc_user` (
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   username varchar(255) default '' comment '用户名' ,
   password varchar(255) default '' comment '登录密码' ,
+  pay_password varchar(255) default comment '支付密码' ,
   destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话' ,
   phone varchar(255) default '' comment '手机号码' ,
   area_code varchar(255) default '' comment '区号' ,
@@ -45,30 +46,46 @@ create table if not exists `rtc_red_packet` (
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   `type` varchar(500) default '' comment '红包类型：private-个人红包 group-群红包' ,
-  sub_type varchar(255) default 0 comment '当且仅当type=group的时候有效，random-拼手气红包 common-普通红包' ,
-  total decimal(13 , 2) unsigned default 0 comment '红包金额' ,
-  `number` smallint unsigned default 1 comment '红包数量' ,
+  sub_type varchar(255) default 0 comment '红包类型：random-拼手气红包 common-普通红包' ,
+  money decimal(13 , 2) unsigned default 0 comment '红包金额' ,
+  `number` smallint unsigned default 1 comment '可领取用户数量' ,
   receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
-  receive_number smallint unsigned default 0 comment '领取数量' ,
-  receive_amount decimal(13,2) default 0 comment '领取金额' ,
+  group_id int unsigned default 0 comment 'rtc_group.id，当且仅当 type=group的时候有效' ,
+  message_id int unsigned default 0 comment 'type=private,message_id=rtc_message.id;type=group,message_id=rtc_group_message.id' ,
+  received_number smallint unsigned default 0 comment '已领取红包数量' ,
+  received_money decimal(13,2) default 0 comment '已领取红包金额' ,
+  is_expired tinyint default 0 comment '是否已经过期，超过给定的时间默认为已过期: 0-未过期 1-已经过期' ,
+  is_received tinyint default 0 comment '红包是否已经被领取完: 0-已经领取完毕 1-未被领取完' ,
+  is_refund tinyint default 0 comment '是否退款：0-否 1-是，仅当红包未被领取完时有效' ,
+  refund_time datetime default null comment '退款发起时间，仅当红包未被领取完成时有效' ,
+  refund_money decimal(13,2) default 0 comment '退款金额，仅当红包未被领取完成时有效' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '红包表';
 
 drop table if exists `rtc_red_packet_receive_log`;
-create table if not exists `rtc_log_for_red_packet` (
+create table if not exists `rtc_red_packet_receive_log` (
   id int unsigned not null auto_increment ,
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
-  `type` varchar(500) default '' comment '红包类型：private-个人红包 group-群红包' ,
-  sub_type varchar(255) default 0 comment '当且仅当type=group的时候有效，random-拼手气红包 common-普通红包' ,
-  total decimal(13 , 2) default 0 comment '红包金额' ,
-  `count` smallint default 1 comment '红包数量' ,
-  receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
-  number_of_recipient smallint unsigned default 0 comment '领取数量' ,
+  red_packet_id int unsigned default 0 comment 'rtc_red_packet.id' ,
+  money decimal(13,2) default 0 comment '领取金额' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
-) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '红包表';
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '红包领取记录表';
+
+drop table if exists `rtc_fund_log`;
+create table if not exists `rtc_fund_log` (
+  id int unsigned not null auto_increment ,
+  user_id int unsigned default 0 comment 'rtc_user.id' ,
+  identifier varchar(255) default '' comment 'rtc_project.identifier' ,
+  `type` varchar(255) default '' comment '操作类型: red_packet-红包记录；其他看程序字典文件' ,
+  `desc` varchar(1000) default '' comment '操作描述' ,
+  `before` decimal(13,2) default 0 comment '金额操作之前余额' ,
+  `after` decimal(13,2) default 0 comment '金额操作之后余额' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '资金记录表';
 
 
 drop table if exists `rtc_user_option`;
@@ -192,6 +209,7 @@ create table if not exists `rtc_message` (
   old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
   aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期' ,
+  res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '私聊消息';
@@ -208,6 +226,7 @@ create table if not exists `rtc_group_message` (
   old tinyint default 1 comment '旧消息（兼容字段）：0-否 1-是' ,
   aes_key varchar(255) default 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   res_expired tinyint default 0 comment '仅针对资源类型的消息有效，资源是否已经过期：0-未过期 1-已过期' ,
+  res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '群聊消息';
@@ -546,7 +565,13 @@ update `rtc_friend_group` set identifier = 'nimo';
 update `rtc_application` set identifier = 'nimo';
 update `rtc_friend` set identifier = 'nimo';
 
-
+alter table `rtc_user` add `balance` decimal(13 , 2) default 0 comment '用户余额';
+alter table `rtc_user` add `language` varchar(500) default 'zh-cn' comment '语言，可选的值请参考国际语言代码缩写表，访问地址: http://www.rzfanyi.com/ArticleShow.asp?ArtID=969';
+alter table `rtc_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
+alter table `rtc_group_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
+alter table `rtc_user` add `pay_password` varchar(255) default comment '支付密码';
+alter table `rtc_red_packet` drop `total`;
+alter table `rtc_red_packet` add `money` decimal(13 , 2) unsigned default 0 comment '红包金额';
 
 -- 缓存方面更改了 user 和 user_option
 

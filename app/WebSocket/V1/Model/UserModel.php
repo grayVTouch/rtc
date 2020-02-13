@@ -335,4 +335,13 @@ class UserModel extends Model
         return $res;
     }
 
+    // 获取用户余额
+    public static function getBalanceByUserIdWithLock(int $user_id)
+    {
+        return self::where('id' , $user_id)
+            // 加 排他锁
+            ->lockForUpdate()
+            ->value('balance');
+    }
+
 }

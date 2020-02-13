@@ -23,7 +23,7 @@ return [
     // 设置队列消费的进程数量
     'consume_queue_process' => 4 ,
     // redis 缓存过期时间，单位：s
-    'cache_duration' => 8 * 3600 ,
+    'cache_duration' => 2 * 3600 ,
     // 客户端心跳检查 间隔时间 单位 s
     'client_heart_check_time' => 10 * 60 ,
     // 客户端接收到心跳检查的时候客户端在给定时间内必须向服务端发数据

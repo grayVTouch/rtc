@@ -109,7 +109,7 @@ return [
         'voice' ,
         // 文件
         'file' ,
-        //
+        // 多余，后面应该删除
         'chat_file' ,
         // 名片
         'card' ,
@@ -121,10 +121,12 @@ return [
         'message_set' ,
         // 通知
         'notification' ,
+        // 普通红包
+        'red_packet' ,
         // 随机红包
-        'random_red_envelope' ,
+        'red_packet_for_random' ,
         // 口令红包
-        'password_red_envelope' ,
+        'red_packet_for_password' ,
         // 撤回消息
         'withdraw' ,
         // 视频
@@ -433,5 +435,19 @@ return [
         'voice' ,
         'file' ,
         'video' ,
+    ] ,
+
+    // 资金记录类型
+    'fund_log_type' => [
+        // 红包记录
+        'red_packet' ,
+    ] ,
+
+    // 红包类型
+    'red_packet_type' => [
+        // 普通红包
+        'common' ,
+        // 拼手气红包
+        'random' ,
     ] ,
 ];

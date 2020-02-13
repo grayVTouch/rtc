@@ -252,6 +252,29 @@ class Redis
      */
     protected static $blacklist = '%s_blacklist_%s_%s';
 
+    /**
+     * 红包 随机生成的 金额
+     *
+     * @param string $identifier
+     * @param int $red_packet_id
+     *
+     * @var list
+     */
+    protected static $redPacket = '%_red_packet_%s';
+
+    /**
+     * 红包用户领取记录
+     *
+     * @param string $identifier
+     * @param int $user_id
+     * @param int $red_packet_id
+     *
+     * @var string
+     */
+    protected static $redPacketReceivedLog = '%_red_packet_received_log_%s_%s';
+
+
+
 
     // 字符串类型设置
     public static function string(string $name , $val = null)
