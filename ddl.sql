@@ -13,6 +13,7 @@ create table if not exists `rtc_user` (
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   username varchar(255) default '' comment '用户名' ,
   password varchar(255) default '' comment '登录密码' ,
+
   pay_password varchar(255) default comment '支付密码' ,
   destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话' ,
   phone varchar(255) default '' comment '手机号码' ,
@@ -31,6 +32,7 @@ create table if not exists `rtc_user` (
   signature varchar(500) default '' comment '个性签名' ,
   enable_destroy_password tinyint default 0 comment '启用销毁密码?：0-禁用 1-启用' ,
   is_init_destroy_password tinyint default 0 comment '是否初始化了销毁密码： 0-否 1-是' ,
+  is_init_pay_password tinyint default 0 comment '是否初始化了支付密码： 0-否 1-是' ,
   aes_key varchar(255) default '' comment 'aes 加密的 key，根据需要采用不同的长度；AES-128Bit-CBC加密算法，请提供 16位的单字节字符' ,
   is_test tinyint default 0 comment '是否是测试账号：0-否 1-是' ,
   balance decimal(13 , 2) default 0 comment '用户余额' ,
@@ -49,6 +51,7 @@ create table if not exists `rtc_red_packet` (
   sub_type varchar(255) default 0 comment '红包类型：random-拼手气红包 common-普通红包' ,
   money decimal(13 , 2) unsigned default 0 comment '红包金额' ,
   `number` smallint unsigned default 1 comment '可领取用户数量' ,
+  remark varchar(500) default '' comment '备注' ,
   receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
   group_id int unsigned default 0 comment 'rtc_group.id，当且仅当 type=group的时候有效' ,
   message_id int unsigned default 0 comment 'type=private,message_id=rtc_message.id;type=group,message_id=rtc_group_message.id' ,
@@ -57,6 +60,7 @@ create table if not exists `rtc_red_packet` (
   is_expired tinyint default 0 comment '是否已经过期，超过给定的时间默认为已过期: 0-未过期 1-已经过期' ,
   is_received tinyint default 0 comment '红包是否已经被领取完: 0-已经领取完毕 1-未被领取完' ,
   is_refund tinyint default 0 comment '是否退款：0-否 1-是，仅当红包未被领取完时有效' ,
+  received_time datetime default null comment '领取完毕的时间点' ,
   refund_time datetime default null comment '退款发起时间，仅当红包未被领取完成时有效' ,
   refund_money decimal(13,2) default 0 comment '退款金额，仅当红包未被领取完成时有效' ,
   create_time datetime default current_timestamp comment '创建时间' ,
@@ -83,10 +87,10 @@ create table if not exists `rtc_fund_log` (
   `desc` varchar(1000) default '' comment '操作描述' ,
   `before` decimal(13,2) default 0 comment '金额操作之前余额' ,
   `after` decimal(13,2) default 0 comment '金额操作之后余额' ,
+  `money` decimal(13,2) default 0 comment '变化金额' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '资金记录表';
-
 
 drop table if exists `rtc_user_option`;
 create table if not exists `rtc_user_option` (
@@ -480,6 +484,31 @@ create table if not exists `rtc_system_param` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '系统参数';
 
+drop table if exists `rtc_user_activity_log`;
+create table if not exists `rtc_user_activity_log` (
+  id int unsigned not null auto_increment ,
+  identifier varchar(500) default '' comment '项目标识符' ,
+  `user_id` int unsigned default 0 comment 'rtc_user.id' ,
+  `online_count` int unsigned default 0 comment '在线次数' ,
+  `offline_count` int unsigned default 0 comment '离线次数（完整离线）' ,
+  `login_count` int unsigned default 0 comment '登录次数' ,
+  `logout_count` int unsigned default 0 comment '登出次数' ,
+  `date` date default null comment '日期' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户活跃记录';
+
+drop table if exists `rtc_statistics_user_activity_log`;
+create table if not exists `rtc_statistics_user_activity_log` (
+  id int unsigned not null auto_increment ,
+  identifier varchar(500) default '' comment '项目标识符' ,
+  `user_count` varchar(255) default 0 comment '在线用户数' ,
+  `client_count` varchar(255) default 0 comment '在线客户端数量' ,
+  `date` date default null comment '日期' ,
+  create_time datetime default current_timestamp ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '统计：用户活跃记录';
+
 -- drop table if exists `rtc_report`;
 -- create table if not exists `rtc_report` (
 --   id int unsigned not null auto_increment ,
@@ -569,9 +598,10 @@ alter table `rtc_user` add `balance` decimal(13 , 2) default 0 comment '用户�
 alter table `rtc_user` add `language` varchar(500) default 'zh-cn' comment '语言，可选的值请参考国际语言代码缩写表，访问地址: http://www.rzfanyi.com/ArticleShow.asp?ArtID=969';
 alter table `rtc_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
 alter table `rtc_group_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
-alter table `rtc_user` add `pay_password` varchar(255) default comment '支付密码';
+alter table `rtc_user` add `pay_password` varchar(255) default '' comment '支付密码';
 alter table `rtc_red_packet` drop `total`;
 alter table `rtc_red_packet` add `money` decimal(13 , 2) unsigned default 0 comment '红包金额';
+alter table `rtc_user` add is_init_pay_password tinyint default 0 comment '是否初始化了支付密码： 0-否 1-是';
 
 -- 缓存方面更改了 user 和 user_option
 

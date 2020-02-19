@@ -50,4 +50,6 @@ class GroupMessageUtil extends Util
     }
 
     // 创建 redis
+
+
 }

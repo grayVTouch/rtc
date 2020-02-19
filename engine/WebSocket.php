@@ -9,6 +9,7 @@
 namespace Engine;
 
 
+use App\Data\GroupMemberData;
 use App\Model\ClearTimerLogModel;
 use App\Model\DeleteMessageForGroupModel;
 use App\Model\DeleteMessageForPrivateModel;
@@ -30,6 +31,8 @@ use App\Util\OssUtil;
 use App\Util\TimerLogUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Util\MessageUtil;
+use App\WebSocket\V1\Redis\CacheRedis;
+use App\WebSocket\V1\Util\UserActivityLogUtil;
 use Core\Lib\Facade;
 use Core\Lib\Throwable;
 use function core\obj_to_array;
@@ -46,7 +49,7 @@ use App\Redis\UserRedis;
 use App\Util\PushUtil;
 use App\Util\MessageUtil as BaseMessageUtil;
 use Engine\Facade\Log;
-use Engine\Facade\Redis;
+use Engine\Facade\Redis as RedisFacade;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -165,8 +168,13 @@ class WebSocket
         if ($worker_id != 0) {
             return ;
         }
+        // 程序初始化
+//        $this->app->clearRedis();
+        $this->app->initialize();
+//        $this->app->dataPreload();
         // 定时器仅需要开启一次！
-        $this->initTimer();
+//        $this->initTimer();
+        $this->initTimerV1();
     }
 
     /**
@@ -216,6 +224,10 @@ class WebSocket
             }
             UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
             var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有客户端下线）');
+            // 如果之前不在线
+            UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($identifier , $user_id , date('Y-m-d') , [
+                'offline_count' => 'inc'
+            ]);
         } else {
             var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线）');
         }
@@ -585,33 +597,28 @@ class WebSocket
         /**
          * todo 清理临时群 + 临时用户（数据量大时必须更改！）
          */
-        Timer::tick( 1 * 3600 * 1000 , function(){
-            // 记录定时执行日志
-            $timer_log_id = 0;
-            TimerLogUtil::logCheck(function() use(&$timer_log_id){
-                $timer_log_id = TimerLogModel::u_insertGetId('清理临时群 + 用户中...' , 'clear_tmp_group_and_user');
-            });
+        Timer::tick( 30 * 1000 , function(){
             $date = date('Y-m-d');
             $once_for_clear_tmp_group_timer = TimerRedis::onceForClearTmpGroupTimer();
             if (!empty($once_for_clear_tmp_group_timer) && $once_for_clear_tmp_group_timer == $date) {
-                // 今天已经执行过了
-                TimerLogUtil::logCheck(function() use($timer_log_id){
-                    TimerLogModel::appendById($timer_log_id , '今天已经执行过了，结束');
-                });
                 return ;
             }
             $time = date('H:i:s' , time());
             $time_point_for_clear_tmp_group_timer = config('app.time_point_for_clear_tmp_group_and_user_timer');
             if ($time < $time_point_for_clear_tmp_group_timer) {
-                TimerLogUtil::logCheck(function() use($timer_log_id){
-                    TimerLogModel::appendById($timer_log_id , '还未到执行的时间点，结束');
-                });
+                // 还未到清理时间
                 return ;
             }
+            TimerRedis::onceForClearTmpGroupTimer($date);
             // 清理规则：清理前两天之前的数据
             // 清理那些临时创建的用户
             // 清理那些临时创建的组
             // 每天凌晨 3:30 执行一次
+            // 记录定时执行日志
+            $timer_log_id = 0;
+            TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = TimerLogModel::u_insertGetId('清理临时群 + 用户中...' , 'clear_tmp_group_and_user');
+            });
             try {
                 DB::beginTransaction();
                 $date_time = new DateTime();
@@ -646,7 +653,6 @@ class WebSocket
                     }
                 }
                 DB::commit();
-                TimerRedis::onceForClearTmpGroupTimer($date);
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });
@@ -947,6 +953,565 @@ class WebSocket
 //                $this->clientOffline($fd);
 //            }
 //        });
+    }
+
+    /**
+     * 定时任务
+     */
+    protected function initTimerV1()
+    {
+        /**
+         * 客服自动退出
+         */
+//        Timer::tick(2 * 1000 , function(){
+//            $timer_log_id = 0;
+//            TimerLogUtil::logCheck(function() use(&$timer_log_id){
+//                $timer_log_id = TimerLogModel::u_insertGetId('客服通话检测中...' , 'platform_advoise');
+//            });
+//            try {
+//                DB::beginTransaction();
+//                $groups = GroupModel::serviceGroup();
+//                $waiter_wait_max_duration = config('app.waiter_wait_max_duration');
+//                $push = [];
+//                foreach ($groups as $v)
+//                {
+//                    if (empty($user)) {
+//                        // 如果没有找到用户信息，跳过不处理
+//                        continue ;
+//                    }
+//                    $waiter_id = UserRedis::groupBindWaiter($v->user->identifier , $v->id);
+//                    if (empty($waiter_id)) {
+//                        // 没有绑定任何客服
+//                        continue ;
+//                    }
+//                    $waiter = UserModel::findById($waiter_id);
+//                    // 检查最近一条消息是否发送超时
+//                    $last_message = GroupMessageModel::recentMessage($waiter_id , $v->id , 'user');
+//                    if (!empty($last_message)) {
+//                        $create_time = strtotime($last_message->create_time);
+//                        $free_duration = time() - $create_time;
+//                        if ($free_duration < $waiter_wait_max_duration) {
+//                            // 等待时间没有超过最长客服等待时间，跳过
+//                            continue ;
+//                        }
+//                    }
+//                    UserRedis::delGroupBindWaiter($v->user->identifier , $v->id);
+//                    // 群通知：客服已经断开连接！
+//                    $user_ids = GroupMemberModel::getUserIdByGroupId($v->id);
+//                    $group_message_id = GroupMessageModel::u_insertGetId($waiter->id , $v->id , 'text' , sprintf(config('business.message')['waiter_leave'] , $waiter->username));
+//                    GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->id , $waiter->id);
+//                    $msg = GroupMessageModel::findById($group_message_id);
+//                    MessageUtil::handleGroupMessage($msg);
+//                    $push[] = [
+//                        'identifier' => $v->user->identifier ,
+//                        'user_ids'    => $user_ids ,
+//                        'type'       => 'group_message' ,
+//                        'data'       => $msg
+//                    ];
+//                }
+//                DB::commit();
+//                foreach ($push as $v)
+//                {
+//                    PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data']);
+//                }
+//                TimerLogUtil::logCheck(function() use($timer_log_id){
+//                    TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+//                });
+//            } catch(Exception $e) {
+//                DB::rollBack();
+//                TimerLogUtil::logCheck(function() use($timer_log_id){
+//                    TimerLogModel::appendById($timer_log_id , '执行发生异常，结束');
+//                });
+//                if (config('app.debug')) {
+//                    throw $e;
+//                }
+//                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+//                $log = json_encode($log);
+//                ProgramErrorLogModel::u_insertGetId('客服自动退出定时器执行发生异常' , $log , 'timer_event');
+//            }
+//        });
+
+        /**
+         * todo 清理临时群 + 临时用户（数据量大时必须更改！）
+         */
+        Timer::tick( 30 * 1000 , function(){
+            $date = date('Y-m-d');
+            $key_for_timer = 'clear_tmp_group_timer_for_v1';
+            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            if (!empty($clear) && $clear == $date) {
+                return ;
+            }
+            $time = date('H:i:s' , time());
+            $time_point_for_clear_tmp_group_timer = config('app.time_point_for_clear_tmp_group_and_user_timer');
+            if ($time < $time_point_for_clear_tmp_group_timer) {
+                // 还未到清理时间
+                return ;
+            }
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+            // 清理规则：清理前两天之前的数据
+            // 清理那些临时创建的用户
+            // 清理那些临时创建的组
+            // 每天凌晨 3:30 执行一次
+            // 记录定时执行日志
+            $timer_log_id = 0;
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('清理临时群 + 用户中...' , 'clear_tmp_group_and_user');
+            });
+            try {
+                DB::beginTransaction();
+                $date_time = new DateTime();
+                // $date_time->setTimeZone(new DateTimeZone('Asia/Shanghai'));
+                $date_time->setTimestamp(time());
+                $date_interval = new DateInterval('P2D');
+//                $date_interval = new DateInterval('PT10S');
+                $date_time->sub($date_interval);
+                $timestamp = $date_time->format('Y-m-d H:i:s');
+                $temp_user = \App\WebSocket\V1\Model\UserModel::getTempByTimestamp($timestamp);
+                if (!empty($temp_user)) {
+                    /**
+                     * **************
+                     * 清理临时用户
+                     * **************
+                     */
+                    foreach ($temp_user as $v)
+                    {
+                        \App\WebSocket\V1\Util\UserUtil::delete($v->identifier , $v->id);
+                    }
+                }
+                /**
+                 * **************
+                 * 清理临时群
+                 * **************
+                 */
+                $temp_group = \App\WebSocket\V1\Model\GroupModel::getTempByTimestamp($timestamp);
+                if (!empty($temp_group)) {
+                    foreach ($temp_group as $v)
+                    {
+                        \App\WebSocket\V1\Util\GroupUtil::delete($v->identifier , $v->id);
+                    }
+                }
+                DB::commit();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+                });
+            } catch(Exception $e) {
+                DB::rollBack();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
+                });
+                if (config('app.debug')) {
+                    throw $e;
+                }
+                // 记录错误日志
+                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $log = json_encode($log);
+                \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理临时群的定时器执行发生错误' , $log , 'timer_event');
+            }
+        });
+
+        /**
+         * todo 清理到期的时效群（数据量过大时这种方式不行！后期必须更换）
+         */
+        Timer::tick(1 * 60 * 1000 , function(){
+            $timer_log_id = 0;
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('清理过期的时效群中...' , 'clear_expired_group');
+            });
+            try {
+                DB::beginTransaction();
+                $expired_group = \App\WebSocket\V1\Model\GroupModel::expiredGroup();
+                foreach ($expired_group as $v)
+                {
+                    $v->member_ids = \App\WebSocket\V1\Model\GroupMemberModel::getUserIdByGroupId($v->id);
+                    // 删除群
+                    \App\WebSocket\V1\Util\GroupUtil::delete($v->identifier , $v->id);
+                }
+                DB::commit();
+                foreach ($expired_group as $v)
+                {
+                    if (empty($v->user)) {
+                        continue ;
+                    }
+                    // 通知群成员删除群相关信息
+                    \App\WebSocket\V1\Util\PushUtil::multiple($v->user->identifier , $v->member_ids , 'delete_group_from_cache' , [$v->id]);
+                }
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+                });
+            } catch(Exception $e) {
+                DB::rollBack();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
+                });
+                if (config('app.debug')) {
+                    throw $e;
+                }
+                // 记录错误日志
+                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $log = json_encode($log);
+                \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理时效群的定时器执行发生错误' , $log , 'timer_event');
+            }
+        });
+
+        /**
+         * todo 清理消息记录（数据量大时不行！后期必须更改）
+         */
+        Timer::tick(1 * 3600 * 1000 , function(){
+            $date = date('Y-m-d');
+            $key_for_timer = 'clear_message_timer_for_v1';
+            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            if (!empty($clear) && $clear == $date) {
+                return ;
+            }
+            $time = date('H:i:s' , time());
+            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
+            if ($time < $time_point_for_clear_message_timer) {
+                // 还未到清理时间
+                return ;
+            }
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+            $timer_log_id = 0;
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('消息记录清理中...' , 'clear_message');
+            });
+            /**
+             * 该定时器主要作用是清理聊天记录
+             */
+            $time = date('H:i:s');
+            $timestamp_for_now = time();
+            // 定时清理聊天记录
+            $time_point_for_clear_private_message_timer = config('app.time_point_for_clear_private_message_timer');
+            $time_point_for_clear_group_message_timer   = config('app.time_point_for_clear_group_message_timer');
+
+            $get_duration = function(string $type){
+                switch ($type)
+                {
+                    case 'day':
+                        $duration = 24 * 3600;
+                        break;
+                    case 'week':
+                        $duration = 7 * 24 * 3600;
+                        break;
+                    case 'month':
+                        $duration = 30 * 24 * 3600;
+                        break;
+                    default:
+                        $duration = 0;
+                }
+                return $duration;
+            };
+
+            // 获取已经开启定时清理的用户记录
+            $user_for_clear_private = [];
+            $user_for_clear_group = [];
+            try {
+                DB::beginTransaction();
+                if ($time >= $time_point_for_clear_private_message_timer) {
+                    // 清理私聊记录
+                    $user_for_clear_private = \App\WebSocket\V1\Model\UserModel::getWithEnableRegularClearForPrivate();
+                    foreach ($user_for_clear_private as $v)
+                    {
+                        $last = \App\WebSocket\V1\Model\ClearTimerLogModel::lastByTypeAndUserId('private' , $v->id);
+                        if (empty($last)) {
+                            \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'private');
+                            continue ;
+                        }
+                        $timestamp_for_last = strtotime($last->create_time);
+                        $duration = $get_duration($v->user_option->clear_timer_for_private);
+                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
+                            // 未超过时间
+                            continue ;
+                        }
+                        // 清空所有私聊记录
+                        $friend_ids = \App\WebSocket\V1\Model\FriendModel::getFriendIdByUserId($v->id);
+                        $v->friend_ids = $friend_ids;
+                        $v->chat_ids = [];
+                        foreach ($friend_ids as $v1)
+                        {
+                            $chat_id = \App\WebSocket\V1\Util\ChatUtil::chatId($v->id , $v1);
+                            $user_for_clear_private->chat_ids[] = $chat_id;
+                            $messages = \App\WebSocket\V1\Model\MessageModel::getByChatId($chat_id);
+                            foreach ($messages as $v2)
+                            {
+                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::countByChatIdAndMessageId($chat_id , $v2->id);
+                                $reference_count++;
+                                if ($reference_count >= 2) {
+                                    // 删除记录
+                                    \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
+                                } else {
+                                    // 屏蔽消息记录
+                                    \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $chat_id);
+                                }
+                            }
+                        }
+                        \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'private');
+                    }
+                    // todo 通知客户端删除本地数据库中的数据
+                }
+
+                if ($time == $time_point_for_clear_group_message_timer) {
+                    // 清理群聊记录
+                    $user_for_clear_group = \App\WebSocket\V1\Model\UserModel::getWithEnableRegularClearForGroup();
+                    foreach ($user_for_clear_group as $v)
+                    {
+                        $last = \App\WebSocket\V1\Model\ClearTimerLogModel::lastByTypeAndUserId('group' , $v->id);
+                        if (empty($last)) {
+                            \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'group');
+                            continue ;
+                        }
+                        $timestamp_for_last = strtotime($last->create_time);
+                        $duration = $get_duration($v->user_option->clear_timer_for_group);
+                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
+                            // 未超过时间
+                            continue ;
+                        }
+                        // 清空所有私聊记录
+                        $groups = \App\WebSocket\V1\Model\GroupMemberModel::getByUserId($v->id);
+                        $v->groups = $groups;
+                        $v->group_ids = [];
+                        foreach ($groups as $v1)
+                        {
+                            $v->group_ids[] = $v1->id;
+                            $group_messages = \App\WebSocket\V1\Model\GroupMessageModel::getByGroupId($v1->group_id);
+                            $member_count = \App\WebSocket\V1\Model\GroupMemberModel::countByGroupId($v1->group_id);
+                            foreach ($group_messages as $v2)
+                            {
+                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForGroupModel::countByGroupIddAndGroupMessageId($v1->group_id , $v2->id);
+                                $reference_count++;
+                                if ($reference_count >= $member_count) {
+                                    // 删除记录
+                                    \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
+                                } else {
+                                    // 屏蔽消息记录
+                                    \App\WebSocket\V1\Model\DeleteMessageForGroupModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $v1->group_id);
+                                }
+                            }
+                        }
+                        \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'group');
+                    }
+                }
+                DB::commit();
+                foreach ($user_for_clear_private as $v)
+                {
+                    // 通知客户端清除本地缓存
+                    \App\WebSocket\V1\Util\PushUtil::multiple($v->identifier , $v->id , 'empty_private_session_from_cache' , $v->chat_ids);
+                }
+                foreach ($user_for_clear_group as $v)
+                {
+                    // 通知客户端清除本地缓存
+                    \App\WebSocket\V1\Util\PushUtil::multiple($v->identifier , $v->id , 'empty_group_session_from_cache' , $v->group_ids);
+                }
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+                });
+            } catch(Exception $e) {
+                DB::rollBack();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
+                });
+                if (config('app.debug')) {
+                    throw $e;
+                }
+                // 记录错误日志
+                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $log = json_encode($log);
+                \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理消息记录的定时器执行发生错误' , $log , 'timer_event');
+            }
+        });
+
+        // 资源文件定期清理
+        // 正式上线后，清理时间：app.res_duration
+        // 清理间隔时间： 12 小时
+        Timer::tick(1 * 3600 * 1000 , function(){
+//        Timer::tick(30 * 1000 , function(){
+            $date = date('Y-m-d');
+            $key_for_timer = 'clear_res_timer_for_v1';
+            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            if (!empty($clear) && $clear == $date) {
+                return ;
+            }
+            $time = date('H:i:s' , time());
+            $time_point_for_clear_res_timer = config('app.time_point_for_clear_res_timer');
+            if ($time < $time_point_for_clear_res_timer) {
+                // 还未到清理时间
+                return ;
+            }
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+            $timer_log_id = 0;
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('资源文件过期处理中...' , 'clear_oss_res');
+            });
+            $aes_vi = config('app.aes_vi');
+            // 资源文件过期时间
+            $res_duration = config('app.res_duration');
+            // 资源文件的消息类型
+            $message_type_for_oss = config('app.message_type_for_oss');
+            // 私聊文件清理
+            $messages = \App\WebSocket\V1\Model\MessageModel::getByTypeAndNotExpired($message_type_for_oss);
+            $time = time();
+            $datetime = date('Y-m-d H:i:s');
+            foreach ($messages as $v)
+            {
+                $create_time_for_unix = strtotime($v->create_time);
+                $expired_time = $create_time_for_unix + $res_duration;
+                if ($time <= $expired_time) {
+                    // 尚未过期
+                    continue ;
+                }
+                $msg = $v->old < 1 ? \App\WebSocket\V1\Util\AesUtil::decrypt($v->message , $v->aes_key , $aes_vi) : $v->message;
+                \App\WebSocket\V1\Util\OssUtil::delAll([$msg]);
+                \App\WebSocket\V1\Model\MessageModel::updateById($v->id , [
+                    'res_expired' => 1 ,
+                    'res_expired_time' => $datetime
+                ]);
+                if ($v->type == 'voice') {
+                    // 语音消息比较特殊
+                    // 设置语音消息为已读
+                    $other_id = \App\WebSocket\V1\Util\ChatUtil::otherId($v->chat_id , $v->user_id);
+                    $is_read = \App\WebSocket\V1\Data\MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($v->identifier , $other_id , $v->id);
+                    if (!$is_read) {
+                        // 未读取
+                        // (string $identifier , int $user_id , string $chat_id , int $message_id , int $is_read)
+                        \App\WebSocket\V1\Data\MessageReadStatusData::insertGetId($v->identifier , $other_id , $v->chat_id , $v->id , 1);
+                    }
+                }
+                usleep(50 * 1000);
+            }
+            $messages = \App\WebSocket\V1\Model\GroupMessageModel::getByTypeAndNotExpired($message_type_for_oss);
+            foreach ($messages as $v)
+            {
+                $create_time_for_unix = strtotime($v->create_time);
+                $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
+                if ($time <= $expired_time) {
+                    // 尚未过期
+                    continue ;
+                }
+                $msg = $v->old < 1 ? \App\WebSocket\V1\Util\AesUtil::decrypt($v->message , $v->aes_key , $aes_vi) : $v->message;
+                \App\WebSocket\V1\Util\OssUtil::delAll([$msg]);
+                \App\WebSocket\V1\Model\GroupMessageModel::updateById($v->id , [
+                    'res_expired' => 1 ,
+                    'res_expired_time' => $datetime
+
+                ]);
+                if ($v->type == 'voice') {
+                    // 语音消息比较特殊
+                    // 设置语音消息为已读
+                    $user_ids = \App\WebSocket\V1\Model\GroupMemberModel::getUserIdByGroupId($v->group_id);
+                    $user_ids = array_diff($user_ids , [$v->user_id]);
+                    foreach ($user_ids as $v1)
+                    {
+                        $is_read = \App\WebSocket\V1\Data\GroupMessageReadStatusData::isReadByIdentifierAndUserIdAndGroupMessageId($v->identifier , $v1 , $v->id);
+                        if (!$is_read) {
+                            // 未读取
+                            // (string $identifier , int $user_id , int $group_message_id , int $group_id , $is_read = 1)
+                            \App\WebSocket\V1\Data\GroupMessageReadStatusData::insertGetId($v->identifier , $v1 , $v->id , $v->group_id , 1);
+                        }
+                    }
+                }
+                usleep(50 * 1000);
+            }
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+            });
+        });
+
+        // 红包过期 + 自动退款
+        Timer::tick(1 * 60 * 3600 , function(){
+//        Timer::tick(10 * 1000 , function(){
+            $date = date('Y-m-d');
+            $key_for_timer = 'red_packet_timer_for_v1';
+            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            if (!empty($clear) && $clear == $date) {
+                return ;
+            }
+            $time = date('H:i:s' , time());
+            $time_point_for_clear_res_timer = config('app.time_point_for_red_packet_timer');
+            if ($time < $time_point_for_clear_res_timer) {
+                // 还未到清理时间
+                return ;
+            }
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+            $timer_log_id = 0;
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('红包处理（红包过期 + 自动退款）中...' , 'red_packet');
+            });
+            $datetime = date('Y-m-d H:i:s');
+            $decimal_digit = config('app.decimal_digit');
+            try {
+                DB::beginTransaction();
+                $not_expired_red_packet = \App\WebSocket\V1\Model\RedPacketModel::notExpiredRedPacket();
+                foreach ($not_expired_red_packet as $v)
+                {
+                    $create_time = strtotime($v->create_time);
+                    $red_packet_expired_duration = config('app.red_packet_expired_duration');
+                    if ($create_time + $red_packet_expired_duration > time()) {
+                        continue ;
+                    }
+                    \App\WebSocket\V1\Model\RedPacketModel::updateById($v->id , [
+                        'is_expired' => 1 ,
+                    ]);
+                }
+                $expired_and_received_and_not_refund_red_packet = \App\Websocket\V1\Model\RedPacketModel::expiredAndReceivedAndNotRefundRedPacket();
+                foreach ($expired_and_received_and_not_refund_red_packet as $v)
+                {
+
+                    $refund_money = bcsub($v->money , $v->received_money , $decimal_digit);
+                    // 资金记录
+                    $balance = \App\WebSocket\V1\Model\UserModel::getBalanceByUserIdWithLock($v->user_id);
+                    $cur_balance = bcadd($balance , $refund_money , $decimal_digit);
+                    \App\WebSocket\V1\Model\UserModel::updateById($v->user_id , [
+                        'balance' => $cur_balance
+                    ]);
+                    \App\WebSocket\V1\Model\FundLogModel::insertGetId([
+                        'user_id'   => $v->user_id ,
+                        'identifier' => $v->identifier ,
+                        'type' => 'red_packet' ,
+                        'before' => $balance ,
+                        'after' => $cur_balance ,
+                        'money' => $refund_money ,
+                        'desc' => '红包过期自动退款' ,
+                    ]);
+                    \App\WebSocket\V1\Model\RedPacketModel::updateById($v->id , [
+                        'is_refund' => 1 ,
+                        'refund_money' => $refund_money ,
+                        'refund_time' => $datetime
+                    ]);
+                }
+                DB::commit();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                    $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+                });
+            } catch(Exception $e) {
+                DB::rollBack();
+                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
+                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
+                });
+                if (config('app.debug')) {
+                    throw $e;
+                }
+                // 记录错误日志
+                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+                $log = json_encode($log);
+                \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('红包定时器执行发生错误' , $log , 'timer_event');
+            }
+        });
+
+        // 间隔30分钟统计一下在线用户数 和 在线客户端数
+        Timer::tick(5 * 60 * 1000 , function(){
+            $project = \App\WebSocket\V1\Model\ProjectModel::getAll();
+            $date = date('Y-m-d');
+            foreach ($project as $v)
+            {
+                $user_keys = RedisFacade::keys($v->identifier . '_user_id_mapping_fd*');
+                $client_keys = RedisFacade::keys($v->identifier . '_fd_mapping_user_id*');
+                \App\WebSocket\V1\Model\StatisticsUserActivityLogModel::insertGetId([
+                    'identifier' => $v->identifier ,
+                    'client_count' => count($client_keys) ,
+                    'user_count' => count($user_keys) ,
+                    'date' => $date ,
+                ]);
+            }
+        });
     }
 
     /**

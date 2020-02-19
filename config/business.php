@@ -121,12 +121,8 @@ return [
         'message_set' ,
         // 通知
         'notification' ,
-        // 普通红包
+        // 红包
         'red_packet' ,
-        // 随机红包
-        'red_packet_for_random' ,
-        // 口令红包
-        'red_packet_for_password' ,
         // 撤回消息
         'withdraw' ,
         // 视频

@@ -19,8 +19,8 @@ use Core\Lib\Facade;
  * @method static string(string $name , string $value = '' , int $timeout = 0)
  * @method static hash(string $name , string $key , string $value = '' , int $timeout = 0)
  * @method static hashAll(string $name , array $data = [] , int $timeout = 0)
- * @method static lPush(string $name , string $value)
- * @method static rPush(string $name , string $value)
+ * @method static lPush(string $name , string ...$value)
+ * @method static rPush(string $name , string ...$value)
  * @method static lRange(string $name , int $start = 0 , int $end = -1)
  * @method static del($name)
  * @method static parse(string $str = '')
@@ -32,6 +32,7 @@ use Core\Lib\Facade;
  * @method static sIsMember(string $name , $value)
  * @method static lPop(string $name)
  * @method static rPop(string $name)
+ * @method static expire(string $name , int $timeout)
  *
  */
 class Redis extends Facade

@@ -10,12 +10,14 @@ namespace App\WebSocket\V1\Util;
 
 use App\WebSocket\V1\Data\GroupMessageReadStatusData;
 use App\WebSocket\V1\Data\MessageReadStatusData;
+use App\WebSocket\V1\Data\RedPacketData;
 use App\WebSocket\V1\Model\DeleteMessageForPrivateModel;
 use App\WebSocket\V1\Model\GroupMemberModel;
 use App\WebSocket\V1\Model\GroupMessageModel;
 use App\WebSocket\V1\Model\GroupMessageReadStatusModel;
 use App\WebSocket\V1\Model\MessageModel;
 use App\WebSocket\V1\Model\MessageReadStatusModel;
+use App\WebSocket\V1\Model\RedPacketModel;
 use App\WebSocket\V1\Model\UserModel;
 use App\WebSocket\V1\Util\ChatUtil;
 use App\WebSocket\V1\Util\GroupUtil;
@@ -71,11 +73,18 @@ class MessageUtil extends Util
             }
             $group_message->messages = $messages;
         }
+        $message = $group_message->old > 0 ? $group_message->message : AesUtil::decrypt($group_message->message , $group_message->aes_key , config('app.aes_vi'));
         if ($group_message->type == 'card') {
             // 名片消息
             $user_for_card = UserModel::findById($group_message->message);
             UserUtil::handle($user_for_card);
             $group_message->user_for_card = $user_for_card;
+        }
+        if ($group_message->type == 'red_packet') {
+            // 红包消息
+            $red_packet = RedPacketData::findByIdentifierAndId($group_message->identifier , $message);
+            RedPacketUtil::handle($red_packet , $user_id);
+            $group_message->red_packet = $red_packet;
         }
 
         if (!empty($user_id)) {
@@ -121,11 +130,18 @@ class MessageUtil extends Util
             }
             $msg->messages = $messages;
         }
+        $message = $msg->old > 0 ? $msg->message : AesUtil::decrypt($msg->message , $msg->aes_key , config('app.aes_vi'));
         if ($msg->type == 'card') {
             // 名片消息
-            $user_for_card = UserModel::findById($msg->message);
+            $user_for_card = UserModel::findById($message);
             UserUtil::handle($user_for_card);
             $msg->user_for_card = $user_for_card;
+        }
+        if ($msg->type == 'red_packet') {
+            // 红包消息
+            $red_packet = RedPacketData::findByIdentifierAndId($msg->identifier , $message);
+            RedPacketUtil::handle($red_packet , $user_id);
+            $msg->red_packet = $red_packet;
         }
     }
 

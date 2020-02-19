@@ -266,8 +266,8 @@ class Redis
      * 红包用户领取记录
      *
      * @param string $identifier
-     * @param int $user_id
      * @param int $red_packet_id
+     * @param int $user_id
      *
      * @var string
      */

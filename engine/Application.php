@@ -118,10 +118,9 @@ class Application
         FacadeLib::register('redis' , $redis);
     }
 
+    // 清空 redis 缓存
     public function clearRedis()
     {
-//        $option = config('database.redis');
-//        $keys = RedisFacade::native('keys', $option['prefix'] . '*');
         $keys = RedisFacade::keys('*');
         RedisFacade::native('del', $keys);
     }
@@ -165,12 +164,6 @@ class Application
      */
     public function initialize()
     {
-//        // 初始化系统标志
-//        $initialized = config('app.initialized');
-//        if (File::isFile($initialized)) {
-//            // 已经初始化过系统，跳过
-//            return ;
-//        }
         try {
             DB::beginTransaction();
             // 系统客服
@@ -351,12 +344,7 @@ class Application
     public function run()
     {
         $this->initApp();
-        $this->initDatabase();
-        $this->initRedis();
-        $this->clearRedis();
         $this->initLog();
-        $this->initialize();
-        $this->dataPreload();
         $this->consumeQueue();
         // 这个务必在最后执行！！
         // 因为 WebSocket 实例一旦创建成功

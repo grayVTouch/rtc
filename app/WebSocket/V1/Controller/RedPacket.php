@@ -10,6 +10,8 @@ namespace App\WebSocket\V1\Controller;
 
 
 use App\WebSocket\V1\Action\RedPacketAction;
+use App\WebSocket\V1\Model\TestUserModel;
+use Illuminate\Support\Facades\DB;
 
 class RedPacket extends Auth
 {
@@ -18,6 +20,7 @@ class RedPacket extends Auth
         $param['pay_password'] = $param['pay_password'] ?? '';
         $param['money'] = $param['money'] ?? '';
         $param['other_id'] = $param['other_id'] ?? '';
+        $param['remark'] = $param['remark'] ?? '';
         $res = RedPacketAction::createRedPacketForPrivate($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
@@ -41,6 +44,8 @@ class RedPacket extends Auth
         $param['money']     = $param['money'] ?? '';
         $param['group_id']  = $param['group_id'] ?? '';
         $param['type']      = $param['type'] ?? '';
+        $param['number']      = $param['number'] ?? '';
+        $param['remark'] = $param['remark'] ?? '';
         $res = RedPacketAction::createRedPacketForGroup($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
@@ -52,6 +57,67 @@ class RedPacket extends Auth
     {
         $param['red_packet_id'] = $param['red_packet_id'] ?? '';
         $res = RedPacketAction::receiveRedPacketForGroup($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 红包领取记录
+    public function redPacketReceivedLog(array $param)
+    {
+        $param['red_packet_id'] = $param['red_packet_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $res = RedPacketAction::redPacketReceivedLog($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 统计信息：红包领取记录
+    public function redPacketReceivedInfo(array $param)
+    {
+        $param['year'] = $param['year'] ?? '';
+        $res = RedPacketAction::redPacketReceivedInfo($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 统计信息：红包发送记录
+    public function redPacketSendInfo(array $param)
+    {
+        $param['year'] = $param['year'] ?? '';
+        $res = RedPacketAction::redPacketSendInfo($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 总计：红包领取记录
+    public function redPacketReceivedLogs(array $param)
+    {
+        $param['year'] = $param['year'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $res = RedPacketAction::redPacketReceivedLogs($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 总计：红包发送记录
+    public function redPacketSendLogs(array $param)
+    {
+        $param['year'] = $param['year'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $res = RedPacketAction::redPacketSendLogs($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
         }

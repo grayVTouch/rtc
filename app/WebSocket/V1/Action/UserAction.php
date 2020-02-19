@@ -32,6 +32,7 @@ use App\WebSocket\V1\Util\MiscUtil;
 use App\WebSocket\V1\Util\PageUtil;
 use App\WebSocket\V1\Util\SessionUtil;
 use App\WebSocket\V1\Controller\Auth;
+use App\WebSocket\V1\Util\UserActivityLogUtil;
 use App\WebSocket\V1\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Hash;
@@ -449,6 +450,29 @@ class UserAction extends Action
         return self::success();
     }
 
+    public static function initPayPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'pay_password' => 'required' ,
+            'confirm_pay_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_pay_password == 1) {
+            return self::error('你已经初始化过支付密码，禁止再次操作' , 403);
+        }
+        if ($param['pay_password'] != $param['confirm_pay_password']) {
+            return self::error('两次输入的密码不一致');
+        }
+        $pay_password = Hash::make($param['pay_password']);
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+            'pay_password' => $pay_password ,
+            'is_init_pay_password' => 1 ,
+        ]);
+        return self::success();
+    }
 
     public static function setDestroyPassword(Auth $auth , array $param)
     {
@@ -500,6 +524,33 @@ class UserAction extends Action
         $password = Hash::make($param['password']);
         UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
             'password' => $password ,
+        ]);
+        return self::success();
+    }
+
+    public static function setPayPassword(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'origin_pay_password' => 'required' ,
+            'pay_password' => 'required' ,
+            'confirm_pay_password' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查当前是否设置了销毁密码
+        if ($auth->user->is_init_pay_password != 1) {
+            return self::error('您尚未初始化支付密码，请先初始化后再操作' , 403);
+        }
+        if (!Hash::check($param['origin_pay_password'] , $auth->user->pay_password)) {
+            return self::error('旧支付密码有误，请重新输入');
+        }
+        if ($param['pay_password'] != $param['confirm_pay_password']) {
+            return self::error('两次输入的支付密码不一致');
+        }
+        $pay_password = Hash::make($param['pay_password']);
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+            'pay_password' => $pay_password ,
         ]);
         return self::success();
     }
@@ -610,6 +661,9 @@ class UserAction extends Action
                 return self::error($res['data'] , 500);
             }
         }
+        UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($auth->identifier , $auth->user->id , date('Y-m-d') , [
+            'logout_count' => 'inc'
+        ]);
         // 解绑用户id 和 连接id
         UserRedis::delFdByUserId($auth->identifier , $auth->user->id , $auth->fd);
         // 删除 客户端连接 id 映射的用户id

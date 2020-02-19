@@ -201,6 +201,146 @@ class ChatUtil extends Util
         }
     }
 
+    /**
+     * 私聊消息发送（这边是去掉了各种用户认证）
+     * @throws Exception
+     */
+    public static function sendForRedPacketStep1(Base $base , array $param)
+    {
+        $s_time = microtime(true);
+        $validator = Validator::make($param , [
+            'user_id' => 'required' ,
+            'other_id' => 'required' ,
+            'type' => 'required' ,
+            'message' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $type_range = config('business.message_type');
+        if (!in_array($param['type'] , $type_range)) {
+            return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
+        }
+        // 检查是否在群里面
+        // 检查是否时好友
+        $relation = FriendModel::findByUserIdAndFriendId($param['user_id'] , $param['other_id']);
+        if (empty($relation)) {
+//            return self::error('你们还不是好友，禁止操作' , 403);
+        }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户' , 404);
+        }
+        // 该条消息是否是阅后即焚的消息
+        $param['flag'] = empty($relation) ? 'normal' :
+            ($relation->burn == 1 ? 'burn' : 'normal');
+        $param['chat_id'] = ChatUtil::chatId($param['user_id'] , $param['other_id']);
+        $param['extra'] = $param['extra'] ?? '';
+        // 这边做基本的认证
+        $blocked = BlacklistModel::blocked($param['other_id'] , $param['user_id']);
+        $param['blocked'] = (int) $blocked;
+        $param['old'] = $param['old'] ?? '';
+        $param['old'] = $param['old'] === '' ? 1 : $param['old'];
+        $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
+        $param['identifier'] = $base->identifier;
+        $param['create_time'] = $param['create_time'] ?? '';
+        $param['create_time'] = empty($param['create_time']) ? date('Y-m-d H:i:s') : $param['create_time'];
+
+        if ($param['type'] == 'voice_call') {
+            $other = UserData::findByIdentifierAndId($base->identifier , $param['other_id']);
+            if ($other->is_system == 1) {
+                return self::error('禁止向客服发起语音通话' , 403);
+            }
+            // 检查接收方是否是客服
+            $time = time();
+            $datetime = date('Y-m-d H:i:s' , $time);
+            // 如果是语音通话
+            $param['extra'] = json_encode([
+                // 频道
+                'channel' => random(64 , 'letter' , true) ,
+                // 接听状态
+                'status' => 'wait' ,
+                // 开始时间
+                'start_time' => $datetime ,
+                // 结束时间
+                'end_time' => $datetime ,
+                // 挂断时间
+                'close_time' => $datetime ,
+                // 开始时间[unix]
+                'start_time_for_unix' => $time ,
+                // 结束时间[unix]
+                'end_time_for_unix' => $time ,
+                // 挂断时间[unix]
+                'close_time_for_unix' => $time ,
+                // 通话时长，单位 s
+                'duration' => 0
+            ]);
+        }
+        // 将 html 标签转义成 html 实体
+        if ($param['old'] < 1) {
+            $aes_vi = config('app.aes_vi');
+            $message = AesUtil::decrypt($param['message'] , $param['aes_key']  , $aes_vi);
+            $message = strip_tags($message);
+            // 重新加密
+            $param['message'] = AesUtil::encrypt($message , $param['aes_key'] , $aes_vi);
+        } else {
+            $param['message'] = strip_tags($param['message']);
+        }
+        try {
+            $id = MessageModel::insertGetId(array_unit($param , [
+                'user_id' ,
+                'chat_id' ,
+                'message' ,
+                'type' ,
+                'flag' ,
+                'extra' ,
+                'blocked' ,
+                'aes_key' ,
+                'old' ,
+                'identifier' ,
+                'create_time' ,
+            ]));
+            // 消息已读未读：仅已读的用户记录到数据库；然后未读取的用户不记录数据库；
+            MessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $param['chat_id'] , $id , 1);
+            if ($blocked) {
+                // 接收方把发送方拉黑了
+                DeleteMessageForPrivateModel::u_insertGetId($base->identifier , $param['other_id'] , $id , $param['chat_id']);
+            }
+            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'private' , $param['chat_id']);
+            $msg = MessageModel::findById($id);
+            MessageUtil::handleMessage($msg , $param['user_id'] , $param['other_id']);
+            $e_time = microtime(true);
+            var_dump('env: ' . ENV . '; identifier: ' . $base->identifier . '; ' . date('Y-m-d H:i:s') . " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊红包消息创建成功，耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
+            return self::success($msg);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function sendForRedPacketStep2(Base $base , $msg)
+    {
+        /**
+         * 投递到异步任务
+         */
+        WebSocket::deliveryTask(json_encode([
+            'type' => 'callback' ,
+            'data' => [
+                'callback' => [self::class , 'sendForAsyncTask'] ,
+                'param' => [
+                    // platform
+                    $base->platform ,
+                    // 消息列表
+                    $msg ,
+                    // push_all，是否推送给全部人
+                    true ,
+                    // 要排除的 客户端id
+                    [$base->fd] ,
+                ] ,
+            ]
+        ]));
+    }
+
     // 推送标题
     public static function getMessageByTypeAndMessage($type , $message)
     {
@@ -261,7 +401,7 @@ class ChatUtil extends Util
     /**
      * 私聊消息发送异步任务（接收方 + 发送方其他客户端）
      */
-    public static function sendForAsyncTask(string $platform , $msg)
+    public static function sendForAsyncTask(string $platform , $msg , bool $push_all = false , array $exclude_client_id = [])
     {
         $s_time = microtime(true);
         $msg = convert_obj($msg);
@@ -269,42 +409,56 @@ class ChatUtil extends Util
             // 接收方已经把发送方加入黑名单
             return ;
         }
-        $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
-        SessionUtil::createOrUpdate($msg->identifier , $other_id , 'private' , $msg->chat_id);
-        $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $other_id , $msg->user_id);
-        if (
-            $msg->type == 'voice_call'
+        $user_ids = ChatUtil::userIds($msg->chat_id);
+        foreach ($user_ids as $v)
+        {
+            if (!$push_all && $v == $msg->user_id) {
+                // 跳过向消息发送者本身的推送
+                continue ;
+            }
+            $other_id = array_values(array_diff($user_ids , [$v]))[0];
+            SessionUtil::createOrUpdate($msg->identifier , $v , 'private' , $msg->chat_id);
+            $relation = FriendData::findByIdentifierAndUserIdAndFriendId($msg->identifier , $v , $other_id);
+            if (
+                $msg->type == 'voice_call'
 //            $msg->type == 'voice_call' ||
 //            (
 //                $relation &&
 //                $relation->can_notice == 0
 //            )
-        ) {
-            // 语音通话-默认是已读的
-            MessageReadStatusData::insertGetId($msg->identifier , $other_id , $msg->chat_id , $msg->id , 1);
+            ) {
+                // 语音通话-默认是已读的
+                if ($msg->user_id != $v) {
+                    // 非消息发送者更新未读消息数量
+                    MessageReadStatusData::insertGetId($msg->identifier , $v , $msg->chat_id , $msg->id , 1);
+                }
+            }
+            if (empty($relation)) {
+                $msg->user->nickname = empty($relation->alias) ? $msg->user->nickname : $relation->alias;
+            }
+            $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $v , $msg->id);
+            $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);;
+            PushUtil::single($msg->identifier , $v , 'private_message' , $msg);
+            PushUtil::single($msg->identifier , $v , 'refresh_session');
+            PushUtil::single($msg->identifier , $v , 'refresh_unread_count');
+            PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
+            // 系统内推送
+            AppPushUtil::pushCheckWithNewForOther($msg->identifier , $other_id , $v , function() use($msg , $v , $exclude_client_id){
+                PushUtil::single($msg->identifier , $v , 'new' , '' , $exclude_client_id);
+            });
+            if ($msg->user_id == $v) {
+                continue ;
+            }
+            // 将 app 推送添加到队列中
+            QueueRedis::push(json_encode([
+                'callback' => [self::class , 'queueTaskForPrivate'] ,
+                'param' => [
+                    $platform ,
+                    $other_id ,
+                    $msg
+                ] ,
+            ]));
         }
-        if (empty($relation)) {
-            $msg->user->nickname = empty($relation->alias) ? $msg->user->nickname : $relation->alias;
-        }
-        $msg->self_is_read  = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $other_id , $msg->id);
-        $msg->other_is_read = MessageReadStatusData::isReadByIdentifierAndUserIdAndMessageId($msg->identifier , $msg->user_id , $msg->id);;
-        PushUtil::single($msg->identifier , $other_id , 'private_message' , $msg);
-        PushUtil::single($msg->identifier , $other_id , 'refresh_session');
-        PushUtil::single($msg->identifier , $other_id , 'refresh_unread_count');
-        PushUtil::single($msg->identifier , $other_id , 'refresh_session_unread_count');
-        // 系统内推送
-        AppPushUtil::pushCheckWithNewForOther($msg->identifier , $msg->user_id , $other_id , function() use($msg , $other_id){
-            PushUtil::single($msg->identifier , $other_id , 'new');
-        });
-        // 将 app 推送添加到队列中
-        QueueRedis::push(json_encode([
-            'callback' => [self::class , 'queueTaskForPrivate'] ,
-            'param' => [
-                $platform ,
-                $other_id ,
-                $msg
-            ] ,
-        ]));
         $e_time = microtime(true);
         var_dump('env: ' . ENV . '; identifier: ' . $msg->identifier . '; ' . date('Y-m-d H:i:s') .  " 【chat_id: {$msg->chat_id}；sender: {$msg->user_id}】私聊异步任务执行完毕（推送消息给接受方成功），耗费时间：" . bcmul($e_time - $s_time , 1 , 3));
     }
@@ -313,7 +467,7 @@ class ChatUtil extends Util
     /**
      * 群聊消息发送异步任务（接收方 + 发送方其他其他客户端）
      */
-    public static function groupSendForAsyncTask($platform , array $user_ids , string $target_user , $target_user_ids , $msg)
+    public static function groupSendForAsyncTask($platform , array $user_ids , string $target_user , $target_user_ids , $msg , bool $push_all = false , array $exclude_client_id = [])
     {
         $s_time = microtime(true);
         // 获取群成员，过滤掉自身
@@ -321,8 +475,11 @@ class ChatUtil extends Util
         $target_user_ids = $target_user == 'designation' ? json_decode($target_user_ids , true) : [];
         foreach ($user_ids as $v)
         {
-            if ($v == $msg->user_id) {
-                continue ;
+            if (!$push_all) {
+                // 如果并非推送给全部成员那么跳过当前用户
+                if ($v == $msg->user_id) {
+                    continue ;
+                }
             }
 //            $s_time1 = microtime(true);
             // 消息已读未读
@@ -351,9 +508,13 @@ class ChatUtil extends Util
                 )
             ) {
 //                var_dump('推送的群成员 user_id: ' . $v);
-                AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg){
-                    PushUtil::single($msg->identifier , $v , 'new');
+                AppPushUtil::pushCheckWithNewForGroup($v , $msg->group_id , function() use($v , $msg , $exclude_client_id){
+                    PushUtil::single($msg->identifier , $v , 'new' , '' , $exclude_client_id);
                 });
+                if ($v == $msg->user_id) {
+                    // 针对 app 推送，跳过消息发送者
+                    continue ;
+                }
                 // app 推送添加到异步消息队列
                 QueueRedis::push(json_encode([
                     'callback' => [self::class , 'queueTaskForGroup'] ,
@@ -518,6 +679,142 @@ class ChatUtil extends Util
             DB::rollBack();
             throw $e;
         }
+    }
+
+    // 群消息发送：红包专属 步骤 1
+    public static function groupSendForRedPacketStep1(Base $base , $sender_for_red_packet , array $param)
+    {
+        $s_time = microtime(true);
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+            'type' => 'required' ,
+            'user_id' => 'required' ,
+            'message' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $type_range = config('business.message_type');
+        if (!in_array($param['type'] , $type_range)) {
+            return self::error('不支持的消息类型，当前受支持的消息类型有：' . implode(' , ' , $type_range) , 401);
+        }
+        // 检查群是否还存在
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在！' , 404);
+        }
+        // 检查群是否设置了全体禁言
+        if ($group->banned == 1) {
+            return self::error('群主已开启禁言' , 403);
+        }
+        $member = GroupMemberModel::findByUserIdAndGroupId($param['user_id'] , $param['group_id']);
+        if (empty($member)) {
+            return self::error('您不在该群，禁止操作' , 403);
+        }
+        if ($member->banned == 1) {
+            // 被设置禁言
+            return self::error('您已经被管理员设置为禁言');
+        }
+        $user = UserModel::findById($param['user_id']);
+        if (empty($user)) {
+            return self::error('未找到用户' , 404);
+        }
+        $group_target_user = config('business.group_target_user');
+        $param['extra'] = $param['extra'] ?? '';
+        $param['target_user']       = $param['target_user'] ?? '';
+        $param['target_user_ids']   = $param['target_user_ids'] ?? '';
+        // 如果用户没有指定推送的人，那么群推送
+        $param['target_user'] = in_array($param['target_user'] ,  $group_target_user) ? $param['target_user'] : 'auto';
+        $param['old'] = $param['old'] ?? '';
+        $param['old'] = $param['old'] === '' ? 1 : $param['old'];
+        $param['aes_key'] = $param['aes_key'] ?? $user->aes_key;
+        $param['identifier'] = $base->identifier;
+        $param['create_time'] = $param['create_time'] ?? '';
+        $param['create_time'] = empty($param['create_time']) ? date('Y-m-d H:i:s') : $param['create_time'];
+        // 将 html 标签转义成 html 实体
+        if ($param['old'] < 1) {
+            $aes_vi = config('app.aes_vi');
+            $message = AesUtil::decrypt($param['message'] , $param['aes_key'] , $aes_vi);
+            $message = strip_tags($message);
+            // 重新加密
+            $param['message'] = AesUtil::encrypt($message , $param['aes_key'] , $aes_vi);
+        } else {
+            $param['message'] = strip_tags($param['message']);
+        }
+        try {
+            $group_message_id = GroupMessageModel::insertGetId(array_unit($param , [
+                'user_id' ,
+                'group_id' ,
+                'message' ,
+                'type' ,
+                'extra' ,
+                'aes_key' ,
+                'old' ,
+                'identifier' ,
+                'create_time' ,
+            ]));
+            $self_is_read = 1;
+            GroupMessageReadStatusData::insertGetId($base->identifier , $param['user_id'] , $group_message_id , $param['group_id'] , $self_is_read);
+            SessionUtil::createOrUpdate($base->identifier , $param['user_id'] , 'group' , $param['group_id']);
+            $msg = GroupMessageModel::findById($group_message_id);
+            $msg->user = $msg->user ?? new class() {};
+            $msg->user->nickname = empty($member->alias) ? $msg->user->nickname : $member->alias;
+            MessageUtil::handleGroupMessage($msg);
+
+            // 群成员
+            $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
+            if ($param['type'] == 'notification') {
+                $user_ids_for_result = [$param['user_id'] , $sender_for_red_packet];
+                foreach ($user_ids as $v)
+                {
+                    if (in_array($v , $user_ids_for_result)) {
+                        continue ;
+                    }
+                    // 其他用户屏蔽该用户
+                    GroupMessageUtil::shield($base->identifier , $v , $msg->group_id , $msg->id);
+                }
+                $user_ids = $user_ids_for_result;
+            }
+            // 仅给红包发送者 和 领取红包的人发送群消息
+            $e_time = microtime(true);
+            var_dump('env: ' . ENV . '; identifier: ' . $base->identifier . '; ' . date('Y-m-d H:i:s') . " 【group_id：[{$msg->group_id}]；sender: {$msg->user_id} 】群聊消息（红包消息）创建成功，耗费时间：" . bcmul($e_time  - $s_time , 1 , 3));
+            return self::success([
+                'user_ids'  => $user_ids ,
+                'message'   => $msg ,
+            ]);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public static function groupSendForRedPacketStep2(Base $base , array $user_ids , $msg)
+    {
+        /**
+         * 投递异步任务
+         */
+        WebSocket::deliveryTask(json_encode([
+            'type' => 'callback' ,
+            'data' => [
+                'callback' => [self::class , 'groupSendForAsyncTask'] ,
+                'param' => [
+                    // 平台
+                    $base->platform ,
+                    // 推送的用户
+                    $user_ids ,
+                    // target_user
+                    'all' ,
+                    // target_user_ids
+                    [] ,
+                    // message，消息本体
+                    $msg ,
+                    // push_all，是否推送给全部用户
+                    true ,
+                    // exclude_client_id，排除的客户端 id
+                    [$base->fd] ,
+                ]
+            ] ,
+        ]));
     }
 
     public static function otherId(string $chat_id , int $user_id)

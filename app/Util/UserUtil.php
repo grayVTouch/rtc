@@ -159,6 +159,7 @@ class UserUtil extends Util
             // 删除好友关系
             FriendData::delByIdentifierAndUserIdAndFriendId($identifier , $user_id , $v);
             FriendData::delByIdentifierAndUserIdAndFriendId($identifier , $v , $user_id);
+
         }
         // 删除验证消息（无法全面删除）
         ApplicationModel::delByUserId($user_id);

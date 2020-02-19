@@ -89,16 +89,16 @@ class Redis
         }
     }
 
-    public function lPush(string $name , string $value)
+    public function lPush(string $name , string ...$value)
     {
         $key = $this->key($name);
-        return $this->native('lPush' , $key , $value);
+        return call_user_func_array([$this , 'native'] , array_merge(['lPush' , $key] , $value));
     }
 
-    public function rPush(string $name , string $value)
+    public function rPush(string $name , string ...$value)
     {
         $key = $this->key($name);
-        return $this->native('rPush' , $key , $value);
+        return call_user_func_array([$this , 'native'] , array_merge(['rPush' , $key] , $value));
     }
 
     public function lRange(string $name , int $start = 0 , int $end = -1)
@@ -183,6 +183,12 @@ class Redis
     {
         $key = $this->key($name);
         return $this->native('keys' , $key);
+    }
+
+    public function expire(string $name , int $timeout)
+    {
+        $key = $this->key($name);
+        return $this->native('expire' , $key , $timeout);
     }
 
 }

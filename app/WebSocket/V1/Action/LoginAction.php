@@ -22,6 +22,7 @@ use App\WebSocket\V1\Model\SmsCodeModel;
 use App\WebSocket\V1\Model\SystemParamModel;
 use App\WebSocket\V1\Model\UserInfoModel;
 use App\WebSocket\V1\Model\UserJoinFriendOptionModel;
+use App\WebSocket\V1\Model\UserActivityLogModel;
 use App\WebSocket\V1\Model\UserModel;
 use App\WebSocket\V1\Model\UserOptionModel;
 use App\WebSocket\V1\Model\UserTokenModel;
@@ -30,6 +31,7 @@ use App\WebSocket\V1\Redis\UserRedis;
 use App\WebSocket\V1\Util\MiscUtil;
 use App\WebSocket\V1\Util\SessionUtil;
 use App\WebSocket\V1\Util\CaptchaUtil;
+use App\WebSocket\V1\Util\UserActivityLogUtil;
 use App\WebSocket\V1\Util\UserUtil;
 use function core\array_unit;
 use Core\Lib\Hash;
@@ -265,14 +267,14 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        $deny_platform_for_push = config('business.deny_platform_for_push');
-        if (!in_array($base->platform , $deny_platform_for_push)) {
-            // app 推送绑定
-            $res = AppPush::sync($base->platform , $user->id , $param['device_code']);
-            if ($res['code'] != 200) {
-                return self::error($res['data'] , 500);
-            }
-        }
+//        $deny_platform_for_push = config('business.deny_platform_for_push');
+//        if (!in_array($base->platform , $deny_platform_for_push)) {
+//            // app 推送绑定
+//            $res = AppPush::sync($base->platform , $user->id , $param['device_code']);
+//            if ($res['code'] != 200) {
+//                return self::error($res['data'] , 500);
+//            }
+//        }
         try {
             DB::beginTransaction();
             // 先检查当前登录平台是否是非 pc 浏览器
@@ -289,9 +291,14 @@ class LoginAction extends Action
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             UserUtil::mapping($base->identifier , $user->id , $base->fd);
+            $date = date('Y-m-d');
             if (!$online) {
                 // 之前如果不在线，现在上线，那么推送更新
                 UserUtil::onlineStatusChange($base->identifier , $param['user_id'] , 'online');
+                // 新增在线次数
+                UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($base->identifier , $user->id , $date , [
+                    'online_count' => 'inc'
+                ]);
             }
             if ($user->role == 'admin') {
                 // 工作人员登陆后，消费未读消息
@@ -303,6 +310,10 @@ class LoginAction extends Action
                     'used' => 1
                 ]);
             }
+            // 新增登录次数
+            UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($base->identifier , $user->id , $date , [
+                'login_count' => 'inc'
+            ]);
             if (config('app.enable_gt')) {
                 $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
                 if (empty($bind_device)) {
@@ -411,14 +422,14 @@ class LoginAction extends Action
         $param['user_id'] = $user->id;
         $param['token']  = MiscUtil::token();
         $param['expire'] = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        $deny_platform_for_push = config('business.deny_platform_for_push');
-        if (!in_array($base->platform , $deny_platform_for_push)) {
-            // app 推送绑定
-            $res = AppPush::sync($base->platform , $user->id , $param['device_code']);
-            if ($res['code'] != 200) {
-                return self::error($res['data'] , 500);
-            }
-        }
+//        $deny_platform_for_push = config('business.deny_platform_for_push');
+//        if (!in_array($base->platform , $deny_platform_for_push)) {
+//            // app 推送绑定
+//            $res = AppPush::sync($base->platform , $user->id , $param['device_code']);
+//            if ($res['code'] != 200) {
+//                return self::error($res['data'] , 500);
+//            }
+//        }
         try {
             DB::beginTransaction();
             // 先检查当前登录平台是否是非 pc 浏览器
@@ -435,14 +446,23 @@ class LoginAction extends Action
             // 上线通知
             $online = UserRedis::isOnline($base->identifier , $user->id);
             UserUtil::mapping($base->identifier , $user->id , $base->fd);
+            $date = date('Y-m-d');
             if (!$online) {
                 // 之前如果不在线，现在上线，那么推送更新
                 UserUtil::onlineStatusChange($base->identifier , $param['user_id'] , 'online');
+                // 新增在线次数
+                UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($base->identifier , $user->id , $date , [
+                    'online_count' => 'inc'
+                ]);
             }
             if ($user->role == 'admin') {
                 // 工作人员登陆后，消费未读消息
 //                UserUtil::consumeUnhandleMsg($user);
             }
+            // 新增在线次数
+            UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($base->identifier , $user->id , $date , [
+                'login_count' => 'inc'
+            ]);
             if (config('app.enable_gt')) {
                 $bind_device = BindDeviceModel::findByUserIdAndDevice($user->id , $param['device_code']);
                 if (empty($bind_device)) {

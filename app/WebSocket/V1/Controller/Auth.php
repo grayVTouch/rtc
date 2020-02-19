@@ -12,6 +12,7 @@ use App\WebSocket\V1\Model\UserTokenModel;
 use App\WebSocket\V1\Model\UserModel;
 use App\WebSocket\V1\Redis\UserRedis;
 use App\WebSocket\V1\Util\DataUtil;
+use App\WebSocket\V1\Util\UserActivityLogUtil;
 use App\WebSocket\V1\Util\UserUtil;
 use App\WebSocket\V1\Action\LoginAction;
 use Exception;
@@ -55,6 +56,14 @@ class Auth extends Base
 //        var_dump("user_id: " . $this->user->id . ' 正在调用 api');
         UserUtil::handle($this->user);
         // 建立映射
+        // 检查该用户是否在线
+        $online = UserRedis::isOnline($this->identifier , $this->user->id);
+        if (!$online) {
+            // 如果之前不在线
+            UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($this->identifier , $this->user->id , date('Y-m-d') , [
+                'online_count' => 'dec'
+            ]);
+        }
         UserRedis::fdMappingUserId($this->identifier , $this->fd , $this->user->id);
         UserRedis::userIdMappingFd($this->identifier , $this->user->id , $this->fd);
         return true;

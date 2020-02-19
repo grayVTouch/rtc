@@ -11,9 +11,12 @@ namespace App\WebSocket\V1\Util;
 use App\WebSocket\V1\Data\FriendData;
 use App\WebSocket\V1\Model\BlacklistModel;
 use App\WebSocket\V1\Model\FriendModel;
+use App\WebSocket\V1\Model\FundLogModel;
 use App\WebSocket\V1\Model\GroupMemberModel;
 use App\WebSocket\V1\Model\GroupMessageModel;
 use App\WebSocket\V1\Model\GroupMessageReadStatusModel;
+use App\WebSocket\V1\Model\RedPacketModel;
+use App\WebSocket\V1\Model\RedPacketReceiveLogModel;
 use App\WebSocket\V1\Util\PushUtil;
 use App\WebSocket\V1\Model\PushReadStatusModel;
 use App\WebSocket\V1\Model\UserModel;
@@ -416,6 +419,18 @@ class UserUtil extends Util
         {
             UserJoinFriendOptionData::delByIdentifierAndUserIdAndJoinFriendMethodId($v->identifier , $v->user_id , $v->join_friend_method_id);
         }
+        // 删除红包相关信息
+        $red_packet = RedPacketModel::getByUserId($user_id);
+        $red_packet_ids = [];
+        foreach ($red_packet as $v)
+        {
+            $red_packet_ids[] = $v->id;
+        }
+        RedPacketReceiveLogModel::delByRedPacketIds($red_packet_ids);
+        RedPacketModel::delByUserId($user_id);
+
+        // 删除资金记录相关信息
+        FundLogModel::delByUserId($user_id);
         // 删除用户
         UserData::delByIdentifierAndId($identifier , $user_id);
         // 用户下线

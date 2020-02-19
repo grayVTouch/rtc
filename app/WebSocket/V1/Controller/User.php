@@ -358,6 +358,30 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    // 初始化支付密码
+    public function initPayPassword(array $param)
+    {
+        $param['pay_password'] = $param['pay_password'] ?? '';
+        $param['confirm_pay_password'] = $param['confirm_pay_password'] ?? '';
+        $res = UserAction::initPayPassword($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
+
+    // 修改登录密码
+    public function setPayPassword(array $param)
+    {
+        $param['origin_pay_password'] = $param['origin_pay_password'] ?? '';
+        $param['pay_password'] = $param['pay_password'] ?? '';
+        $param['confirm_pay_password'] = $param['confirm_pay_password'] ?? '';
+        $res = UserAction::setPayPassword($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 
 
 }

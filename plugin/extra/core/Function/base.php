@@ -249,7 +249,6 @@ function ssl_random(int $len = 256){
 
 
 // 精确的随机数分配
-// 精确的随机数分配
 function decimal_random($total , $num , $scale = 2)
 {
     $avg = bcdiv($total , $num , $scale);
@@ -266,10 +265,14 @@ function decimal_random($total , $num , $scale = 2)
     while (true)
     {
         if ($count++ > 10000000) {
-            // 死循环！说明参数有问题
+            // 超过随机数生成最大尝试次数
+            // 很大概率是参数有问题
+            // 请检查提供的参数的合理性
+            // 并再次尝试
             return false;
         }
         if (count($res) == $num - 1) {
+            // 最后一个单元
             // 总额 - 已用
             $res[] = $last;
             break;
@@ -278,19 +281,27 @@ function decimal_random($total , $num , $scale = 2)
             $cur = mt_rand(1 , 100);
             $ratio = bcdiv($cur , 100 , 2);
             $change = bcmul($range , $ratio , $scale);
-            $amount = bcadd($change , $minimum , $scale);
-            if ($amount <= 0) {
+            $random = bcadd($change , $minimum , $scale);
+            if ($random <= 0) {
+                // 随机生成的金额 < 0
+                // 全部重新生成
                 $res = [];
                 $last = $total;
                 continue ;
             }
-            $last = bcsub($last , $amount , $scale);
+            if (in_array($random , $res)) {
+                // 如果重复则重新生成
+                continue ;
+            }
+            $last = bcsub($last , $random , $scale);
             if ($last <= 0) {
+                // 如果导致最后一个单元值 <= 0
+                // 全部重新生成
                 $res = [];
                 $last = $total;
                 continue ;
             }
-            $res[] = $amount;
+            $res[] = $random;
         }
     }
     return $res;

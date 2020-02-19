@@ -82,6 +82,12 @@ return [
     'time_point_for_clear_group_message_timer' => '04:00:00' ,
     // 定时器：清理临时群 + 临时用户的时间点
     'time_point_for_clear_tmp_group_and_user_timer' => '03:30:00' ,
+    //定时器：清除（私聊 + 群聊）
+    'time_point_for_clear_message_timer' => '04:00:00' ,
+    // 定时器：清除资源文件
+    'time_point_for_clear_res_timer' => '04:00:00' ,
+    // 定时器：红包定时器
+    'time_point_for_red_packet_timer' => '04:00:00' ,
     // 搜索好友显示
 
     // 系统服务员名称
@@ -157,8 +163,18 @@ return [
         'image' ,
         'voice' ,
         'file' ,
+        'video' ,
     ] ,
 
     // 资源过期时间
     'res_duration' => 7 * 24 * 3600 ,
+
+    // 小数位保留的长度
+    'decimal_digit' => 2 ,
+
+    // 红包过期时间
+    'red_packet_expired_duration' => 24 * 60 * 60 ,
+
+    // 红包默认备注
+    'red_packet_remark' => '恭喜发财，大吉大利' ,
 ];
