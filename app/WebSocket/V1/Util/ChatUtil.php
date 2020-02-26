@@ -409,7 +409,6 @@ class ChatUtil extends Util
      */
     public static function sendForAsyncTask(string $platform , $msg , bool $push_all = false , array $exclude_client_id = [])
     {
-        var_dump('fuck you !!!');
         $s_time = microtime(true);
         $msg = convert_obj($msg);
         if ($msg->blocked == 1) {
@@ -419,8 +418,6 @@ class ChatUtil extends Util
         $user_ids = ChatUtil::userIds($msg->chat_id);
         foreach ($user_ids as $v)
         {
-            var_dump("cur_id: " . $v . '; sender: ' . $msg->user_id);
-
             if (!$push_all && $v == $msg->user_id) {
                 // 跳过向消息发送者本身的推送
                 continue ;
@@ -452,21 +449,19 @@ class ChatUtil extends Util
             PushUtil::single($msg->identifier , $v , 'refresh_session');
             PushUtil::single($msg->identifier , $v , 'refresh_unread_count');
             PushUtil::single($msg->identifier , $v , 'refresh_session_unread_count');
-            var_dump('user_id: ' . $v . '; other_id: ' . $other_id);
-            if ($msg->user_id == $other_id) {
+            if ($msg->user_id == $v) {
                 continue ;
             }
             // 系统内推送
-            AppPushUtil::pushCheckWithNewForOther($msg->identifier , $v , $other_id , function() use($msg , $other_id , $exclude_client_id){
-                var_dump('给 other_id: ' . $other_id . '；推送 new 推送');
-                PushUtil::single($msg->identifier , $other_id , 'new' , '' , $exclude_client_id);
+            AppPushUtil::pushCheckWithNewForOther($msg->identifier , $other_id , $v , function() use($msg , $v , $exclude_client_id){
+                PushUtil::single($msg->identifier , $v , 'new' , '' , $exclude_client_id);
             });
             // 将 app 推送添加到队列中
             QueueRedis::push(json_encode([
                 'callback' => [self::class , 'queueTaskForPrivate'] ,
                 'param' => [
                     $platform ,
-                    $other_id ,
+                    $v ,
                     $msg
                 ] ,
             ]));
