@@ -121,7 +121,12 @@ class Application
     // 清空 redis 缓存
     public function clearRedis()
     {
-        $keys = RedisFacade::keys('*');
+        // 删除和连接相关的 key
+        $keys1 = RedisFacade::keys('*user_id_mapping_fd*');
+        $keys2 = RedisFacade::keys('*fd_mapping_user_id*');
+        $keys3 = RedisFacade::keys('*fd_mapping_identifier*');
+        $keys4 = RedisFacade::keys('*fd_mapping_platform*');
+        $keys = array_merge($keys1 , $keys2 , $keys3 , $keys4);
         RedisFacade::native('del', $keys);
     }
 

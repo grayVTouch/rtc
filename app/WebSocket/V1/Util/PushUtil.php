@@ -38,6 +38,7 @@ class PushUtil
                 // 跳过排除的客户端连接
                 continue ;
             }
+
             if (!WebSocket::exist($v)) {
                 // 连接已经无效，跳过
                 $res['fail']++;

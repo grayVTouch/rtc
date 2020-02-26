@@ -261,17 +261,17 @@ class AppPushUtil extends Util
     public static function pushCheckWithNewForOther(string $identifier , int $user_id , int $other_id , callable $callback)
     {
         // 检查全局推送是否开启
-        $chat_id = ChatUtil::chatId($user_id , $other_id);
+//        $chat_id = ChatUtil::chatId($user_id , $other_id);
         $other = UserModel::findById($other_id);
         if (empty($other)) {
             ProgramErrorLogModel::u_insertGetId("Bug: 用户不存在 [friend_id: {$other_id}]");
             return ;
         }
-        $session_id = ChatUtil::sessionId('private' , $chat_id);
+//        $session_id = ChatUtil::sessionId('private' , $chat_id);
         // 检查用户是否在和你的会话中
-        if (SessionRedis::existSessionMember($other->identifier , $session_id , $other->id)) {
-            return ;
-        }
+//        if (SessionRedis::existSessionMember($other->identifier , $session_id , $other->id)) {
+//            return ;
+//        }
         if (empty($other->user_option)) {
             ProgramErrorLogModel::u_insertGetId("Bug: 用户信息不完整（请在 rtc_user_option 中为用户新增记录） [friend_id: {$other_id}]");
             return ;
@@ -301,10 +301,10 @@ class AppPushUtil extends Util
         $user = UserModel::findById($user_id);
         // 检查用户是否在绘画里面
         $session_id = ChatUtil::sessionId('group' , $group_id);
-        if (SessionRedis::existSessionMember($user->identifier , $session_id , $user->id)) {
-            // 用户在房间里面，不做推送
-            return ;
-        }
+//        if (SessionRedis::existSessionMember($user->identifier , $session_id , $user->id)) {
+//            // 用户在房间里面，不做推送
+//            return ;
+//        }
         if (empty($user->user_option)) {
             ProgramErrorLogModel::u_insertGetId("Bug: 用户选项信息不完善（请在 rtc_user_option 中为用户新增记录） [user_id: {$user_id}]");
             return ;

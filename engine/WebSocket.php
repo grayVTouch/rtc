@@ -169,7 +169,7 @@ class WebSocket
             return ;
         }
         // 程序初始化
-//        $this->app->clearRedis();
+        $this->app->clearRedis();
         $this->app->initialize();
 //        $this->app->dataPreload();
         // 定时器仅需要开启一次！
@@ -184,7 +184,7 @@ class WebSocket
     public function open(BaseWebSocket $websocket , Http $http)
     {
         $this->isOpen = true;
-        var_dump('env: ' . ENV . '; ' .  date('Y-m-d H:i:s') . ' 存在客户端连接');
+        var_dump('env: ' . ENV . '; ' .  date('Y-m-d H:i:s') . ' 存在客户端连接: fd=' . $http->fd);
 //        $websocket->push($http->fd , '你已经成功连接客户端');
     }
 
