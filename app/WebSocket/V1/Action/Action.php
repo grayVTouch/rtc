@@ -19,4 +19,6 @@ class Action
     {
         return compact('data' , 'code');
     }
+
+//    public
 }

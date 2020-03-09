@@ -23,5 +23,15 @@ class Misc extends Auth
         return $this->success($res['data']);
     }
 
+    // 翻译
+    public function translate(array $param)
+    {
+        $param['value'] = $param['value'] ?? '';
+        $res = MiscAction::translate($this , $param);
+        if ($res['code'] != 0) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
 
 }

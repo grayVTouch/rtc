@@ -11,6 +11,8 @@ namespace App\WebSocket\V1\Action;
 
 use App\WebSocket\V1\Util\RegionUtil;
 use App\WebSocket\V1\Controller\Auth;
+use App\WebSocket\V1\Util\TranslationUtil;
+use Core\Lib\Validator;
 
 class MiscAction extends Action
 {
@@ -33,5 +35,23 @@ class MiscAction extends Action
             return self::success(0);
         }
         return self::success(1);
+    }
+
+    public static function translate(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'value' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        if (empty($param['value'])) {
+            return self::error('请提供待翻译的值');
+        }
+        if (empty($auth->user->language)) {
+            return self::error('请先设置语言' , 403);
+        }
+        $translation_value = TranslationUtil::translate($param['value'] , 'auto' , $auth->user->language);
+        return self::success($translation_value);
     }
 }

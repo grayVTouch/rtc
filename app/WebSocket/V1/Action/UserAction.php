@@ -755,4 +755,22 @@ class UserAction extends Action
             throw $e;
         }
     }
+
+    public static function setLanguage(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'language' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $language = config('business.language');
+        if (!in_array($param['language'] , $language)) {
+            return self::error('不支持的语言');
+        }
+        UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+            'language' => $param['language']
+        ]);
+        return self::success();
+    }
 }

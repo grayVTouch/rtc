@@ -509,6 +509,17 @@ create table if not exists `rtc_statistics_user_activity_log` (
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '统计：用户活跃记录';
 
+drop table if exists `rtc_translation`;
+create table if not exists `rtc_translation` (
+  id int unsigned not null auto_increment ,
+  `source_language` char(255) default 'cn' comment '源语言' ,
+  `target_language` char(255) default 'cn' comment '目标语言' ,
+  original mediumtext comment '原文' ,
+  `translation` mediumtext comment '译文' ,
+  create_time datetime default current_timestamp comment '创建时间' ,
+  primary key `id` (`id`)
+) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '翻译表';
+
 -- drop table if exists `rtc_report`;
 -- create table if not exists `rtc_report` (
 --   id int unsigned not null auto_increment ,
@@ -595,7 +606,7 @@ update `rtc_application` set identifier = 'nimo';
 update `rtc_friend` set identifier = 'nimo';
 
 alter table `rtc_user` add `balance` decimal(13 , 2) default 0 comment '用户余额';
-alter table `rtc_user` add `language` varchar(500) default 'zh-cn' comment '语言，可选的值请参考国际语言代码缩写表，访问地址: http://www.rzfanyi.com/ArticleShow.asp?ArtID=969';
+alter table `rtc_user` add `language` varchar(500) default '' comment '语言';
 alter table `rtc_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
 alter table `rtc_group_message` add res_expired_time datetime default null comment '资源过期时间，仅针对资源类型的消息有效';
 alter table `rtc_user` add `pay_password` varchar(255) default '' comment '支付密码';

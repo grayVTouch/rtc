@@ -383,5 +383,15 @@ class User extends Auth
         return self::success($res['data']);
     }
 
+    // 设置语言
+    public function setLanguage(array $param)
+    {
+        $param['language'] = $param['language'] ?? '';
+        $res = UserAction::setLanguage($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 
 }
