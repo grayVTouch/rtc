@@ -30,7 +30,7 @@ class MiscAction extends Action
         }
         $info = $info['data'];
 
-        if ($info['country'] == '中国') {
+        if ($info['content'] == '中国') {
             // 在中国
             return self::success(0);
         }
