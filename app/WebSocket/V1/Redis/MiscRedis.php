@@ -14,7 +14,8 @@ class MiscRedis extends Redis
 {
     public static function fdMappingIdentifier(int $fd , string $identifier = '')
     {
-        $name = sprintf(self::$fdMappingIdentifier , $fd);
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingIdentifier , $extranet_ip , $fd);
         if (empty($identifier)) {
             return RedisFacade::string($name);
         }
@@ -23,7 +24,8 @@ class MiscRedis extends Redis
 
     public static function delfdMappingIdentifier(int $fd)
     {
-        $name = sprintf(self::$fdMappingIdentifier , $fd);
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingIdentifier , $extranet_ip , $fd);
         return RedisFacade::del($name);
     }
 }
