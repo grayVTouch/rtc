@@ -10,6 +10,8 @@
 $host = 'http://chat.hichatvip.com';
 
 return [
+    // 外网 ip（该 ip 在任何一台服务器上部署的时候都要指定）
+    'extranet_ip' => '47.88.223.82' ,
     // 监听的 ip
     'ip' => '0.0.0.0' ,
     // 监听的端口

@@ -16,17 +16,58 @@ class UserRedis extends Redis
     // 绑定 user_id 和 客户端连接
     public static function userIdMappingFd(string $identifier , int $user_id , int $fd = null)
     {
+        $extranet_ip = config('app.extranet_ip');
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         if (is_null($fd)) {
             return RedisFacade::setAll($name);
         }
-        return RedisFacade::sAdd($name , $fd , config('app.timeout'));
+        $data = [
+            'extranet_ip'   => $extranet_ip ,
+            'client_id'     => $fd
+        ];
+        return RedisFacade::sAdd($name , json_encode($data) , config('app.timeout'));
     }
 
-    public static function delFdByUserId($identifier , $user_id , int $fd)
+    public static function delUserIdMappingFd($identifier , $user_id , int $fd)
     {
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         return RedisFacade::sRem($name , $fd);
+    }
+
+
+    public static function fdMappingUserId($identifier , $fd , int $user_id = 0)
+    {
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingUserId , $identifier , $extranet_ip , $fd);
+        if (empty($user_id)) {
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $user_id , config('app.timeout'));
+    }
+
+    public static function delFdMappingUserId($identifier , $fd)
+    {
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingUserId , $identifier , $extranet_ip , $fd);
+        return RedisFacade::del($name);
+    }
+
+    public static function fdMappingPlatform(string $identifier , int $fd , string $platform = '')
+    {
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingPlatform , $identifier , $extranet_ip , $fd);
+        if (empty($platform)) {
+            // 获取
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $platform);
+    }
+
+    public static function delFdMappingPlatform(string $identifier , int $fd)
+    {
+        $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingPlatform , $identifier , $extranet_ip , $fd);
+        return RedisFacade::del($name);
     }
 
     // 检查用户是否在线
@@ -126,21 +167,6 @@ class UserRedis extends Redis
         return RedisFacade::del($name);
     }
 
-    public static function fdMappingUserId($identifier , $fd , int $user_id = 0)
-    {
-        $name = sprintf(self::$fdMappingUserId , $identifier , $fd);
-        if (empty($user_id)) {
-            return RedisFacade::string($name);
-        }
-        return RedisFacade::string($name , $user_id , config('app.timeout'));
-    }
-
-    public static function delFdMappingUserId($identifier , $fd)
-    {
-        $name = sprintf(self::$fdMappingUserId , $identifier , $fd);
-        return RedisFacade::del($name);
-    }
-
     public static function noWaiterForGroup(string $identifier , int $group_id , bool $get = true)
     {
         $name = sprintf(self::$noWaiterForGroup , $identifier , $group_id);
@@ -153,24 +179,6 @@ class UserRedis extends Redis
     public static function delNoWaiterForGroup(string $identifier , int $group_id)
     {
         $name = sprintf(self::$noWaiterForGroup , $identifier , $group_id);
-        return RedisFacade::del($name);
-    }
-
-    // fd 映射的 platform
-    public static function fdMappingPlatform(string $identifier , int $fd , string $platform = '')
-    {
-        $name = sprintf(self::$fdMappingPlatform , $identifier , $fd);
-        if (empty($platform)) {
-            // 获取
-            return RedisFacade::string($name);
-        }
-        return RedisFacade::string($name , $platform);
-    }
-
-    // 删除 fd 的映射关系
-    public static function delFdMappingPlatform(string $identifier , int $fd)
-    {
-        $name = sprintf(self::$fdMappingPlatform , $identifier , $fd);
         return RedisFacade::del($name);
     }
 

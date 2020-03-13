@@ -294,4 +294,15 @@ class Group extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 判断当前用户是否在某个群里面
+    public function isGroupMember(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $res = GroupAction::isGroupMember($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

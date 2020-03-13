@@ -6,7 +6,7 @@
  * Time: 10:24
  */
 
-namespace App\WebSocket\V1\Util;
+namespace App\Http\WebV1\Util;
 
 
 use App\WebSocket\V1\Redis\UserRedis;

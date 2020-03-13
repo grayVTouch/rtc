@@ -1322,8 +1322,7 @@ class WebSocket
         // 资源文件定期清理
         // 正式上线后，清理时间：app.res_duration
         // 清理间隔时间： 12 小时
-        Timer::tick(1 * 3600 * 1000 , function(){
-//        Timer::tick(30 * 1000 , function(){
+        Timer::tick(30 * 1000 , function(){
             $date = date('Y-m-d');
             $key_for_timer = 'clear_res_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
@@ -1354,6 +1353,7 @@ class WebSocket
             {
                 $create_time_for_unix = strtotime($v->create_time);
                 $expired_time = $create_time_for_unix + $res_duration;
+
                 if ($time <= $expired_time) {
                     // 尚未过期
                     continue ;
@@ -1381,7 +1381,7 @@ class WebSocket
             foreach ($messages as $v)
             {
                 $create_time_for_unix = strtotime($v->create_time);
-                $expired_time = date('Y-m-d H:i:s' , $create_time_for_unix + $res_duration);
+                $expired_time = $create_time_for_unix + $res_duration;
                 if ($time <= $expired_time) {
                     // 尚未过期
                     continue ;

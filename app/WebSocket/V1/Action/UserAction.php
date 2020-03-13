@@ -665,11 +665,11 @@ class UserAction extends Action
             'logout_count' => 'inc'
         ]);
         // 解绑用户id 和 连接id
-        UserRedis::delFdByUserId($auth->identifier , $auth->user->id , $auth->fd);
+        UserRedis::delUserIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
         // 删除 客户端连接 id 映射的用户id
         UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
         // 删除 token
-        UserTokenModel::delByToken($auth->token);
+//        UserTokenModel::delByToken($auth->token);
         return self::success();
     }
 

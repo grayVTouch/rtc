@@ -81,7 +81,13 @@ class SessionAction extends Action
                     // 用户使用的平台
                     $v->group->name = '平台咨询';
                 }
-                $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
+                if (empty($member)) {
+                    $join_timestamp = date('Y-m-d H:i:s');
+                } else {
+                    $join_timestamp = $member->create_time;
+                }
+                $v->unread = GroupMessageReadStatusModel::unreadCountByUserIdAndGroupIdAndJoinTimestamp($auth->user->id , $v->target_id , $join_timestamp);
                 $v->top = empty($v->group) ? 0 : $v->group->top;
                 $v->can_notice = empty($v->group) ? 1 : $v->group->can_notice;
                 if ($v->top == 1) {

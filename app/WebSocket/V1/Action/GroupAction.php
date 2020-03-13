@@ -898,4 +898,24 @@ class GroupAction extends Action
         }
     }
 
+    public static function isGroupMember(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        // 检查群是否存在
+        $group = GroupData::findByIdentifierAndId($auth->identifier , $param['group_id']);
+        if (empty($group)) {
+            return self::error('群不存在' , 404);
+        }
+        $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+        if (empty($member)) {
+            return self::success(0);
+        }
+        return self::success(1);
+    }
+
 }

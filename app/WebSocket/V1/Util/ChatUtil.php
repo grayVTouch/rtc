@@ -341,7 +341,12 @@ class ChatUtil extends Util
                     // push_all，是否推送给全部人
                     true ,
                     // 要排除的 客户端id
-                    [$base->fd] ,
+                    [
+                        [
+                            'extranet_ip'   => config('app.extranet_ip') ,
+                            'client_id'     => $base->fd ,
+                        ]
+                    ] ,
                 ] ,
             ]
         ]));
@@ -817,7 +822,12 @@ class ChatUtil extends Util
                     // push_all，是否推送给全部用户
                     true ,
                     // exclude_client_id，排除的客户端 id
-                    [$base->fd] ,
+                    [
+                        [
+                            'extranet_ip'   => config('app.extranet_ip') ,
+                            'client_id'     => $base->fd ,
+                        ]
+                    ] ,
                 ]
             ] ,
         ]));

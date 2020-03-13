@@ -5,7 +5,7 @@
  * Date: 2019/5/11
  * Time: 17:43
  */
-namespace App\WebSocket\V1\Redis;
+namespace App\Http\WebV1\Redis;
 
 use Engine\Facade\Redis as RedisFacade;
 

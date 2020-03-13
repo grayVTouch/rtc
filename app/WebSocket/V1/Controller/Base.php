@@ -106,7 +106,12 @@ class Base
     // 结合当前业务的发送接口：发送单条数据
     public function send(int $user_id , string $type = '' , $data = [])
     {
-        return $this->push($user_id , $type , $data , [$this->fd]);
+        return $this->push($user_id , $type , $data , [
+            [
+                'extranet_ip'   => config('app.extranet_ip') ,
+                'client_id'     => $this->fd
+            ] ,
+        ]);
     }
 
     // 结合当前业务的发送接口：发送多条数据

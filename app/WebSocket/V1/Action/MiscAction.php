@@ -40,6 +40,7 @@ class MiscAction extends Action
     public static function translate(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
+            'target' => 'required' ,
             'value' => 'required' ,
         ]);
         if ($validator->fails()) {
@@ -48,10 +49,11 @@ class MiscAction extends Action
         if (empty($param['value'])) {
             return self::error('请提供待翻译的值');
         }
-        if (empty($auth->user->language)) {
-            return self::error('请先设置语言' , 403);
-        }
-        $translation_value = TranslationUtil::translate($param['value'] , 'auto' , $auth->user->language);
+//        if (empty($auth->user->language)) {
+//            return self::error('请先设置语言' , 403);
+//        }
+        $param['source'] = empty($param['source']) ? 'auto' : $param['source'];
+        $translation_value = TranslationUtil::translate($param['value'] , $param['source'] , $param['target']);
         return self::success($translation_value);
     }
 }

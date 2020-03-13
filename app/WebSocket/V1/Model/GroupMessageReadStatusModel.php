@@ -124,7 +124,7 @@ class GroupMessageReadStatusModel extends Model
     }
 
     // 某个用户针对单个群聊会话的未读消息数量
-    public static function unreadCountByUserIdAndGroupId(int $user_id , int $group_id)
+    public static function unreadCountByUserIdAndGroupIdAndJoinTimestamp(int $user_id , int $group_id , string $join_timestamp)
     {
         $count = GroupMessageModel::whereNotExists(function($query) use($user_id , $group_id){
             $query->select('id')
@@ -144,7 +144,11 @@ class GroupMessageReadStatusModel extends Model
                     ])
                     ->whereRaw('rtc_group_message.id = rtc_delete_message_for_private.message_id');
             })
-            ->where('group_id' , $group_id)
+            ->where([
+                ['group_id' , '=' , $group_id] ,
+                // 统计未读消息数量要从进群之后的消息开始统计
+                ['create_time' , '>=' , $join_timestamp] ,
+            ])
             ->count();
         return (int) $count;
     }

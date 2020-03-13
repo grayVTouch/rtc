@@ -26,6 +26,8 @@ class Misc extends Auth
     // 翻译
     public function translate(array $param)
     {
+        $param['source'] = $param['source'] ?? '';
+        $param['target'] = $param['target'] ?? '';
         $param['value'] = $param['value'] ?? '';
         $res = MiscAction::translate($this , $param);
         if ($res['code'] != 0) {

@@ -6,14 +6,12 @@
  * Time: 16:45
  */
 
-namespace App\Http\Web\Controller;
+namespace App\Http\WebV1\Controller;
 
-use App\Redis\MiscRedis;
-use App\Util\PushUtil;
+use App\Http\WebV1\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use App\Model\ProjectModel;
 
 class Common
 {

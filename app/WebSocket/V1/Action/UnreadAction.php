@@ -51,8 +51,9 @@ class UnreadAction extends Action
 //                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $v->user_id);
 //                $can_notice = empty($member) ? 1 : $member->can_notice;
 //                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
-
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
+                $join_timestamp = empty($member) ? date('Y-m-d H:i:s') : $member->create_time;
+                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupIdAndJoinTimestamp($auth->user->id , $v->target_id , $join_timestamp);
             }
         }
         // 申请记录
@@ -88,8 +89,9 @@ class UnreadAction extends Action
 //                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $v->user_id);
 //                $can_notice = empty($member) ? 1 : $member->can_notice;
 //                $unread_count_by_group += $can_notice == 1 ? GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id) : 0;
-
-                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupId($auth->user->id , $v->target_id);
+                $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $v->target_id , $auth->user->id);
+                $join_timestamp = empty($member) ? date('Y-m-d H:i:s') : $member->create_time;
+                $unread_count_by_group += GroupMessageReadStatusModel::unreadCountByUserIdAndGroupIdAndJoinTimestamp($auth->user->id , $v->target_id , $join_timestamp);
             }
         }
         // 推送消息（全部类型：公告等其他）
