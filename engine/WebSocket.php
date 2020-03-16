@@ -198,41 +198,38 @@ class WebSocket
     public function close(Server $server , int $fd , int $reacter_id)
     {
         // 客户端下线
-        $this->clientOffline($fd);
+        $this->clientOfflineV0($fd);
+        $this->clientOfflineV1($fd);
     }
 
     /**
      * @param int $fd
      * @throws Exception
      */
-    public function clientOffline(int $fd)
+    public function clientOfflineV0(int $fd)
     {
         $this->isOpen = false;
-        $identifier = MiscRedis::fdMappingIdentifier($fd);
+        $identifier = \App\Redis\MiscRedis::fdMappingIdentifier($fd);
         if (empty($identifier)) {
             return ;
         }
-        $user_id = UserRedis::fdMappingUserId($identifier , $fd);
-        $conn = UserRedis::userIdMappingFd($identifier , $user_id);
+        $user_id = \App\Redis\UserRedis::fdMappingUserId($identifier , $fd);
+        $conn = \App\Redis\UserRedis::userIdMappingFd($identifier , $user_id);
         $_conn = is_array($conn) ? array_diff($conn , [$fd]) : [];
-
         if (empty($_conn)) {
             // 所有客户端均已经下线
             if (!empty($user_id)) {
                 // 记录当前用户最近一次下线时间
-                UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
+                \App\Redis\UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
             }
-            UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
-            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有客户端下线）');
-            // 如果之前不在线
-            UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($identifier , $user_id , date('Y-m-d') , [
-                'offline_count' => 'inc'
-            ]);
+            \App\Util\UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有客户端下线） V1');
         } else {
-            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线）');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线） V1');
         }
+
         // 清除 Redis（删除的太快了）
-        $user = UserModel::findById($user_id);
+        $user = \App\Model\UserModel::findById($user_id);
         try {
             DB::beginTransaction();
             $push = [];
@@ -264,20 +261,20 @@ class WebSocket
 //                        }
 //                    }
                     // 用户离线后自动退出会话
-                    $sessions = SessionModel::getByUserId($user->id);
+                    $sessions = \App\Model\SessionModel::getByUserId($user->id);
                     foreach ($sessions as $v)
                     {
-                        SessionRedis::delSessionMember($user->identifier , $v->session_id , $user->id);
+                        \App\Redis\SessionRedis::delSessionMember($user->identifier , $v->session_id , $user->id);
                     }
                 }
             }
             DB::commit();
             foreach ($push as $v)
             {
-                PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
+                \App\Util\PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [$fd]);
             }
             // 删除 Redis
-            $this->clearRedis($user_id , $fd);
+            $this->clearRedisV0($user_id , $fd);
         } catch(Exception $e) {
             DB::rollBack();
             if (config('app.debug')) {
@@ -285,7 +282,104 @@ class WebSocket
             }
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
-            ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
+            \App\Model\ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
+        }
+    }
+
+    public function clientOfflineV1(int $fd)
+    {
+        $this->isOpen = false;
+        $identifier = \App\WebSocket\V1\Redis\MiscRedis::fdMappingIdentifier($fd);
+        if (empty($identifier)) {
+            return ;
+        }
+        $user_id = \App\WebSocket\V1\Redis\UserRedis::fdMappingUserId($identifier , $fd);
+        $conn = \App\WebSocket\V1\Redis\UserRedis::userIdMappingFd($identifier , $user_id);
+        $_conn = [];
+        foreach ($conn as $v)
+        {
+            if ($v['extranet_ip'] == config('app.extranet_ip') && $v['client_id'] == $fd) {
+                // 排除当前的显现客户端
+                continue ;
+            }
+            $_conn[] = $v;
+        }
+        if (empty($_conn)) {
+            // 所有客户端均已经下线
+            if (!empty($user_id)) {
+                // 记录当前用户最近一次下线时间
+                \App\WebSocket\V1\Redis\UserRedis::userRecentOnlineTimestamp($identifier , $user_id , date('Y-m-d H:i:s'));
+            }
+            \App\WebSocket\V1\Util\UserUtil::onlineStatusChange($identifier , $user_id , 'offline');
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（所有客户端下线）');
+            // 如果之前不在线
+            \App\WebSocket\V1\Util\UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($identifier , $user_id , date('Y-m-d') , [
+                'offline_count' => 'inc'
+            ]);
+        } else {
+            var_dump('env: ' . ENV . '; identifier: ' . $identifier . '; ' . date('Y-m-d H:i:s') . '; user_id: ' . $user_id . ' 客户端下线（还有其他客户端在线）');
+        }
+
+        // 清除 Redis（删除的太快了）
+        $user = \App\WebSocket\V1\Model\UserModel::findById($user_id);
+        try {
+            DB::beginTransaction();
+            $push = [];
+            if (!empty($user)) {
+                if (empty($_conn)) {
+                    // 客服下线后续处理
+//                    if ($user->role == 'admin') {
+//                        // 如果是客服，自动退出客服群
+//                        $groups = GroupMemberModel::getByUserId($user->id);
+//                        foreach ($groups as $v)
+//                        {
+//                            $group_bind_waiter = UserRedis::groupBindWaiter($identifier , $v->group_id);
+//                            $group_bind_waiter = (int) $group_bind_waiter;
+//                            if ($group_bind_waiter != $user_id) {
+//                                // 绑定的并非当前离线客服
+//                                continue ;
+//                            }
+//                            $user_ids = GroupMemberModel::getUserIdByGroupId($v->group_id);
+//                            $group_message_id = GroupMessageModel::u_insertGetId($user->id , $v->group_id , 'text' , sprintf(config('business.message')['waiter_close'] , $user->username));
+//                            GroupMessageReadStatusModel::initByGroupMessageId($group_message_id , $v->group_id , $user->id);
+//                            $msg = GroupMessageModel::findById($group_message_id);
+//                            MessageUtil::handleGroupMessage($msg);
+//                            $push[] = [
+//                                'identifier'    => $v->user->identifier ,
+//                                'user_ids'      => $user_ids ,
+//                                'type'          => 'group_message' ,
+//                                'data'          => $msg
+//                            ];
+//                        }
+//                    }
+                    // 用户离线后自动退出会话
+                    $sessions = \App\WebSocket\V1\Model\SessionModel::getByUserId($user->id);
+                    foreach ($sessions as $v)
+                    {
+                        \App\WebSocket\V1\Redis\SessionRedis::delSessionMember($user->identifier , $v->session_id , $user->id);
+                    }
+                }
+            }
+            DB::commit();
+            foreach ($push as $v)
+            {
+                \App\WebSocket\V1\Util\PushUtil::multiple($v['identifier'] , $v['user_ids'] , $v['type'] , $v['data'] , [
+                    [
+                        'extranet_ip'   => config('app.extranet_ip') ,
+                        'client_id'     => $fd
+                    ]
+                ]);
+            }
+            // 删除 Redis
+            $this->clearRedisV1($user_id , $fd);
+        } catch(Exception $e) {
+            DB::rollBack();
+            if (config('app.debug')) {
+                throw $e;
+            }
+            $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
+            $log = json_encode($log);
+            \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
         }
     }
 
@@ -1522,31 +1616,65 @@ class WebSocket
      * @param int $user_id
      * @param int|null $fd
      */
-    public function clearRedis(int $user_id , int $fd = null)
+    public function clearRedisV0(int $user_id , int $fd = null)
     {
-        $user = UserModel::findById($user_id);
+        $user = \App\Model\UserModel::findById($user_id);
         if (empty($user)) {
             return ;
         }
-        UserRedis::delNumberOfReceptionsForWaiter($user->identifier , $user->id);
+        \App\Redis\UserRedis::delNumberOfReceptionsForWaiter($user->identifier , $user->id);
         if (empty($fd)) {
-            $fds = $fds = UserRedis::userIdMappingFd($user->identifier , $user->id);
+            $fds = $fds = \App\Redis\UserRedis::userIdMappingFd($user->identifier , $user->id);
         } else {
             $fds = [$fd];
         }
         foreach ($fds as $v)
         {
-            UserRedis::delFdByUserId($user->identifier , $user_id , $v);
-            UserRedis::delFdMappingUserId($user->identifier , $v);
-            MiscRedis::delfdMappingIdentifier($v);
-            UserRedis::delFdMappingPlatform($user->identifier , $v);
+            \App\Redis\UserRedis::delFdByUserId($user->identifier , $user_id , $v);
+            \App\Redis\UserRedis::delFdMappingUserId($user->identifier , $v);
+            \App\Redis\MiscRedis::delfdMappingIdentifier($v);
+            \App\Redis\UserRedis::delFdMappingPlatform($user->identifier , $v);
+        }
+        if (!\App\Redis\UserRedis::isOnline($user->identifier , $user->id)) {
+            // 确定当前已经处于完全离线状态，那么删除掉该用户绑定的相关信息
+            $group_ids = \App\Model\GroupMemberModel::getGroupIdByUserId($user->id);
+            array_walk($group_ids , function($v) use($user){
+                \App\Redis\UserRedis::delGroupBindWaiter($user->identifier , $v);
+                \App\Redis\UserRedis::delNoWaiterForGroup($user->identifier , $v);
+            });
+        }
+    }
+
+    public function clearRedisV1(int $user_id , int $fd = null)
+    {
+        $user = \App\WebSocket\V1\Model\UserModel::findById($user_id);
+        if (empty($user)) {
+            return ;
+        }
+        \App\WebSocket\V1\Redis\UserRedis::delNumberOfReceptionsForWaiter($user->identifier , $user->id);
+        if (empty($fd)) {
+            $fds = \App\WebSocket\V1\Redis\UserRedis::userIdMappingFd($user->identifier , $user->id);
+        } else {
+            $fds = [
+                [
+                    'extranet_ip'   => config('app.extranet_ip') ,
+                    'client_id'     => $fd ,
+                ]
+            ];
+        }
+        foreach ($fds as $v)
+        {
+            \App\WebSocket\V1\Redis\UserRedis::delUserIdMappingFd($user->identifier , $user_id , $v['client_id']);
+            \App\WebSocket\V1\Redis\UserRedis::delFdMappingUserId($user->identifier , $v['client_id']);
+            \App\WebSocket\V1\Redis\MiscRedis::delfdMappingIdentifier($v['client_id']);
+            \App\WebSocket\V1\Redis\UserRedis::delFdMappingPlatform($user->identifier , $v['client_id']);
         }
         if (!UserRedis::isOnline($user->identifier , $user->id)) {
             // 确定当前已经处于完全离线状态，那么删除掉该用户绑定的相关信息
-            $group_ids = GroupMemberModel::getGroupIdByUserId($user->id);
+            $group_ids = \App\WebSocket\V1\Model\GroupMemberModel::getGroupIdByUserId($user->id);
             array_walk($group_ids , function($v) use($user){
-                UserRedis::delGroupBindWaiter($user->identifier , $v);
-                UserRedis::delNoWaiterForGroup($user->identifier , $v);
+                \App\WebSocket\V1\Redis\UserRedis::delGroupBindWaiter($user->identifier , $v);
+                \App\WebSocket\V1\Redis\UserRedis::delNoWaiterForGroup($user->identifier , $v);
             });
         }
     }

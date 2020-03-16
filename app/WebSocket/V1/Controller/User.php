@@ -338,6 +338,8 @@ class User extends Auth
 
     public function avatar(array $param)
     {
+        $param['identifier'] = $param['identifier'] ?? '';
+        $param['extranet_ip'] = $param['extranet_ip'] ?? '';
         $param['client_id'] = $param['client_id'] ?? '';
         $res = UserAction::avatar($this , $param);
         if ($res['code'] != 0) {
@@ -350,6 +352,7 @@ class User extends Auth
     public function authPc(array $param)
     {
 //        var_dump('pc 端授权登录');
+        $param['extranet_ip'] = $param['extranet_ip'] ?? '';
         $param['client_id'] = $param['client_id'] ?? '';
         $res = UserAction::authPc($this , $param);
         if ($res['code'] != 0) {

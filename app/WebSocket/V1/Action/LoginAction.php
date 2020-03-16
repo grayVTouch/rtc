@@ -329,21 +329,23 @@ class LoginAction extends Action
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
-                $client_ids = UserRedis::userIdMappingFd($base->identifier , $user->id);
-                foreach ($client_ids as $v)
+                $clients = UserRedis::userIdMappingFd($base->identifier , $user->id);
+                $exclude = [];
+                $extranet_ip = config('app.extranet_ip');
+                foreach ($clients as $v)
                 {
                     // 检查平台
-                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
+                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v['client_id']);
                     if (!in_array($platform , $single_device_for_platform)) {
+                        $exclude[] = $v;
                         continue ;
                     }
-                    if ($v == $base->fd) {
-                        // 跳过当前用户
+                    if ($v['extranet_ip'] == $extranet_ip && $v['client_id'] == $base->fd) {
+                        $exclude[] = $v;
                         continue ;
                     }
-                    // 通知对方下线
-                    $base->push($v , 'forced_offline');
                 }
+                $base->push($user->id , 'forced_offline' , '' , $exclude);
             }
             // 推送一条未读消息数量
             return self::success([
@@ -478,21 +480,23 @@ class LoginAction extends Action
             DB::commit();
             if (in_array($base->platform , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
-                $client_ids = UserRedis::userIdMappingFd($base->identifier , $user->id);
-                foreach ($client_ids as $v)
+                $clients = UserRedis::userIdMappingFd($base->identifier , $user->id);
+                $exclude = [];
+                $extranet_ip = config('app.extranet_ip');
+                foreach ($clients as $v)
                 {
                     // 检查平台
-                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v);
+                    $platform = UserRedis::fdMappingPlatform($base->identifier , $v['client_id']);
                     if (!in_array($platform , $single_device_for_platform)) {
+                        $exclude[] = $v;
                         continue ;
                     }
-                    if ($v == $base->fd) {
-                        // 跳过当前用户
+                    if ($v['extranet_ip'] == $extranet_ip && $v['client_id'] == $base->fd) {
+                        $exclude[] = $v;
                         continue ;
                     }
-                    // 通知对方下线
-                    $base->push($v , 'forced_offline');
                 }
+                $base->push($user->id , 'forced_offline' , '' , $exclude);
             }
             // 推送一条未读消息数量
             return self::success([
@@ -527,7 +531,6 @@ class LoginAction extends Action
         if ($param['password'] != $param['confirm_password']) {
             return self::error('两次输入的密码不一致' , 401);
         }
-
         // 检查短信验证码
         $sms_code = SmsCodeModel::findByIdentifierAndAreaCodeAndPhoneAndType($base->identifier , $param['area_code'] , $param['phone'] , 1);
         if (empty($sms_code)) {
@@ -537,7 +540,7 @@ class LoginAction extends Action
         }
         if (strtotime($sms_code->update_time) + config('app.code_duration') < time()) {
             return self::error([
-                'sms_code' => '验证码已经过期' ,
+                'sms_code' => '短信验证码已经过期' ,
             ]);
         }
         if ($sms_code->code != $param['sms_code']) {
@@ -716,8 +719,8 @@ class LoginAction extends Action
             return self::error($validator->message());
         }
         // 检查用户名
-        if (preg_match('[A-z]\w{5,}' , $param['username']) < 1) {
-            return self::error('用户名错误（字母开头，长度不能低于6位）');
+        if (preg_match('/[A-z]\w{5,}/' , $param['username']) < 1) {
+            return self::error('账号错误（字母开头，长度不能低于6位）');
         }
         // 昵称要过滤掉表情
         $reg_for_nickname = "//";
@@ -945,12 +948,18 @@ class LoginAction extends Action
     // 二维码数据
     public static function loginQRCode(Base $base , array $param)
     {
-        $app_download = config('app.app_download');
-        $data = base64_encode(json_encode([
-            'client_id' => $base->fd ,
-            'identifier' => $base->identifier ,
-        ]));
-        $qrcode_data = sprintf('%s?data=%s' , $app_download , $data);
+        $download = config('app.app_download');
+        $data = [
+            // web 端授权登录
+            'type'  => 'web_login' ,
+            'data'  => [
+                'identifier'    => $base->identifier ,
+                'extranet_ip'   => config('app.extranet_ip') ,
+                'client_id'     => $base->fd
+            ] ,
+        ];
+        $base64 = base64_encode(json_encode($data));
+        $qrcode_data = sprintf('%s?identity=%s&data=%s' , $download , $base->identifier , $base64);
 
         $qrCode = new QrCode($qrcode_data);
         $qrCode->setSize(430);

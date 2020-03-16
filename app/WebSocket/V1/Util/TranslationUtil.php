@@ -19,6 +19,12 @@ use function extra\is_http;
 class TranslationUtil extends Util
 {
 
+    /**
+     * baidu  百度
+     * youdao 有道
+     */
+    public static $sdk = 'baidu';
+
     // 翻译
     public static function translate($value = null , string $source = 'cn' , string $target = 'cn')
     {
@@ -26,19 +32,28 @@ class TranslationUtil extends Util
             return $value;
         }
         $scalar = is_scalar($value);
-        $source = $source == 'cn' ? 'zh-CHS' : $source;
-        $target = $target == 'cn' ? 'zh-CHS' : $target;
+        switch (self::$sdk)
+        {
+            case 'baidu':
+                $source = $source == 'cn' ? 'zh' : $source;
+                $target = $target == 'cn' ? 'zh' : $target;
+                break;
+            case 'youdao':
+                $source = $source == 'cn' ? 'zh-CHS' : $source;
+                $target = $target == 'cn' ? 'zh-CHS' : $target;
+                break;
+        }
         return $scalar ? self::single($value , $source , $target) : self::multiple($value , $source , $target);
     }
 
     // 标量值：中文 => 英文
-    private static function single(string $value = '' , string $source = 'zh-CHS' , string $target = 'en')
+    private static function single(string $value = '' , string $source = '' , string $target = '')
     {
         return self::persistent($value , $source , $target);
     }
 
     // 对象，属性值：中文 => 英文
-    private static function multiple($value = null , string $source = 'zh-CHS' , $target = 'en')
+    private static function multiple($value = null , string $source = '' , $target = '')
     {
         if (empty($value)) {
             return $value;
@@ -56,7 +71,7 @@ class TranslationUtil extends Util
     }
 
     // 保存到映射表（持久化）
-    private static function persistent($value = '' , string $source = 'zh-CHS' , string $target = 'en')
+    private static function persistent($value = '' , string $source = '' , string $target = '')
     {
         if ($source == $target) {
              return $value;
@@ -70,20 +85,25 @@ class TranslationUtil extends Util
         if (is_http($value)) {
             return $value;
         }
-//        if ($source == 'zh-CHS' && !has_cn($value)) {
-//            return $value;
-//        }
-//        if ($source == 'en' && !has_en($value)) {
-//            return $value;
-//        }
         $original = $value;
         $res = TranslationModel::findBySourceLanguageAndTargetLanguageAndOriginal($source , $target , $original);
         // 检查是否存在
         if (!empty($res)) {
             return $res->translation;
         }
-        var_dump("source: {$source}; target: {$target}; value: {$value}");
-        $translation = YouDaoTranslationUtil::translate($value , $source , $target);
+
+        switch (self::$sdk)
+        {
+            case 'youdao':
+                $translation = YouDaoTranslationUtil::translate($value , $source , $target);
+                break;
+            case 'baidu':
+                $translation = BaiduTranslationUtil::translate($value , $source , $target);
+                break;
+            default:
+                $translation = '';
+        }
+        var_dump("待翻译值: {$value}；源语言：{$source}；目标语言：{$target}；翻译结果：{$translation}");
         if (!empty($translation)) {
             // 保存到翻译表
             $data = [

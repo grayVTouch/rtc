@@ -240,7 +240,9 @@ class UserAction extends Action
         $download = config('app.app_download');
         $data = [
             'type'  => 'user' ,
-            'id'    => $user->id ,
+            'data'  => [
+                'id' => $user->id
+            ]
         ];
         $base64 = base64_encode(json_encode($data));
         $link = sprintf('%s?identity=%s&data=%s' , $download , $auth->identifier , $base64);
@@ -676,31 +678,38 @@ class UserAction extends Action
     public static function avatar(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
-            'client_id' => 'required' ,
+            'identifier'    => 'required' ,
+            'extranet_ip'   => 'required' ,
+            'client_id'     => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查给定的客户端连接是否存在
-        if (!WebSocket::exist($param['client_id'])) {
-            return self::success('头像信息推送失败！客户端连接已经断线！请重新发起认证');
+        if ($param['identifier'] != $auth->identifier) {
+            return self::error("web 和 当前 app 非同一项目！禁止操作");
         }
-        $auth->push($param['client_id'] , 'avatar' , $auth->user->avatar);
+        // 检查给定的客户端连接是否存在
+        $auth->clientPush([
+            'extranet_ip' => $param['extranet_ip'] ,
+            'client_id'   => $param['client_id']
+        ] , 'avatar' , $auth->user->avatar);
         return self::success();
     }
 
+    // todo 新增版本二支持
     // pc 端授权登录
     public static function authPc(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [
+            'identifier' => 'required' ,
+            'extranet_ip' => 'required' ,
             'client_id' => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查给定的客户端连接是否存在
-        if (!WebSocket::exist($param['client_id'])) {
-            return self::success('授权认证失败！客户端连接已经断线！请重新发起认证');
+        if ($param['identifier'] != $auth->identifier) {
+            return self::error("web 和 当前 app 非同一项目！禁止操作");
         }
         $param['platform'] = 'web';
         $param['identifier'] = $auth->identifier;
@@ -718,7 +727,7 @@ class UserAction extends Action
                 // 删除掉其他 token
                 UserTokenModel::delByUserIdAndPlatform($auth->user->id, $param['platform']);
             }
-            UserRedis::fdMappingPlatform($param['identifier'], $param['client_id'], $param['platform']);
+            UserRedis::fdMappingPlatformForWeb($param['identifier'], $param['extranet_ip'] , $param['client_id'], $param['platform']);
             UserTokenModel::u_insertGetId($param['identifier'], $param['user_id'], $param['token'], $param['expire'], $param['platform']);
             // 上线通知
             $online = UserRedis::isOnline($param['identifier'], $auth->user->id);
@@ -728,26 +737,31 @@ class UserAction extends Action
                 UserUtil::onlineStatusChange($param['identifier'], $param['user_id'], 'online');
             }
             DB::commit();
-            if (in_array($param['platform'], $single_device_for_platform)) {
+            if (in_array($param['platform'] , $single_device_for_platform)) {
                 // 通知其他客户端你已经被迫下线
-                $client_ids = UserRedis::userIdMappingFd($param['identifier'], $auth->user->id);
-                foreach ($client_ids as $v) {
+                $clients = UserRedis::userIdMappingFd($param['identifier'] , $auth->user->id);
+                $exclude = [];
+                foreach ($clients as $v)
+                {
                     // 检查平台
-                    $platform = UserRedis::fdMappingPlatform($param['identifier'], $v);
-                    if (!in_array($platform, $single_device_for_platform)) {
-                        continue;
+                    $platform = UserRedis::fdMappingPlatformForWeb($param['identifier'] , $v['extranet_ip'] , $v['client_id']);
+                    if (!in_array($platform , $single_device_for_platform)) {
+                        $exclude[] = $v;
+                        continue ;
                     }
-                    if ($v == $param['client_id']) {
-                        // 跳过当前用户
-                        continue;
+                    if ($v['extranet_ip'] == $param['extranet_ip'] && $v['client_id'] == $param['client_id']) {
+                        $exclude[] = $v;
+                        continue ;
                     }
-                    // 通知对方下线
-                    $auth->push($v, 'forced_offline');
                 }
+                $auth->push($auth->user->id , 'forced_offline' , '' , $exclude);
             }
-            $auth->clientPush($param['client_id'], 'logined', [
-                'user_id' => $auth->user->id,
-                'token' => $param['token'],
+            $auth->clientPush([
+                'extranet_ip' => $param['extranet_ip'] ,
+                'client_id' => $param['client_id']
+            ] , 'logined', [
+                'user_id'   => $auth->user->id,
+                'token'     => $param['token'],
             ]);
             return self::success('操作成功');
         } catch (Exception $e) {

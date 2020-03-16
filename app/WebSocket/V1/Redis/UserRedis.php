@@ -19,7 +19,12 @@ class UserRedis extends Redis
         $extranet_ip = config('app.extranet_ip');
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         if (is_null($fd)) {
-            return RedisFacade::setAll($name);
+            $res = RedisFacade::setAll($name);
+            foreach ($res as &$v)
+            {
+                $v = json_decode($v , true);
+            }
+            return $res;
         }
         $data = [
             'extranet_ip'   => $extranet_ip ,
@@ -33,7 +38,6 @@ class UserRedis extends Redis
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
         return RedisFacade::sRem($name , $fd);
     }
-
 
     public static function fdMappingUserId($identifier , $fd , int $user_id = 0)
     {
@@ -55,6 +59,17 @@ class UserRedis extends Redis
     public static function fdMappingPlatform(string $identifier , int $fd , string $platform = '')
     {
         $extranet_ip = config('app.extranet_ip');
+        $name = sprintf(self::$fdMappingPlatform , $identifier , $extranet_ip , $fd);
+        if (empty($platform)) {
+            // 获取
+            return RedisFacade::string($name);
+        }
+        return RedisFacade::string($name , $platform);
+    }
+
+    // 特殊：转为 web 端写的单独方法（提供兼容性用的，否则会产生大量代码修改）
+    public static function fdMappingPlatformForWeb(string $identifier , string $extranet_ip , int $fd , string $platform = '')
+    {
         $name = sprintf(self::$fdMappingPlatform , $identifier , $extranet_ip , $fd);
         if (empty($platform)) {
             // 获取

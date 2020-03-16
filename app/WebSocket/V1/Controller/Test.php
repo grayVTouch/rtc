@@ -9,25 +9,13 @@
 namespace App\WebSocket\V1\Controller;
 
 
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\WebSocket\V1\Util\BaiDuTranslationUtil;
 
 class Test extends Base
 {
     public function index(array $param)
     {
-        try {
-            DB::beginTransaction();
-            var_dump("开启事务成功");
-            DB::insert('insert into test_user (name) value ("running")');
-            DB::insert('insert into test_user (name,value) value ("running")');
-//            throw new Exception("exception");
-            var_dump("抛出异常后程序正常执行");
-            DB::commit();
-            var_dump("程序提交成功");
-        } catch(Exception $e){
-            DB::rollBack();
-            var_dump("程序回滚成功");
-        }
+        $res = BaiDuTranslationUtil::translate('my name is grayvtouch' , 'auto' , 'jp');
+        var_dump("翻译结果：" . $res);
     }
 }

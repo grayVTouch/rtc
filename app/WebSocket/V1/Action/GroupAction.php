@@ -255,7 +255,7 @@ class GroupAction extends Action
             return self::error('该申请的记录 op_type 类型错误！禁止操作' , 403);
         }
         $deny_application_status = config('business.deny_application_status');
-        if (!in_array($app->status , $deny_application_status)) {
+        if (in_array($app->status , $deny_application_status)) {
             return self::error('当前申请记录的状态禁止操作');
         }
         $relation_user_id = json_decode($app->relation_user_id , true);
@@ -376,6 +376,7 @@ class GroupAction extends Action
             $auth->pushAll($group_member_ids , 'refresh_group_member');
             $auth->pushAll($kick_user_ids , 'refresh_group');
             $auth->pushAll($kick_user_ids , 'delete_group_from_cache');
+            $auth->pushAll($kick_user_ids , 'refresh_session');
             // 通知被踢出群的那个人，删除本地
             ChatUtil::groupSend($auth , [
                 'user_id'   => $group->user_id ,
@@ -644,7 +645,9 @@ class GroupAction extends Action
         $download = config('app.app_download');
         $data = [
             'type'  => 'group' ,
-            'id'    => $param['group_id'] ,
+            'data'  => [
+                'id' => $group->id
+            ]
         ];
         $base64 = base64_encode(json_encode($data));
         $link = sprintf('%s?identity=%s&data=%s' , $download , $auth->identifier , $base64);

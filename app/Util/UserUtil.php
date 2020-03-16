@@ -203,7 +203,7 @@ class UserUtil extends Util
         // 删除用户
         UserData::delByIdentifierAndId($identifier , $user_id);
         // 用户下线
-        WebSocket::clearRedis($user_id);
+        WebSocket::clearRedisV0($user_id);
     }
 
     // 获取用户名

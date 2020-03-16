@@ -89,6 +89,8 @@ class PushUtil
         {
             $send = Http::post(sprintf(self::$forwardUrl , $v['extranet_ip']) , [
                 'data' => [
+                    // 项目标识符
+                    'identifier' => $identifier ,
                     // 待接收的客户端 id 列表
                     'client'    => json_encode($v) ,
                     // 排除的客户端
@@ -152,6 +154,8 @@ class PushUtil
         // 其他节点上的客户端连接 id
         $send = Http::post(sprintf(self::$forwardUrl , $client['extranet_ip']) , [
             'data' => [
+                // 项目标识符
+                'identifier' => $identifier ,
                 // 待接收的客户端 id 列表
                 'client'    => json_encode([$client]) ,
                 // 排除的客户端
