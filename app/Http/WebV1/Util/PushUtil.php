@@ -145,7 +145,10 @@ class PushUtil
                 // 连接已经无效，跳过
                 return false;
             }
-            $send = WebSocket::push($client['client_id'] , json_encode($data));
+            $send = WebSocket::push($client['client_id'] , json_encode([
+                'type' => $type ,
+                'data' => $data ,
+            ]));
             if (!$send) {
                 return false;
             }

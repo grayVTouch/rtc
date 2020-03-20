@@ -17,6 +17,7 @@ use App\WebSocket\V1\Model\GroupMessageModel;
 use App\WebSocket\V1\Model\GroupMessageReadStatusModel;
 use App\WebSocket\V1\Model\GroupModel;
 use App\WebSocket\V1\Model\GroupMemberModel;
+use App\WebSocket\V1\Model\SystemParamModel;
 use App\WebSocket\V1\Model\UserModel;
 use App\WebSocket\V1\Util\AppPushUtil;
 use App\WebSocket\V1\Util\ChatUtil;
@@ -642,7 +643,7 @@ class GroupAction extends Action
         if (empty($group)) {
             return self::error('未找到群信息' , 404);
         }
-        $download = config('app.app_download');
+        $download = SystemParamModel::getValueByKey('app_download');
         $data = [
             'type'  => 'group' ,
             'data'  => [

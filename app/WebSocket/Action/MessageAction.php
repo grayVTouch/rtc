@@ -250,10 +250,10 @@ class MessageAction extends Action
         if (in_array($res->type , $deny_withdraw_message_type)) {
             return self::error('该消息类型不支持撤回' , 403);
         }
-        $withdraw_duration = config('app.withdraw_duration');
-        if ($withdraw_duration < time() - strtotime($res->create_time)) {
-            return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
-        }
+//        $withdraw_duration = config('app.withdraw_duration');
+//        if ($withdraw_duration < time() - strtotime($res->create_time)) {
+//            return self::error(sprintf('超过%s秒，不允许操作' , $withdraw_duration) , 403);
+//        }
         $res_type_range = config('business.res_type_for_message');
         if (in_array($res->type , $res_type_range)) {
             // 删除 oss 上存放的资源

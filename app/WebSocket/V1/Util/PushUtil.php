@@ -146,14 +146,19 @@ class PushUtil
                 // 连接已经无效，跳过
                 return false;
             }
-            $send = WebSocket::push($client['client_id'] , json_encode($data));
+            $send = WebSocket::push($client['client_id'] , json_encode([
+                'type' => $type ,
+                'data' => $data
+            ]));
             if (!$send) {
                 return false;
             }
             return true;
         }
+
+        $forwardUrl = sprintf(self::$forwardUrl , $client['extranet_ip']);
         // 其他节点上的客户端连接 id
-        $send = Http::post(sprintf(self::$forwardUrl , $client['extranet_ip']) , [
+        $send = Http::post($forwardUrl , [
             'data' => [
                 // 项目标识符
                 'identifier' => $identifier ,

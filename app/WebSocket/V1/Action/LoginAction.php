@@ -948,7 +948,7 @@ class LoginAction extends Action
     // 二维码数据
     public static function loginQRCode(Base $base , array $param)
     {
-        $download = config('app.app_download');
+        $download = SystemParamModel::getValueByKey('app_download');
         $data = [
             // web 端授权登录
             'type'  => 'web_login' ,

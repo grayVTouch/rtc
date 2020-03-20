@@ -237,7 +237,7 @@ class UserAction extends Action
         if (empty($user)) {
             return self::error('未找到用户信息' , 404);
         }
-        $download = config('app.app_download');
+        $download = SystemParamModel::getValueByKey('app_download');
         $data = [
             'type'  => 'user' ,
             'data'  => [
@@ -600,7 +600,7 @@ class UserAction extends Action
     // 分享注册二维码
     public static function shareRegisterQRCode(Auth $auth , array $param)
     {
-        $app_download = config('app.app_download');
+        $app_download = SystemParamModel::getValueByKey('app_download');
         $app_download = sprintf('%s?invite_code=%s' , $app_download , $auth->user->invite_code);
         return self::success($app_download);
     }
@@ -757,8 +757,8 @@ class UserAction extends Action
                 $auth->push($auth->user->id , 'forced_offline' , '' , $exclude);
             }
             $auth->clientPush([
-                'extranet_ip' => $param['extranet_ip'] ,
-                'client_id' => $param['client_id']
+                'extranet_ip'   => $param['extranet_ip'] ,
+                'client_id'     => $param['client_id']
             ] , 'logined', [
                 'user_id'   => $auth->user->id,
                 'token'     => $param['token'],
