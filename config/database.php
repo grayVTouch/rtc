@@ -10,7 +10,7 @@ return [
     'mysql' => [
         'driver'    => 'mysql',
         'host'      => '127.0.0.1',
-        'database'  => 'rtc',
+        'database'  => 'rtc_nesm',
         'username'  => 'root',
         'password'  => '364793',
         'charset'   => 'utf8',
@@ -22,7 +22,7 @@ return [
         'host'        => '127.0.0.1' ,
         'port'      => 6379 ,
         'password'  => '364793' ,
-        'prefix'    => 'rtc_' ,
+        'prefix'    => 'nesm_' ,
         'timeout'   => 0 ,
     ] ,
 ];
