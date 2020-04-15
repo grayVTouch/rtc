@@ -104,9 +104,18 @@ create table if not exists `rtc_user_option` (
   clear_timer_for_private varchar(255) default 'none' comment '自动清理私聊记录时长: none-关闭 day-天 week-周 month-月' ,
   clear_timer_for_group varchar(255) default 'none' comment '自动清理群聊记录时长: none-关闭 day-天 week-周 month-月' ,
   `banned` tinyint(4) DEFAULT '0' COMMENT '全局禁言（仅可后台设置）：0-否 1-是',
+
+      -- 新增朋友圈的相关选项
+  -- 允许朋友查看朋友圈的范围
+  friend_circle_range tinyint default 0 comment '朋友圈查看范围：0-全部 1-最近三天 2-最近一个月 3-最近半年' ,
+  friend_circle_tip tinyint default 0 comment '朋友圈更新提醒：0-不提醒（当好友发布朋友圈的时候，没有红点提醒） 1-当发布朋友圈的时候有红点提醒' ,
+
+
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
 ) engine = innodb character set = utf8mb4 collate = utf8mb4_bin comment '用户设置表';
+
+
 
 drop table if exists `rtc_user_token`;
 create table if not exists `rtc_user_token` (
@@ -613,6 +622,9 @@ alter table `rtc_user` add `pay_password` varchar(255) default '' comment '支�
 alter table `rtc_red_packet` drop `total`;
 alter table `rtc_red_packet` add `money` decimal(13 , 2) unsigned default 0 comment '红包金额';
 alter table `rtc_user` add is_init_pay_password tinyint default 0 comment '是否初始化了支付密码： 0-否 1-是';
+
+alter table `rtc_user_option` add friend_circle_range tinyint default 0 comment '朋友圈查看范围：0-全部 1-最近三天 2-最近一个月 3-最近半年';
+alter table `rtc_user_option` add friend_circle_tip tinyint default 0 comment '朋友圈更新提醒：0-不提醒（当好友发布朋友圈的时候，没有红点提醒） 1-当发布朋友圈的时候有红点提醒';
 
 -- 缓存方面更改了 user 和 user_option
 

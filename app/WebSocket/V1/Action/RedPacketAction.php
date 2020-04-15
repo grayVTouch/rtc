@@ -457,6 +457,8 @@ class RedPacketAction extends Action
             UserUtil::handle($red_packet->user , $auth->user->id);
             $v->red_packet = $red_packet;
             $v->best = $v->user_id == $best_user_id ? 1 : 0;
+            $v->user = UserModel::findById($v->user_id);
+            UserUtil::handle($v->user , $auth->user->id);
         }
         return self::success($res);
     }
