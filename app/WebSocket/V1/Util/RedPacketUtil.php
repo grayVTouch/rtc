@@ -24,7 +24,17 @@ class RedPacketUtil extends Util
             $red_packet->received_duration = strtotime($red_packet->received_time) - strtotime($red_packet->create_time);
         }
         // 是否领取过该红包
-        $red_packet->is_received_for_myself = RedPacketReceivedLogRedis::redPacketReceivedLogByIdentifierAndRedPacketIdAndUserIdAndVal($red_packet->identifier , $red_packet->id , $user_id);
-        $red_packet->is_received_for_myself = $red_packet->is_received_for_myself ?? intval(RedPacketReceiveLogModel::isReceivedByUserIdAndRedPacketId($user_id , $red_packet->id));
+        if ($red_packet->type == 'private') {
+            if (empty($user_id) || $red_packet->receiver != $user_id) {
+                $red_packet->is_received_for_myself = 0;
+            } else {
+                $red_packet->is_received_for_myself = $red_packet->is_received;
+            }
+        } else {
+            // 群聊
+            $red_packet->is_received_for_myself = RedPacketReceivedLogRedis::redPacketReceivedLogByIdentifierAndRedPacketIdAndUserIdAndVal($red_packet->identifier , $red_packet->id , $user_id);
+            $red_packet->is_received_for_myself = $red_packet->is_received_for_myself ?? intval(RedPacketReceiveLogModel::isReceivedByUserIdAndRedPacketId($user_id , $red_packet->id));
+
+        }
     }
 }

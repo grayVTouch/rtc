@@ -142,6 +142,7 @@ class MessageUtil extends Util
             $red_packet = RedPacketData::findByIdentifierAndId($msg->identifier , $message);
             RedPacketUtil::handle($red_packet , $user_id);
             $msg->red_packet = $red_packet;
+//            $msg->red_packet = $red_packet;
         }
     }
 
