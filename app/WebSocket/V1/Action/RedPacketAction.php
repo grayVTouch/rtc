@@ -16,12 +16,15 @@ use App\WebSocket\V1\Data\RedPacketData;
 use App\WebSocket\V1\Data\UserData;
 use App\WebSocket\V1\Model\FundLogModel;
 use App\WebSocket\V1\Model\GroupMemberModel;
+use App\WebSocket\V1\Model\GroupMessageModel;
+use App\WebSocket\V1\Model\MessageModel;
 use App\WebSocket\V1\Model\RedPacketModel;
 use App\WebSocket\V1\Model\RedPacketReceiveLogModel;
 use App\WebSocket\V1\Model\UserModel;
 use App\WebSocket\V1\Redis\RedPacketReceivedLogRedis;
 use App\WebSocket\V1\Redis\RedPacketRedis;
 use App\WebSocket\V1\Util\ChatUtil;
+use App\WebSocket\V1\Util\MessageUtil;
 use App\WebSocket\V1\Util\RedPacketReceiveLogUtil;
 use App\WebSocket\V1\Util\UserUtil;
 use function core\decimal_random;
@@ -191,6 +194,13 @@ class RedPacketAction extends Action
                 return self::error('领取红包失败（发送消息失败：' . $res['data'] . '）');
             }
             DB::commit();
+            // 更新红包消息
+            $msg = MessageModel::findById($red_packet->message_id);
+            $other_id = ChatUtil::otherId($msg->chat_id , $msg->user_id);
+            MessageUtil::handleMessage($msg , $msg->user_id , $other_id);
+            $auth->push($msg->user_id , 'refresh_private_message' , $msg);
+            MessageUtil::handleMessage($msg , $other_id , $msg->user_id);
+            $auth->push($other_id , 'refresh_private_message' , $msg);
             return self::success();
         } catch(Exception $e){
             DB::rollBack();
@@ -421,7 +431,19 @@ class RedPacketAction extends Action
             }
             DB::commit();
             $res = $res['data'];
+            // 发送推送通知
             ChatUtil::groupSendForRedPacketStep2($auth , $res['user_ids'] , $res['message']);
+            /**
+             * 有人领取的情况下，更新红包消息
+             *
+             */
+            $user_ids = GroupMemberModel::getUserIdByGroupId($red_packet->group_id);
+            foreach ($user_ids as $v)
+            {
+                $msg = GroupMessageModel::findById($red_packet->message_id);
+                MessageUtil::handleGroupMessage($msg , $v);
+                $auth->push($v , 'refresh_group_message' , $msg);
+            }
             return self::success();
         } catch(Exception $e){
             RedPacketRedis::pushByIdentifierAndRedPacketIdAndValAndType($auth->identifier , $param['red_packet_id'] , $money , 'left');
