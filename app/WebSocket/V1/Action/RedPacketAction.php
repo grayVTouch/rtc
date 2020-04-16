@@ -54,10 +54,11 @@ class RedPacketAction extends Action
             return self::error('user_id：' . $param['other_id'] . '为找到' , 404);
         }
         $param['remark'] = empty($param['remark']) ? config('app.red_packet_remark') : $param['remark'];
+        $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
             $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcsub($balance , $param['money']);
+            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
             if ($cur_balance < 0) {
                 DB::rollBack();
                 return self::error('当前余额不够' , 403);
@@ -76,7 +77,6 @@ class RedPacketAction extends Action
             UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
                 'balance' => $cur_balance
             ]);
-            $decimal_digit = config('app.decimal_digit');
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
@@ -152,8 +152,9 @@ class RedPacketAction extends Action
                 DB::rollBack();
                 return self::error('非法操作' , 403);
             }
+            $decimal_digit = config('app.decimal_digit');
             $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcadd($balance , $red_packet->money);
+            $cur_balance = bcadd($balance , $red_packet->money , $decimal_digit);
             RedPacketModel::updateById($red_packet->id , [
                 'is_received' => 1 ,
                 'received_number' => 1 ,
@@ -166,7 +167,6 @@ class RedPacketAction extends Action
                 'red_packet_id' => $red_packet->id ,
                 'money' => $red_packet->money ,
             ]);
-            $decimal_digit = config('app.decimal_digit');
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
@@ -234,16 +234,16 @@ class RedPacketAction extends Action
         }
         $param['remark'] = empty($param['remark']) ? config('app.red_packet_remark') : $param['remark'];
         $red_packet_id = 0;
+        // 红包金额保留的小数位数
+        $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
             $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcsub($balance , $param['money']);
+            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
             if ($cur_balance < 0) {
                 DB::rollBack();
                 return self::error('当前余额不够' , 403);
             }
-            // 红包金额保留的小数位数
-            $decimal_digit = config('app.decimal_digit');
             $moneys = [];
             // 分配红包金额
             switch ($param['type'])
@@ -376,7 +376,7 @@ class RedPacketAction extends Action
             }
             // 获取红包金额
             $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcadd($balance , $money);
+            $cur_balance = bcadd($balance , $money , $decimal_digit);
             $red_packet->received_number++;
             $update_red_packet_data = [
                 'is_received'       => intval($red_packet->received_number == $red_packet->number) ,
