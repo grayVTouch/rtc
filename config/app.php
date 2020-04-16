@@ -182,4 +182,8 @@ return [
 
     // 保留的小数点位数
     'digit_number' => 2 ,
+
+    // 红包数量-最小
+    'min_red_packet_number' => 1 ,
+    // 红包数量-最小
 ];

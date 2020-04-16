@@ -560,4 +560,14 @@ class RedPacketAction extends Action
         ] , (int) $param['limit_id'] , $limit);
         return self::success($res);
     }
+
+    public static function redPacketLimit(Auth $auth , array $param)
+    {
+        // 拼手气红包
+        $min_red_packet_number = config('app.min_red_packet_number');
+        return self::success([
+            // 最小红包数量
+            'min_red_packet_number' => $min_red_packet_number
+        ]);
+    }
 }

@@ -123,4 +123,14 @@ class RedPacket extends Auth
         }
         return self::success($res['data']);
     }
+
+    // 红包相关限制信息
+    public function redPacketLimit(array $param)
+    {
+        $res = RedPacketAction::redPacketLimit($this , $param);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        return self::success($res['data']);
+    }
 }

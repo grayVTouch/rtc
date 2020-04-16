@@ -25,6 +25,7 @@ class RedPacketUtil extends Util
         }
         // 是否领取过该红包
         if ($red_packet->type == 'private') {
+            // 私聊
             if (empty($user_id) || $red_packet->receiver != $user_id) {
                 $red_packet->is_received_for_myself = 0;
             } else {
