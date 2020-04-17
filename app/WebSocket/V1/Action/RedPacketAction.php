@@ -431,8 +431,12 @@ class RedPacketAction extends Action
             }
             DB::commit();
             $res = $res['data'];
+
+            print_r($res['user_ids']);
+
             // 发送推送通知
             ChatUtil::groupSendForRedPacketStep2($auth , $res['user_ids'] , $res['message']);
+
             /**
              * 有人领取的情况下，更新红包消息
              *
