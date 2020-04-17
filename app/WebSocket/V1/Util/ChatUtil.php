@@ -775,7 +775,7 @@ class ChatUtil extends Util
             // 群成员
             $user_ids = GroupMemberModel::getUserIdByGroupId($msg->group_id);
             if ($param['type'] == 'notification') {
-                $user_ids_for_result = [$param['user_id'] , $sender_for_red_packet];
+                $user_ids_for_result = $param['user_id'] == $sender_for_red_packet ? [$sender_for_red_packet] : [$param['user_id'] , $sender_for_red_packet];
                 foreach ($user_ids as $v)
                 {
                     if (in_array($v , $user_ids_for_result)) {
