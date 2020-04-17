@@ -35,6 +35,7 @@ class RedPacketUtil extends Util
             // 群聊
             $red_packet->is_received_for_myself = RedPacketReceivedLogRedis::redPacketReceivedLogByIdentifierAndRedPacketIdAndUserIdAndVal($red_packet->identifier , $red_packet->id , $user_id);
             $red_packet->is_received_for_myself = $red_packet->is_received_for_myself ?? intval(RedPacketReceiveLogModel::isReceivedByUserIdAndRedPacketId($user_id , $red_packet->id));
+            $red_packet->is_received_for_myself = intval($red_packet->is_received_for_myself);
 
         }
     }
