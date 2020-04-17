@@ -625,7 +625,7 @@ alter table `rtc_user` add is_init_pay_password tinyint default 0 comment '是�
 
 alter table `rtc_user_option` add friend_circle_range tinyint default 0 comment '朋友圈查看范围：0-全部 1-最近三天 2-最近一个月 3-最近半年';
 alter table `rtc_user_option` add friend_circle_tip tinyint default 0 comment '朋友圈更新提醒：0-不提醒（当好友发布朋友圈的时候，没有红点提醒） 1-当发布朋友圈的时候有红点提醒';
-alter table `rtc_user_option` add friend_circle_background tinyint default 0 comment '朋友圈背景图片';
+alter table `rtc_user_option` add friend_circle_background varchar(1000) default '' comment '朋友圈背景图片';
 
 -- 缓存方面更改了 user 和 user_option
 

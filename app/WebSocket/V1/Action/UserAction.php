@@ -85,12 +85,14 @@ class UserAction extends Action
         $param['birthday'] = $param['birthday'] === '' ? $auth->user->birthday : $param['birthday'];
         $param['nickname'] = $param['nickname'] === '' ? $auth->user->nickname : $param['nickname'];
         $param['signature'] = $param['signature'] === '' ? $auth->user->signature : $param['signature'];
+//        $param['friend_circle_background'] = $param['friend_circle_background'] === '' ? $auth->user->signature : $param['signature'];
         UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'avatar' ,
             'sex' ,
             'birthday' ,
             'nickname' ,
             'signature' ,
+//            'friend_circle_background' ,
         ]));
         return self::success();
     }
@@ -159,6 +161,7 @@ class UserAction extends Action
         $param['friend_auth']           = $param['friend_auth'] === '' ? $user_option->friend_auth : $param['friend_auth'];
         $param['clear_timer_for_private']           = $param['clear_timer_for_private'] === '' ? $user_option->clear_timer_for_private : $param['clear_timer_for_private'];
         $param['clear_timer_for_group']           = $param['clear_timer_for_group'] === '' ? $user_option->clear_timer_for_group : $param['clear_timer_for_group'];
+        $param['friend_circle_background']           = $param['friend_circle_background'] === '' ? $user_option->friend_circle_background : $param['friend_circle_background'];
         UserOptionData::updateByIdentifierAndUserIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'private_notification' ,
             'group_notification' ,
@@ -166,6 +169,7 @@ class UserAction extends Action
             'friend_auth' ,
             'clear_timer_for_private' ,
             'clear_timer_for_group' ,
+            'friend_circle_background' ,
         ]));
         return self::success();
     }
