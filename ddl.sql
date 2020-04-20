@@ -13,7 +13,6 @@ create table if not exists `rtc_user` (
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   username varchar(255) default '' comment '用户名' ,
   password varchar(255) default '' comment '登录密码' ,
-
   pay_password varchar(255) default comment '支付密码' ,
   destroy_password varchar(255) default '' comment '销毁密码：销毁账号的时候要求输入改密码，如果有设置的话' ,
   phone varchar(255) default '' comment '手机号码' ,
@@ -49,7 +48,9 @@ create table if not exists `rtc_red_packet` (
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   `type` varchar(500) default '' comment '红包类型：private-个人红包 group-群红包' ,
   sub_type varchar(255) default 0 comment '红包类型：random-拼手气红包 common-普通红包' ,
+  coin_id int unsigned default 0 comment 'rtc_coin.id，也有可能是第三方的 coin_id（作为第三方模块嵌入到其他系统的时候一般是第三方 coin_id）' ,
   money decimal(13 , 2) unsigned default 0 comment '红包金额' ,
+  order_no varchar(100) default '' comment '订单号' ,
   `number` smallint unsigned default 1 comment '可领取用户数量' ,
   remark varchar(500) default '' comment '备注' ,
   receiver int unsigned default 0 comment 'rtc_user.id，当且仅当 type=private的时候有效' ,
@@ -73,6 +74,7 @@ create table if not exists `rtc_red_packet_receive_log` (
   user_id int unsigned default 0 comment 'rtc_user.id' ,
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   red_packet_id int unsigned default 0 comment 'rtc_red_packet.id' ,
+  coin_id int unsigned default 0 comment 'rtc_coin.id，也有可能是第三方的 coin_id（作为第三方模块嵌入到其他系统的时候一般是第三方 coin_id）' ,
   money decimal(13,2) default 0 comment '领取金额' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -85,8 +87,10 @@ create table if not exists `rtc_fund_log` (
   identifier varchar(255) default '' comment 'rtc_project.identifier' ,
   `type` varchar(255) default '' comment '操作类型: red_packet-红包记录；其他看程序字典文件' ,
   `desc` varchar(1000) default '' comment '操作描述' ,
-  `before` decimal(13,2) default 0 comment '金额操作之前余额' ,
-  `after` decimal(13,2) default 0 comment '金额操作之后余额' ,
+  `order_no` varchar(100) default '' comment '订单号，用在于不同模块之间核对记录用' ,
+  coin_id int unsigned default 0 comment 'rtc_coin.id，也有可能是第三方的 coin_id（作为第三方模块嵌入到其他系统的时候一般是第三方 coin_id）' ,
+--   `before` decimal(13,2) default 0 comment '金额操作之前余额' ,
+--   `after` decimal(13,2) default 0 comment '金额操作之后余额' ,
   `money` decimal(13,2) default 0 comment '变化金额' ,
   create_time datetime default current_timestamp comment '创建时间' ,
   primary key `id` (`id`)
@@ -626,6 +630,12 @@ alter table `rtc_user` add is_init_pay_password tinyint default 0 comment '是�
 alter table `rtc_user_option` add friend_circle_range tinyint default 0 comment '朋友圈查看范围：0-全部 1-最近三天 2-最近一个月 3-最近半年';
 alter table `rtc_user_option` add friend_circle_tip tinyint default 0 comment '朋友圈更新提醒：0-不提醒（当好友发布朋友圈的时候，没有红点提醒） 1-当发布朋友圈的时候有红点提醒';
 alter table `rtc_user_option` add friend_circle_background varchar(1000) default '' comment '朋友圈背景图片';
+
+alter table `rtc_red_packet` add coin_id int unsigned default 0 comment 'rtc_coin.id，也有可能是第三方的 coin_id（作为第三方模块嵌入到其他系统的时候一般是第三方 coin_id）';
+alter table `rtc_red_packet` add order_no varchar(100) default '' comment '订单号';
+alter table `rtc_red_packet_receive_log` add coin_id int unsigned default 0 comment 'rtc_coin.id，也有可能是第三方的 coin_id（作为第三方模块嵌入到其他系统的时候一般是第三方 coin_id）';
+alter table `rtc_fund_log` add `order_no` varchar(100) default '' comment '订单号，用在于不同模块之间核对记录用';
+alter table `rtc_red_packet` drop order_no;
 
 -- 缓存方面更改了 user 和 user_option
 

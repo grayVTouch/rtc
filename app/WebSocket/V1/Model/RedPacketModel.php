@@ -56,9 +56,13 @@ class RedPacketModel extends Model
     {
         $filter['user_id'] = $filter['user_id'] ?? '';
         $filter['year'] = $filter['year'] ?? '';
+        $filter['coin_id'] = $filter['coin_id'] ?? '';
         $where = [];
         if ($filter['user_id'] != '') {
             $where[] = ['user_id' , '=' , $filter['user_id']];
+        }
+        if ($filter['coin_id'] != '') {
+            $where[] = ['coin_id' , '=' , $filter['coin_id']];
         }
         $model = self::where($where);
         if ($filter['year'] != '') {
@@ -74,6 +78,9 @@ class RedPacketModel extends Model
         $where = [];
         if ($filter['user_id'] != '') {
             $where[] = ['user_id' , '=' , $filter['user_id']];
+        }
+        if ($filter['coin_id'] != '') {
+            $where[] = ['coin_id' , '=' , $filter['coin_id']];
         }
         $model = self::where($where);
         if ($filter['year'] != '') {

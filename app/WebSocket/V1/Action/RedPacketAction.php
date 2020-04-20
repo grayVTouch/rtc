@@ -9,6 +9,7 @@
 namespace App\WebSocket\V1\Action;
 
 
+use App\WebSocket\V1\Api\UserBalanceApi;
 use App\WebSocket\V1\Controller\Auth;
 use App\WebSocket\V1\Data\GroupData;
 use App\WebSocket\V1\Data\GroupMemberData;
@@ -25,6 +26,7 @@ use App\WebSocket\V1\Redis\RedPacketReceivedLogRedis;
 use App\WebSocket\V1\Redis\RedPacketRedis;
 use App\WebSocket\V1\Util\ChatUtil;
 use App\WebSocket\V1\Util\MessageUtil;
+use App\WebSocket\V1\Util\OrderUtil;
 use App\WebSocket\V1\Util\RedPacketReceiveLogUtil;
 use App\WebSocket\V1\Util\UserUtil;
 use function core\decimal_random;
@@ -36,12 +38,37 @@ use Illuminate\Support\Facades\DB;
 
 class RedPacketAction extends Action
 {
+
+    // 用户余额
+    public static function userBalance(Auth $auth , array $param)
+    {
+        $res = UserBalanceApi::getBalance($auth->user->id);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        $res = $res['data'];
+        return self::success($res);
+    }
+
+    // 币种列表
+    public static function myCoin(Auth $auth , array $param)
+    {
+        $res = UserBalanceApi::myCoin($auth->user->id);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        $res = $res['data'];
+        return self::success($res);
+    }
+
+
     public static function createRedPacketForPrivate(Auth $auth , array $param)
     {
 //        $s_time = microtime(true);
         $validator = Validator::make($param , [
             'other_id'      => 'required' ,
             'pay_password'  => 'required' ,
+            'coin_id'         => 'required' ,
             'money'         => 'required' ,
         ]);
         if ($validator->fails()) {
@@ -60,35 +87,50 @@ class RedPacketAction extends Action
         $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
-            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
-            if ($cur_balance < 0) {
-                DB::rollBack();
-                return self::error('当前余额不够' , 403);
-            }
+//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
+//            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
+//            if ($cur_balance < 0) {
+//                DB::rollBack();
+//                return self::error('当前余额不够' , 403);
+//            }
+            // 调用远程扣款接口，扣除远程接口
+            // ($order_no , $user_id , $type , $coin_id , $money , $desc = '')
+            $order_no = OrderUtil::orderNo();
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'private' ,
                 // 私聊红包默认都是 普通红包
                 'sub_type' => 'common' ,
+//                'order_no' => $order_no ,
+                'coin_id' => $param['coin_id'] ,
                 'money' => $param['money'] ,
                 'number' => 1 ,
                 'receiver' => $param['other_id'] ,
                 'remark' => $param['remark'] ,
             ]);
-            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-                'balance' => $cur_balance
-            ]);
+//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+//                'balance' => $cur_balance
+//            ]);
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
+
                 'type' => 'red_packet' ,
-                'before' => $balance ,
-                'after' => $cur_balance ,
-                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'desc' => '发送红包' ,
+//                'before' => $balance ,
+//                'after' => $cur_balance ,
+//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
+                'coin_id' => $param['coin_id'] ,
+                'money' => -$param['money'] ,
+                'order_no' => $order_no ,
+                'desc' => sprintf('发送私聊红包（sender: %s ; red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
+            // 更新用户余额
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送私聊红包');
+            if ($api_res['code'] != 0) {
+                DB::rollBack();
+                return self::error($api_res['data'] , $api_res['code']);
+            }
             // 发送红包消息
             $res = ChatUtil::sendForRedPacketStep1($auth , [
                 'user_id'   => $auth->user->id ,
@@ -156,8 +198,8 @@ class RedPacketAction extends Action
                 return self::error('非法操作' , 403);
             }
             $decimal_digit = config('app.decimal_digit');
-            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcadd($balance , $red_packet->money , $decimal_digit);
+//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
+//            $cur_balance = bcadd($balance , $red_packet->money , $decimal_digit);
             RedPacketModel::updateById($red_packet->id , [
                 'is_received' => 1 ,
                 'received_number' => 1 ,
@@ -168,20 +210,30 @@ class RedPacketAction extends Action
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'red_packet_id' => $red_packet->id ,
+                'coin_id' => $red_packet->coin_id ,
                 'money' => $red_packet->money ,
             ]);
+            $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'red_packet' ,
-                'before' => $balance ,
-                'after' => $cur_balance ,
-                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'desc' => '领取红包' ,
+//                'before' => $balance ,
+//                'after' => $cur_balance ,
+//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
+                'order_no' => $order_no ,
+                'coin_id' => $red_packet->coin_id ,
+                'money' => $red_packet->money ,
+                'desc' => sprintf('领取私聊红包（sender: %s;red_packet_id: %s;receiver: %s）' , $red_packet->user_id , $red_packet->id , $auth->user->id) ,
             ]);
-            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-                'balance' => $cur_balance
-            ]);
+//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+//                'balance' => $cur_balance
+//            ]);
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $red_packet->coin_id , $red_packet->money , 'receive' , '领取私聊红包');
+            if ($api_res['code'] != 0) {
+                DB::rollBack();
+                return self::error($api_res['data'] , $api_res['code']);
+            }
             $res = ChatUtil::send($auth , [
                 'user_id' => $auth->user->id ,
                 'other_id' => $red_packet->user_id ,
@@ -216,6 +268,7 @@ class RedPacketAction extends Action
             'money'         => 'required' ,
             'type'          => 'required' ,
             'number'        => 'required' ,
+            'coin_id'       => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -276,6 +329,7 @@ class RedPacketAction extends Action
                 'identifier' => $auth->identifier ,
                 'type' => 'group' ,
                 'sub_type' => $param['type'] ,
+                'coin_id' => $param['coin_id'] ,
                 'money' => $param['money'] ,
                 'number' => $param['number'] ,
                 'group_id' => $group->id ,
@@ -283,18 +337,26 @@ class RedPacketAction extends Action
             ]);
             // 保存到 redis
             RedPacketRedis::redPacketByIdentifierAndRedPacketIdAndList($auth->identifier , $red_packet_id , $moneys);
-            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-                'balance' => $cur_balance
-            ]);
+//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+//                'balance' => $cur_balance
+//            ]);
+            $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'red_packet' ,
-                'before' => $balance ,
-                'after' => $cur_balance ,
-                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'desc' => '发送红包' ,
+//                'before' => $balance ,
+//                'after' => $cur_balance ,
+                'order_no' => $order_no ,
+//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
+                'money' => -$param['money'] ,
+                'desc' => sprintf('发送群红包（sender: %s;red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送群红包');
+            if ($api_res['code'] != 0) {
+                DB::rollBack();
+                return self::error($api_res['data'] , $api_res['code']);
+            }
             $res = ChatUtil::groupSendForRedPacketStep1($auth , $auth->user->id , [
                 'user_id' => $auth->user->id ,
                 'group_id' => $group->id ,
@@ -385,8 +447,8 @@ class RedPacketAction extends Action
                 return self::error('您并非群成员' , 403);
             }
             // 获取红包金额
-            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcadd($balance , $money , $decimal_digit);
+//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
+//            $cur_balance = bcadd($balance , $money , $decimal_digit);
             $red_packet->received_number++;
             $update_red_packet_data = [
                 'is_received'       => intval($red_packet->received_number == $red_packet->number) ,
@@ -402,20 +464,30 @@ class RedPacketAction extends Action
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'red_packet_id' => $red_packet->id ,
+                'coin_id' => $red_packet->coin_id ,
                 'money' => $money ,
             ]);
+            $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'red_packet' ,
-                'before' => $balance ,
-                'after' => $cur_balance ,
-                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'desc' => '领取红包' ,
+//                'before' => $balance ,
+//                'after' => $cur_balance ,
+//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
+                'order_no' => $order_no ,
+                'coin_id' => $red_packet->coin_id ,
+                'money' => $money ,
+                'desc' => sprintf('领取群红包（sender: %s;red_packet_id: %s;receiver: %s）' , $red_packet->user_id , $red_packet->id , $auth->user->id) ,
             ]);
-            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-                'balance' => $cur_balance
-            ]);
+//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
+//                'balance' => $cur_balance
+//            ]);
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $red_packet->coin_id , $money , 'receive' , '领取群红包');
+            if ($api_res['code'] != 0) {
+                DB::rollBack();
+                return self::error($api_res['data'] , $api_res['code']);
+            }
             $res = ChatUtil::groupSendForRedPacketStep1($auth , $red_packet->user_id , [
                 'user_id' => $auth->user->id ,
                 'group_id' => $group->id ,
@@ -493,15 +565,23 @@ class RedPacketAction extends Action
     // 统计信息：收到的红包
     public static function redPacketReceivedInfo(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'coin_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $param['year'] = empty($param['year']) ? date('Y') : $param['year'];
         $money = RedPacketReceiveLogModel::getMoneyByFilter([
             'user_id' => $auth->user->id ,
-            'year' => $param['year']
+            'year' => $param['year'] ,
+            'coin_id' => $param['coin_id'] ,
         ]);
         $money = bcmul($money , 1 , config('app.decimal_digit'));
         $number = RedPacketReceiveLogModel::getNumberByFilter([
             'user_id' => $auth->user->id ,
-            'year' => $param['year']
+            'year' => $param['year'] ,
+            'coin_id' => $param['coin_id'] ,
         ]);
         $number_for_best = RedPacketReceiveLogUtil::getNumberForMostMoneyByUserIdAndYear($auth->user->id , $param['year']);
         return self::success([
@@ -514,15 +594,23 @@ class RedPacketAction extends Action
     // 统计信息：发出去的红包
     public static function redPacketSendInfo(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'coin_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $param['year'] = empty($param['year']) ? date('Y') : $param['year'];
         $money = RedPacketModel::getMoneyByFilter([
             'user_id' => $auth->user->id ,
-            'year' => $param['year']
+            'year' => $param['year'] ,
+            'coin_id' => $param['coin_id'] ,
         ]);
         $money = bcmul($money , 1 , config('app.decimal_digit'));
         $number = RedPacketModel::getNumberByFilter([
             'user_id' => $auth->user->id ,
-            'year' => $param['year']
+            'year' => $param['year'] ,
+            'coin_id' => $param['coin_id']
         ]);
         return self::success([
             'money' => $money ,
@@ -533,11 +621,18 @@ class RedPacketAction extends Action
     // 总计：收到的红包记录
     public static function redPacketReceivedLogs(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'coin_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $param['year'] = empty($param['year']) ? date('Y') : $param['year'];
         $limit = !empty($param['limit']) ? $param['limit'] : config('app.limit');
         $res = RedPacketReceiveLogModel::getByFilterAndLimitIdAndLimit([
             'user_id' => $auth->user->id ,
             'year' => $param['year'] ,
+            'coin_id' => $param['coin_id'] ,
         ] , (int) $param['limit_id'] , $limit);
         foreach ($res as $v)
         {
@@ -556,11 +651,18 @@ class RedPacketAction extends Action
     // 总计：发出的红包记录
     public static function redPacketSendLogs(Auth $auth , array $param)
     {
+        $validator = Validator::make($param , [
+            'coin_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
         $param['year'] = empty($param['year']) ? date('Y') : $param['year'];
         $limit = !empty($param['limit']) ? $param['limit'] : config('app.limit');
         $res = RedPacketModel::getByFilterAndLimitIdAndLimit([
             'user_id' => $auth->user->id ,
             'year' => $param['year'] ,
+            'coin_id' => $param['coin_id'] ,
         ] , (int) $param['limit_id'] , $limit);
         return self::success($res);
     }
