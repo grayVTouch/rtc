@@ -8,12 +8,11 @@
 
 namespace App\Http\ApiV1\Controller;
 
-use App\Redis\MiscRedis;
 use App\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use App\Model\ProjectModel;
+use App\Http\ApiV1\Model\ProjectModel;
 
 class Base
 {

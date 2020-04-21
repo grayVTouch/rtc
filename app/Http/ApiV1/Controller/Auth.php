@@ -9,8 +9,8 @@
 namespace App\Http\ApiV1\Controller;
 
 
-use App\Http\WebV1\Model\UserTokenModel;
-use App\Http\WebV1\Model\UserModel;
+use App\Http\ApiV1\Model\UserTokenModel;
+use App\Http\ApiV1\Model\UserModel;
 
 class Auth extends Base
 {

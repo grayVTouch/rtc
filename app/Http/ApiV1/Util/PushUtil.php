@@ -6,7 +6,7 @@
  * Time: 10:24
  */
 
-namespace App\Http\WebV1\Util;
+namespace App\Http\ApiV1\Util;
 
 
 use App\Http\ApiV1\Redis\UserRedis;
