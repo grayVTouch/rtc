@@ -49,11 +49,10 @@ class LoginAction extends Action
             return self::error('用户不存在' , 404);
         }
         $expire = date('Y-m-d H:i:s' , time() + config('app.timeout'));
-        print_r($param);
         try {
-            UserTokenModel::u_insertGetId($base->identifier , $user->id , $param['token'] , $expire , $param['platform']);
             // 将同平台的其他登录客户端的凭证删除
             UserTokenModel::delByUserIdAndPlatform($user->id , $param['platform']);
+            UserTokenModel::u_insertGetId($base->identifier , $user->id , $param['token'] , $expire , $param['platform']);
             return self::success();
         } catch(Exception $e) {
             DB::rollBack();
