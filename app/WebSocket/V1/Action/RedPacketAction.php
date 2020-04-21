@@ -58,7 +58,16 @@ class RedPacketAction extends Action
             return self::error($res['data'] , $res['code']);
         }
         $res = $res['data'];
-        return self::success($res);
+        $end_res = [];
+        foreach ($res as $v)
+        {
+            $one_res = [];
+            $one_res['coin_id']   = $v['coin_id'];
+            $one_res['ico']       = $v['ico'];
+            $one_res['coin_name'] = $v['coin_name'];
+            $end_res[] = $one_res;
+        }
+        return self::success($end_res);
     }
 
 
@@ -75,9 +84,9 @@ class RedPacketAction extends Action
             return self::error($validator->message());
         }
         // 检查用户密码是否正确
-        if (!Hash::check($param['pay_password'] , $auth->user->pay_password)) {
-            return self::error('支付密码错误');
-        }
+//        if (!Hash::check($param['pay_password'] , $auth->user->pay_password)) {
+//            return self::error('支付密码错误');
+//        }
         // 用户是否存在
         $other = UserModel::findById($param['other_id']);
         if (empty($other)) {
@@ -126,7 +135,7 @@ class RedPacketAction extends Action
                 'desc' => sprintf('发送私聊红包（sender: %s ; red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
             // 更新用户余额
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送私聊红包');
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送私聊红包' , $param['pay_password']);
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);
@@ -274,9 +283,9 @@ class RedPacketAction extends Action
             return self::error($validator->message());
         }
         // 检查用户密码是否正确
-        if (!Hash::check($param['pay_password'] , $auth->user->pay_password)) {
-            return self::error('支付密码错误');
-        }
+//        if (!Hash::check($param['pay_password'] , $auth->user->pay_password)) {
+//            return self::error('支付密码错误');
+//        }
         $red_packet_type = config('business.red_packet_type');
         if (!in_array($param['type'] , $red_packet_type)) {
             return self::error('不支持的红包类型，当前支持的红包类型有：' . implode($red_packet_type));
@@ -352,7 +361,7 @@ class RedPacketAction extends Action
                 'money' => -$param['money'] ,
                 'desc' => sprintf('发送群红包（sender: %s;red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送群红包');
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送群红包' , $param['pay_password']);
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);

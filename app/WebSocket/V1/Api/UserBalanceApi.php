@@ -31,7 +31,7 @@ class UserBalanceApi extends Api
      * @param $type 类型 send-发送红包 | receive-领取红包 | refund-退款
      * @param $money 变更金额 正数（增加） | 负数（减少）
      */
-    public static function updateBalance($order_no , $user_id , $coin_id , $money , $type , $desc = '')
+    public static function updateBalance($order_no , $user_id , $coin_id , $money , $type , $desc = '' , $password = '')
     {
         $path = '/v1/user_balance/updateBalance';
         $api = self::genApiByPathInShop($path);
@@ -42,6 +42,7 @@ class UserBalanceApi extends Api
             'coin_id'   => $coin_id ,
             'money'     => $money ,
             'desc'      => $desc ,
+            'password'  => $password ,
         ]);
     }
 

@@ -6,7 +6,7 @@
  * Time: 10:02
  */
 
-namespace App\WebSocket\V1\Model;
+namespace App\Http\ApiV1\Model;
 
 
 use function core\convert_obj;

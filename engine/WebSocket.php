@@ -32,6 +32,7 @@ use App\Util\TimerLogUtil;
 use App\Util\UserUtil;
 use App\WebSocket\Util\MessageUtil;
 use App\WebSocket\V1\Redis\CacheRedis;
+use App\WebSocket\V1\Util\OrderUtil;
 use App\WebSocket\V1\Util\UserActivityLogUtil;
 use Core\Lib\Facade;
 use Core\Lib\Throwable;
@@ -1532,10 +1533,10 @@ class WebSocket
             $datetime = date('Y-m-d H:i:s');
             $decimal_digit = config('app.decimal_digit');
             try {
-                DB::beginTransaction();
                 $not_expired_red_packet = \App\WebSocket\V1\Model\RedPacketModel::notExpiredRedPacket();
                 foreach ($not_expired_red_packet as $v)
                 {
+                    DB::beginTransaction();
                     $create_time = strtotime($v->create_time);
                     $red_packet_expired_duration = config('app.red_packet_expired_duration');
                     if ($create_time + $red_packet_expired_duration > time()) {
@@ -1544,24 +1545,28 @@ class WebSocket
                     \App\WebSocket\V1\Model\RedPacketModel::updateById($v->id , [
                         'is_expired' => 1 ,
                     ]);
+                    DB::commit();
                 }
                 $expired_and_received_and_not_refund_red_packet = \App\Websocket\V1\Model\RedPacketModel::expiredAndReceivedAndNotRefundRedPacket();
                 foreach ($expired_and_received_and_not_refund_red_packet as $v)
                 {
-
+                    DB::beginTransaction();
                     $refund_money = bcsub($v->money , $v->received_money , $decimal_digit);
                     // 资金记录
-                    $balance = \App\WebSocket\V1\Model\UserModel::getBalanceByUserIdWithLock($v->user_id);
-                    $cur_balance = bcadd($balance , $refund_money , $decimal_digit);
-                    \App\WebSocket\V1\Model\UserModel::updateById($v->user_id , [
-                        'balance' => $cur_balance
-                    ]);
+//                    $balance = \App\WebSocket\V1\Model\UserModel::getBalanceByUserIdWithLock($v->user_id);
+//                    $cur_balance = bcadd($balance , $refund_money , $decimal_digit);
+//                    \App\WebSocket\V1\Model\UserModel::updateById($v->user_id , [
+//                        'balance' => $cur_balance
+//                    ]);
+                    $order_no = OrderUtil::orderNo();
                     \App\WebSocket\V1\Model\FundLogModel::insertGetId([
                         'user_id'   => $v->user_id ,
                         'identifier' => $v->identifier ,
                         'type' => 'red_packet' ,
-                        'before' => $balance ,
-                        'after' => $cur_balance ,
+//                        'before' => $balance ,
+//                        'after' => $cur_balance ,
+                        'order_no' => $order_no ,
+                        'coin_id' => $v->coin_id ,
                         'money' => $refund_money ,
                         'desc' => '红包过期自动退款' ,
                     ]);
@@ -1570,8 +1575,18 @@ class WebSocket
                         'refund_money' => $refund_money ,
                         'refund_time' => $datetime
                     ]);
+                    /**
+                     * 发起退款
+                     */
+                    $api_res = \App\WebSocket\V1\Api\UserBalanceApi::updateBalance($order_no , $v->user_id , $v->coin_id , $refund_money , 'refund' , '红包退款（到期未被领取完的）');
+                    if ($api_res['code'] != 0) {
+                        // 记录退款失败的日志
+                        DB::rollBack();
+                        continue ;
+                    }
+                    DB::commit();
                 }
-                DB::commit();
+//                DB::commit();
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                     $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });

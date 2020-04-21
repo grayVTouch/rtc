@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Util;
+namespace App\Http\ApiV1\Util;
 
 use function core\random;
 use function core\ssl_random;
@@ -12,7 +12,7 @@ use function core\ssl_random;
  * Time: 9:30
  */
 
-class MiscUtil
+class MiscUtil extends Util
 {
     // 唯一码
     public static function uniqueCode()

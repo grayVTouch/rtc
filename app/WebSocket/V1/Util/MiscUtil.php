@@ -38,4 +38,10 @@ class MiscUtil
         return ssl_random(255);
     }
 
+    // 生成 aes key
+    public static function aesKey()
+    {
+        return random(16 , 'mixed' , true);
+    }
+
 }
