@@ -23,7 +23,6 @@ class UserAction extends Action
         $param['birthday'] = $param['birthday'] === '' ? $auth->user->birthday : $param['birthday'];
         $param['nickname'] = $param['nickname'] === '' ? $auth->user->nickname : $param['nickname'];
         $param['signature'] = $param['signature'] === '' ? $auth->user->signature : $param['signature'];
-        print_r($param);
         UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , array_unit($param , [
             'avatar' ,
             'sex' ,

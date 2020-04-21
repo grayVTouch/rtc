@@ -18,6 +18,9 @@ class User extends Auth
         $param = $this->request->post;
         $param['nickname'] = $param['nickname'] ?? '';
         $param['avatar'] = $param['avatar'] ?? '';
+        $param['sex'] = $param['sex'] ?? '';
+        $param['birthday'] = $param['birthday'] ?? '';
+        $param['signature'] = $param['signature'] ?? '';
         $res = UserAction::editUserInfo($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
