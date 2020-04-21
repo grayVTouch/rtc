@@ -55,14 +55,4 @@ class UserBalanceApi extends Api
             'user_id' => $user_id ,
         ]);
     }
-
-    // 获取单个币种的信息
-    public static function getCoin($coin_id)
-    {
-        $path = '/v1/user_balance/coin';
-        $api = self::genApiByPathInShop($path);
-        return self::post($api , [
-            'coin_id' => $coin_id ,
-        ]);
-    }
 }
