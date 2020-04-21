@@ -29,7 +29,7 @@ class Login extends Base
         $param = $this->request->post;
         $param['nickname'] = $param['nickname'] ?? '';
         $param['avatar'] = $param['avatar'] ?? '';
-        $res = LoginAction::login($this , $param);
+        $res = LoginAction::register($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
         }
