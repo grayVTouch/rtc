@@ -719,9 +719,9 @@ class LoginAction extends Action
             return self::error($validator->message());
         }
         // 检查用户名
-        if (preg_match('/[A-z]\w{5,}/' , $param['username']) < 1) {
-            return self::error('账号错误（字母开头，长度不能低于6位）');
-        }
+//        if (preg_match('/[A-z]\w{5,}/' , $param['username']) < 1) {
+//            return self::error('账号错误（字母开头，长度不能低于6位）');
+//        }
         // 昵称要过滤掉表情
         $reg_for_nickname = "//";
         // 检查图形验证码是否正确

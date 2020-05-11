@@ -11,7 +11,7 @@ $host = 'http://chat.hichatvip.com';
 
 return [
     // 外网 ip（该 ip 在任何一台服务器上部署的时候都要指定）
-    'extranet_ip' => '47.88.223.82' ,
+    'extranet_ip' => '47.241.15.104' ,
     // 监听的 ip
     'ip' => '0.0.0.0' ,
     // 监听的端口
@@ -155,7 +155,8 @@ return [
 
     // app 下载连接地址
 //    'app_download' => 'https://sapp.link/download/nxmq2' ,
-    'app_download' => 'https://fir.im/OJBKapk' ,
+//    'app_download' => 'https://fir.im/OJBKapk' ,
+    'app_download' => 'http://download.hichatvip.com/' ,
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,
