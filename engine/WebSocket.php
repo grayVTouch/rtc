@@ -198,7 +198,7 @@ class WebSocket
     public function close(Server $server , int $fd , int $reacter_id)
     {
         // 客户端下线
-        $this->clientOfflineV0($fd);
+//        $this->clientOfflineV0($fd);
         $this->clientOfflineV1($fd);
     }
 
