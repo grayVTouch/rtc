@@ -331,12 +331,12 @@ class RedPacketAction extends Action
         $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
-            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
-            if ($cur_balance < 0) {
-                DB::rollBack();
-                return self::error('当前余额不够' , 403);
-            }
+//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
+//            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
+//            if ($cur_balance < 0) {
+//                DB::rollBack();
+//                return self::error('当前余额不够' , 403);
+//            }
             $moneys = [];
             // 分配红包金额
             switch ($param['type'])
