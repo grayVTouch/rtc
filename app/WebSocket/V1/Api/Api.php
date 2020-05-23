@@ -53,7 +53,7 @@ class Api
             return self::error('网络请求错误 或 服务器没有任何响应');
         }
         $res = json_decode($res , true);
-        var_dump($res);
+//        var_dump($res);
         if (empty($res)) {
             return self::error('服务器没有任何响应');
         }

@@ -143,12 +143,12 @@ class RedPacketAction extends Action
 //                'after' => $cur_balance ,
 //                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
                 'coin_id' => $param['coin_id'] ,
-                'money' => -$param['money'] ,
+                'money' => $param['money'] ,
                 'order_no' => $order_no ,
                 'desc' => sprintf('发送私聊红包（sender: %s ; red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
             // 更新用户余额
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送私聊红包' , $param['pay_password']);
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , $param['money'] , 'send' , '发送私聊红包' , $param['pay_password']);
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);
@@ -371,10 +371,10 @@ class RedPacketAction extends Action
 //                'after' => $cur_balance ,
                 'order_no' => $order_no ,
 //                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'money' => -$param['money'] ,
+                'money' => $param['money'] ,
                 'desc' => sprintf('发送群红包（sender: %s;red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , -$param['money'] , 'send' , '发送群红包' , $param['pay_password']);
+            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $param['coin_id'] , $param['money'] , 'send' , '发送群红包' , $param['pay_password']);
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);
