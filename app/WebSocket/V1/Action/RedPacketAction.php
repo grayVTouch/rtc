@@ -79,8 +79,6 @@ class RedPacketAction extends Action
             'pay_password'  => 'required' ,
             'coin_id'         => 'required' ,
             'money'         => 'required' ,
-            'coin_ico'         => 'required' ,
-            'coin_name'         => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -238,6 +236,8 @@ class RedPacketAction extends Action
                 'red_packet_id' => $red_packet->id ,
                 'coin_id' => $red_packet->coin_id ,
                 'money' => $red_packet->money ,
+                'coin_ico' => $red_packet->coin_ico ,
+                'coin_name' => $red_packet->coin_name ,
             ]);
             $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
@@ -295,8 +295,6 @@ class RedPacketAction extends Action
             'type'          => 'required' ,
             'number'        => 'required' ,
             'coin_id'       => 'required' ,
-            'coin_ico'       => 'required' ,
-            'coin_name'       => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -495,6 +493,8 @@ class RedPacketAction extends Action
                 'identifier' => $auth->identifier ,
                 'red_packet_id' => $red_packet->id ,
                 'coin_id' => $red_packet->coin_id ,
+                'coin_ico' => $red_packet->coin_ico ,
+                'coin_name' => $red_packet->coin_name ,
                 'money' => $money ,
             ]);
             $order_no = OrderUtil::orderNo();
