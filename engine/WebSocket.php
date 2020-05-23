@@ -1515,16 +1515,16 @@ class WebSocket
 //        Timer::tick(10 * 1000 , function(){
             $date = date('Y-m-d');
             $key_for_timer = 'red_packet_timer_for_v1';
-//            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
-//            if (!empty($clear) && $clear == $date) {
-//                return ;
-//            }
-//            $time = date('H:i:s' , time());
-//            $time_point_for_clear_res_timer = config('app.time_point_for_red_packet_timer');
-//            if ($time < $time_point_for_clear_res_timer) {
-//                // 还未到清理时间
-//                return ;
-//            }
+            $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            if (!empty($clear) && $clear == $date) {
+                return ;
+            }
+            $time = date('H:i:s' , time());
+            $time_point_for_clear_res_timer = config('app.time_point_for_red_packet_timer');
+            if ($time < $time_point_for_clear_res_timer) {
+                // 还未到清理时间
+                return ;
+            }
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
@@ -1582,9 +1582,7 @@ class WebSocket
                     if ($api_res['code'] != 0) {
                         // 记录退款失败的日志
                         DB::rollBack();
-
-                        var_dump($api_res['data']);
-
+                        var_dump('退款失败，远程接口返回的错误信息：' . $api_res['data']);
                         continue ;
                     }
                     DB::commit();

@@ -53,13 +53,13 @@ class Api
             return self::error('网络请求错误 或 服务器没有任何响应');
         }
         $res = json_decode($res , true);
-//        var_dump($res);
         if (empty($res)) {
             return self::error('服务器没有任何响应');
         }
         if ($res['code'] != self::SUCCESS_CODE) {
             // 发生错误
-            return self::error('远程接口错误: code: ' . $res['code'] . '; data: ' . $res['data'] , 500);
+            return self::error($res['data'] , 500);
+//            return self::error('远程接口错误: code: ' . $res['code'] . '; data: ' . $res['data'] , 500);
         }
         return self::success($res['data']);
     }

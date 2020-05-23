@@ -175,8 +175,8 @@ return [
     'decimal_digit' => 2 ,
 
     // 红包过期时间
-//    'red_packet_expired_duration' => 24 * 60 * 60 ,
-    'red_packet_expired_duration' => 20 ,
+    'red_packet_expired_duration' => 24 * 60 * 60 ,
+//    'red_packet_expired_duration' => 20 ,
 
     // 红包默认备注
     'red_packet_remark' => '恭喜发财，大吉大利' ,

@@ -35,17 +35,6 @@ class UserBalanceApi extends Api
     {
         $path = '/api/auth/hb';
         $api = self::genApiByPathInShop($path);
-
-        print_r([
-            'order_no'  => $order_no ,
-            'user_id'   => $user_id ,
-            'type'      => $type ,
-            'coin_id'   => $coin_id ,
-            'money'     => $money ,
-            'desc'      => $desc ,
-            'password'  => $password ,
-        ]);
-
         return self::post($api , [
             'order_no'  => $order_no ,
             'user_id'   => $user_id ,
