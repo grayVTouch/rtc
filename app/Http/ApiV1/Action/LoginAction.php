@@ -107,7 +107,7 @@ class LoginAction extends Action
             PushReadStatusModel::u_insertGetId($base->identifier , $id , $push_id , $system , 0);
             SessionUtil::createOrUpdate($base->identifier , $id , $system , '');
             DB::commit();
-            return self::success($param['unique_code']);
+            return self::success(["unique_code"=>$param['unique_code'],"uid"=>$id]);
         } catch(Exception $e) {
             DB::rollBack();
             throw $e;
