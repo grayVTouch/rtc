@@ -362,8 +362,8 @@ class RedPacketAction extends Action
                 'number' => $param['number'] ,
                 'group_id' => $group->id ,
                 'remark' => $param['remark'] ,
-                'coin_ico' => $param['remark'] ,
-                'coin_name' => $param['remark'] ,
+                'coin_ico' => $param['coin_ico'] ,
+                'coin_name' => $param['coin_name'] ,
             ]);
             // 保存到 redis
             RedPacketRedis::redPacketByIdentifierAndRedPacketIdAndList($auth->identifier , $red_packet_id , $moneys);
