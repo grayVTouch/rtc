@@ -243,7 +243,7 @@ class RedPacketAction extends Action
                 'coin_ico' => $red_packet->coin_ico ,
                 'coin_name' => $red_packet->coin_name ,
             ]);
-            $order_no = OrderUtil::orderNo();
+//            $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
@@ -251,7 +251,7 @@ class RedPacketAction extends Action
 //                'before' => $balance ,
 //                'after' => $cur_balance ,
 //                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'order_no' => $order_no ,
+                'order_no' => $red_packet->order_no ,
                 'coin_id' => $red_packet->coin_id ,
                 'money' => $red_packet->money ,
                 'desc' => sprintf('领取私聊红包（sender: %s;red_packet_id: %s;receiver: %s）' , $red_packet->user_id , $red_packet->id , $auth->user->id) ,
@@ -259,7 +259,7 @@ class RedPacketAction extends Action
 //            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
 //                'balance' => $cur_balance
 //            ]);
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $red_packet->coin_id , $red_packet->money , 'receive' , '领取私聊红包');
+            $api_res = UserBalanceApi::updateBalance($red_packet->order_no , $auth->user->id , $red_packet->coin_id , $red_packet->money , 'receive' , '领取私聊红包');
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);
@@ -511,7 +511,7 @@ class RedPacketAction extends Action
 //                'before' => $balance ,
 //                'after' => $cur_balance ,
 //                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
-                'order_no' => $order_no ,
+                'order_no' => $red_packet->order_no ,
                 'coin_id' => $red_packet->coin_id ,
                 'money' => $money ,
                 'desc' => sprintf('领取群红包（sender: %s;red_packet_id: %s;receiver: %s）' , $red_packet->user_id , $red_packet->id , $auth->user->id) ,
@@ -519,7 +519,7 @@ class RedPacketAction extends Action
 //            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
 //                'balance' => $cur_balance
 //            ]);
-            $api_res = UserBalanceApi::updateBalance($order_no , $auth->user->id , $red_packet->coin_id , $money , 'receive' , '领取群红包');
+            $api_res = UserBalanceApi::updateBalance($red_packet->order_no , $auth->user->id , $red_packet->coin_id , $money , 'receive' , '领取群红包');
             if ($api_res['code'] != 0) {
                 DB::rollBack();
                 return self::error($api_res['data'] , $api_res['code']);
