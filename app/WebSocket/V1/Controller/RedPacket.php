@@ -40,6 +40,8 @@ class RedPacket extends Auth
         $param['other_id'] = $param['other_id'] ?? '';
         $param['remark'] = $param['remark'] ?? '';
         $param['coin_id'] = $param['coin_id'] ?? '';
+        $param['coin_ico'] = $param['coin_ico'] ?? '';
+        $param['coin_name'] = $param['coin_name'] ?? '';
         $res = RedPacketAction::createRedPacketForPrivate($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);

@@ -79,6 +79,8 @@ class RedPacketAction extends Action
             'pay_password'  => 'required' ,
             'coin_id'         => 'required' ,
             'money'         => 'required' ,
+            'coin_ico'         => 'required' ,
+            'coin_name'         => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -117,6 +119,8 @@ class RedPacketAction extends Action
                 'number' => 1 ,
                 'receiver' => $param['other_id'] ,
                 'remark' => $param['remark'] ,
+                'coin_ico' => $param['coin_ico'] ,
+                'coin_name' => $param['coin_name'] ,
             ]);
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
@@ -291,6 +295,8 @@ class RedPacketAction extends Action
             'type'          => 'required' ,
             'number'        => 'required' ,
             'coin_id'       => 'required' ,
+            'coin_ico'       => 'required' ,
+            'coin_name'       => 'required' ,
         ]);
         if ($validator->fails()) {
             return self::error($validator->message());
@@ -356,6 +362,8 @@ class RedPacketAction extends Action
                 'number' => $param['number'] ,
                 'group_id' => $group->id ,
                 'remark' => $param['remark'] ,
+                'coin_ico' => $param['remark'] ,
+                'coin_name' => $param['remark'] ,
             ]);
             // 保存到 redis
             RedPacketRedis::redPacketByIdentifierAndRedPacketIdAndList($auth->identifier , $red_packet_id , $moneys);
