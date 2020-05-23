@@ -1511,7 +1511,7 @@ class WebSocket
         });
 
         // 红包过期 + 自动退款
-        Timer::tick(1 * 1000 , function(){
+        Timer::tick(5 * 1000 , function(){
 //        Timer::tick(10 * 1000 , function(){
             $date = date('Y-m-d');
             $key_for_timer = 'red_packet_timer_for_v1';
