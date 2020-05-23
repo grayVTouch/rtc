@@ -105,6 +105,19 @@ class RedPacketAction extends Action
             // 调用远程扣款接口，扣除远程接口
             // ($order_no , $user_id , $type , $coin_id , $money , $desc = '')
             $order_no = OrderUtil::orderNo();
+            print_r([
+                'user_id' => $auth->user->id ,
+                'identifier' => $auth->identifier ,
+                'type' => 'private' ,
+                // 私聊红包默认都是 普通红包
+                'sub_type' => 'common' ,
+//                'order_no' => $order_no ,
+                'coin_id' => $param['coin_id'] ,
+                'money' => $param['money'] ,
+                'number' => 1 ,
+                'receiver' => $param['other_id'] ,
+                'remark' => $param['remark'] ,
+            ]);
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
