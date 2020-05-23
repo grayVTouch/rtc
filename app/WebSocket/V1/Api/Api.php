@@ -13,7 +13,7 @@ use Core\Lib\Http;
 
 class Api
 {
-    public static $hostForShop = "http://test.com/";
+    public static $hostForShop = "http://161.117.233.100/";
 
     public const SUCCESS_CODE = 0;
 

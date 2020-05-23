@@ -15,7 +15,7 @@ class UserBalanceApi extends Api
     // 获取用户余额列表
     public static function getBalance($user_id)
     {
-        $path = '/v1/user_balance/balance';
+        $path = '/api/auth/hb_balance';
         $api = self::genApiByPathInShop($path);
         return self::post($api , [
             'user_id' => $user_id
@@ -33,7 +33,7 @@ class UserBalanceApi extends Api
      */
     public static function updateBalance($order_no , $user_id , $coin_id , $money , $type , $desc = '' , $password = '')
     {
-        $path = '/v1/user_balance/updateBalance';
+        $path = '/api/auth/hb';
         $api = self::genApiByPathInShop($path);
         return self::post($api , [
             'order_no'  => $order_no ,
@@ -49,7 +49,7 @@ class UserBalanceApi extends Api
     // 获取币种列表
     public static function myCoin($user_id)
     {
-        $path = '/v1/user_balance/myCoin';
+        $path = '/api/auth/hb_coin';
         $api = self::genApiByPathInShop($path);
         return self::post($api , [
             'user_id' => $user_id ,
