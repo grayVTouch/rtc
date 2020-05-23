@@ -119,6 +119,7 @@ class RedPacketAction extends Action
                 'remark' => $param['remark'] ,
                 'coin_ico' => $param['coin_ico'] ,
                 'coin_name' => $param['coin_name'] ,
+                'order_no' => $param['order_no'] ,
             ]);
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
@@ -134,6 +135,7 @@ class RedPacketAction extends Action
                 'remark' => $param['remark'] ,
                 'coin_ico' => $param['coin_ico'] ,
                 'coin_name' => $param['coin_name'] ,
+                'order_no' => $param['order_no'] ,
             ]);
 //            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
 //                'balance' => $cur_balance
@@ -352,6 +354,7 @@ class RedPacketAction extends Action
                     }
                     break;
             }
+            $order_no = OrderUtil::orderNo();
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
@@ -364,13 +367,14 @@ class RedPacketAction extends Action
                 'remark' => $param['remark'] ,
                 'coin_ico' => $param['coin_ico'] ,
                 'coin_name' => $param['coin_name'] ,
+                'order_no' => $order_no
             ]);
             // 保存到 redis
             RedPacketRedis::redPacketByIdentifierAndRedPacketIdAndList($auth->identifier , $red_packet_id , $moneys);
 //            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
 //                'balance' => $cur_balance
 //            ]);
-            $order_no = OrderUtil::orderNo();
+
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,

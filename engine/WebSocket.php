@@ -1558,14 +1558,14 @@ class WebSocket
 //                    \App\WebSocket\V1\Model\UserModel::updateById($v->user_id , [
 //                        'balance' => $cur_balance
 //                    ]);
-                    $order_no = OrderUtil::orderNo();
+//                    $order_no = OrderUtil::orderNo();
                     \App\WebSocket\V1\Model\FundLogModel::insertGetId([
                         'user_id'   => $v->user_id ,
                         'identifier' => $v->identifier ,
                         'type' => 'red_packet' ,
 //                        'before' => $balance ,
 //                        'after' => $cur_balance ,
-                        'order_no' => $order_no ,
+                        'order_no' => $v->order_no ,
                         'coin_id' => $v->coin_id ,
                         'money' => $refund_money ,
                         'desc' => '红包过期自动退款' ,
@@ -1578,7 +1578,7 @@ class WebSocket
                     /**
                      * 发起退款
                      */
-                    $api_res = \App\WebSocket\V1\Api\UserBalanceApi::updateBalance($order_no , $v->user_id , $v->coin_id , $refund_money , 'refund' , '红包退款（到期未被领取完的）');
+                    $api_res = \App\WebSocket\V1\Api\UserBalanceApi::updateBalance($v->order_no , $v->user_id , $v->coin_id , $refund_money , 'refund' , '红包退款（到期未被领取完的）');
                     if ($api_res['code'] != 0) {
                         // 记录退款失败的日志
                         DB::rollBack();
