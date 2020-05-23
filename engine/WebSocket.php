@@ -1582,6 +1582,9 @@ class WebSocket
                     if ($api_res['code'] != 0) {
                         // 记录退款失败的日志
                         DB::rollBack();
+
+                        var_dump($api_res['data']);
+
                         continue ;
                     }
                     DB::commit();
