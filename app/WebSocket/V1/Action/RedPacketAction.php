@@ -132,6 +132,8 @@ class RedPacketAction extends Action
                 'number' => 1 ,
                 'receiver' => $param['other_id'] ,
                 'remark' => $param['remark'] ,
+                'coin_ico' => $param['coin_ico'] ,
+                'coin_name' => $param['coin_name'] ,
             ]);
 //            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
 //                'balance' => $cur_balance
