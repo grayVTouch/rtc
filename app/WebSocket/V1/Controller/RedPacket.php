@@ -68,6 +68,8 @@ class RedPacket extends Auth
         $param['number']      = $param['number'] ?? '';
         $param['remark'] = $param['remark'] ?? '';
         $param['coin_id'] = $param['coin_id'] ?? '';
+        $param['coin_ico'] = $param['coin_ico'] ?? '';
+        $param['coin_name'] = $param['coin_name'] ?? '';
         $res = RedPacketAction::createRedPacketForGroup($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
