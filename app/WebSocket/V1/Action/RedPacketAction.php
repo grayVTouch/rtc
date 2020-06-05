@@ -96,14 +96,8 @@ class RedPacketAction extends Action
         $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
-//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-//            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
-//            if ($cur_balance < 0) {
-//                DB::rollBack();
-//                return self::error('当前余额不够' , 403);
-//            }
+
             // 调用远程扣款接口，扣除远程接口
-            // ($order_no , $user_id , $type , $coin_id , $money , $desc = '')
             $order_no = OrderUtil::orderNo();
             $red_packet_id = RedPacketModel::insertGetId([
                 'user_id' => $auth->user->id ,
@@ -111,7 +105,6 @@ class RedPacketAction extends Action
                 'type' => 'private' ,
                 // 私聊红包默认都是 普通红包
                 'sub_type' => 'common' ,
-//                'order_no' => $order_no ,
                 'coin_id' => $param['coin_id'] ,
                 'money' => $param['money'] ,
                 'number' => 1 ,
@@ -119,19 +112,12 @@ class RedPacketAction extends Action
                 'remark' => $param['remark'] ,
                 'coin_ico' => $param['coin_ico'] ,
                 'coin_name' => $param['coin_name'] ,
-                'order_no' => $param['order_no'] ,
+                'order_no' => $order_no ,
             ]);
-//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-//                'balance' => $cur_balance
-//            ]);
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
-
                 'type' => 'red_packet' ,
-//                'before' => $balance ,
-//                'after' => $cur_balance ,
-//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
                 'coin_id' => $param['coin_id'] ,
                 'money' => $param['money'] ,
                 'order_no' => $order_no ,
@@ -209,9 +195,6 @@ class RedPacketAction extends Action
                 DB::rollBack();
                 return self::error('非法操作' , 403);
             }
-            $decimal_digit = config('app.decimal_digit');
-//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-//            $cur_balance = bcadd($balance , $red_packet->money , $decimal_digit);
             RedPacketModel::updateById($red_packet->id , [
                 'is_received' => 1 ,
                 'received_number' => 1 ,
@@ -227,22 +210,15 @@ class RedPacketAction extends Action
                 'coin_ico' => $red_packet->coin_ico ,
                 'coin_name' => $red_packet->coin_name ,
             ]);
-//            $order_no = OrderUtil::orderNo();
             FundLogModel::insertGetId([
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'red_packet' ,
-//                'before' => $balance ,
-//                'after' => $cur_balance ,
-//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
                 'order_no' => $red_packet->order_no ,
                 'coin_id' => $red_packet->coin_id ,
                 'money' => $red_packet->money ,
                 'desc' => sprintf('领取私聊红包（sender: %s;red_packet_id: %s;receiver: %s）' , $red_packet->user_id , $red_packet->id , $auth->user->id) ,
             ]);
-//            UserData::updateByIdentifierAndIdAndData($auth->identifier , $auth->user->id , [
-//                'balance' => $cur_balance
-//            ]);
             $api_res = UserBalanceApi::updateBalance($red_packet->order_no , $auth->user->id , $red_packet->coin_id , $red_packet->money , 'receive' , '领取私聊红包');
             if ($api_res['code'] != 0) {
                 DB::rollBack();
@@ -287,10 +263,6 @@ class RedPacketAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
-        // 检查用户密码是否正确
-//        if (!Hash::check($param['pay_password'] , $auth->user->pay_password)) {
-//            return self::error('支付密码错误');
-//        }
         $red_packet_type = config('business.red_packet_type');
         if (!in_array($param['type'] , $red_packet_type)) {
             return self::error('不支持的红包类型，当前支持的红包类型有：' . implode($red_packet_type));
@@ -315,12 +287,6 @@ class RedPacketAction extends Action
         $decimal_digit = config('app.decimal_digit');
         try {
             DB::beginTransaction();
-//            $balance = UserModel::getBalanceByUserIdWithLock($auth->user->id);
-//            $cur_balance = bcsub($balance , $param['money'] , $decimal_digit);
-//            if ($cur_balance < 0) {
-//                DB::rollBack();
-//                return self::error('当前余额不够' , 403);
-//            }
             $moneys = [];
             // 分配红包金额
             switch ($param['type'])
@@ -363,10 +329,7 @@ class RedPacketAction extends Action
                 'user_id' => $auth->user->id ,
                 'identifier' => $auth->identifier ,
                 'type' => 'red_packet' ,
-//                'before' => $balance ,
-//                'after' => $cur_balance ,
                 'order_no' => $order_no ,
-//                'money' => bcsub($cur_balance , $balance , $decimal_digit) ,
                 'money' => $param['money'] ,
                 'desc' => sprintf('发送群红包（sender: %s;red_packet_id: %s）' , $auth->user->id , $red_packet_id) ,
             ]);

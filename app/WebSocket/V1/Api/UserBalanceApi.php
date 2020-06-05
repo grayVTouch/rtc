@@ -25,11 +25,11 @@ class UserBalanceApi extends Api
     /**
      * 更新用户余额
      *
-     * @param $order_no 订单号
-     * @param $user_id 用户Id
-     * @param $coin_id 币种id
-     * @param $type 类型 send-发送红包 | receive-领取红包 | refund-退款
-     * @param $money 变更金额 正数（增加） | 负数（减少）
+     * @param string $order_no 订单号
+     * @param int $user_id 用户Id
+     * @param int $coin_id 币种id
+     * @param string $type 类型 send-发送红包 | receive-领取红包 | refund-退款
+     * @param int $money 变更金额 正数（增加） | 负数（减少）
      */
     public static function updateBalance($order_no , $user_id , $coin_id , $money , $type , $desc = '' , $password = '')
     {

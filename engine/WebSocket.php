@@ -1525,6 +1525,7 @@ class WebSocket
                 // 还未到清理时间
                 return ;
             }
+            var_dump("定时器执行中...");
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
