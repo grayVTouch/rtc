@@ -1527,6 +1527,10 @@ class WebSocket
                 return ;
             }
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+
+            // 设置后的缓存值
+            var_dump(\App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer));
+
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('红包处理（红包过期 + 自动退款）中...' , 'red_packet');
