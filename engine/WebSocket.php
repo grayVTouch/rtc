@@ -278,12 +278,12 @@ class WebSocket
             $this->clearRedisV0($user_id , $fd);
         } catch(Exception $e) {
             DB::rollBack();
-            if (config('app.debug')) {
-                throw $e;
-            }
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
             \App\Model\ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
+            if (config('app.debug')) {
+                throw $e;
+            }
         }
     }
 
@@ -375,12 +375,12 @@ class WebSocket
             $this->clearRedisV1($user_id , $fd);
         } catch(Exception $e) {
             DB::rollBack();
-            if (config('app.debug')) {
-                throw $e;
-            }
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
             \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('WebSocket 请求执行异常' , $log , 'WebSocket');
+            if (config('app.debug')) {
+                throw $e;
+            }
         }
     }
 
@@ -601,10 +601,10 @@ class WebSocket
         } catch(Exception $e) {
             $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
             $log = json_encode($log);
+            ProgramErrorLogModel::u_insertGetId('WebSocket 任务执行异常' , $log , 'Task');
             if (config('app.debug')) {
                 throw $e;
             }
-            ProgramErrorLogModel::u_insertGetId('WebSocket 任务执行异常' , $log , 'Task');
         }
     }
 
@@ -756,13 +756,13 @@ class WebSocket
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 ProgramErrorLogModel::u_insertGetId('清理临时群的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -803,13 +803,13 @@ class WebSocket
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 ProgramErrorLogModel::u_insertGetId('清理时效群的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -957,13 +957,13 @@ class WebSocket
                 TimerLogUtil::logCheck(function() use($timer_log_id){
                     TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 ProgramErrorLogModel::u_insertGetId('清理消息记录的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -1194,13 +1194,13 @@ class WebSocket
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
                     \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理临时群的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -1238,13 +1238,13 @@ class WebSocket
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
                     \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理时效群的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -1404,13 +1404,13 @@ class WebSocket
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
                     \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('清理消息记录的定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
@@ -1516,8 +1516,8 @@ class WebSocket
             $date = date('Y-m-d');
             $key_for_timer = 'red_packet_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
-            var_dump($clear);
             if (!empty($clear) && $clear == $date) {
+                var_dump('还没有到执行时间点...跳过');
                 return ;
             }
             $time = date('H:i:s' , time());
@@ -1554,18 +1554,10 @@ class WebSocket
                     DB::beginTransaction();
                     $refund_money = bcsub($v->money , $v->received_money , $decimal_digit);
                     // 资金记录
-//                    $balance = \App\WebSocket\V1\Model\UserModel::getBalanceByUserIdWithLock($v->user_id);
-//                    $cur_balance = bcadd($balance , $refund_money , $decimal_digit);
-//                    \App\WebSocket\V1\Model\UserModel::updateById($v->user_id , [
-//                        'balance' => $cur_balance
-//                    ]);
-//                    $order_no = OrderUtil::orderNo();
                     \App\WebSocket\V1\Model\FundLogModel::insertGetId([
                         'user_id'   => $v->user_id ,
                         'identifier' => $v->identifier ,
                         'type' => 'red_packet' ,
-//                        'before' => $balance ,
-//                        'after' => $cur_balance ,
                         'order_no' => $v->order_no ,
                         'coin_id' => $v->coin_id ,
                         'money' => $refund_money ,
@@ -1597,13 +1589,13 @@ class WebSocket
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
                     \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
                 });
-                if (config('app.debug')) {
-                    throw $e;
-                }
                 // 记录错误日志
                 $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
                 $log = json_encode($log);
                 \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('红包定时器执行发生错误' , $log , 'timer_event');
+                if (config('app.debug')) {
+                    throw $e;
+                }
             }
         });
 
