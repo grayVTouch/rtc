@@ -13,7 +13,7 @@ use Core\Lib\Http;
 
 class Api
 {
-    public static $hostForShop = "http://161.117.233.100/";
+    public static $hostForShop = "http://api.NEMSVIP.VIP:200/";
 
     public const SUCCESS_CODE = 0;
 
