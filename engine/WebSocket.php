@@ -1516,6 +1516,7 @@ class WebSocket
             $date = date('Y-m-d');
             $key_for_timer = 'red_packet_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
+            var_dump($clear);
             if (!empty($clear) && $clear == $date) {
                 return ;
             }
@@ -1525,7 +1526,6 @@ class WebSocket
                 // 还未到清理时间
                 return ;
             }
-            var_dump("定时器执行中...");
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
