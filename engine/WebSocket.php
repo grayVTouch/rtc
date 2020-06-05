@@ -9,19 +9,14 @@
 namespace Engine;
 
 
-use App\Data\GroupMemberData;
 use App\Model\ClearTimerLogModel;
 use App\Model\DeleteMessageForGroupModel;
 use App\Model\DeleteMessageForPrivateModel;
-use App\Model\DeleteMessageModel;
 use App\Model\FriendModel;
 use App\Model\MessageModel;
-use App\Model\MessageReadStatusModel;
 use App\Model\ProgramErrorLogModel;
 use App\Model\TaskLogModel;
 use App\Model\TimerLogModel;
-use App\Model\SessionModel;
-use App\Redis\SessionRedis;
 use App\Redis\TimerRedis;
 use App\Util\AesUtil;
 use App\Util\ChatUtil;
@@ -30,26 +25,17 @@ use App\Util\GroupUtil;
 use App\Util\OssUtil;
 use App\Util\TimerLogUtil;
 use App\Util\UserUtil;
-use App\WebSocket\Util\MessageUtil;
-use App\WebSocket\V1\Redis\CacheRedis;
-use App\WebSocket\V1\Util\OrderUtil;
-use App\WebSocket\V1\Util\UserActivityLogUtil;
 use Core\Lib\Facade;
 use Core\Lib\Throwable;
-use function core\obj_to_array;
 use DateInterval;
 use DateTime;
-use DateTimeZone;
 use App\Model\GroupModel;
 use App\Model\GroupMemberModel;
 use App\Model\GroupMessageModel;
-use App\Model\GroupMessageReadStatusModel;
 use App\Model\UserModel;
-use App\Redis\MiscRedis;
 use App\Redis\UserRedis;
 use App\Util\PushUtil;
 use App\Util\MessageUtil as BaseMessageUtil;
-use Engine\Facade\Log;
 use Engine\Facade\Redis as RedisFacade;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -1517,7 +1503,6 @@ class WebSocket
             $key_for_timer = 'red_packet_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
             if (!empty($clear) && $clear == $date) {
-                var_dump('还没有到执行时间点...跳过');
                 return ;
             }
             $time = date('H:i:s' , time());
@@ -1527,10 +1512,6 @@ class WebSocket
                 return ;
             }
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
-
-            // 设置后的缓存值
-            var_dump(\App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer));
-
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('红包处理（红包过期 + 自动退款）中...' , 'red_packet');
