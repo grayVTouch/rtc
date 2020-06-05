@@ -11,6 +11,7 @@ namespace App\WebSocket\V1\Model;
 
 use function core\convert_obj;
 use function core\random;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class GroupModel extends Model

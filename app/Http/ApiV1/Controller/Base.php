@@ -6,14 +6,13 @@
  * Time: 16:45
  */
 
-namespace App\Http\Web\Controller;
+namespace App\Http\ApiV1\Controller;
 
-use App\Redis\MiscRedis;
 use App\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use App\Model\ProjectModel;
+use App\Http\ApiV1\Model\ProjectModel;
 
 class Base
 {
@@ -27,8 +26,8 @@ class Base
 
     public function __construct(WebSocket $conn , Request $request , Response $response , string $identifier = '')
     {
-        $this->identifier = $identifier;
-        $this->request = $request;
+        $this->identifier   = $identifier;
+        $this->request      = $request;
         $this->response = $response;
         $this->conn     = $conn;
     }

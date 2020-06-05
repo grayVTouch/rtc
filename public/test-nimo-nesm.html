@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>api 接口测试</title>
+</head>
+<body>
+<style>
+    textarea {
+        width: 400px;
+        height: 300px;
+    }
+    p {
+        word-wrap: break-word;
+        white-space: normal;
+    }
+</style>
+<p>永久token: </p>
+<p>rZxUtKEL12oMkxIOmuZSKu6cHFr6B7SClM0pNyfXFQlrfp9YjyNKHazPqoEN8kqtqAQObdUpAUMdBsS3CiovfMVeUb9fqSKvK2sSi5U0zuu83efSeZw8kgNt0gi0Puh2j1HMIdF7eyJhD0XW2Gyfp1AakBFjUjXbIEW4PWWjzqzyhJVsag2TJtRJvDQvjEfrPxQ26OPfFJvHZN3Wfw3LQCtojLiqRfknwoddN6HWaJztqE1ybxSsrCO6fSG0JOw</p>
+<textarea id="json">
+{
+  "router": "/Friend/delFriend",
+  "identifier": "nimo",
+  "user_id": 4 ,
+  "debug": "running" ,
+  "request": "abcdefghijklmnopqrstuvwxyz",
+  "platform": "pc",
+  "data": {
+    "friend_id":9
+  }
+}
+</textarea>
+<br>
+<textarea id="res"></textarea>
+<br>
+<button id="send">发送</button>
+<script src="SmallJs.js"></script>
+<script>
+
+    var send = G('#send');
+    var json = G('#json');
+    var res = G('#res');
+    var parseRes = G('#parse_res');
+    var ws = new WebSocket('ws://47.88.223.82:10001');
+    // var ws = new WebSocket('ws://websocket.gca.cool:10001');
+    ws.onopen = () => {
+        console.log('ws open');
+    };
+
+    ws.onclose = (e) => {
+        console.log('ws close' , e , e.data , e.reason);
+    };
+
+    ws.onerror = (e) => {
+        console.log('ws error' , e , e.reason);
+    };
+
+    ws.onmessage = (e) => {
+        res.val(e.data);
+        console.log(JSON.parse(e.data));
+    };
+
+    send.on('click' , () => {
+        ws.send(json.val());
+    });
+</script>
+</body>
+</html>

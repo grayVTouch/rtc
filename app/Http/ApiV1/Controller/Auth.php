@@ -6,11 +6,11 @@
  * Time: 23:57
  */
 
-namespace App\Http\Web\Controller;
+namespace App\Http\ApiV1\Controller;
 
 
-use App\Model\UserTokenModel;
-use App\Model\UserModel;
+use App\Http\ApiV1\Model\UserTokenModel;
+use App\Http\ApiV1\Model\UserModel;
 
 class Auth extends Base
 {

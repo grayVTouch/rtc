@@ -6,14 +6,12 @@
  * Time: 16:45
  */
 
-namespace App\Http\Web\Controller;
+namespace App\Http\ApiV1\Controller;
 
-use App\Redis\MiscRedis;
-use App\Util\PushUtil;
+use App\Http\WebV1\Util\PushUtil;
 use Swoole\WebSocket\Server as WebSocket;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
-use App\Model\ProjectModel;
 
 class Common
 {
@@ -92,13 +90,23 @@ class Common
     // 结合当前业务的发送接口：发送单条数据
     public function send(int $user_id , string $type = '' , array $data = [])
     {
-        return $this->push($user_id , $type , $data , [$this->fd]);
+        return $this->push($user_id , $type , $data , [
+            [
+                'extranet_ip'   => config('app.extranet_ip') ,
+                'client_id'     => $this->fd
+            ]
+        ]);
     }
 
     // 结合当前业务的发送接口：发送多条数据
     public function sendAll(array $user_ids , string $type = '' , array $data = [])
     {
-        return $this->pushAll($user_ids , $type , $data , [$this->fd]);
+        return $this->pushAll($user_ids , $type , $data , [
+            [
+                'extranet_ip'   => config('app.extranet_ip') ,
+                'client_id'     => $this->fd
+            ]
+        ]);
     }
 
     // 单条推送：推送其他数据

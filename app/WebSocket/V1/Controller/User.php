@@ -100,6 +100,7 @@ class User extends Auth
         $param['friend_auth']           = $param['friend_auth'] ?? '';
         $param['clear_timer_for_private']           = $param['clear_timer_for_private'] ?? '';
         $param['clear_timer_for_group']           = $param['clear_timer_for_group'] ?? '';
+        $param['friend_circle_background']           = $param['friend_circle_background'] ?? '';
         $res = UserAction::editUserOption($this , $param);
         if ($res['code'] != 0) {
             return self::error($res['data'] , $res['code']);
@@ -396,5 +397,6 @@ class User extends Auth
         }
         return self::success($res['data']);
     }
+
 
 }

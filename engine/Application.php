@@ -13,6 +13,7 @@ use App\Model\ProjectModel;
 use App\Model\UserModel;
 use App\Model\UserOptionModel;
 use App\Redis\QueueRedis;
+use App\Util\MiscUtil;
 use function core\array_unit;
 use function core\format_path;
 use Core\Lib\File;
@@ -206,6 +207,8 @@ class Application
                     // 系统用户不存在，新增系统用户
                     $copy_system_user_data = $system_user_data;
                     $copy_system_user_data['identifier'] = $v->identifier;
+                    $copy_system_user_data['unique_code'] = MiscUtil::uniqueCode();
+                    $copy_system_user_data['aes_key'] = MiscUtil::aesKey();
                     $id = UserModel::insertGetId(array_unit($copy_system_user_data , [
                         'identifier' ,
                         'username' ,
@@ -218,8 +221,10 @@ class Application
                         'is_system' ,
                         'is_temp' ,
                         'is_test' ,
+                        'unique_code' ,
                         'role' ,
                         'is_init_password' ,
+                        'aes_key' ,
                     ]));
                     UserOptionModel::insertGetId([
                         'user_id' => $id
