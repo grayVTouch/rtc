@@ -1497,7 +1497,7 @@ class WebSocket
         });
 
         // 红包过期 + 自动退款
-        Timer::tick(5 * 1000 , function(){
+        Timer::tick(30 * 1000 , function(){
 //        Timer::tick(10 * 1000 , function(){
             $date = date('Y-m-d');
             $key_for_timer = 'red_packet_timer_for_v1';
@@ -1518,24 +1518,24 @@ class WebSocket
             });
             $datetime = date('Y-m-d H:i:s');
             $decimal_digit = config('app.decimal_digit');
-            try {
-                $not_expired_red_packet = \App\WebSocket\V1\Model\RedPacketModel::notExpiredRedPacket();
-                foreach ($not_expired_red_packet as $v)
-                {
-                    DB::beginTransaction();
-                    $create_time = strtotime($v->create_time);
-                    $red_packet_expired_duration = config('app.red_packet_expired_duration');
-                    if ($create_time + $red_packet_expired_duration > time()) {
-                        continue ;
-                    }
-                    \App\WebSocket\V1\Model\RedPacketModel::updateById($v->id , [
-                        'is_expired' => 1 ,
-                    ]);
-                    DB::commit();
+            $not_expired_red_packet = \App\WebSocket\V1\Model\RedPacketModel::notExpiredRedPacket();
+            foreach ($not_expired_red_packet as $v)
+            {
+                $create_time = strtotime($v->create_time);
+                $red_packet_expired_duration = config('app.red_packet_expired_duration');
+                if ($create_time + $red_packet_expired_duration > time()) {
+                    continue ;
                 }
-                $expired_and_received_and_not_refund_red_packet = \App\Websocket\V1\Model\RedPacketModel::expiredAndReceivedAndNotRefundRedPacket();
-                foreach ($expired_and_received_and_not_refund_red_packet as $v)
-                {
+                \App\WebSocket\V1\Model\RedPacketModel::updateById($v->id , [
+                    'is_expired' => 1 ,
+                ]);
+            }
+            $expired_and_received_and_not_refund_red_packet = \App\Websocket\V1\Model\RedPacketModel::expiredAndReceivedAndNotRefundRedPacket();
+
+            foreach ($expired_and_received_and_not_refund_red_packet as $v)
+            {
+
+                try {
                     DB::beginTransaction();
                     $refund_money = bcsub($v->money , $v->received_money , $decimal_digit);
                     // 资金记录
@@ -1560,28 +1560,26 @@ class WebSocket
                     if ($api_res['code'] != 0) {
                         // 记录退款失败的日志
                         DB::rollBack();
-                        var_dump('退款失败，远程接口返回的错误信息：' . $api_res['data']);
+                        $error_msg = '退款失败，远程接口返回的错误信息：' . $api_res['data'];
+                        \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id,$v,$error_msg){
+                            $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , sprintf('[red_packet_id: %s] 退款发生错误：%s' , $v->id , $error_msg));
+                        });
+                        var_dump($error_msg);
                         continue ;
                     }
                     DB::commit();
-                }
-//                DB::commit();
-                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
-                    $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
-                });
-            } catch(Exception $e) {
-                DB::rollBack();
-                \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use($timer_log_id){
-                    \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行异常，结束');
-                });
-                // 记录错误日志
-                $log = (new Throwable())->exceptionJsonHandlerInDev($e , true);
-                $log = json_encode($log);
-                \App\WebSocket\V1\Model\ProgramErrorLogModel::u_insertGetId('红包定时器执行发生错误' , $log , 'timer_event');
-                if (config('app.debug')) {
-                    throw $e;
+                    // 间隔 500ms 执行一次
+                    usleep(500 * 1000);
+                } catch(Exception $e) {
+                    DB::rollBack();
+                    \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id,$v,$e){
+                        $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , sprintf('[red_packet_id: %s] 退款发生错误：%s' , $v->id , $e->getMessage()));
+                    });
                 }
             }
+            \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
+                $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
+            });
         });
 
         // 间隔30分钟统计一下在线用户数 和 在线客户端数
