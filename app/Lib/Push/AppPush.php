@@ -131,6 +131,7 @@ class AppPush {
         var_dump(json_encode($data));
         $res = self::curl($platform , '/sync' , $data);
 
+        var_dump($res);
 
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
