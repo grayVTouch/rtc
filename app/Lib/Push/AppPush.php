@@ -127,7 +127,11 @@ class AppPush {
         $data = [];
         $data['user']   = $user_id;
         $data['rid']    = $registration_id;
+
+        var_dump(json_encode($data));
         $res = self::curl($platform , '/sync' , $data);
+
+
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
@@ -167,6 +171,9 @@ class AppPush {
         }
         $path = trim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
+
+        var_dump(json_encode($data));
+
         return Http::post($url , [
             'data' => $data ,
         ]);
