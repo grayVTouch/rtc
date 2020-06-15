@@ -127,12 +127,8 @@ class AppPush {
         $data = [];
         $data['user']   = $user_id;
         $data['rid']    = $registration_id;
-
-        var_dump(json_encode($data));
         $res = self::curl($platform , '/sync' , $data);
-
-        var_dump($res);
-
+        echo "app推送同步远程接口调用：发送的数据（不含token，token 在最终调用处合成）：" . json_encode($data) . "; 远程返回的结果：" . $res . PHP_EOL;
         if (empty($res)) {
             return self::response('请求发送失败，请检查网络' , 500);
         }
@@ -172,9 +168,6 @@ class AppPush {
         }
         $path = trim($path , '/');
         $url = sprintf('%s/%s' , self::$api , $path);
-
-        var_dump(json_encode($data));
-
         return Http::post($url , [
             'data' => $data ,
         ]);
