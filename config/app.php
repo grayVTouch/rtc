@@ -99,7 +99,7 @@ return [
 	'customer_channel_name' => '官方客服',
 
 	// 客服账号
-	'waiter_username' => 'waiter',
+	'waiter_username' => '13000000000',
 	// 客服密码
 	'waiter_password' => '123456',
 
