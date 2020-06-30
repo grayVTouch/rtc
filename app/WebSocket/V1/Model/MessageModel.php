@@ -242,6 +242,18 @@ class MessageModel extends Model
         return $res;
     }
 
+    public static function getByChatIdAndUserId(string $chat_id , int $user_id)
+    {
+        $res = self::where([
+                ['user_id' , '=' , $user_id] ,
+                ['chat_id' , '=' , $chat_id] ,
+            ])
+            ->get();
+        $res = convert_obj($res);
+        self::multiple($res);
+        return $res;
+    }
+
     public static function countByChatIdAndValue(string $chat_id , $value)
     {
         return self::where([

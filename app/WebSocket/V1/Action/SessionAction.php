@@ -295,6 +295,33 @@ class SessionAction extends Action
         return self::success();
     }
 
+    public static function shieldPrivateHistory(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'chat_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $res = SessionUtil::shieldPrivateHistory($param['chat_id'] , $auth->user->id);
+        if ($res['code'] != 0) {
+            return self::error($res['data'] , $res['code']);
+        }
+        // 推送
+        $other_id = ChatUtil::otherId($param['chat_id'] , $auth->user->id);
+        $user_ids = ChatUtil::userIds($param['chat_id']);
+        // 发送一个通知
+        ChatUtil::send($auth , [
+            'user_id' => $auth->user->id ,
+            'other_id' => $other_id ,
+            'type' => 'notification' ,
+            'message' => sprintf('%s：撤回了所有消息' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username)) ,
+            'old' => 1 ,
+        ] , true);
+        $auth->pushAll($user_ids , 'sync_private_session' , $param['chat_id']);
+        return self::success();
+    }
+
     // 群聊：会话清理（彻底删除消息记录）
     public static function emptyGroupHistory(Auth $auth , array $param)
     {

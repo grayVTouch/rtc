@@ -79,7 +79,8 @@ class Session extends Auth
     public function emptyPrivateHistory(array $param)
     {
         $param['chat_id'] = $param['chat_id'] ?? '';
-        $res = SessionAction::emptyPrivateHistory($this , $param);
+//        $res = SessionAction::emptyPrivateHistory($this , $param);
+        $res = SessionAction::shieldPrivateHistory($this , $param);
         if ($res['code'] != 0) {
             return $this->error($res['data'] , $res['code']);
         }

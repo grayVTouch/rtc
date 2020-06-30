@@ -210,7 +210,7 @@ class MessageReadStatusModel extends Model
                 ['chat_id' , '=' , $chat_id] ,
                 ['flag' , '=' , 'normal'] ,
             ])
-            ->whereNotIn('type' , ['voice'])
+//            ->whereNotIn('type' , ['voice'])
             ->get();
         $res = convert_obj($res);
         self::multiple($res);

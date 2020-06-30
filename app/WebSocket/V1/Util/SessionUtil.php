@@ -149,6 +149,17 @@ class SessionUtil extends Util
         return self::success();
     }
 
+    // 删除会话
+    public static function shieldPrivateHistory(string $chat_id , $sender_id)
+    {
+        $res = MessageModel::getByChatIdAndUserId($chat_id , $sender_id);
+        foreach ($res as $v)
+        {
+            MessageUtil::shield($v->identifier , $v->user_id , $v->chat_id , $v->id);
+        }
+        return self::success();
+    }
+
     //
     public static function emptyGroupHistory(string $type , $target_id)
     {

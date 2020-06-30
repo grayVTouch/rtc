@@ -184,7 +184,7 @@ class GroupMessageReadStatusModel extends Model
             ->where([
                 ['group_id' , '=' , $group_id] ,
             ])
-            ->whereNotIn('type' , ['voice'])
+//            ->whereNotIn('type' , ['voice'])
             ->get();
         $res = convert_obj($res);
         self::multiple($res);
