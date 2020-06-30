@@ -169,7 +169,7 @@ return [
 	],
 
 	// 资源过期时间
-	'res_duration' => 7 * 24 * 3600,
+	'res_duration' => 3650 * 24 * 3600,
 
 	// 小数位保留的长度
 	'decimal_digit' => 2,
