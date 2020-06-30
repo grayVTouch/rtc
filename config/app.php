@@ -99,7 +99,7 @@ return [
 	'customer_channel_name' => '官方客服',
 
 	// 客服账号
-	'waiter_username' => 'waiter',
+	'waiter_username' => '13000000000',
 	// 客服密码
 	'waiter_password' => '123456',
 
@@ -158,7 +158,7 @@ return [
 	'app_download' => 'https://fir.im/OJBKapk',
 
 	// 新用户注册推送
-	'new_user_notification' => '欢迎使用NESM！NESM通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。',
+	'new_user_notification' => '欢迎使用NEMS！NEMS通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。',
 
 	// 需要一并删除 oss 上文件的消息类型
 	'message_type_for_oss' => [
@@ -169,7 +169,7 @@ return [
 	],
 
 	// 资源过期时间
-	'res_duration' => 7 * 24 * 3600,
+	'res_duration' => 3650 * 24 * 3600,
 
 	// 小数位保留的长度
 	'decimal_digit' => 2,
