@@ -1404,7 +1404,6 @@ class WebSocket
         // 正式上线后，清理时间：app.res_duration
         // 清理间隔时间： 12 小时
         Timer::tick(30 * 1000 , function(){
-            return ;
             $date = date('Y-m-d');
             $key_for_timer = 'clear_res_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
