@@ -120,7 +120,7 @@ class MessageModel extends Model
         return $res;
     }
 
-    public static function lastest(int $user_id , string $chat_id , int $limit_id = 0)
+    public static function lastest(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 0)
     {
         $where = [
             ['chat_id' , '=' , $chat_id] ,
@@ -138,8 +138,11 @@ class MessageModel extends Model
                     ]);
             })
             ->where($where)
-            ->orderBy('id' , 'desc')
-            ->get();
+            ->orderBy('id' , 'desc');
+        if (!empty($limit)) {
+            $res->limit($limit);
+        }
+        $res = $res->get();
         $res = convert_obj($res);
         foreach ($res as $v)
         {

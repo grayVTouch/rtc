@@ -78,6 +78,7 @@ class MessageAction extends Action
         if ($validator->fails()) {
             return self::error($validator->message());
         }
+        $limit  = empty($param['limit']) ? 0 : $param['limit'];
         $limit_id  = empty($param['limit_id']) ? 0 : $param['limit_id'];
         $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
         try {
@@ -85,7 +86,7 @@ class MessageAction extends Action
             // 删除阅后即焚消息
             $id_list = MessageModel::getBurnIdsWithFriendReadedByChatId($chat_id);
             MessageUtil::delMessageByIds($id_list);
-            $res = MessageModel::lastest($auth->user->id , $chat_id , $limit_id);
+            $res = MessageModel::lastest($auth->user->id , $chat_id , $limit_id , $limit);
             foreach ($res as $v)
             {
                 MessageUtil::handleMessage($v , $auth->user->id , $param['friend_id']);

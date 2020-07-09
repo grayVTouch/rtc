@@ -64,6 +64,7 @@ class Message extends Auth
     {
         $param['friend_id'] = $param['friend_id'] ?? '';
         $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
         $res = MessageAction::lastest($this , $param);
         if ($res['code'] != 0) {
             return $this->error($res['data'] , $res['code']);
