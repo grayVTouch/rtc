@@ -26,6 +26,7 @@ class AppPush {
 
     private static $api = 'http://push.t1.tuuz.cc';
 
+
     // nimo 推送
     private static $token = 'eco';
 
