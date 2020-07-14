@@ -27,10 +27,10 @@ class AppPush {
     private static $api = 'http://push.t1.tuuz.cc';
 
     // nimo 推送
-    private static $token = 'nesm';
+    private static $token = 'eco';
 
     // 专门针对 ios 进行的推送
-    private static $tokenForIos = 'nesm';
+    private static $tokenForIos = 'eco';
 
     /*
      *
