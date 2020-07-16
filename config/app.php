@@ -158,7 +158,7 @@ return [
 	'app_download' => 'https://fir.im/OJBKapk',
 
 	// 新用户注册推送
-	'new_user_notification' => '欢迎使用ECO-Effect！ECO-Effect通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。',
+	'new_user_notification' => '欢迎使用印象生态！印象生态通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。',
 
 	// 需要一并删除 oss 上文件的消息类型
 	'message_type_for_oss' => [
