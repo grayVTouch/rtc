@@ -154,7 +154,7 @@ return [
     'group_member_show_limit' => 45 ,
 
     // 分成 android 和 ios
-    'app_download' => 'http://chat.hichatvip.com/download.html' ,
+    'app_download' => 'http://chat.hichatvip.com/download/down.html' ,
 
     // ios 平台对应下载链接
     'app_download_for_ios' => 'https://testflight.apple.com/join/vclFc86H' ,
