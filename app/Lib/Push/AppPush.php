@@ -168,9 +168,12 @@ class AppPush {
         $api  = rtrim(self::$api , '/');
         $path = ltrim($path , '/');
         $url = sprintf('%s/%s' , $api , $path);
-        return Http::post($url , [
+        $res = Http::post($url , [
             'data' => $data ,
         ]);
+		$send_json = json_encode($data);
+		echo "极光推送远程调用，api: $url; 发送的数据：{$send_json}; 服务器响应：{$res}\n";
+		return $res;
     }
 
 }
