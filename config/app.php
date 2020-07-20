@@ -106,7 +106,7 @@ return [
     // 默认客服手机号码 区号
     'waiter_area_code' => '00' ,
 
-    // 默认客服手机号码【13 位数字的手机号码，请固定 15 位数字】
+    // 默认客服手机号码【11 位数字的手机号码】
     'waiter_phone' => '00000000000' ,
 
     // 客服头像
@@ -153,10 +153,13 @@ return [
     // 群成员显示数量
     'group_member_show_limit' => 45 ,
 
-    // app 下载连接地址
-//    'app_download' => 'https://sapp.link/download/nxmq2' ,
-//    'app_download' => 'https://fir.im/OJBKapk' ,
-    'app_download' => 'http://d.firim.info/Hichat/' ,
+    // 分成 android 和 ios
+    'app_download' => 'http://chat.hichatvip.com/download.html' ,
+
+    // ios 平台对应下载链接
+    'app_download_for_ios' => 'https://testflight.apple.com/join/vclFc86H' ,
+    // android 平台对应下载链接
+    'app_download_for_android' => 'http://d.firim.info/Hichat/' ,
 
     // 新用户注册推送
     'new_user_notification' => '欢迎使用嗨聊！嗨聊通信是最安全的通信软件，所有的消息和通话都是通过点对点加密传输。' ,
