@@ -183,4 +183,5 @@ return [
 
     // 红包默认备注
     'red_packet_remark' => '恭喜发财，大吉大利' ,
+
 ];

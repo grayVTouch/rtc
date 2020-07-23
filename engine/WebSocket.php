@@ -1251,10 +1251,16 @@ class WebSocket
          * todo 清理消息记录（数据量大时不行！后期必须更改）
          */
         Timer::tick(1 * 3600 * 1000 , function(){
-            $date = date('Y-m-d');
+            $month = date('Y-m');
             $key_for_timer = 'clear_message_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
-            if (!empty($clear) && $clear == $date) {
+            if (!empty($clear) && $clear == $month) {
+                // 每个月执行一次
+                return ;
+            }
+            $date = date('d');
+            if ($date != 1) {
+                // 每个月 1 号定时清理
                 return ;
             }
             $time = date('H:i:s' , time());
@@ -1263,11 +1269,13 @@ class WebSocket
                 // 还未到清理时间
                 return ;
             }
-            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $date);
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $month);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('消息记录清理中...' , 'clear_message');
             });
+            // 清除上个月记录
+            $delete_timestamp = date_create('yesterday')->format('Y-m-d') . ' 23:59:59';
             /**
              * 该定时器主要作用是清理聊天记录
              */
@@ -1311,9 +1319,14 @@ class WebSocket
                             continue ;
                         }
                         $timestamp_for_last = strtotime($last->create_time);
-                        $duration = $get_duration($v->user_option->clear_timer_for_private);
-                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
-                            // 未超过时间
+//                        $duration = $get_duration($v->user_option->clear_timer_for_private);
+                        // 清除之前记录
+//                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
+//                            // 未超过时间
+//                            continue ;
+//                        }
+                        if ($timestamp_for_last > $delete_timestamp) {
+                            // 不在删除范围内
                             continue ;
                         }
                         // 清空所有私聊记录
@@ -1327,15 +1340,17 @@ class WebSocket
                             $messages = \App\WebSocket\V1\Model\MessageModel::getByChatId($chat_id);
                             foreach ($messages as $v2)
                             {
-                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::countByChatIdAndMessageId($chat_id , $v2->id);
-                                $reference_count++;
-                                if ($reference_count >= 2) {
-                                    // 删除记录
-                                    \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
-                                } else {
-                                    // 屏蔽消息记录
-                                    \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $chat_id);
-                                }
+                                \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
+
+//                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::countByChatIdAndMessageId($chat_id , $v2->id);
+//                                $reference_count++;
+//                                if ($reference_count >= 2) {
+//                                    // 删除记录
+//                                    \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
+//                                } else {
+//                                    // 屏蔽消息记录
+//                                    \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $chat_id);
+//                                }
                             }
                         }
                         \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'private');
@@ -1354,9 +1369,13 @@ class WebSocket
                             continue ;
                         }
                         $timestamp_for_last = strtotime($last->create_time);
-                        $duration = $get_duration($v->user_option->clear_timer_for_group);
-                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
-                            // 未超过时间
+//                        $duration = $get_duration($v->user_option->clear_timer_for_group);
+//                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
+//                            // 未超过时间
+//                            continue ;
+//                        }
+                        if ($timestamp_for_last > $delete_timestamp) {
+                            // 不在删除范围内
                             continue ;
                         }
                         // 清空所有私聊记录
@@ -1367,18 +1386,19 @@ class WebSocket
                         {
                             $v->group_ids[] = $v1->id;
                             $group_messages = \App\WebSocket\V1\Model\GroupMessageModel::getByGroupId($v1->group_id);
-                            $member_count = \App\WebSocket\V1\Model\GroupMemberModel::countByGroupId($v1->group_id);
+//                            $member_count = \App\WebSocket\V1\Model\GroupMemberModel::countByGroupId($v1->group_id);
                             foreach ($group_messages as $v2)
                             {
-                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForGroupModel::countByGroupIddAndGroupMessageId($v1->group_id , $v2->id);
-                                $reference_count++;
-                                if ($reference_count >= $member_count) {
-                                    // 删除记录
-                                    \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
-                                } else {
-                                    // 屏蔽消息记录
-                                    \App\WebSocket\V1\Model\DeleteMessageForGroupModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $v1->group_id);
-                                }
+                                \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
+//                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForGroupModel::countByGroupIddAndGroupMessageId($v1->group_id , $v2->id);
+//                                $reference_count++;
+//                                if ($reference_count >= $member_count) {
+//                                    // 删除记录
+//                                    \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
+//                                } else {
+//                                    // 屏蔽消息记录
+//                                    \App\WebSocket\V1\Model\DeleteMessageForGroupModel::u_insertGetId($v2->identifier , $v->id , $v2->id , $v1->group_id);
+//                                }
                             }
                         }
                         \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'group');
