@@ -64,7 +64,7 @@ return [
 	// 短信验证码 发送频率，单位：s
 	'sms_code_wait_time' => 60,
 	// 群人数限制
-	'group_member_limit' => 200,
+	'group_member_limit' => 10000,
 	// 默认群名称
 	'group_name' => '群聊',
 	// 默认个人
