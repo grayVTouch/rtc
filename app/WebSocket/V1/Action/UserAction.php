@@ -660,21 +660,25 @@ class UserAction extends Action
     public static function logout(Auth $auth , array $param)
     {
         $deny_platform = ['web' , 'pc'];
-        if (!in_array($auth->platform , $deny_platform)) {
+	    echo "成功退出1";
+	    if (!in_array($auth->platform , $deny_platform)) {
             // 解绑用户id 和 极光推送的绑定关系
             $res = AppPush::sync($auth->platform , $auth->user->id , 1);
             if ($res['code'] != 200) {
                 return self::error($res['data'] , 500);
             }
         }
-        UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($auth->identifier , $auth->user->id , date('Y-m-d') , [
+	    echo "成功退出2";
+	    UserActivityLogUtil::createOrUpdateCountByIdentifierAndUserIdAndDateAndData($auth->identifier , $auth->user->id , date('Y-m-d') , [
             'logout_count' => 'inc'
         ]);
         // 解绑用户id 和 连接id
-        UserRedis::delUserIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
+	    echo "成功退出3";
+	    UserRedis::delUserIdMappingFd($auth->identifier , $auth->user->id , $auth->fd);
         // 删除 客户端连接 id 映射的用户id
         UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
-        // 删除 token
+	    echo "成功退出";
+	    // 删除 token
 //        UserTokenModel::delByToken($auth->token);
         return self::success();
     }
