@@ -550,6 +550,7 @@ class UserAction extends Action
     {
         $app_download = config('app.app_download');
         $app_download = sprintf('%s?invite_code=%s' , $app_download , $auth->user->invite_code);
+        echo "aaa";
         return self::success($app_download);
     }
 
