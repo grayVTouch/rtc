@@ -617,6 +617,7 @@ class UserAction extends Action
         UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
         // 删除 token
         UserTokenModel::delByToken($auth->token);
+        echo "成功退出";
         return self::success("成功退出");
     }
 
