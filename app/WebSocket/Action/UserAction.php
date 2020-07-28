@@ -604,6 +604,7 @@ class UserAction extends Action
     public static function logout(Auth $auth , array $param)
     {
         $deny_platform = ['web' , 'pc'];
+	    echo "成功退出1";
         if (!in_array($auth->platform , $deny_platform)) {
             // 解绑用户id 和 极光推送的绑定关系
             $res = AppPush::sync($auth->platform , $auth->user->id , 1);
@@ -611,9 +612,11 @@ class UserAction extends Action
                 return self::error($res['data'] , 500);
             }
         }
+	    echo "成功退出2";
         // 解绑用户id 和 连接id
         UserRedis::delFdByUserId($auth->identifier , $auth->user->id , $auth->fd);
         // 删除 客户端连接 id 映射的用户id
+	    echo "成功退出3";
         UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
         // 删除 token
         UserTokenModel::delByToken($auth->token);
