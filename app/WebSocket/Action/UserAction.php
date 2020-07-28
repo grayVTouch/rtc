@@ -617,7 +617,7 @@ class UserAction extends Action
         UserRedis::delFdMappingUserId($auth->identifier , $auth->fd);
         // 删除 token
         UserTokenModel::delByToken($auth->token);
-        return self::success();
+        return self::success("退出成功");
     }
 
     public static function avatar(Auth $auth , array $param)
