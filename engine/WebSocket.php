@@ -1250,8 +1250,8 @@ class WebSocket
         /**
          * todo 清理消息记录（数据量大时不行！后期必须更改）
          */
-//        Timer::tick(1 * 3600 * 1000 , function(){
-        Timer::tick(10 * 1000 , function(){
+        Timer::tick(1 * 3600 * 1000 , function(){
+//        Timer::tick(10 * 1000 , function(){
             $month = date('Y-m');
             $key_for_timer = 'clear_message_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
@@ -1259,41 +1259,37 @@ class WebSocket
                 // 每个月执行一次
                 return ;
             }
-//            $date = date('d');
-//            if ($date != 1) {
-//                // 每个月 1 号定时清理
-//                return ;
-//            }
+            $date = date('d');
+            if ($date != 1) {
+                // 每个月 1 号定时清理
+                return ;
+            }
             $time = date('H:i:s' , time());
-//            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
-//            if ($time < $time_point_for_clear_message_timer) {
-//                // 还未到清理时间
-//                return ;
-//            }
+            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
+            if ($time < $time_point_for_clear_message_timer) {
+                // 还未到清理时间
+                return ;
+            }
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $month);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('消息记录清理中...' , 'clear_message');
             });
             // 清除上个月记录
-//            $delete_timestamp = date_create('yesterday')->format('Y-m-d') . ' 23:59:59';
-            $delete_timestamp = '2020-07-31 23:59:59';
+            $delete_timestamp = date_create('yesterday')->format('Y-m-d') . ' 23:59:59';
             try {
                 DB::beginTransaction();
                 $messages = \App\WebSocket\V1\Model\MessageModel::getBelowTimestamp($delete_timestamp);
-                foreach ($messages as $v2)
+                foreach ($messages as $v)
                 {
-                    \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
-                    var_dump('清理私聊消息: ' . $v2->id . '成功' . PHP_EOL);
+                    \App\WebSocket\V1\Util\MessageUtil::delete($v->id);
                 }
                 $group_messages = \App\WebSocket\V1\Model\GroupMessageModel::getBelowTimestamp($delete_timestamp);
-                foreach ($group_messages as $v2)
+                foreach ($group_messages as $v)
                 {
-                    \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
-                    var_dump('清理群聊消息: ' . $v2->id . '成功' . PHP_EOL);
+                    \App\WebSocket\V1\Util\GroupMessageUtil::delete($v->id);
                 }
                 DB::commit();
-                var_dump('消息清理成功');
                 \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                     \App\WebSocket\V1\Model\TimerLogModel::appendById($timer_log_id , '执行成功，结束');
                 });
