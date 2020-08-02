@@ -1251,17 +1251,11 @@ class WebSocket
          * todo 清理消息记录（数据量大时不行！后期必须更改）
          */
         Timer::tick(1 * 3600 * 1000 , function(){
-//        Timer::tick(10 * 1000 , function(){
-            $month = date('Y-m');
+            $datetime = date('Y-m-d');
             $key_for_timer = 'clear_message_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
-            if (!empty($clear) && $clear == $month) {
-                // 每个月执行一次
-                return ;
-            }
-            $date = date('d');
-            if ($date != 1) {
-                // 每个月 1 号定时清理
+            if (!empty($clear) && $clear == $datetime) {
+                // 每天执行一次
                 return ;
             }
             $time = date('H:i:s' , time());
@@ -1270,13 +1264,13 @@ class WebSocket
                 // 还未到清理时间
                 return ;
             }
-            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $month);
+            \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $datetime , 48 * 3600);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
                 $timer_log_id = \App\WebSocket\V1\Model\TimerLogModel::u_insertGetId('消息记录清理中...' , 'clear_message');
             });
             // 清除上个月记录
-            $delete_timestamp = date_create('yesterday')->format('Y-m-d') . ' 23:59:59';
+            $delete_timestamp = date('Y-m-t 23:59:59' , strtotime('-2 month'));
             try {
                 DB::beginTransaction();
                 $messages = \App\WebSocket\V1\Model\MessageModel::getBelowTimestamp($delete_timestamp);
