@@ -1343,6 +1343,7 @@ class WebSocket
                             foreach ($messages as $v2)
                             {
                                 \App\WebSocket\V1\Util\MessageUtil::delete($v2->id);
+                                var_dump('清理私聊消息: ' . $v2->id . '成功' . PHP_EOL);
 
 //                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForPrivateModel::countByChatIdAndMessageId($chat_id , $v2->id);
 //                                $reference_count++;
@@ -1393,6 +1394,7 @@ class WebSocket
                             foreach ($group_messages as $v2)
                             {
                                 \App\WebSocket\V1\Util\GroupMessageUtil::delete($v2->id);
+                                var_dump('清理群聊消息: ' . $v2->id . '成功' . PHP_EOL);
 //                                $reference_count = \App\WebSocket\V1\Model\DeleteMessageForGroupModel::countByGroupIddAndGroupMessageId($v1->group_id , $v2->id);
 //                                $reference_count++;
 //                                if ($reference_count >= $member_count) {
