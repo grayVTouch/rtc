@@ -1265,11 +1265,11 @@ class WebSocket
                 return ;
             }
             $time = date('H:i:s' , time());
-            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
-            if ($time < $time_point_for_clear_message_timer) {
-                // 还未到清理时间
-                return ;
-            }
+//            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
+//            if ($time < $time_point_for_clear_message_timer) {
+//                // 还未到清理时间
+//                return ;
+//            }
             \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer , $month);
             $timer_log_id = 0;
             \App\WebSocket\V1\Util\TimerLogUtil::logCheck(function() use(&$timer_log_id){
