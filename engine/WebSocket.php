@@ -1250,7 +1250,8 @@ class WebSocket
         /**
          * todo 清理消息记录（数据量大时不行！后期必须更改）
          */
-        Timer::tick(1 * 3600 * 1000 , function(){
+//        Timer::tick(1 * 3600 * 1000 , function(){
+        Timer::tick(10 * 1000 , function(){
             $month = date('Y-m');
             $key_for_timer = 'clear_message_timer_for_v1';
             $clear = \App\WebSocket\V1\Redis\CacheRedis::value($key_for_timer);
