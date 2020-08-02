@@ -1318,7 +1318,8 @@ class WebSocket
                             \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'private');
                             continue ;
                         }
-                        $timestamp_for_last = strtotime($last->create_time);
+//                        $timestamp_for_last = strtotime($last->create_time);
+                        $timestamp_for_last = $last->create_time;
 //                        $duration = $get_duration($v->user_option->clear_timer_for_private);
                         // 清除之前记录
 //                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
@@ -1368,7 +1369,8 @@ class WebSocket
                             \App\WebSocket\V1\Model\ClearTimerLogModel::u_insertGetId($v->id , 'group');
                             continue ;
                         }
-                        $timestamp_for_last = strtotime($last->create_time);
+//                        $timestamp_for_last = strtotime($last->create_time);
+                        $timestamp_for_last = $last->create_time;
 //                        $duration = $get_duration($v->user_option->clear_timer_for_group);
 //                        if ($timestamp_for_now - $timestamp_for_last < $duration) {
 //                            // 未超过时间
