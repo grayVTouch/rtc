@@ -1259,11 +1259,11 @@ class WebSocket
                 // 每个月执行一次
                 return ;
             }
-            $date = date('d');
-            if ($date != 1) {
-                // 每个月 1 号定时清理
-                return ;
-            }
+//            $date = date('d');
+//            if ($date != 1) {
+//                // 每个月 1 号定时清理
+//                return ;
+//            }
             $time = date('H:i:s' , time());
 //            $time_point_for_clear_message_timer = config('app.time_point_for_clear_message_timer');
 //            if ($time < $time_point_for_clear_message_timer) {
@@ -1410,6 +1410,7 @@ class WebSocket
                     }
                 }
                 DB::commit();
+                var_dump('消息清理成功');
                 foreach ($user_for_clear_private as $v)
                 {
                     // 通知客户端清除本地缓存
