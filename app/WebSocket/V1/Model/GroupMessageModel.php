@@ -276,4 +276,10 @@ class GroupMessageModel extends Model
         self::multiple($res);
         return $res;
     }
+
+    public static function getBelowTimestamp(string $timestamp)
+    {
+        return self::where('create_time' , '<=' , $timestamp)
+            ->get();
+    }
 }
