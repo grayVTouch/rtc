@@ -86,7 +86,7 @@ class MessageAction extends Action
             // 删除阅后即焚消息
             $id_list = MessageModel::getBurnIdsWithFriendReadedByChatId($chat_id);
             MessageUtil::delMessageByIds($id_list);
-            $res = MessageModel::lastest($auth->user->id , $chat_id , $limit_id , $limit);
+            $res = MessageModel::lastest($auth->user->id , $chat_id , $limit_id , $limit , $param['type']);
             foreach ($res as $v)
             {
                 MessageUtil::handleMessage($v , $auth->user->id , $param['friend_id']);

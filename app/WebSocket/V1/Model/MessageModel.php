@@ -120,7 +120,7 @@ class MessageModel extends Model
         return $res;
     }
 
-    public static function lastest(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 0)
+    public static function lastest(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 0 , $type = 'near')
     {
         $where = [
             ['chat_id' , '=' , $chat_id] ,
@@ -130,6 +130,10 @@ class MessageModel extends Model
         if ($limit_id != '') {
             $where[] = ['id' , '>' , $limit_id];
             $order_type = 'asc';
+        } else {
+            if ($type === 'near') {
+                $order_type = 'asc';
+            }
         }
         $res = self::with(['user'])
             ->whereNotExists(function($query) use($user_id){

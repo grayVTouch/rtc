@@ -55,6 +55,7 @@ class GroupMessage extends Auth
         $param['group_id'] = $param['group_id'] ?? '';
         $param['limit_id'] = $param['limit_id'] ?? '';
         $param['limit'] = $param['limit'] ?? '';
+        $param['type'] = $param['type'] ?? '';
         $res = GroupMessageAction::lastest($this , $param);
         if ($res['code'] != 0) {
             return $this->error($res['data'] , $res['code']);

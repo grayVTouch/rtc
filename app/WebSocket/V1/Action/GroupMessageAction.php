@@ -93,7 +93,7 @@ class GroupMessageAction extends Action
         }
         $limit = empty($param['limit']) ? 0 : $param['limit'];
         $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
-        $res = GroupMessageModel::lastest($auth->user->id , $group->id , $member->create_time , $limit_id , $limit);
+        $res = GroupMessageModel::lastest($auth->user->id , $group->id , $member->create_time , $limit_id , $limit , $param['type']);
         foreach ($res as $v)
         {
             MessageUtil::handleGroupMessage($v , $auth->user->id);

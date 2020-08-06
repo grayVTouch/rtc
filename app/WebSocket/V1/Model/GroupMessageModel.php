@@ -125,7 +125,7 @@ class GroupMessageModel extends Model
         return $res;
     }
 
-    public static function lastest(int $user_id , $group_id , string $join_group_time , int $limit_id = 0 , int $limit)
+    public static function lastest(int $user_id , $group_id , string $join_group_time , int $limit_id = 0 , int $limit = 0 , $type = 'near')
     {
         $where = [
             ['group_id' , '=' , $group_id] ,
@@ -137,6 +137,10 @@ class GroupMessageModel extends Model
         if (!empty($limit_id)) {
             $where[] = ['id' , '>' , $limit_id];
             $order_type = 'asc';
+        } else {
+            if ($type === 'near') {
+                $order_type = 'asc';
+            }
         }
         $res = self::with(['group' , 'user'])
             ->whereNotExists(function($query) use($user_id){
