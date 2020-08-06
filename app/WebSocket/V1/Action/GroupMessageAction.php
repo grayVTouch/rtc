@@ -108,6 +108,40 @@ class GroupMessageAction extends Action
         return self::success($res);
     }
 
+    public static function earliest(Auth $auth , array $param)
+    {
+        // 获取群聊数据
+        $validator = Validator::make($param , [
+            'group_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $group = GroupModel::findById($param['group_id']);
+        if (empty($group)) {
+            return self::error('未找到群对应信息' , 404);
+        }
+        $member = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $auth->user->id);
+        if (empty($member)) {
+            return self::error('您不是该群的成员，禁止操作' , 403);
+        }
+        $limit = empty($param['limit']) ? 0 : $param['limit'];
+        $limit_id = empty($param['limit_id']) ? 0 : $param['limit_id'];
+        $res = GroupMessageModel::earliest($auth->user->id , $group->id , $member->create_time , $limit_id , $limit);
+        foreach ($res as $v)
+        {
+            MessageUtil::handleGroupMessage($v , $auth->user->id);
+            GroupUtil::handle($v->group , $auth->user->id);
+            UserUtil::handle($v->user , $auth->user->id);
+            $member_for_message = GroupMemberData::findByIdentifierAndGroupIdAndUserId($auth->identifier , $group->id , $v->user_id);
+            if (!empty($member_for_message)) {
+                $v->user = $v->user ?? new class() {};
+                $v->user->nickname = empty($member_for_message->alias) ? $v->user->nickname : $member_for_message->alias;
+            }
+        }
+        return self::success($res);
+    }
+
     // 设置未读消息数量
     public static function resetUnread(Auth $auth , array $param)
     {

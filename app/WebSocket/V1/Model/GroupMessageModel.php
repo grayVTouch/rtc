@@ -132,8 +132,11 @@ class GroupMessageModel extends Model
             // 加载消息的时间必须大于加入群的时间
             ['create_time' , '>=' , $join_group_time] ,
         ];
+        $order_field = 'id';
+        $order_type = 'desc';
         if (!empty($limit_id)) {
             $where[] = ['id' , '>' , $limit_id];
+            $order_type = 'asc';
         }
         $res = self::with(['group' , 'user'])
             ->whereNotExists(function($query) use($user_id){
@@ -145,7 +148,7 @@ class GroupMessageModel extends Model
                     ]);
             })
             ->where($where)
-            ->orderBy('id' , 'desc');
+            ->orderBy($order_field , $order_type);
         if (!empty($limit)) {
             $res->limit($limit);
         }
@@ -159,6 +162,45 @@ class GroupMessageModel extends Model
         }
         return $res;
     }
+
+    public static function earliest(int $user_id , $group_id , string $join_group_time , int $limit_id = 0 , int $limit)
+    {
+        $where = [
+            ['group_id' , '=' , $group_id] ,
+            // 加载消息的时间必须大于加入群的时间
+            ['create_time' , '>=' , $join_group_time] ,
+        ];
+        $order_field = 'id';
+        $order_type = 'asc';
+        if (!empty($limit_id)) {
+            $where[] = ['id' , '>' , $limit_id];
+            $order_type = 'desc';
+        }
+        $res = self::with(['group' , 'user'])
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('id')
+                    ->from('delete_message_for_group')
+                    ->whereRaw('rtc_group_message.id = rtc_delete_message_for_group.group_message_id')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                    ]);
+            })
+            ->where($where)
+            ->orderBy($order_field , $order_type);
+        if (!empty($limit)) {
+            $res->limit($limit);
+        }
+        $res = $res->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            GroupModel::single($v->group);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
+
 
     public static function u_insertGetId(int $user_id , int $group_id , string $type , string $message = '' , string $extra = '')
     {

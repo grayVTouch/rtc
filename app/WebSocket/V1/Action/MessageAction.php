@@ -104,6 +104,41 @@ class MessageAction extends Action
         }
     }
 
+    //
+    public static function earliest(Auth $auth , array $param)
+    {
+        $validator = Validator::make($param , [
+            'friend_id' => 'required' ,
+        ]);
+        if ($validator->fails()) {
+            return self::error($validator->message());
+        }
+        $limit  = empty($param['limit']) ? 0 : $param['limit'];
+        $limit_id  = empty($param['limit_id']) ? 0 : $param['limit_id'];
+        $chat_id = ChatUtil::chatId($auth->user->id , $param['friend_id']);
+        try {
+            DB::beginTransaction();
+            // 删除阅后即焚消息
+            $id_list = MessageModel::getBurnIdsWithFriendReadedByChatId($chat_id);
+            MessageUtil::delMessageByIds($id_list);
+            $res = MessageModel::earliest($auth->user->id , $chat_id , $limit_id , $limit);
+            foreach ($res as $v)
+            {
+                MessageUtil::handleMessage($v , $auth->user->id , $param['friend_id']);
+                $relation = FriendData::findByIdentifierAndUserIdAndFriendId($auth->identifier , $auth->user->id , $v->user_id);
+                if (!empty($relation)) {
+                    $v->user = $v->user ?? new class() {};
+                    $v->user->nickname = empty($relation->alias) ? $v->user->nickname : $relation->alias;
+                }
+            }
+            DB::commit();
+            return self::success($res);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     public static function resetUnread(Auth $auth , array $param)
     {
         $validator = Validator::make($param , [

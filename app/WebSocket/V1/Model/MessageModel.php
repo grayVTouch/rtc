@@ -125,8 +125,11 @@ class MessageModel extends Model
         $where = [
             ['chat_id' , '=' , $chat_id] ,
         ];
+        $order_field = 'id';
+        $order_type = 'desc';
         if ($limit_id != '') {
             $where[] = ['id' , '>' , $limit_id];
+            $order_type = 'asc';
         }
         $res = self::with(['user'])
             ->whereNotExists(function($query) use($user_id){
@@ -138,7 +141,42 @@ class MessageModel extends Model
                     ]);
             })
             ->where($where)
-            ->orderBy('id' , 'desc');
+            ->orderBy($order_field , $order_type);
+        if (!empty($limit)) {
+            $res->limit($limit);
+        }
+        $res = $res->get();
+        $res = convert_obj($res);
+        foreach ($res as $v)
+        {
+            self::single($v);
+            UserModel::single($v->user);
+        }
+        return $res;
+    }
+
+    public static function earliest(int $user_id , string $chat_id , int $limit_id = 0 , int $limit = 0)
+    {
+        $where = [
+            ['chat_id' , '=' , $chat_id] ,
+        ];
+        $order_field = 'id';
+        $order_type = 'asc';
+        if ($limit_id != '') {
+            $where[] = ['id' , '<' , $limit_id];
+            $order_type = 'desc';
+        }
+        $res = self::with(['user'])
+            ->whereNotExists(function($query) use($user_id){
+                $query->select('id')
+                    ->from('delete_message_for_private')
+                    ->whereRaw('rtc_message.id = rtc_delete_message_for_private.message_id')
+                    ->where([
+                        ['user_id' , '=' , $user_id] ,
+                    ]);
+            })
+            ->where($where)
+            ->orderBy($order_field , $order_type);
         if (!empty($limit)) {
             $res->limit($limit);
         }

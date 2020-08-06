@@ -72,6 +72,19 @@ class Message extends Auth
         return $this->success($res['data']);
     }
 
+    // 最旧消息
+    public function earliest(array $param)
+    {
+        $param['friend_id'] = $param['friend_id'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $res = MessageAction::earliest($this , $param);
+        if ($res['code'] != 0) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     // 重置未读数量
     public function resetUnread(array $param)
     {

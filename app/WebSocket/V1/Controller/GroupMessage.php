@@ -62,6 +62,18 @@ class GroupMessage extends Auth
         return $this->success($res['data']);
     }
 
+    public function earliest(array $param)
+    {
+        $param['group_id'] = $param['group_id'] ?? '';
+        $param['limit_id'] = $param['limit_id'] ?? '';
+        $param['limit'] = $param['limit'] ?? '';
+        $res = GroupMessageAction::earliest($this , $param);
+        if ($res['code'] != 0) {
+            return $this->error($res['data'] , $res['code']);
+        }
+        return $this->success($res['data']);
+    }
+
     // 重置未读数量
     public function delete(array $param)
     {
