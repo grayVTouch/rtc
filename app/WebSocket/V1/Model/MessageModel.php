@@ -156,6 +156,7 @@ class MessageModel extends Model
             self::single($v);
             UserModel::single($v->user);
         }
+
         return $res;
     }
 

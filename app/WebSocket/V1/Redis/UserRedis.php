@@ -35,8 +35,13 @@ class UserRedis extends Redis
 
     public static function delUserIdMappingFd($identifier , $user_id , int $fd)
     {
+        $extranet_ip = config('app.extranet_ip');
+        $data = [
+            'extranet_ip'   => $extranet_ip ,
+            'client_id'     => $fd
+        ];
         $name = sprintf(self::$userIdMappingFd , $identifier , $user_id);
-        return RedisFacade::sRem($name , $fd);
+        return RedisFacade::sRem($name , json_encode($data));
     }
 
     public static function fdMappingUserId($identifier , $fd , int $user_id = 0)

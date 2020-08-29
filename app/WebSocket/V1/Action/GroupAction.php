@@ -156,10 +156,10 @@ class GroupAction extends Action
             }
             $log .= $user->nickname . ',';
         }
-        $log = mb_substr($log , 0 , mb_strlen($log) - 2);
+        $log = mb_substr($log , 0 , mb_strlen($log) - 1);
         $param['type']      = 'group';
         $param['op_type']   = 'invite_into_group';
-        $param['log']       = sprintf('"%s" 邀请 "%s" 进群' , $auth->user->nickname , $log);
+        $param['log']       = sprintf('"%s" 邀请 "%s" 进群' , UserUtil::getNameFromNicknameAndUsername($auth->user->nickname , $auth->user->username) , $log);
         $param['user_id']   = $group->user_id;
         $param['invite_user_id'] = $auth->user->id;
         $param['identifier'] = $auth->identifier;

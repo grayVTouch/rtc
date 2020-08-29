@@ -158,6 +158,7 @@ return [
 
     // ios 平台对应下载链接
     'app_download_for_ios' => 'https://testflight.apple.com/join/vclFc86H' ,
+
     // android 平台对应下载链接
     'app_download_for_android' => 'http://d.firim.info/Hichat/' ,
 
